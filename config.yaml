@@ -25,3 +25,68 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: UAV-VLN
+      description: 请帮我查找无人机视觉语言导航UAV VLN的论文
+      enabled: true
+      paper_sources:
+        - arxiv
+        - biorxiv
+      keywords:
+        - keyword: UAV visual language navigation
+          keyword_cn: 无人机视觉语言导航
+          query: UAV visual language navigation
+        - keyword: vision language navigation
+          keyword_cn: 视觉语言导航
+          query: vision language navigation for unmanned aerial vehicles
+        - keyword: drone navigation
+          keyword_cn: 无人机导航
+          query: drone navigation with natural language instructions
+        - keyword: language guided drone
+          keyword_cn: 语言引导无人机
+          query: language guided drone navigation
+        - keyword: multimodal navigation UAV
+          keyword_cn: 无人机多模态导航
+          query: multimodal navigation using vision and language for UAV
+        - keyword: UAV instruction following
+          keyword_cn: 无人机指令跟随
+          query: UAV instruction following with visual environment
+      intent_queries:
+        - query: find papers on UAV visual language navigation
+          query_cn: 查找无人机视觉语言导航的论文
+          enabled: true
+          source: manual
+          note: ''
+        - query: research about vision language navigation for drones
+          query_cn: 关于无人机视觉语言导航的研究
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-06-08T13:59:07.017Z'
+source_backends:
+  arxiv:
+    papers_table: arxiv_papers
+    use_vector_rpc: true
+    vector_rpc: match_arxiv_papers
+    vector_rpc_exact: match_arxiv_papers_exact
+    use_bm25_rpc: true
+    bm25_rpc: match_arxiv_papers_bm25
+    sync_table: arxiv_sync_status
+    sync_success_value: success
+    schema: public
+    kind: supabase
+    enabled: true
+    url: https://lyucdwgefyfbmaiopjbk.supabase.co
+    anon_key: sb_publishable_lX-oi64Uxyd7SIVv3_w2Uw_MTOojeKq
+  biorxiv:
+    papers_table: biorxiv_papers
+    use_vector_rpc: true
+    vector_rpc: match_biorxiv_papers_exact
+    vector_rpc_exact: match_biorxiv_papers_exact
+    use_bm25_rpc: true
+    bm25_rpc: match_biorxiv_papers_bm25
+    schema: public
+    kind: supabase
+    enabled: true
+    url: https://lyucdwgefyfbmaiopjbk.supabase.co
+    anon_key: sb_publishable_lX-oi64Uxyd7SIVv3_w2Uw_MTOojeKq
