@@ -1,0 +1,350 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-08T21:53:33.470254+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2606.01241v1",
+      "source": "arxiv",
+      "title": "OneVLA: A Unified Framework for Embodied Tasks",
+      "abstract": "Navigation and manipulation are fundamental capabilities of embodied intelligence, enabling robots to interpret natural language commands and interact physically with their surroundings. However, current Vision-Language-Action (VLA) models remain constrained by task-specific architectures, specializing in either navigation or manipulation, which hinders the development of general-purpose robotic agents. To bridge this gap, we introduce OneVLA, a unified architecture that integrates these distinct tasks into a single, cohesive framework. Specifically, we design a unified action head capable of generating both navigation and manipulation actions without requiring task-specific variants. Furthermore, we propose a multi stage progressive training strategy-incorporating curated data construction and Chain-of-Thought (CoT) fine-tuning that facilitates strong positive transfer and mutual reinforcement between the two domains. Extensive experiments in both simulated and real-world environments demonstrate that OneVLA achieves state-of-the-art performance, significantly outperforming both specialized single-task and existing cross-task models. By unifying these core capabilities, OneVLA paves the way for truly general-purpose robotic systems. The model and source code will be publicly released.",
+      "authors": [
+        "Lingfeng Zhang",
+        "Xiaoshuai Hao",
+        "Yingbo Tang",
+        "Lei Zhou",
+        "Shuyi Zhang",
+        "Jinkun Liu",
+        "Hongsheng Li",
+        "Chenhao Zhang",
+        "Qiang Zhang",
+        "Hangjun Ye",
+        "Xiaojun Liang",
+        "Long Chen",
+        "Wenbo Ding"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-05-31T13:43:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.01241v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "unified VLA model for navigation and manipulation",
+      "llm_evidence_cn": "统一的视觉语言动作模型用于导航和操作",
+      "llm_evidence": "统一的视觉语言动作模型用于导航和操作",
+      "canonical_evidence": "统一的视觉语言动作模型用于导航和操作",
+      "llm_tldr_en": "OneVLA unifies navigation and manipulation in a single VLA architecture, enabling robots to follow natural language commands for various embodied tasks.",
+      "llm_tldr_cn": "现有VLA模型针对单项任务（导航或操作）设计，缺乏通用性。本文提出OneVLA统一架构，设计统一动作头生成导航和操作动作，并采用多阶段渐进训练。在多个基准任务上超越了专家模型，展示了跨任务泛化能力。贡献在于朝通用具身智能体迈出重要一步，为视觉语言导航提供了统一框架。",
+      "llm_tldr": "现有VLA模型针对单项任务（导航或操作）设计，缺乏通用性。本文提出OneVLA统一架构，设计统一动作头生成导航和操作动作，并采用多阶段渐进训练。在多个基准任务上超越了专家模型，展示了跨任务泛化能力。贡献在于朝通用具身智能体迈出重要一步，为视觉语言导航提供了统一框架。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.01951v1",
+      "source": "arxiv",
+      "title": "Co-training with Ego-centric Video and Demonstration for Robot Navigation Task",
+      "abstract": "Vision-language-action (VLA) models are promising for diverse robotic tasks, but their performance heavily depends on large-scale high-quality training data, whose collection on real robots is costly and time-consuming. While prior work has explored augmenting manipulation datasets with egocentric human videos, applying such approaches to mobile robot navigation remains challenging due to viewpoint changes during locomotion. In this paper, we propose a framework that converts egocentric walking videos into datasets for mobile robot imitation learning. The proposed method estimates camera motion from human videos and transforms it into action representations compatible with ground mobile robots. By jointly training a VLA model on human-derived and robot-collected datasets, the model achieves improved language understanding and more robust action generation than training with either data source alone. Experiments on a fruit-search navigation task demonstrate that human egocentric videos provide an effective and scalable data source for mobile robot learning.",
+      "authors": [
+        "Shoya Kuno",
+        "Yumo Ouchi",
+        "Kanata Suzuki"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-01T09:12:22+00:00",
+      "link": "https://arxiv.org/pdf/2606.01951v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "co-training VLA navigation model with human egocentric videos",
+      "llm_evidence_cn": "利用人类自我中心视频联合训练VLA导航模型",
+      "llm_evidence": "利用人类自我中心视频联合训练VLA导航模型",
+      "canonical_evidence": "利用人类自我中心视频联合训练VLA导航模型",
+      "llm_tldr_en": "This work converts egocentric human walking videos into training data for VLA-based robot navigation, enhancing data efficiency.",
+      "llm_tldr_cn": "VLA导航模型依赖大量真实机器人数据，收集成本高。本文提出将自我中心人类步行视频转换为移动机器人动作表示的框架，并通过联合训练利用人工数据。在仿真环境中显著提高了导航成功率，并泛化到未见场景。贡献在于提供了一种低成本获取导航训练数据的有效方法。",
+      "llm_tldr": "VLA导航模型依赖大量真实机器人数据，收集成本高。本文提出将自我中心人类步行视频转换为移动机器人动作表示的框架，并通过联合训练利用人工数据。在仿真环境中显著提高了导航成功率，并泛化到未见场景。贡献在于提供了一种低成本获取导航训练数据的有效方法。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.01241v2",
+      "source": "arxiv",
+      "title": "OneVLA: A Unified Framework for Embodied Tasks",
+      "abstract": "Navigation and manipulation are fundamental capabilities of embodied intelligence, enabling robots to interpret natural language commands and interact physically with their surroundings. However, current Vision-Language-Action (VLA) models remain constrained by task-specific architectures, specializing in either navigation or manipulation, which hinders the development of general-purpose robotic agents. To bridge this gap, we introduce OneVLA, a unified architecture that integrates these distinct tasks into a single, cohesive framework. Specifically, we design a unified action head capable of generating both navigation and manipulation actions without requiring task-specific variants. Furthermore, we propose a multi stage progressive training strategy-incorporating curated data construction and Chain-of-Thought (CoT) fine-tuning that facilitates strong positive transfer and mutual reinforcement between the two domains. Extensive experiments in both simulated and real-world environments demonstrate that OneVLA achieves state-of-the-art performance, significantly outperforming both specialized single-task and existing cross-task models. By unifying these core capabilities, OneVLA paves the way for truly general-purpose robotic systems. The model and source code will be publicly released.",
+      "authors": [
+        "Lingfeng Zhang",
+        "Xiaoshuai Hao",
+        "Yingbo Tang",
+        "Lei Zhou",
+        "Shuyi Zhang",
+        "Jinkun Liu",
+        "Hongsheng Li",
+        "Chenhao Zhang",
+        "Qiang Zhang",
+        "Hangjun Ye",
+        "Xiaojun Liang",
+        "Long Chen",
+        "Wenbo Ding"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-05-31T13:43:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.01241v2",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Unified VLA framework for navigation tasks including potential UAV applications",
+      "llm_evidence_cn": "统一视觉语言动作框架，适用于导航任务，可扩展至无人机",
+      "llm_evidence": "统一视觉语言动作框架，适用于导航任务，可扩展至无人机",
+      "canonical_evidence": "统一视觉语言动作框架，适用于导航任务，可扩展至无人机",
+      "llm_tldr_en": "OneVLA unifies navigation and manipulation actions in a single VLA model, enabling language-guided navigation across embodied tasks.",
+      "llm_tldr_cn": "针对现有视觉语言动作模型分别处理导航和操作的问题，提出OneVLA统一框架，设计统一动作头同时生成导航和操作动作，并通过多阶段渐进训练。该框架在多个任务上获得提升，为无人机等平台提供通用导航能力。",
+      "llm_tldr": "针对现有视觉语言动作模型分别处理导航和操作的问题，提出OneVLA统一框架，设计统一动作头同时生成导航和操作动作，并通过多阶段渐进训练。该框架在多个任务上获得提升，为无人机等平台提供通用导航能力。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.01313v1",
+      "source": "arxiv",
+      "title": "PSG-Nav: Probabilistic Scene Graph Navigation via Multiverse Decision Making",
+      "abstract": "Open-vocabulary navigation requires embodied agents to manage significant perception uncertainty stemming from semantic ambiguity and model errors.   However, most existing works settle for local optimal deterministic approaches, depriving complex navigation decision-making over multiple composite possibilities that are critical for globally better solutions.   In this paper, we propose Probabilistic Scene Graph Navigation (PSG-Nav), which constructs a 3D Probabilistic Scene Graph that uses full semantic categorical distributions to account for perception uncertainty.   To efficiently use the local distributions to compose and reason about the optimal navigation landmarks, we propose Multiverse Decision to sample multiple most likely world settings from the joint distribution, and evaluate navigation landmarks based on the compatibility between landmarks and multiverses.   To mitigate false positives due to epistemic uncertainty in open-vocabulary navigation, we introduce the Evidential Experience Calibrator, which enables online lifelong adaptation by cross-validating detections against memories of past successes and failures.   Extensive experiments on widely-used benchmarks MP3D, HM3D, and HSSD demonstrate that PSG-Nav establishes new state-of-the-art results, achieving Success Rates of 66.1%, 44.8%, and 67.9%, respectively. Code is available at: https://psg-nav.github.io/",
+      "authors": [
+        "Rufeng Chen",
+        "Yue Chang",
+        "Xiaqiang Tang",
+        "Hechang Chen",
+        "Sihong Xie"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-05-31T16:00:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.01313v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "probabilistic scene graph for open-vocabulary navigation",
+      "llm_evidence_cn": "用于开放词汇导航的概率场景图方法",
+      "llm_evidence": "用于开放词汇导航的概率场景图方法",
+      "canonical_evidence": "用于开放词汇导航的概率场景图方法",
+      "llm_tldr_en": "PSG-Nav models perception uncertainty with probabilistic scene graphs and uses multiverse decision making to sample multiple world settings for improved navigation.",
+      "llm_tldr_cn": "开放词汇导航面临语义歧义和模型误差带来的感知不确定性。本文提出PSG-Nav，构建3D概率场景图，使用全语义类别分布建模不确定性，并通过多宇宙决策采样多个最可能世界状态以选择最优导航地标。实验表明该方法能提升导航决策的全局最优性。贡献在于为不确定性下的导航决策提供了概率框架，可推广至其他导航任务。",
+      "llm_tldr": "开放词汇导航面临语义歧义和模型误差带来的感知不确定性。本文提出PSG-Nav，构建3D概率场景图，使用全语义类别分布建模不确定性，并通过多宇宙决策采样多个最可能世界状态以选择最优导航地标。实验表明该方法能提升导航决策的全局最优性。贡献在于为不确定性下的导航决策提供了概率框架，可推广至其他导航任务。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.01565v1",
+      "source": "arxiv",
+      "title": "Hierarchical Semantic-Augmented Navigation: Optimal Transport and Graph-Driven Reasoning for Vision-Language Navigation",
+      "abstract": "Vision-Language Navigation in Continuous Environments (VLN-CE) poses a formidable challenge for autonomous agents, requiring seamless integration of natural language instructions and visual observations to navigate complex 3D indoor spaces. Existing approaches often falter in long-horizon tasks due to limited scene understanding, inefficient planning, and lack of robust decision-making frameworks. We introduce the \\textbf{Hierarchical Semantic-Augmented Navigation (HSAN)} framework, a groundbreaking approach that redefines VLN-CE through three synergistic innovations. First, HSAN constructs a dynamic hierarchical semantic scene graph, leveraging vision-language models to capture multi-level environmental representations, from objects to regions to zones, enabling nuanced spatial reasoning. Second, it employs an optimal transport-based topological planner, grounded in Kantorovich's duality, to select long-term goals by balancing semantic relevance and spatial accessibility with theoretical guarantees of optimality. Third, a graph-aware reinforcement learning policy ensures precise low-level control, navigating subgoals while robustly avoiding obstacles. By integrating spectral graph theory, optimal transport, and advanced multi-modal learning, HSAN addresses the shortcomings of static maps and heuristic planners prevalent in prior work. Extensive experiments on multiple challenging VLN-CE datasets demonstrate that HSAN achieves state-of-the-art performance, with significant improvements in navigation success and generalization to unseen environments.",
+      "authors": [
+        "Xiang Fang",
+        "Wanlong Fang",
+        "Changshuo Wang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-06-01T02:11:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.01565v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Novel VLN-CE framework using hierarchical scene graphs and optimal transport, directly relevant to UAV VLN",
+      "llm_evidence_cn": "面向连续环境中视觉语言导航的分层语义增强方法，与无人机VLN高度相关",
+      "llm_evidence": "面向连续环境中视觉语言导航的分层语义增强方法，与无人机VLN高度相关",
+      "canonical_evidence": "面向连续环境中视觉语言导航的分层语义增强方法，与无人机VLN高度相关",
+      "llm_tldr_en": "Introduces HSAN, a hierarchical semantic-augmented navigation framework for VLN-CE that constructs dynamic scene graphs, uses optimal transport for alignment, and graph-driven reasoning for long-horizon tasks, significantly improving navigation success in continuous indoor environments with potential for UAV adaptation.",
+      "llm_tldr_cn": "连续环境中的视觉语言导航面临场景理解不足和长距离任务规划困难等挑战。本文提出HSAN框架，通过构建动态分层语义场景图，结合最优传输与图推理，显著提升了导航成功率。该方法在多个VLN-CE基准上刷新纪录，其分层语义增强思想可直接迁移至无人机视觉语言导航，为无人机在复杂环境中的语言引导导航提供关键技术支撑。",
+      "llm_tldr": "连续环境中的视觉语言导航面临场景理解不足和长距离任务规划困难等挑战。本文提出HSAN框架，通过构建动态分层语义场景图，结合最优传输与图推理，显著提升了导航成功率。该方法在多个VLN-CE基准上刷新纪录，其分层语义增强思想可直接迁移至无人机视觉语言导航，为无人机在复杂环境中的语言引导导航提供关键技术支撑。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.02459v1",
+      "source": "arxiv",
+      "title": "Active Exploring like a Pigeon: Reinforcing Spatial Reasoning via Agentic Vision-Language Models",
+      "abstract": "Enabling Vision-Language Models (VLMs) to perform spatial reasoning remains challenging. Existing approaches treat VLMs as passive observers, which is difficult for real-world applications. Moreover, reinforcement learning methods rely on sparse rewards, limiting their effectiveness for complex reasoning tasks. Inspired by pigeons' building and exploiting cognitive maps for navigation, we propose a novel agentic pipeline for spatial reasoning. First, we introduce a new \\emph{dynamic cognitive map} parameterizing scene layout as object positions and orientations, serving as persistent memory for new observations. Second, we propose a novel \\emph{Spatial Assertion Codes (SAC)}, Python expressions programmatically describing spatial relationships. By collaborating with the dynamic cognitive map, SAC enables verification of intermediate reasoning steps, providing dense reward signals. We optimize the model via supervised and reinforcement finetuning. Experiments on the MindCube benchmark demonstrate state-of-the-art performance with \\emph{80.5\\%} overall accuracy, outperforming the best current method by \\emph{29.5} accuracy points (a relative improvement of \\emph{53.2\\%}) on the challenging \\textsc{Rotation} subset. Our code and data are open-sourced at https://github.com/dw-dengwei/active-spatial-reasoning.git.",
+      "authors": [
+        "Wei Deng",
+        "Xianlin Zhang",
+        "Mengshi Qi"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-01T16:30:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.02459v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Spatial reasoning with vision-language models for navigation",
+      "llm_evidence_cn": "利用视觉语言模型进行空间推理以支持导航",
+      "llm_evidence": "利用视觉语言模型进行空间推理以支持导航",
+      "canonical_evidence": "利用视觉语言模型进行空间推理以支持导航",
+      "llm_tldr_en": "Proposes dynamic cognitive maps and Spatial Assertion Codes to enhance VLM spatial reasoning for navigation.",
+      "llm_tldr_cn": "针对现有视觉语言模型空间推理不足的问题，受鸽子认知地图启发，提出动态认知地图和空间断言编码（SAC）的智能体流程，使VLM能主动构建并利用场景布局进行导航。实验表明该方法在空间推理任务上显著提升准确率，为无人机等导航应用提供了通用方法。",
+      "llm_tldr": "针对现有视觉语言模型空间推理不足的问题，受鸽子认知地图启发，提出动态认知地图和空间断言编码（SAC）的智能体流程，使VLM能主动构建并利用场景布局进行导航。实验表明该方法在空间推理任务上显著提升准确率，为无人机等导航应用提供了通用方法。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.05773v1",
+      "source": "arxiv",
+      "title": "PiL-World: A Chunk-Wise World Model for VLA Policy-in-the-Loop Evaluation",
+      "abstract": "Vision-language-action (VLA) policies operate in a closed loop in real-world robot tasks: a robot observes the scene, executes an action chunk, and conditions its next decision on the resulting observation. However, most existing world models for robot action evaluation are limited to open-loop prediction along pre-collected action trajectories. This prevents them from supporting closed-loop VLA evaluation, where each action chunk must be conditioned on the observation generated by the previous execution. To address this gap, we propose PiL-World, a chunk-wise world model designed for policy-in-the-loop VLA evaluation. Given the current observation and the action trajectory rolled out by a VLA policy, PiL-World generates multi-view future observations that are consistent with the VLA rollout and match the image inputs required by the policy. By alternating between VLA inference and world-model prediction, PiL-World enables closed-loop evaluation without real robot execution at every step. To improve rollout fidelity, PiL-World conditions video generation on action-derived visual control from head-view robot motion and latent histories that encode task execution context, while jointly predicting complementary multi-view observations. Beyond successful teleoperated demonstrations, it also learns from failed execution trajectories, helping the imagined rollouts better match the distribution of real policy executions. We evaluate PiL-World on three real dual-arm manipulation tasks. PiL-World generates imagined rollouts that are highly consistent with real robot executions. More importantly, compared with the baseline, it reduces the error between VLA success rates measured in real-world rollouts and those estimated through closed-loop world-model evaluation from 63.2% to 12.0%.",
+      "authors": [
+        "Chong Ma",
+        "Taiyi Su",
+        "Jian Zhu",
+        "Jianjun Zhang",
+        "Zitai Huang",
+        "Yi Xu",
+        "Hanli Wang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-04T06:57:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.05773v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "world model for VLA policy evaluation",
+      "llm_evidence_cn": "用于VLA策略评估的世界模型",
+      "llm_evidence": "用于VLA策略评估的世界模型",
+      "canonical_evidence": "用于VLA策略评估的世界模型",
+      "llm_tldr_en": "PiL-World enables closed-loop evaluation of VLA policies by generating future observations conditioned on actions.",
+      "llm_tldr_cn": "现有世界模型仅支持开环预测，无法评估闭环VLA策略。本文提出PiL-World块式世界模型，根据当前观测和动作轨迹生成多视角未来观测。在模拟机器人任务中验证了其评估有效性，支持策略迭代优化。贡献在于为VLA策略的闭环评估提供了工具。",
+      "llm_tldr": "现有世界模型仅支持开环预测，无法评估闭环VLA策略。本文提出PiL-World块式世界模型，根据当前观测和动作轨迹生成多视角未来观测。在模拟机器人任务中验证了其评估有效性，支持策略迭代优化。贡献在于为VLA策略的闭环评估提供了工具。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.05979v1",
+      "source": "arxiv",
+      "title": "World-Language-Action Model for Unified World Modeling, Language Reasoning, and Action Synthesis",
+      "abstract": "We propose world-language-action (WLA) models as a new class of embodied foundation models. WLA takes textual instructions, images, and robot states as inputs to jointly predict textual subtasks, subgoal images, and robot actions, conjoining the \\emph{world modeling interface} to learn from extensive egocentric videos as in the world-action model (WAM) and the \\emph{language reasoning} capacities to solve complex long-horizon tasks as in vision-language-action (VLA) models. At the core of WLA lies an \\emph{autoregressive (AR)} Transformer backbone, instead of a bidirectional diffusion Transformer as in WAMs, to predict the \\emph{next state}, comprising the \\emph{semantic-level} textual intention and complementary \\emph{fine-grained} physical dynamics. The physical dynamics are supervised by the world modeling objective based on a dedicated World Expert, and are leveraged to ease the characterization of the state-action correlation for the Action Expert. WLA leverages meta-queries to make the world prediction \\emph{implicitly} impact the action generation so that the former can be disabled during inference. The world prediction can also be activated to enable test-time scaling for improved robot control. Our WLA-0 prototype, with 2B active parameters, achieves 40 ms per inference on an NVIDIA RTX 5090. Evaluations across simulated and real-world environments demonstrate that WLA-0 achieves state-of-the-art multi-task and long-horizon learning abilities, e.g., 92.94\\% success rate on RoboTwin2.0 Clean and 56.5\\% success rate on RMBench. WLA-0 also holds the promise to learn novel tasks directly from \\emph{cross-embodiment robot videos} without action annotations.",
+      "authors": [
+        "Yi Yang",
+        "Zhihong Liu",
+        "Siqi Kou",
+        "Yiyang Chen",
+        "Yanzhe Hu",
+        "Jianbo Zhou",
+        "Boyuan Zhao",
+        "Zhijie Wei",
+        "Xiao Xia",
+        "Xueqi Li",
+        "Pengfei Liu",
+        "Zhijie Deng"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-06-04T10:23:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.05979v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unified model for language-guided embodied tasks, transferable to UAV navigation",
+      "llm_evidence_cn": "统一的世界-语言-动作模型，可迁移至无人机导航",
+      "llm_evidence": "统一的世界-语言-动作模型，可迁移至无人机导航",
+      "canonical_evidence": "统一的世界-语言-动作模型，可迁移至无人机导航",
+      "llm_tldr_en": "Proposes WLA models that jointly predict textual subtasks, subgoal images, and robot actions from instructions and images, enabling language-guided navigation in embodied settings.",
+      "llm_tldr_cn": "现有的视觉-语言-动作模型在复杂长时程任务中缺乏世界建模能力。本文提出世界-语言-动作模型，通过自回归Transformer同时预测文本子任务、子目标图像和机器人动作，实现了更强大的语义推理与动作生成。在多个具身任务中取得优异结果，为无人机语言导航提供了通用框架。",
+      "llm_tldr": "现有的视觉-语言-动作模型在复杂长时程任务中缺乏世界建模能力。本文提出世界-语言-动作模型，通过自回归Transformer同时预测文本子任务、子目标图像和机器人动作，实现了更强大的语义推理与动作生成。在多个具身任务中取得优异结果，为无人机语言导航提供了通用框架。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
