@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-09T05:37:42.305913+00:00",
+  "generated_at": "2026-06-09T06:41:36.225504+00:00",
   "updated_date": "20260511-20260609",
   "carryover_days": 9,
   "tag_states": {
@@ -11,7 +11,172 @@
     "rs-fusion": {
       "updated_date": "20260511-20260609",
       "carryover_days": 9,
-      "items": []
+      "items": [
+        {
+          "id": "2606.00706v1",
+          "source": "arxiv",
+          "title": "CR-JEPA: Cross-Modal Joint-Embedding Predictive Learning for Remote Sensing Image Retrieval",
+          "abstract": "Cross-modal remote sensing image retrieval aims to retrieve semantically related scenes across heterogeneous sensing modalities. This remains challenging because paired observations may differ substantially in imaging physics, spatial resolution, spectral configuration, and visual appearance. Moreover, a single retrieval projection trained with one objective may be insufficient to jointly support cross-modal semantic alignment and same-modal neighbourhood preservation. We propose CR-JEPA, a Cross-modal Retrieval Joint-Embedding Predictive Architecture for dual-modality remote sensing retrieval. The model uses modality-specific stems, a shared transformer trunk, and JEPA-style predictive objectives to estimate masked latent target features within and across modalities. Inspired by LeJEPA, we apply Sketched Isotropic Gaussian Regularization to raw retrieval projections to stabilize embeddings and mitigate collapse. CR-JEPA further employs a decoupled-head design with a unified retrieval head for same-modal retrieval and a cross-modal retrieval head for cross-modal search. We evaluate CR-JEPA on BEN-14K, CBRSIR_VS, and DSRSID. On BEN-14K, CR-JEPA improves S1 to S2 retrieval from 61.23% to 75.82% and S2 to S1 retrieval from 63.73% to 75.40% over X-JEPA, while also achieving competitive same-modal retrieval with fewer parameters.",
+          "authors": [
+            "Md Aminur Hossain",
+            "Ayush V. Patel",
+            "Nitant Dube",
+            "Biplab Banerjee"
+          ],
+          "primary_category": "cs.CV",
+          "categories": [
+            "cs.CV"
+          ],
+          "published": "2026-05-30T12:29:46+00:00",
+          "link": "https://arxiv.org/pdf/2606.00706v1",
+          "tags": [
+            "keyword:rs-fusion",
+            "query:rs-fusion"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "cross-modal remote sensing image retrieval with joint-embedding predictive learning",
+          "llm_evidence_cn": "联合嵌入预测学习的跨模态遥感图像检索",
+          "llm_evidence": "联合嵌入预测学习的跨模态遥感图像检索",
+          "canonical_evidence": "联合嵌入预测学习的跨模态遥感图像检索",
+          "llm_tldr_en": "Proposes CR-JEPA for cross-modal remote sensing retrieval using modality-specific stems, shared transformer trunk, and JEPA-style predictive objectives to align semantic and preserve neighborhood structure.",
+          "llm_tldr_cn": "本文针对跨模态遥感图像检索中语义对齐和邻域保持的困难，提出了CR-JEPA架构。采用模态特定支柱和共享Transformer主干，结合JEPA预测目标同时优化跨模态语义对齐和同模态邻域保持。在双模态遥感检索任务上取得了显著提升。",
+          "llm_tldr": "本文针对跨模态遥感图像检索中语义对齐和邻域保持的困难，提出了CR-JEPA架构。采用模态特定支柱和共享Transformer主干，结合JEPA预测目标同时优化跨模态语义对齐和同模态邻域保持。在双模态遥感检索任务上取得了显著提升。",
+          "llm_tags": [
+            "query:rs-fusion"
+          ],
+          "matched_query_tag": "query:rs-fusion",
+          "matched_query_text": "Deep learning methods for remote sensing multimodal fusion",
+          "matched_requirement_id": "req-8",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.00706v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2606.05586v1",
+          "source": "arxiv",
+          "title": "BMCR: Adaptive Backbone Module Composition via Reinforcement Learning for Remote Sensing Object Detection",
+          "abstract": "In remote sensing object detection, Convolutional Neural Networks (CNNs) excel at capturing local details while Vision Transformers (ViTs) are better at global context modeling. However, existing detectors typically rely on a single fixed backbone or a manually designed hybrid architecture, and thus fail to adaptively exploit these complementary strengths across inputs of diverse complexity. To address this limitation, we propose Backbone Module Composition via Reinforcement Learning (BMCR). BMCR dynamically assembles input-adaptive inference paths from reusable modules decomposed from off-the-shelf CNN and ViT backbones. To enable such cross-family composition, we first construct an extensible module toolbox. Specifically, we decompose representative CNN and ViT backbones into reusable functional modules and encapsulate each module with explicit structural, semantic, and computational metadata for compatibility-aware assembly. To bridge the gap between grid-based CNN features and token-based ViT representations, we design a lightweight Optimal Transport (OT) based transition interface that ensures distribution-aware alignment while respecting spatial consistency. The backbone composition process is then formulated as a sequential decision problem, in which a policy network progressively selects task-relevant modules according to intermediate multi-scale observations. To stabilize the joint optimization of reusable modules and the routing policy, we further develop an Adaptive Module Cooperative Optimization (AMCO) strategy that coordinates module updating, routing exploration, and reward assignment during training. On DOTA-v1.0, DOTA-v1.5 and DIOR-R, BMCR achieves 79.31\\%, 73.41\\% and 71.86\\% mAP, respectively, surpassing strong static and dynamic baselines by up to 2.5 points while maintaining competitive efficiency.",
+          "authors": [
+            "Wenlin Liu",
+            "Xikun Hu",
+            "Ping Zhong"
+          ],
+          "primary_category": "cs.CV",
+          "categories": [
+            "cs.CV",
+            "cs.MM"
+          ],
+          "published": "2026-06-04T02:04:15+00:00",
+          "link": "https://arxiv.org/pdf/2606.05586v1",
+          "tags": [
+            "keyword:rs-fusion",
+            "query:rs-fusion"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "adaptive backbone fusion for remote sensing object detection",
+          "llm_evidence_cn": "遥感目标检测中的自适应骨干网络融合",
+          "llm_evidence": "遥感目标检测中的自适应骨干网络融合",
+          "canonical_evidence": "遥感目标检测中的自适应骨干网络融合",
+          "llm_tldr_en": "Proposes BMCR that uses reinforcement learning to dynamically compose CNN and ViT backbone modules for input-adaptive inference in remote sensing object detection.",
+          "llm_tldr_cn": "针对遥感目标检测中单一骨干网络无法适应不同复杂度输入的问题，提出基于强化学习的骨干模块组合方法BMCR。该方法将CNN和ViT模块分解为可复用工具箱，通过强化学习动态组装推理路径。实验结果表明BMCR在多个遥感检测数据集上优于固定骨干方法。",
+          "llm_tldr": "针对遥感目标检测中单一骨干网络无法适应不同复杂度输入的问题，提出基于强化学习的骨干模块组合方法BMCR。该方法将CNN和ViT模块分解为可复用工具箱，通过强化学习动态组装推理路径。实验结果表明BMCR在多个遥感检测数据集上优于固定骨干方法。",
+          "llm_tags": [
+            "query:rs-fusion"
+          ],
+          "matched_query_tag": "query:rs-fusion",
+          "matched_query_text": "object detection in remote sensing",
+          "matched_requirement_id": "req-5",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.05586v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2605.25737v1",
+          "source": "arxiv",
+          "title": "SFR-Net: Learning Scale-Frustum Representations for Ultra-Wide Area Remote Sensing Image Segmentation",
+          "abstract": "Pixel count and geographical coverage are two key characteristics of remote sensing images. Existing remote sensing image segmentation methods typically focus on images with either a small pixel count or a large pixel count but limited geographical coverage. In this paper, we introduce a novel segmentation task targeting ultra-wide area (UWA) remote sensing images, characterized by both a large pixel count and extremely wide geographical coverage. The core challenges of UWA segmentation lie in simultaneously handling ground objects with significantly varying scales and maintaining long-range contextual semantic continuity. To address these challenges, we propose the Scale-Frustum Representation Network (SFR-Net). Inspired by the viewing frustums of remote sensing images captured from different altitudes, we construct scale-frustum representations, enabling unified modeling of ground objects and contextual features at different scales. Furthermore, we design a cascaded cross-scale fusion mechanism to effectively integrate these representations, enhancing local semantic understanding while ensuring long-range contextual continuity. Experimental results on GID and FBPS demonstrate that SFR-Net achieves state-of-the-art performance, improving mIoU by 1.72% and 4.29%, respectively, over the strongest competing methods. In addition, the proposed scale-frustum representations can be integrated into generic segmentation networks to improve both segmentation accuracy and convergence speed. The implementation code will be publicly available at https://github.com/ChuyuZhong/SFR-Net.",
+          "authors": [
+            "Chuyu Zhong",
+            "Keyan Chen",
+            "Qinzhe Yang",
+            "Bowen Chen",
+            "Zhengxia Zou",
+            "Zhenwei Shi"
+          ],
+          "primary_category": "cs.CV",
+          "categories": [
+            "cs.CV"
+          ],
+          "published": "2026-05-25T11:45:50+00:00",
+          "link": "https://arxiv.org/pdf/2605.25737v1",
+          "tags": [
+            "keyword:rs-fusion",
+            "query:rs-fusion"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "remote sensing image segmentation for ultra-wide area",
+          "llm_evidence_cn": "超广域遥感图像分割",
+          "llm_evidence": "超广域遥感图像分割",
+          "canonical_evidence": "超广域遥感图像分割",
+          "llm_tldr_en": "Proposes SFR-Net for ultra-wide area remote sensing image segmentation, handling large pixel count and wide coverage, using scale-frustum representations for multi-scale objects.",
+          "llm_tldr_cn": "针对超广域遥感图像中像素多、地理覆盖广带来的尺度变化和语义连续性问题，提出尺度-截头体表示网络(SFR-Net)。该网络通过多尺度特征学习和长程语义保持机制，有效分割超广域图像中的不同尺度地物。在构建的超广域数据集上达到领先水平。",
+          "llm_tldr": "针对超广域遥感图像中像素多、地理覆盖广带来的尺度变化和语义连续性问题，提出尺度-截头体表示网络(SFR-Net)。该网络通过多尺度特征学习和长程语义保持机制，有效分割超广域图像中的不同尺度地物。在构建的超广域数据集上达到领先水平。",
+          "llm_tags": [
+            "query:rs-fusion"
+          ],
+          "matched_query_tag": "query:rs-fusion",
+          "matched_query_text": "remote sensing image analysis",
+          "matched_requirement_id": "req-1",
+          "selection_source": "carryover_cache",
+          "paper_id": "2605.25737v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2605.24639v1",
+          "source": "arxiv",
+          "title": "DisDop: Distillation with Domain Priors for Open-Vocabulary Aerial Object Detection",
+          "abstract": "With the widespread application of drones in recent years, object detection of aerial images has attracted increasing attention, especially open-vocabulary aerial detection which is not restricted to predefined categories. Due to the scarcity of drone's viewpoint images and their significant differences from natural images, it is difficult to achieve satisfying results by directly applying vanilla open-vocabulary detection methods designed for natural scenarios. Some studies propose to transfer knowledge from pre-trained models by using lightweight networks or generating pseudo labels, but they tend to rely on models trained on natural images, neglecting the potential of foundation models specifically tailored for remote sensing and aerial imagery. To address this limitation, we propose DisDop, a unified framework that systematically distills multi-level domain priors from remote sensing foundation models (e.g., RemoteCLIP and DINOv3) into a lightweight detector. Specifically, we first distill visual priors through a teacher fusion strategy that combines RemoteCLIP's cross-modal alignment capability with DINOv3's fine-grained local feature extraction ability, transferring their complementary strengths to the detector's backbone. Second, we distill textual priors embedded in RemoteCLIP's text encoder by explicitly modeling inter-category semantic relationships, while incorporating global contextual priors to enhance local feature representation for small objects. Through this multi-level prior distillation framework, our DisDop achieves new state-of-the-art performance on open-vocabulary aerial detection benchmarks. Extensive ablation analysis also demonstrates the rationality and effectiveness of our proposed modules.",
+          "authors": [
+            "Ruihao Xu",
+            "Yong Liu",
+            "Yansong Tang",
+            "Sule Bai",
+            "Xubing Ye",
+            "Bingyao Yu",
+            "Yutao Guo",
+            "Jiwen Lu",
+            "Jie Zhou"
+          ],
+          "primary_category": "cs.CV",
+          "categories": [
+            "cs.CV",
+            "cs.AI"
+          ],
+          "published": "2026-05-23T16:01:20+00:00",
+          "link": "https://arxiv.org/pdf/2605.24639v1",
+          "tags": [
+            "keyword:rs-fusion",
+            "query:rs-fusion"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "open-vocabulary aerial object detection",
+          "llm_evidence_cn": "开放词汇航空目标检测",
+          "llm_evidence": "开放词汇航空目标检测",
+          "canonical_evidence": "开放词汇航空目标检测",
+          "llm_tldr_en": "DisDop distills knowledge from remote sensing foundation models using domain priors to improve open-vocabulary aerial object detection, outperforming natural-scene-based methods.",
+          "llm_tldr_cn": "针对无人机视角图像稀缺且与自然图像差异大的问题，提出DisDop方法，通过蒸馏遥感领域基础模型的知识并引入域先验，实现开放词汇航空目标检测。在多个数据集上实验证明，该方法显著优于直接应用自然场景的开放词汇检测方法，为航空目标检测提供了可迁移的先验知识。",
+          "llm_tldr": "针对无人机视角图像稀缺且与自然图像差异大的问题，提出DisDop方法，通过蒸馏遥感领域基础模型的知识并引入域先验，实现开放词汇航空目标检测。在多个数据集上实验证明，该方法显著优于直接应用自然场景的开放词汇检测方法，为航空目标检测提供了可迁移的先验知识。",
+          "llm_tags": [
+            "query:rs-fusion"
+          ],
+          "matched_query_tag": "query:rs-fusion",
+          "matched_query_text": "object detection in remote sensing",
+          "matched_requirement_id": "req-5",
+          "selection_source": "carryover_cache",
+          "paper_id": "2605.24639v1",
+          "carry_days": 1
+        }
+      ]
     }
   }
 }
