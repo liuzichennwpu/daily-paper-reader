@@ -1,0 +1,640 @@
+Title: ATT-CR: Adaptive Triangular Transformer for Cloud Removal
+
+URL Source: https://arxiv.org/pdf/2606.05999v1
+
+Published Time: Fri, 05 Jun 2026 01:14:37 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 1
+
+# ATT-CR: Adaptive Triangular Transformer for Cloud Removal 
+
+Yang Wu, Ye Deng, Member, IEEE, Pengna Li, Wenli Huang, Kangyi Wu, Xiaomeng Xin, and Jinjun Wang 
+
+Abstract —Cloud removal aims to accurately reconstruct the ground objects obscured by clouds in remote sensing images. Existing Transformer-based methods utilizing self-attention have shown impressive results by effectively modeling long-range dependencies in cloudy images. However, they suffer from the following issues: 1) the high computational complexity of self-attention limits scalability; 2) treating both cloudy and clean pixels as valid within the attention computation brings distur-bances in subsequent layers, leading to suboptimal performance. To address these challenges, we propose the Adaptive Triangu-lar Transformer for Cloud Removal (ATT-CR), a model that effectively reduces computational costs and mitigates interference from cloudy pixels. Specifically, it consists of two core compo-nents: Triangular Attention (TAN) and Feature Selected Gating Module (FSGM). TAN employs lower and upper triangular matrices to approximate Softmax attention with O(N ) computa-tional complexity, significantly reducing the computational costs. The FSGM, on the other hand, integrates with TAN to adaptively distinguish between cloudy and clean features, which minimizes the introduction of invalid information into subsequent layers. Extensive experiments on cloud removal benchmarks demon-strate that ATT-CR delivers superior performance compared to existing methods. 
+
+Index Terms —Cloud removal, Image reconstruction, Triangu-lar attention, Adaptive feature selection, Remote sensing images. 
+
+I. I NTRODUCTION 
+
+# CLoud contamination significantly impairs the usability of optical remote sensing images in national defense and geoscience applications. Effectively removing clouds and recovering underlying ground information has emerged as a critical research area in remote sensing image processing. To restore high-quality images from cloud-contaminated ones, earlier methods [1]–[4] rely on physical priors derived from statistical properties of images. While these prior-based meth-ods are interpretable, their performance is limited by com-plex atmospheric conditions. In contrast, Convolutional Neural 
+
+This work was supported in part by the National Natural Science Foundation of China under Grants 62088102, U24A20325, and 12326608; the Fundamen-tal Research Funds for the Central Universities under Grant JBK2103012, the Sichuan Science Foundation Project under Grant 2024ZDZX0002 and Grant 2024NSFTD0054, and in part by the Public Welfare Research Program of Ningbo City under Grant 2024S063. (Corresponding author: Ye Deng.) Yang Wu, Pengna Li, Xiaomeng Xin, Kangyi Wu, and Jinjun Wang are with the Xi’an Jiaotong University, Xi’an, Shaanxi 710049, China (e-mail: wuyang cc@stu.xjtu.edu.cn). Ye Deng is with the School of Computing and Artificial Intelligence, South-western University of Finance and Economics, Chengdu, Sichuan 611130, China (e-mail: dengye@swufe.edu.cn). Wenli Huang is with the Ningbo University of Technology, Ningbo, Zhejiang 315211, China. 
+
+Networks (CNNs) are favored in deep learning architectures for their ability to automatically extract features, minimizing the need for extensive preprocessing and domain-specific knowledge. Many CNN-based cloud removal methods [5]– [10] effectively learn the mapping between cloudy and cloud-free images. However, clouds vary significantly in density and extent due to variations in atmospheric conditions, often covering large areas in satellite and aerial imagery. The fixed spatial kernels of CNNs primarily emphasize local features, restricting their capacity to model non-local correlations and adapt to diverse cloud formations. To deal with the diverse cloud formation and effectively model the long-range dependency in occluded ground infor-mation, some works [11]–[16] have incorporated self-attention mechanisms that fuse information from both local and non-local contexts for cloud removal. For instance, CMNet [15], GLF-CR [17], and ACA-CRNet [12] employ the CNN-based local module to capture reliable texture details while utilizing the self-attention to maintain the structure consistency in the recovered images. Although these methods benefit from the strengths of self-attention, offering improved feature represen-tation capabilities, they still face several issues: 1) The quadratic computational complexity of self-attention with respect to feature resolution restricts its long-range mod-eling capabilities in cloud removal tasks. To mitigate this issue, methods such as SPA-GAN [11] and ACA-CRNet [12] integrate the attention blocks only in middle layers, where feature maps are smaller, but this strategy limits their rep-resentation capabilities. CVAE [13] mitigates complexity by splitting the image into large patches to reduce the number of tokens, but this sacrifices fine-grained pixel-level information. CMNet [15], Trinity-Net [14], and GLF-CR [17] apply self-attention within small windows to lower computational costs, but this requires complex cyclic shifting window operations and have restricted receptive fields. CR-former [16] linearizes the softmax attention to model pixel-level long-range de-pendency, with O(N ) computational complexity. However, this approach exacerbates the low-rank limitations inherent in the multi-head attention [18], restricting the feature diversity and network expressiveness. Despite efforts to balance long-range dependency modeling and computational efficiency, these methods still compromise feature representation quality. More recently, Mamba-CR [19] and CR-Famba [20] applied Mamba [21], a state-space model (SSM), to cloud removal. Mamba achieves linear complexity via recursive filtering of 
+
+0000–0000/00$00.00 © 2021 IEEE   
+
+> arXiv:2606.05999v1 [cs.CV] 4 Jun 2026 JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 2Cloud
+> Image
+> Reference
+> Image
+> Ours
+> Fig. 1. The cloud removal outputs from our ATT-CR model in diverse cloud formations scenarios. The images are sourced from the RICE1, RICE2, T-CLOUD, and SEN12MS-CR datasets. In each column, the first image is the cloudy input, the middle image shows the output from our model, and the last image is the cloud-free reference image.
+
+1D token sequences. However, due to the lossy memory mechanism of SSMs, these models are less expressive than attention-based methods [22] and often require additional modifications to compensate for information loss. 2) Existing Transformer-based cloud removal methods [11], [13]–[15], [17] typically compute attention across the entire feature map without differentiating between clouded and clean regions, which brings disturbances in feature representation and visual artifacts such as color discrepancy and blurriness in restored images. Moreover, since the transmission properties across different optical bands vary in cloud-contaminated scenarios [7], the degraded image features often exhibit channel-wise distinctions, where some channels may retain valid information. Consequently, incorporating both spatial and channel-wise properties to discriminate between cloudy and clean features may substantially enhance cloud removal performance. To overcome these challenges, we propose the Adaptive Triangular Transformer for Cloud Removal (ATT-CR), which effectively reduces computational costs and mitigates inter-ference from cloudy pixels. Specifically, ATT-CR comprises two core components: Triangular Attention (TAN) and the Feature Selected Gating Module (FSGM). Similar to other methods [16], [23], [24], TAN first employs a simple activation function to approximate Softmax attention and reorders the attention computation from (QK T )V to Q(KT V ), achieving a linearized attention mechanism. Subsequently, to address the low-rank limitations of the linear attention [18], our TAN incorporates a triangular attention matrix to preserve the rank of the attention map while maintaining linear computational complexity. This enables the modeling of pixel-level long-range dependencies and high-quality feature representations in cloudy images. To mitigate interference from cloudy pixels in attention computation and consider channel-wise transmission properties, the FSGM adaptively modulates the TAN outputs by differentiating cloudy and clean features at each channel and spatial location. This process minimizes the propagation of cloudy information into subsequent layers, improving the model’s robustness to cloud coverage. Additionally, we in-troduce multi-scale tokens into TAN to extract ground object features at varying scales, further enhancing feature diversity and improving overall representation quality. We perform extensive experiments on real-world datasets, including RICE1, RICE2, T-CLOUD, and the multi-spectral dataset SEN12MS-CR. The experimental results show that ATT-CR delivers superior performance compared to existing methods. Fig. 1 shows some restored images of ATT-CR in scenarios with diverse cloud formations. In summary, our main contributions are as follows:  
+
+> •
+
+We design an ATT-CR network that provides effective feature representation while maintaining computational efficiency for cloudy images.  
+
+> •
+
+We propose the TAN to capture pixel-level long-range dependencies in cloudy images with O(N ) computational complexity and alleviate the low-rank limitation by em-ploying the multi-head triangular attention matrix.  
+
+> •
+
+We propose a Feature Selected Gating Module (FSGM) that integrates with TAN to adaptively select features for each channel at every spatial location, enhancing the model’s robustness to cloud coverage. This article follows the structure outlined below. First, we introduce related work on cloud removal in Section II. Next, section III presents our proposed network, ATT-CR, along with its core modules, TAN and FSGM, in a top-down manner. Then, section IV describes the experimental settings and offers the results along with a detailed analysis. Finally, we summarize the article in section VI. II. R ELATED WORKS 
+
+A. Self-Attention-Enhanced CNNs for Cloud Removal 
+
+CNNs excel at learning complex data distribution within large-scale datasets and show powerful representational ability. Leveraging these advantages, numerous methods [25]–[28] employ CNNs to model the relationship between cloud-free and cloud-contaminated images in an end-to-end manner, directly generating clear images from their cloud-contaminated counterparts. To increase model interpretability, some meth-ods [7], [29], [30] integrate the CNNs with physical models, which leverage the neural networks to learn the parameters of traditional physical models. Although these methods have sig-nificantly improved cloud removal, the fixed spatial kernels of CNNs limit their capability to model long-range dependencies and adapt to diverse cloud formations. Thanks to the competence of the self-attention mechanism in modeling long-range dependencies, some works [11], [12], [31]–[33] have introduced self-attention to augment CNN-based methods for cloud removal. For example, Pan et al. [11] and Huang et al. [12] combined convolution with spatial atten-tion to obtain clean images. Zhou et al. [31] and Wen et al. [32] employed channel attention mechanisms to suppress clouds and enhance ground details in restored images. Chen et al. [33] developed a contextual attention module to match similar clean information from distant regions for cloud removal. However, in CNN-based networks, attention mechanisms are typically confined to deeper layers with smaller feature maps. Although JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 3
+
+this approach minimizes additional computational overhead, it yields only limited performance improvements. 
+
+B. Efficient Transformer for Cloud Removal 
+
+Transformers [34], which utilize self-attention to construct a convolution-free neural network, have shown remarkable potential in modeling global information. However, their quadratic computational complexity poses scalability chal-lenges, especially when dealing with the large number of tokens typical in image data. To adapt transformers for high-resolution feature maps, recent works in computer vision have introduced three strategies to reduce computational com-plexity [35]–[40]: (1) dividing images into large patches to reduce the number of tokens, as in Vision Transformer [35], (2) constraining attention within small windows and shifting the windows to achieve a global receptive field, as in Swin Transformer [37], and (3) replacing softmax attention with linear attention, as in Restormer [39]. Building on the success of these strategies, similar approaches have been applied to cloud removal tasks. CVAE [13] and Trinity-Net [14] leverage the Vision Trans-former [35] and Swin Transformer [37], respectively, to model degradation factors in cloudy images and restore details from a global perspective. Cloud-EGAN [41] employs the Swin transformer to exploit high-level information from a global perspective. CMNet [15] and GLF-CR [17] integrate CNN-based local modules to capture reliable texture details while employing the Swin Transformer [37] to maintain structural consistency in recovered images. Cloudformer [42] strategi-cally applies self-attention within smaller windows to reduce computational demands. While merging tokens and restricting attention to small windows effectively reduce computational complexity, these approaches have notable drawbacks: large patch partitioning sacrifices fine-grained pixel-level informa-tion, and shifted window attention limits the receptive field, collectively compromising representation capabilities and re-ducing the involvement of a wider range of pixels. To extend attention beyond regional ranges and capture fine-grained information, some researchers reduce the com-putational burden by replacing Softmax attention with lin-ear attention. For instance, MDTA [39] applies self-attention across all channels to model pixel-level global information with a computational complexity of O(N ). Building upon MDTA, DFDNet [43] and TSMCF [44] recover cloudy images to enhance computational efficiency, but it neglects spatial relationships. Another line of research employs simplified activation functions [23], [45] or customized mapping func-tions [16], [46] as approximations for the Softmax func-tion in Transformers. These methods exploit the associative property of matrix multiplication to reorder the computation from (QK T )V to Q(KT V ), achieving O(N ) computation complexity. Although existing linear attention designs significantly re-duce computational costs, they aggravate the low-rank limita-tion inherent in multi-head attention models [18], which limits their expressiveness. To address this challenge, we develop a simple yet effective attention that utilizes the full-rank property of the triangular matrix combined with the multi-head mechanism, overcoming low-rank limitations and capturing pixel-level long-range dependencies with O(N ) computational complexity. 
+
+C. Gated Module 
+
+Gating has been explored in many fields, including com-puter vision [47], [48], natural language [49]. For example, Hu et al. [47] proposed scaling feature responses by adjusting each channel with learned sigmoid gating values. Yu et al. [48] utilized the gating mechanisms to mitigate the influence of in-valid pixels in image inpainting. Beyond convolutional gating, Huang et al. [50] introduced a sparse self-attention transformer that restricts attention to valid regions, suppressing interfer-ence from invalid pixels in inpainting. In cloud removal, remote sensing images are often contaminated by variable and complex cloud cover, where operations on heavily clouded pixels can introduce invalid information, degrading network performance. To address this issue, Dai et al. [51] incorporated a com-mon convolutional layer with gated convolutional layers to differentiate between cloudy and clean pixels. Wang et al. [52] integrated a gated convolutional layer in the feature extraction and SAR-optical image fusion modules to mitigate errors caused by cloud regions. Similarly, Wang et al. [9] employed a Region Gated Module with convolutional operations to distinguish between cloudy and non-cloudy regions. Cloud-contaminated images exhibit channel-wise charac-teristics due to varying transmission across color channels. Inspired by gating mechanisms in the aforementioned CNN-based networks and considering channel-wise characteristics of cloud-contaminated image features, we propose a feature selection gating module integrated with our triangular attention module. This design enhances the robustness of TAN against cloud cover by enabling adaptive feature selection across spatial locations and channels, mitigating the impact of cloudy features and improving overall performance. III. M ETHODS 
+
+We aim to develop a cloud removal network that balances feature representation capability and computational complexity for cloudy remote-sensing images. This section presents the proposed Adaptive Triangular Transformer for Cloud Removal (ATT-CR) in a top-down manner. First, we adopt a multi-stage encoder-decoder architecture as the backbone of ATT-CR. Then, to effectively learn long-range dependencies without constraining the receptive field and alleviate the low-rank limitation inherent in linear attention, we propose the Trian-gular Attention (TAN) module. Next, to model the varying granularity of ground objects, we integrate Multi-Scale Tokens (MS-Tokens) with TAN to enable the extraction of fine and coarse-grained information. Finally, considering the channel-wise characteristics of degraded image features, we introduce a Feature Selection Gating Module (FSGM) that combines with TAN to adaptively select features for each channel at every spatial location. This enables subsequent layers to focus on the features contributed to cloud removal, enhancing the overall network performance. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 4(a) ATT-CR                                        
+
+> 1×1 Conv
+> LeakRelu
+> LeakRelu
+> 1×1 Conv
+> 3×3 Conv
+> (d) FSGM
+> Cloudy Input Cloud-free Output
+> 𝐀 ×𝐀 ×𝐀
+> 𝐀
+> 𝐀 ×𝐀
+> 𝐀 ×𝐀 𝐀
+> 𝐀𔰀𝐀𚰀𝐀𖠀𝐀𔰀𝐀𛀀𔰀
+> 𝐀 𝐀𝐀𝐀𚀀  × 𝐀 𝐀
+> 𝐀 ×𝐀 ×𝐀􄀀
+> 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀
+> 3×3 Conv
+> 3×3 Conv
+> Down
+> 𝐀
+> 𝐀𔰀𝐀𚰀𝐀𖠀𝐀𔰀𝐀𛀀𔰀
+> 𝐀𝐀𝐀𝐀𚀀  × 𝐀 𝐀
+> Down
+> 𝐀𔰀𝐀𚰀𝐀𖠀𝐀𔰀𝐀𛀀𔰀
+> 𝐀𝐀𝐀𝐀𚀀  × 𝐀 4
+> 𝐀𔰀𝐀𚰀𝐀𖠀𝐀𔰀𝐀𛀀𔰀
+> 𝐀𝐀𝐀𝐀𚀀  × 𝐀 5
+> UP
+> UP
+> CC
+> ATAM
+> GDFN
+> 𝐀𔰀𝐀𚰀𝐀𖠀𝐀𔰀𝐀𛀀𔰀 𝐀𝐀𝐀𝐀𚀀
+> ×𝐀 3
+> 𝐀 ×𝐀 ×􄀀
+> 𝐀 𝐀 𝐀
+> 𝐀
+> 𝐀 ×𝐀
+> 𝐀 ×𝐀 𝐀 𝐀
+> 𝐀 ×𝐀
+> 𝐀 ×𝐀 𝐀
+> Stage 1 Stage 2 Stage 4 Stage 5 Stage 3
+> 1×1 Conv
+> 𝐀 R𝐀 ’
+> 5×5
+> DwConv
+> Linear
+> Q
+> LayerNorm
+> Linear
+> heads/2
+> Lower triangular
+> matrix
+> heads/2
+> Upper triangular
+> matrix
+> C
+> 3×3
+> DwConv C
+> Triangular Attention
+> Triangular Attention
+> 1×1
+> Conv
+> X
+> K&V
+> K&V
+> K&V
+> FSGM
+> (b) ATAM
+
+•     
+
+> (c) TAN
+> Triangular Attention
+> MS-Tokens
+> Triangular Attention
+> Gated-DConv Feed-Forward Network
+> Depth-wise Convolution
+> TAN
+> GDFN
+> C
+> Down
+> UP
+> Downsample
+> Upsample
+> Concatenate
+> 3×3
+> DwConv
+> •Element-wise Multiply
+> 1×1
+> Conv 1×1Convolution
+> ATAM Adaptive Triangular Attention Module
+
+Fig. 2. Architecture of ATT-CR. (a) ATT-CR employs a multi-stage design, with each stage consisting of stacked Transformer blocks. (b) The ATAM integrates TAN, FSGM, and Ms-Tokens, working together to achieve high-quality feature representation. (c) TAN has linear computational complexity and addresses the low-rank limitation. (d) FSGM integrates with TAN to minimize the introduction of cloudy features into subsequent layers. 
+
+A. Overall Pipeline of ATT-CR 
+
+Our model, ATT-CR, is structured as a multi-stage encoder-decoder architecture, as represented in Fig. 2. Stages 1 to 3 serve as encoders, while stages 4 and 5 are decoders. Each level of the encoder and decoder consists of multiple instances of Transformer blocks. Starting with a cloudy image 
+
+I ∈ RH×W ×3, ATT-CR utilizes a 3 × 3 convolution for low-level feature extraction to produce X ∈ RH×W ×C . These features are then passed through a five-stage encoder-decoder, followed by a 3 × 3 convolutional layer that reduces the channels to 3. 
+
+Encoder: Starting with low-level feature X ∈ RH×W ×C , it is processed by three stages (stages 1 to 3) that hierarchically reduce spatial size while increasing channel dimensions. Each stage consists of Li stacked Transformer blocks and includes a downsampling operation between every two stages. The final encoder stage outputs the feature map is XE3 ∈ R H 
+
+> 4
+
+× W 
+
+> 4
+
+×4C .
+
+Decoder: The decoder processes the encoder’s output XE3
+
+and progressively restore the spatial resolution. The decoder consists of two stages (Stages 4 to 5). Each stage comprises 
+
+Li stacked Transformer blocks and includes an upsampling operation between consecutive stages. Additionally, a skip connection aggregates information from both the encoder and the decoder, followed by a 1 × 1 convolutional layer to reduce the channel dimension. In the final stage, a 3 × 3
+
+convolutional layer is applied to reduce the channel dimension to 3, generating residual image R ∈ RH×W ×3. The final reconstructed image I′ is then derived from I + R.
+
+Transformer Block: The central Transformer block is com-posed of an Adaptive Triangular Attention Module (ATAM) and a Gated-DConv Feed-Forward Network (GDFN) [39]. The attention module, ATAM, integrates Multi-Scale Tokens (MS-Tokens) with Triangular Attention (TAN) to model long-range dependencies across multiple scales, while incorporating the Feature Selection Gating Module (FSGM) for feature modu-lation, thereby enhancing the model’s robustness. Following Restormer [39], GDFN transforms and propagates attention module features to subsequent layers. 
+
+B. Triangular Attention 
+
+In the vanilla Transformer [34], the input Ix ∈ RN ×d
+
+is mapped to query, key, and value through the projection matrices WQ, WK , and WV . Here, N = H ×W represents the resolution of the feature map Ix. The self-attention operation is formulated as follows [34]: 
+
+Q = IxWQ, K = IxWK , V = IxWV , (1) 
+
+Oi =
+
+NX
+
+j=1 
+
+sim( Qi, K j )Vj
+
+PNj=1 sim( Qi, K j ) , (2) where Q, K, V ∈ RN ×d, sim( ·) denotes the similarity func-tion. The current Vision Transformer primarily employs Soft-max function, where sim( Q, K ) = exp( QK T ), to measure similarity. In this case, the term exp( QK T ) introduces an 
+
+O(N 2) computational complexity, resulting in high compu-tational costs for high-resolution features. To mitigate the computational burden of self-attention, recent works [16], [24], [45], [53] focus on modifications to the Softmax function, employing carefully designed kernels as approximations of exp( QK T ). In this way, the similarity function takes the following form: 
+
+sim( Q, K ) = ϕ(Q)ϕ(KT ). (3) Accordingly, the self-attention formulation in (2) can be ex-pressed as follows: 
+
+Oi =
+
+PNj=1 ϕ(Qi)ϕ(Kj )T Vj
+
+PNj=1 ϕ(Qi)ϕ(Kj )T . (4) JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 5self-attention lower triangular attention upper triangular attention    
+
+> linear attention map
+> rank ≤d
+> lower triangular attention map
+> rank = N
+> upper triangular attention map
+> rank = N
+
+Fig. 3. Overview of triangular attention. The first row illustrates the establishment of correlations between image patches, where the orange box represents the query image patch. The second row displays the attention maps. The original attention is decomposed into two parts: one computes the query with its preceding patches (lower triangular attention) and the other with its subsequent patches (upper triangular attention), achieving a full-rank attention map and global context. 
+
+By applying the associative property of matrix multiplication, the computation in (ϕ(Qi)ϕ(Kj )T )Vj can be reordered as 
+
+ϕ(Qi)( ϕ(Kj )T Vj ).
+
+Oi = ϕ(Qi)
+
+PNj=1 ϕ(Kj )T Vj
+
+PNj=1 ϕ(Qi)ϕ(Kj )T , (5) where the computational complexity becomes O(N d 2). In high-resolution images where the token count reaches tens of thousands (N ≫ d2), the computational complexity becomes more favorable. Moreover, the terms PNj=1 ϕ(Kj )T Vj and 
+
+PNj=1 ϕ(Kj )T in (5) are computed only once and shared across all queries. This results in O(N ) computational and memory complexity, ensuring linear computational cost. Although linear attention offers superior computational ef-ficiency compared to Softmax self-attention, it encounters limitations in feature expressiveness. Specifically, the rank of the attention matrix is constrained by the image resolution 
+
+N and the channel dimension d [18], [54]. As illustrated below [54]: 
+
+r( ϕ(Q)ϕ(K)T ) ≤ min(r( ϕ(Q)) , r( ϕ(K))) 
+
+≤ min( N, d ), (6) where r denotes the matrix rank. In cloudy remote sensing images d ≪ N , such as cloud removal inputs with d = 48 
+
+and N = 256 × 256 . In this scenario, the rank of the attention matrix is constrained by d, resulting in a low-rank property, where multiple rows of the attention map exhibit significant homogenization. Since the output of self-attention is a weighted sum of V , homogenized attention weights render aggregated features indistinguishable, leading to a reduced representation ability. To mitigate this limitation, we design a simple yet effective Triangular Attention mechanism to enhance the rank of the attention map, as presented in Fig. 3. Specifically, inspired by the full-rank property of the triangular matrix, we divide the 𝐀 𝐀 𝐀𳐀𝐀𴀀𝐀 
+
+> 𝐀
+> •••
+> 𝐀 𝐀 𝐀𳐀𝐀𴀀𝐀
+> 𝐀 (∙)
+> 𝐀 (∙)
+> 𝐀 𝐀 𝐀 𝐀𳐀𝐀 𴀀𝐀
+
+×1/ 𝐀 𝐀 𝐀 𝐀𳐀𝐀 𴀀𝐀 
+
+> •••
+> 𝐀 (∙)
+> 𝐀 𝐀 𝐀𵠀𵠀𴀀𝐀
+> 𝐀
+> 𝐀 𝐀 𝐀 𝐀𵠀 𵠀𴀀𝐀
+
+×1/ 𝐀 𝐀 𝐀 𝐀𵠀 𵠀𴀀𝐀         
+
+> 𝐀 𝐀 𝐀 𝐀𵠀 𵠀𴀀𝐀
+> 𝐀 𝐀 𝐀 𝐀𳐀𝐀 𴀀𝐀
+> 𝐀 𝐀
+> C
+> 𝐀 𝐀 𝐀
+> Lower triangular attention Upper triangular attention
+> 𝐀 𝐀𝐀
+> 𝐀 (∙) 1
+> 𝐀
+> •••
+> 1
+> 𝐀 𝐀 𝐀 𝐀𵠀𵠀𴀀𝐀
+> •••
+> 𝐀
+> 𝐀
+> 𝐀
+> 𝐀
+> ∑∑
+> Matrix Multiplication
+> CConcatenate
+> ∑Sum
+> 𝐀 (∙)1+ELU (∙)
+
+Fig. 4. The calculation of the triangular attention output values involves splitting Q, K, and V into multiple heads: half of the heads compute the lower triangular attention output O1ilower , while the other half compute the upper triangular attention output O2iupper , achieving a full-rank representation while maintaining computational efficiency. 
+
+attention heads into two groups: one computes upper triangular attention, while the other computes lower triangular attention. Firstly, we split Q, K, V into two heads as follows: 
+
+Q1, Q 2 = split (Q), Q ∈ R N ×d, Q 1, Q 2 ∈ R N ×d/ 2, (7) 
+
+K1, K 2 = split (K), K ∈ R N ×d, K 1, K 2 ∈ R N ×d/ 2, (8) 
+
+V1, V 2 = split (V ), V ∈ R N ×d, V 1, V 2 ∈ R N ×d/ 2, (9) Then, the attention matrices are defined as: 
+
+Alower = ϕ(Q1)ϕ(K1)⊤ · Ii≤j (10) 
+
+Aupper = ϕ(Q2)ϕ(K2)⊤ · Ii≥j (11) where Ii≤j , Ii≥j ∈ R N ×N are indicator functions that apply lower and upper triangular masks, respectively. Here, i is the row index and j is the column index. Specifically, Ii≤j ensures that each position i can only attend to previous positions (including itself), while Ii≥j ensures that each position i can only attend to itself and subsequent positions. Each masked at-tention matrix is computed independently in separate attention heads. In this way, the original linear attention is decomposed into two triangular attention branches: 
+
+O = ϕ(Q)ϕ(K)T V → O = Concat (Auper V1, A lower V2)
+
+(12) where each attention matrix Alower , Aupper ∈ R N ×N is a triangular matrix. A well-established property in linear algebra states that: If M ∈ RN ×N is triangular and non-singular, then 
+
+rank( M ) = N .Therefore, this design ensures that the resulting attention maps Alower and Aupper maintain full rank N , effectively mitigating the rank limitation d inherent in conventional linear attention. Additionally, by leveraging the multi-head attention mechanism, our Triangular Attention captures global context by aggregating both upper and lower triangular components in a complementary manner. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 6
+
+Since the calculation of triangular attention involves causal masking, its detailed formulation (illustrated in Fig. 4) is expressed as follows: 
+
+O1ilower = ϕ(Q1i)
+
+Pij=1 ϕ(K1j )T V1j
+
+Pij=1 ϕ(Q1i)ϕ(K1j )T ,O2iupper = ϕ(Q2i)
+
+PNj=i ϕ(K2j )T V2j
+
+PNj=i ϕ(Q2i)ϕ(K2j )T .
+
+(13) We introduce the Mi and Zi into (13), where 
+
+M1ilower =
+
+> i
+
+X
+
+> j=1
+
+ϕ(K1j )T V1j , M2iupper =
+
+> N
+
+X
+
+> j=i
+
+ϕ(K2j )T V2j ,
+
+(14) 
+
+Z1ilower = ϕ(Q1i)
+
+> i
+
+X
+
+> j=1
+
+ϕ(K1j )T ,Z2iupper = ϕ(Q2i)
+
+> N
+
+X
+
+> j=i
+
+ϕ(K2j )T .
+
+(15) Then, (13) is simplify as: 
+
+O1ilower = ϕ(Q1i)M1ilower 
+
+Z1ilower 
+
+, O2iupper = ϕ(Q2i)M2iupper 
+
+Z2iupper 
+
+.
+
+(16) The global information is captured by concatenating the lower triangular attention output Oilower and the upper triangular attention output Oiupper , as seen in Fig. 4. The output Oi is represented as follows: 
+
+Oi = Concat( O1ilower , O 2iupper ), (17) where Mi and Zi are derived from Mi−1 and Zi−1 in constant time, resulting in linear computational complexity with respect to the sequence length N . Following the approach in linear attention [45], we adopt ϕ(x) = ELU( x) + 1 , where ELU ensures positive similarity while preventing the gradients from becoming zero when x is negative, unlike ReLU. This simple and effective method utilizes the full-rank property of the triangular matrix combined with the multi-head mechanism, which overcomes low-rank limitations and captures pixel-level long-range dependencies with O(N ) com-putational complexity. Moreover, ground objects in remote sensing images exhibit significant scale variations, from large water bodies to small buildings. To effectively capture local features at varying granularities and enhance feature diversity, we combine multi-scale tokens with triangular attention, following prior works such as MB-TaylorFormer V2 [55], Gridformer [56], DDM-SNet [57], and ESTINet [58]. Specifically, we apply convo-lution operations with different kernel sizes to the keys and values, generating coarse and fine visual tokens that capture multi-scale information. For computational efficiency, we use small-kernel depthwise separable convolutions [59] to generate multi-scale tokens. The query, key, and value are formulated as follows and the detailed architecture is illustrated in Fig. 2. 
+
+Q = Conv 1×1(X),K = DwConv s×s(Conv 1×1(X)) ,V = DwConv s×s(Conv 1×1(X)) ,
+
+(18) where s is the convolution kernel size. 
+
+C. Feature Selection Gating Module 
+
+Gating mechanisms in convolutions [48] have been demon-strated to effectively distinguish valid pixels in features, thereby enhancing the robustness of the network. Similarly, cloud-contaminated images also exhibit the issue of cloud-interfered pixel features. Inspired by this, we introduce a gated mechanism into our proposed triangular attention to differentiate between cloudy and cloud-free pixels, thereby improving the attention’s ability to handle cloud interference. Specifically, we propose a Feature Selection Gating Module (FSGM) for cloud removal, which performs element-wise multiplication with the TAN output to modulate it and mitigate the propagation of cloudy features into subsequent layers. Since the transmission properties vary across different optical bands, the features of cloud-contaminated images often exhibit channel-wise distinctions, e.g., some bands can penetrate the clouds and retain certain ground details. The FSGM, consider-ing the channel-wise characteristics adaptively selects features at both channel and spatial levels, dynamically focusing on relevant features at different stages to enhance the model’s robustness against cloud contamination. As illustrated in Fig. 2 (d), FSGM employs multiple convo-lutional layers and LeakyReLU activations to effectively cap-ture spatial and channel-wise features, enabling the network to identify and suppress invalid features caused by cloudy pixels. The gating mechanism is formulated as: 
+
+G(X) = Conv 1×1(LeakReLu(Conv 3×3(X)) ×2), (19) where ×2 denotes two layers combining convolutional opera-tions and LeakyReLU activations. We integrate FSGM with TAN to guide subsequent network layers. The refined outputs of TAN are obtained by the product of the outputs of FSGM and TAN, which are computed as follows: ˆX = G(X) ⊙ Cat( H1, H 2, .., H i),Hi = TAN( Qi, K i, V i), (20) where ⊙ represents the Hadamard product and Hi is the output of the i-th scale token from TAN. G(X) generate dynamical weights based on the input feature 
+
+X and adaptively modulates the TAN outputs. This allows the model to emphasize clean regions and suppress cloud-contaminated areas, guiding subsequent network layers to focus on informative features. Visualizations of intermediate gating values reveal that FSGM can differentiate between cloudy and cloud-free features in distinct channels. This en-ables our network to selectively choose valid features in dif-ferent channels, reducing the interference of cloudy pixels in attention computation and aiding in the restoration of missing information. Further details are provided in Section IV-E. 
+
+D. Loss Function 
+
+In this article, we optimize the proposed model using the mean squared error (MSE) loss, which aims to minimize the JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 7
+
+error between the network output and the cloud-free reference image. The loss function is formulated as follows: 
+
+L = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+|| F (Xi, Θ) − Yi|| 2, (21) where N denotes the number of training images, F (.) repre-sents our network, Xi is the clouded input image, and Yi is the corresponding clean reference image. IV. E XPERIMENTS 
+
+To assess the effectiveness of our method, we conduct comprehensive experiments on well-established cloud removal benchmarks and compare the results with several state-of-the-art models. This section details the experimental setup and provides a comprehensive analysis of the results. 
+
+A. Experimental Settings 1) Datasets: We validate our methods on four publicly available cloud removal datasets: RICE1 [60], RICE2 [60], T-CLOUD [13], and SEN12MS-CR. 
+
+RICE1: The RICE1 [60] dataset from Google Earth con-sists of 500 image pairs, each containing a clouded and a corresponding clear image. It is a thin-cloud dataset, with all images cropped to a resolution of 512 × 512 pixels without overlap. For training and testing, the dataset is separated into 400 and 100 pairs, respectively. 
+
+RICE2: The RICE2 [60] dataset focuses on thick-cloud scenarios and includes 735 image pairs, each with a resolution of 512 × 512 pixels. We split the dataset into 588 pairs for training and 147 pairs for testing. 
+
+T-CLOUD: The T-CLOUD [13] dataset is a real-world thin-cloud dataset captured from Landsat 8 RGB images, consisting of 2,939 image pairs. Cloudy images and their corresponding clear images are captured with a 16-day satellite revisit cycle. They are carefully selected under consistent lighting condi-tions, with all images cropped to a resolution 256 ×256 pixels. For training and testing, the dataset is separated into 2,351 and 588 pairs, respectively. 
+
+SEN12MS-CR: The SEN12MS-CR [61] is a large-scale multi-spectral dataset for cloud removal. It contains co-registered radar (Sentinel-1) and optical satellite images (Sentinel-2), forming paired samples. Each sample is a triple, including the 2-band Sentinel-1 SAR data and the 13-band Sentinel-2 optical observation data with and without cloud cover. The dataset spans 175 globally distributed regions across four seasons in 2018 and contains a total of 122,218 patches, each with a resolution of 256 ×256 pixels. For training and testing, the dataset is separated into 114,325 and 7,893 pairs, respectively. 
+
+2) Experiment Details: Our method is implemented in PyTorch, and the experiments are conducted on a system with four NVIDIA RTX 3090 GPUs running Ubuntu 20.04. The model follows a multi-stage encoder-decoder architecture with Transformer blocks [1, 2, 8, 2, 1], attention heads [2, 2, 8, 2, 2], and channels [48, 96, 192, 96, 96] per stage, following the design [39]. For the T-CLOUD, RICE1, and SEN12MS-CR datasets, the kernel sizes of the multi-scale token convolution are set to ([ [3, 5], [3, 5], [1, 3], [3, 5], [3, 5] ]) across stages and [[3, 5], [1, 3], [1, 3], [1, 3], [3, 5]] for RICE2. The model is trained using the AdamW optimizer with L1 loss. The learning rate starts at 4 × 10 −4 and gradually decreases to 2 × 10 −6
+
+through cosine annealing, following the approach in [16], [39]. Training is performed on 256 × 256 patches. For the T-CLOUD, RICE1, and RICE2 datasets, the model is trained for 1,000 epochs with a batch size of 16. For the SEN12MS-CR dataset, we follow [17] and concatenate the 2-channel SAR data with 13-channel multispectral optical images to construct 15-channel inputs. The model is trained for 30 epochs with a batch size of 16 using the MultiStepLR scheduler [62]. The learning rate is initially set to 6 × 10 −4 for the first 15 epochs, then halved every 5 epochs for the remaining training. 
+
+3) Comparison Methods: To assess our model’s perfor-mance, we compared it against eight state-of-the-art (SOTA) cloud removal methods:  
+
+> •
+
+pix2pix [63] (2019): A conditional GAN framework that employs a U-Net generator and a PatchGAN discrimina-tor to learn mappings between paired images.  
+
+> •
+
+SPA-GAN [11] (2020): A GAN model with local-to-global spatial attention for identifying cloud regions and generating clean images.  
+
+> •
+
+CVAE [13] (2022): A conditional variational autoencoder framework that utilizes the Vision Transformer [35] to model the distribution of degradation factors in cloud-contaminated images and reconstruct cloud-free images based on these factors.  
+
+> •
+
+Restormer [39] (2022): A Transformer-based image restoration model that uses channel-wise self-attention with linear complexity to capture pixel-level long-range dependencies efficiently.  
+
+> •
+
+Trinity-Net [14] (2023): A novel framework that com-bines prior information with CNNs and Swin Transformer layers to accurately estimate haze parameters, enabling effective dehazing of remote sensing images.  
+
+> •
+
+CMNet [15] (2024): A multistage neural network fea-turing two complementary subnetworks to refine local spatial details and extract global features using Swin Transformer [37] layers for cloud removal.  
+
+> •
+
+ACA-CRNet [64] (2024): A novel attention-based ap-proach that dynamically selects scores to suppress noise and irrelevant features, enhancing distant context model-ing for better cloud removal.  
+
+> •
+
+CR-former [16] (2024): A U-net-style model leverag-ing Focused Taylor Attention (FT-Attention), which lin-earizes softmax attention and produces more distinctive attention weights for efficient feature extraction in cloud removal tasks.  
+
+> •
+
+CR-Famba [20] (2025): A frequency-domain assisted Mamba for cloud removal, which explores the long-range modeling ability of state space models in remote sensing images. 
+
+B. Experimental Results 1) Quantitative Results : To assess our method’s effective-ness, we perform comprehensive experiments on the real-JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 8                                                                                                                                                                   
+
+> TABLE I QUANTITATIVE COMPARISON ON RICE1, RICE2, AND T-CLOUD. ↓: L OWER VALUES INDICATE BETTER PERFORMANCE ,↑: H IGHER VALUES INDICATE BETTER PERFORMANCE ,WITH BEST RESULTS HIGHLIGHTED IN BOLD .
+> Models RICE1 RICE2 T-CLOUD Overhead MAE ↓SAM ↓PSNR ↑SSIM ↑MAE ↓SAM ↓PSNR ↑SSIM ↑MAE ↓SAM ↓PSNR ↑SSIM ↑Param FLOPs
+> (M) (G) pix2pix [63] 0.0253 4.11 31.97 0.9161 0.0327 5.08 29.45 0.8473 0.0449 10.01 25.64 0.7563 54.41 6.1 SPA-GAN [11] 0.0372 2.25 28.89 0.9144 0.0403 3.36 27.51 0.8177 0.0419 4.09 26.14 0.7954 0.21 15.2 CVAE [13] 0.0198 1.11 33.70 0.9562 0.0216 1.69 33.62 0.9079 0.0342 2.95 28.19 0.8613 15.42 37.1 Restormer [39] 0.0176 1.01 35.42 0.9617 0.0163 1.27 36.05 0.9155 0.0248 2.46 30.49 0.8851 26.13 155.0 Trinity-Net [14] 0.0305 2.20 30.12 0.9605 0.0295 2.63 30.09 0.8771 0.0365 3.67 27.33 0.8410 20.24 17.6 CMNet [15] 0.0144 0.98 36.26 0.9625 0.0167 1.29 35.82 0.9151 0.0251 2.49 30.33 0.8829 16.51 236.0 CR-former-L [16] 0.0138 0.92 36 .75 0.9627 0.0163 1.26 36 .24 0.9161 0.0238 2.43 30 .82 0.8867 26.15 155.0 ACA-CRNet [12] 0.0151 0.98 36.05 0.9628 0.0164 1.29 35.65 0.9126 0.0234 2.35 30.85 0.8885 20.39 1456.1 CR-Famba [20] 0.0325 1.64 30.91 0.9142 0.0252 2.23 31.90 0.8495 0.0262 2.48 30.10 0.8810 174.94 165.0 Ours 0.0135 0.91 36 .83 0 .9629 0 .0149 1.16 36 .72 0 .9183 0 .0226 2.31 31 .12 0 .8908 6.93 53.3
+
+world datasets RICE1, RICE2, and T-CLOUD. Table I pro-vides a comparison between ATT-CR and SOTA models. Following previous studies on cloud removal [11], [15], [17], we quantitatively evaluate model performance using the fol-lowing metrics: mean absolute error (MAE) [65], spectral angle mapper (SAM) [66], peak signal-to-noise ratio (PSNR) [67], and structural similarity index (SSIM) [68]. Additionally, we report the parameter counts (Params) and floating-point operations (FLOPs), where FLOPs represent the multiply-accumulate operations required for the forward pass, and the parameter count reflects the model’s size. Referring to Table I, our model reaches a PSNR value of 36.83dB and obtains an SSIM of 0.9629 on the RICE1 dataset, outperforming the previous SOTA method by 0.08dB in PSNR. On the RICE2 dataset, ours improve PSNR by 0.48dB over the SOTA method. For the T-CLOUD dataset, our model reaches an SSIM of 0.8908 and a PSNR of 31.12dB, with a 0.30dB PSNR gain over the CR-former. These performance gains are primarily attributed to our model overcoming the low-rank limitation inherent in linear attention and the in-troduction of FSGM which adaptively selects features miti-gating the influence of cloudy pixels. In contrast, CR-former does not consider the low-rank limitation and the challenges posed by cloudy pixels, which reduces its effectiveness in handling cloud-contaminated images. For the Mamba-based method CR-Famba, we rerun the publicly available code on our dataset. Compared to CR-Famba, our method achieves significantly better performance while using far fewer param-eters (6.93M vs. 174.94M) and FLOPs (53.5G vs. 174.94G), highlighting the efficiency of our method in both performance and computational cost. We also conduct experiments on SEN12MS-CR [61], a large-scale multi-spectral remote sensing dataset with 122,218 training samples, to evaluate our model’s performance. Ta-ble II reports the experimental results, including attention-based methods such as SPA-GAN [11], CLF-CR [17], Un-CRtainTs [62], and ACA-CRNet [12]. Our method achieves a PSNR of 29.97db, an SSIM of 0.902, and a SAM of 7.484. Compared to the existing SOTA method, ACA-CRNet, our ATT-CR reduces the SAM by 0.28 and improves PSNR by 0.19dB while using only 34% of the parameters and 4% of                                                 
+
+> TABLE II QUANTITATIVE COMPARISON ON THE MULTI -SPECTRAL DATASET
+> SEN12MS-CR.
+> Models SEN12MS-CR Overhead MAE ↓SAM ↓PSNR ↑SSIM ↑Param FLOPs
+> (M) (G) pix2pix [63] 0.031 10.784 27.60 0.864 54.41 6.1 SPA-GAN [11] 0.045 18.085 24.78 0.754 0.21 15.2 DSen2-CR [69] 0.031 9.472 27.76 0.874 18.92 1240.2 GLF-CR [17] 0.028 8.981 28.64 0.885 14.82 250.0 UnCRtainTs L2 [62] 0.027 8.320 28.90 0.880 0.56 37.1 ACA-CRNet [12] 0.025 7.770 29.78 0.896 20.39 1422.0 Ours 0.024 7.484 29.97 0.902 6.93 53.3
+
+the computational cost. The superiority of our model stems from its ability to capture pixel-level long-range dependency and FSGM’s adaptive feature selection, which significantly enhances feature representation capability. In contrast, ACA-CRNet’s attention module, with O(N 2) computational com-plexity, is restricted to the deeper layers to minimize com-putational costs, which leads to weaker feature representation capabilities. The last two columns of Table I and Table II provide a comparison of the parameter counts and FLOPs across the evaluated models, where these metrics are measured at inputs of 256 × 256 . Although pix2pix and SPA-GAN have relatively fewer FLOPs, their performance is notably inferior. In contrast, our model achieves superior performance while significantly reducing computational costs compared to SOTA methods. For example, on the T-CLOUD, RICE1, and RICE2 datasets, our model reduces the parameter count by 73.4% and the FLOPs by 65.5% compared to CR-former. On the SEN12MS-CR dataset, our model requires only 34% of the parameters and 4% of the computational cost compared to ACA-CRNet. These quantitative results demonstrate that our approach effectively balances performance and computational complexity. 
+
+2) Qualitative Comparisons : In Figs. 5, 6, and 7, we show some qualitative results generated by the baseline models on the RICE1, RICE2, T-CLOUD, and SEN12MS-CR. In the diverse cloud coverage scenarios, compared to other methods, our model performs well with superior clarity and high-quality detail restoration. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 9
+
+Fig.5 presents qualitative results on the RICE1 and RICE2 datasets. The first two rows display restored images from the thick cloud dataset RICE2, while the last two rows show images from the thin cloud dataset RICE1. Among the evaluated methods, the CNN-based pix2pix [63] suffers from grid artifacts, and SPA-GAN [11] introduces noticeable color distortions. Models such as CVAE [13], Trinity-Net [14], and CMNet [15] struggle with large cloud-covered regions, leaving residual clouds and failing to recover crucial features like rivers and mountain ridges, as seen in the second and last rows of Fig.5. This limitation arises from their reliance on Swin [37] or ViT [35], which struggle with restricted receptive fields or coarse feature representations for global context modeling. In contrast, our model effectively removes clouds and preserves the perceptual integrity of the image by leveraging pixel-level long-range dependencies. The visualization results confirm that our method performs effectively on both thin and thick cloud scenarios. To further assess our model’s performance in real-world cloud scenarios, we conducted experiments on the T-CLOUD dataset, which includes real-world cloudy and cloud-free im-ages captured from the same locations at different times. Fig.6 presents visualization results on the T-CLOUD test dataset. Previous state-of-the-art methods, such as Restormer [39] and CR-Former, successfully remove clouds but exhibit noticeable blurring along the restored edges, as shown in the last row of Fig. 6. This issue arises from neglecting the influence of cloudy pixels in attention computation and the low-rank limitation in linear attention, leading to visual artifacts. In contrast, our model achieves superior performance, effectively removing clouds while preserving fine-grained textures and high fidelity. The restored image clearly demonstrates the effectiveness and robustness of our method in real-world cloud conditions. Furthermore, to validate ATT-CR’s robustness, we conduct experiments on the large-scale multispectral SEN12MS-CR dataset and present qualitative comparison results in the RGB channels. As illustrated in Fig. 7, compared to competing mod-els, which often introduce noticeable artifacts or fail to remove cloud coverage, our approach restores images with minimal distortion and accurate color rendition. For instance, the pre-vious state-of-the-art model, ACA-CRNet [12], struggles with large cloud-covered areas and fails to recover critical elements. In contrast, our model achieves superior image restoration with higher clarity and fine-detail preservation. These results highlight the outstanding performance and robustness of ATT-CR on large-scale datasets. These qualitative comparisons demonstrate the effectiveness and robustness of ATT-CR in addressing challenges posed by various cloudy scenes. It produces high-fidelity, cloud-free images by effectively modeling pixel-level long-range de-pendencies, without restricting receptive fields, and adaptively selecting features to reduce disturbance from cloudy pixels. 
+
+C. Ablation Studies 
+
+This section presents a comprehensive analysis of each module designed in ATT-CR to illustrate the effectiveness of                                                                       
+
+> TABLE III EFFECTIVENESS OF KEY DESIGNS TAN, FSGM, AND MS-T OKENS IN
+> ATT-CR. ↓: L OWER VALUES INDICATE BETTER PERFORMANCE ,↑:HIGHER VALUES INDICATE BETTER PERFORMANCE .
+> Dataset TAN MS-Tokens FSGM MAE ↓SAM ↓PSNR ↑SSIM ↑
+> RICE1
+> ✓✓✓0.0135 0.9141 36.83 0.9629
+> ✗✓✓0.0142 0.9183 36.60 0.9627
+> ✓✗✓0.0139 0.9197 36.69 0.9626
+> ✓✓✗0.0141 0.9456 36.63 0.9621
+> ✗✗✗0.0148 0.9452 36.20 0.9617
+> RICE2
+> ✓✓✓0.0149 1.166 36.72 0.9183
+> ✗✓✓0.0155 1.206 36.44 0.9176
+> ✓✗✓0.0153 1.165 36.64 0.9179
+> ✓✓✗0.0152 1.217 36.44 0.9168
+> ✗✗✗0.0161 1.249 36.11 0.9164
+
+our approach. The model is trained on 256 ×256 pixel patches cropped from the input cloudy images, with all evaluations conducted on the RICE1 or RICE2 datasets. Our model consists of the primary designs of TAN, FSGM, and Multi-scale Tokens (MS-Tokens), which achieve a balance between high-quality feature representation and computational efficiency. TAN effectively models the long-range dependency with O(N ) computational complexity and mitigates the low-rank bottleneck inherent in linear attention, while MS-Tokens capture local context at multiple scales to enhance feature diversity. FSGM adaptively selects features to mitigate the impact of cloudy regions, further enhancing the model’s ro-bustness. To evaluate the effectiveness of these designs, we conduct experiments by sequentially removing each compo-nent from the network.  
+
+> •
+
+TAN : As shown in Table III, removing TAN and re-placing it with the original linear attention without the triangular matrix segmentation (w/o TAN) results in a PSNR drop of 0.23dB and 0.28dB on the RICE1 and RICE2 datasets, respectively. Fig. 8 provides further visual evidence of this ablation experiment. Comparing columns (a) and (e) in Fig. 8, we observe that the absence of TAN leads to incomplete restoration of the cloud-affected region and certain ground details to be lost. This degradation is attributed to the low-rank nature of the original linear attention, which leads to homoge-nized attention weights, making the aggregated features indistinguishable. Consequently, the restored image in (a) appears ambiguous and lacks detail compared to (e). These results highlight TAN’s effectiveness in mitigating low-rank limitations of linear attention, leading to more accurate restorations.  
+
+> •
+
+MS-Tokens : MS-Tokens enables the model to capture ground objects at multiple scales, which is crucial for preserving texture details and boundaries. Table III shows that removing MS-Tokens results in PSNR decrease of 0.14dB and 0.08dB on RICE1 and RICE2, respectively. Additionally, the comparison between (b) and (e) in Fig. 8 illustrates that MS-Tokens help preserve clear edges and fine-grained information of the restored image. These results demonstrate the effectiveness of MS-Tokens in improving image quality. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 10 CR-former Ours CMNet Restormer CVAE SPA-GAN pix2pix Trinity-Net Cloud Image Reference Image ACA-CRNet 
+
+Fig. 5. Illustration of cloud removal results on the RICE dataset. The first two rows correspond to RICE2, while the last two belong to RICE1. Cloudy input images are shown in the first column, and the reference (ground truth) images are provided in the last column. The intermediate columns display the outputs from several baseline models and our proposed method. The areas marked by the green box are enlarged within the red box for better clarity. CR-former Ours CMNet Restormer CVAE SPA-GAN pix2pix Trinity-Net Cloud Image Reference Image ACA-CRNet 
+
+Fig. 6. Illustration of cloud removal results on the T-CLOUD dataset. Cloudy input images are shown in the first column, and the reference (ground truth) images are provided in the last column. The intermediate columns display the outputs from several baseline models and our proposed method. The areas marked by the green box are enlarged within the red box for better clarity. ACA-CRNet Ours UnCRtainTS GLF-CR SPA-GAN pix2pix DSen2-CR Cloud Image Reference Image 
+
+Fig. 7. Illustration of cloud removal results in the RGB channels for the SEN12MS-CR dataset. Cloudy input images are shown in the first column, and the reference (ground truth) images are provided in the last column. The intermediate columns display the outputs from several baseline models and our proposed method. The areas marked by the green box are enlarged within the red box for better clarity. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 11 (c) w/o FSGM (e) ATT-CR (b) w/o MS-Tokens (a) w/o TAN (d) w/o all Reference Image Cloud Image                                                  
+
+> PSNR: 26.91 PSNR: 26.63 PSNR: 25.71 PSNR: 24.75 PSNR: 27.28
+> PSNR : 40.17 PSNR: 38.92 PSNR: 39.10 PSNR : 37.63 PSNR: 40.95
+> Fig. 8. Ablation visualization results from the RICE1 and RICE2 datasets. (a) removing the TAN; (b) removing the MS-Tokens; (c) removing the FSGM; (d) removing all designs of TAN, MS-Tokens, and FSGM; (e) our full model: ATT-CR. TABLE IV COMPARISON WITH OTHER EFFICIENT ATTENTION METHODS ON DATASET
+> RICE2. R EPLACE THE TAN WITH OTHER EFFICIENT ATTENTION .↓:LOWER VALUES INDICATE BETTER PERFORMANCE ,↑: H IGHER VALUES INDICATE BETTER PERFORMANCE .
+> Method PSNR ↑SSIM ↑
+> Overhead
+> Param FLOPs (M) (G) Ours (TAN) 36.72 0.9183 6.91 53.03 TAN →Swin [37] 36.17 0.9179 6.97 58.65 TAN →Linear SRA [70] 36.60 0.9177 7.60 46.27 TAN →MDTA [39] 36.45 0.9177 6.91 56.31 TAN →EA [23] 36.37 0.9177 6.91 56.31 TAN →ELU LA [45] 36.44 0.9176 6.91 56.35 TAN →FT-Attention [16] 36.50 0.9180 6.91 56.35
+> •
+
+FGSM : As seen in Table III, removing FSGM results in PSNR reductions of 0.2dB on RICE1 and 0.28dB on RICE2, indicating a significant performance drop. Additionally, in Fig. 8 (comparison between (c) and (e)), the recovered image (c) exhibits noticeable color inconsistencies and blurriness, particularly in the cloud-covered regions, compared to the full model in (e). These qualitative and quantitative results confirm that FSGM plays a crucial role in enhancing image clarity. When all designed components are removed, the model’s performance significantly degrades, with PSNR drops of 0.63dB and 0.61dB on RICE1 and RICE2, respectively. As shown in Fig. 8, comparing (d) and (e), the restored image exhibits noticeable blurriness and missing details. These exper-imental results highlight the individual contributions of each component and the synergistic effect of combining them. 
+
+D. Comparison with Other Efficient Attention 
+
+To ensure fairness in comparisons with other efficient atten-tion mechanisms, we replace the TAN attention module in our network with other representative efficient attention modules while keeping the MS-Tokens and FSGM in the network architecture. Table IV presents the experimental results on the RICE2 dataset, including parameter counts and FLOPs, which provides a comprehensive comparison of performance and computational costs. Specifically, we compared our TAN with five previous efficient attention designs, including Swin attention [37], Linear Spatial Reduction Attention (Linear SRA) [70], Multi-Dconv Transposed Attention (MDTA) [39], Efficient Attention (EA) [23], ELU Linear Attention (ELU LA) [45], and FT-Attention [16]. Among these models, Swin [37] employs shifted win-dow attention to model long-range dependencies but with regional receptive fields and complex shifting operations. Linear SRA [70] reduces attention tokens by applying average pooling on keys and values, but it sacrifices some fine-grained pixel-level information. MDTA [39] captures pixel-level long-range dependencies via channel attention, yet loses spatial information. EA [23], ELU LA [23], and FT-Attention [16] utilize the carefully designed mapping function to approximate the softmax attention with O(N ) computational complexity, but exacerbate the low-rank limitation inherent in multi-head attention, restricting feature diversity. In contrast, our TAN not only models pixel-level long-range dependencies with O(N )
+
+computational complexity, without restricting the receptive fields, but also mitigates the low-rank limitation. Table IV shows that our TAN significantly outperforms all other ef-ficient designs while maintaining similar parameter counts and FLOPs, highlighting that our method achieves a superior balance between high expressive capability and computational efficiency. 
+
+E. Visualization of Gated Module Values 
+
+The Feature Selection Gating Module (FSGM) adaptively selects features for each channel at every spatial location, mit-igating the disturbance caused by cloudy features in attention computation. This facilitates the propagation of valid informa-tion to subsequent layers and enhances the model’s robustness against cloud contamination. To validate the effectiveness of FSGM and provide an interpretable analysis, we visualize the learned gating values within the cloud removal network. The unnormalized gating values produced by the FSGM module in the final block of each stage are visualized in Fig. 9. These values reveal distinct patterns, with higher gating values indicating the focus of each channel. Specifically, some channels concentrate on cloudy regions to capture missing information, as certain bands can penetrate the clouds and retain specific ground details. Other channels focus on cloud-free areas to filter out contaminated features and preserve in-formative, clean features. This visualization demonstrates that the model adaptively selects features, distinguishing valuable information from cloud-contaminated regions. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 12 Stage 1 Stage 2 Stage 3 Stage 4 Stage 5 
+
+> Input
+> Cloud free
+> Cloudy
+
+Fig. 9. The visualization of the output values from the learned FSGM, based on results from the RICE2 dataset, shows varying characteristics across different channels and locations at each stage. These gating values effectively differentiate between cloudy and cloud-free features, facilitating the propagation of valid features to subsequent layers. 
+
+Additionally, we visualize the output of the selected channel from FSGM at Stage 2 for various cloudy inputs in Fig. 10. The results show that the spatial distribution of gating re-sponses adapts to varying cloud coverage. Specifically, sup-pressed activation is observed in cloud-covered regions, while enhanced responses appear in clean areas, illustrating how FSGM’s spatial selection dynamically responds to degradation in the input images. Fig. 11 further compares feature maps before and after FSGM. Without FSGM, cloudy regions retain high activation values, but after applying FSGM, these regions are significantly suppressed. The gated output highlights how FSGM selectively enhances valid features while suppressing cloud-related noise, providing strong evidence of its role in cloud suppression and feature refinement. 
+
+Fig. 10. Selected gating channel outputs from FSGM at stage 2. The first row shows the input cloudy images, and the second row displays the gating channel outputs from FSGM. Darker regions indicate suppressed (cloudy) areas; brighter regions indicate preserved or enhanced features. These results show the adaptive spatial response of FSGM to different cloud patterns. 
+
+To further investigate how the Feature Selection Gating Module (FSGM) adapts to varying cloud conditions across different stages, we visualize the mean gate values (aver-aged across all channels) at the final block of each stage for representative thin and thick cloud images, as shown in Fig. 12. The results reveal clear trends: for thin clouds, the gating activations are consistently high and concentrated across all stages, indicating confident feature selection under light occlusion. In contrast, thick cloud images exhibit more complex patterns. For large-scale occlusions, early-stage gate values are low and focused, while small-scale occlusions yield higher early-stage activations due to the availability of clean regions. As the network deepens (Stage 2–4), gate distributions broaden, reflecting the progressive recovery of meaningful 
+
+TABLE V COMPARISON OF FLOP S AND INFERENCE TIMES ACROSS DIFFERENT 
+
+MODELS ON GPU AND CPU FOR VARIOUS INPUT RESOLUTIONS .                                                                                          
+
+> Input Sizes Model FLOPs (G) ↓GPU (ms) ↓CPU (ms) ↓
+> 32 ×32
+> CVAE [13] 0.59 4.31 14.78 Restormer [39] 2.42 39.47 160.42 CMNet [15] 3.68 90.16 279.94 ACA-CRNet [12] 17.98 5.61 76.20 CR-former [16] 2.42 60.63 206.78 Ours 0.83 32.21 111.08
+> 64 ×64
+> CVAE [13] 2.32 4.45 22.50 Restormer [39] 9.68 40.32 254.75 CMNet [15] 14.73 97.47 420.73 ACA-CRNet [12] 72.74 10.45 256.67 CR-former [16] 9.68 64.79 388.59 Ours 3.33 33.82 215.85
+> 128 ×128
+> CVAE [13] 9.24 5.02 61.71 Restormer [39] 38.72 42.64 610.53 CMNet [15] 58.93 103.72 795.38 ACA-CRNet [12] 311.30 40.26 1558.25 CR-former [16] 38.74 64.96 797.24 Ours 13.34 40.75 542.62
+> 256 ×256
+> CVAE [13] 15.42 15.10 209.12 Restormer [39] 154.88 84.74 2068.84 CMNet [15] 236.00 171.99 2318.31 ACA-CRNet [12] 1456.13 223.74 17912.23 CR-former [16] 154.97 109.01 1938.65 Ours 53.34 108.69 1745.74
+
+features. At the final stage, gate values display a multi-modal distribution, which can be attributed to the model’s residual learning structure designed to capture the difference between the degraded input and the clean target. As a result, the final stage primarily focuses on the scattered degraded regions. These observations validate that FSGM dynamically adjusts feature selection in response to cloud density and spatial distribution. 
+
+F. Model Complexity Analysis 
+
+In this section, we provide a detailed analysis of our model’s computational costs. Table V reports the FLOPs and inference times of our method and several representative Transformer-based baselines across input sizes ranging from 32 × 32 to 
+
+256 ×256 . All tests were conducted on a single NVIDIA RTX 3090 GPU and dual Intel Xeon Silver 4214R CPUs (48 logical cores in total). Our model demonstrates favorable computational efficiency across different input sizes. At higher resolution input ( 256 ×JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 13 Before FSGM  
+
+> Output
+> After FSGM
+> Output
+> FSGM
+> Output
+> Input Before FSGM
+> Output
+> After FSGM
+> Output
+> FSGM
+> Output
+> Before FSGM
+> Output
+> After FSGM
+> Output
+> FSGM
+> Output
+
+Fig. 11. Visualization of selected channel outputs before and after FSGM and FSGM gating values. Darker regions indicate suppressed areas; brighter regions indicate preserved or enhanced features. Stage1 Stage2 Stage3 Stage4 Stage5 
+
+Fig. 12. FGSM gate value distributions (channel-wise mean) across five network stages for large-scale thick cloud (top), small-scale thick cloud (middle), and thin cloud (bottom). Gate values are low in early stages for dense clouds due to severe occlusion, and higher for thin and small-scale thick clouds owing to the availability of clean regions. As the network deepens, the distributions gradually broaden as informative features are recovered. This demonstrates FGSM’s adaptive modulation based on cloud density and coverage. 
+
+256 ), our FLOPs (53.34G) are significantly lower than those of CMNet (236.00G), Restormer (154.60G), and ACA-CRNet (1456.13G), while being only slightly higher than CVAE (15.42G), which, however, yields inferior restoration perfor-mance (PSNR scores 3.13 dB and 3.10 dB lower than ours on RICE1 and RICE2, respectively). In terms of inference speed, our model achieves a GPU runtime of 108.69 ms at 256 × 256 , which, while not the fastest due to the serial nature of triangular attention, remains competitive and notably faster than ACA-CRNet (223.74 ms) and CMNet (171.99 ms). On CPU, our method demonstrates even more significant advantages, with an inference time of 1745.74 ms at 256 × 256 , outperforming CR-former (1938.65 ms) by approximately 10%, CMNet (2068.84 ms) by 15%, and ACA-CRNet (2311.92 ms) by over 90%. These results demonstrate that our method achieves an excellent trade-off between efficiency and performance. Its consistently low FLOPs and runtime, particularly on CPU, make it a strong candidate for practical deployment scenarios with limited computational resources. 
+
+G. Ablation on Hyperparameters 
+
+For selecting multi-scale convolution kernel sizes, we con-ducted ablation experiments with the following configurations: Single-scale: kernel size = [1], [3], [5]; Dual-scale: kernel sizes = [1, 3], [3, 5]; and Triple-scale: kernel sizes = [1, 3, 5]. As shown in Table VI, the multi-scale configurations con-sistently outperform their single-scale counterparts in both PSNR and SSIM metrics, with the triple-scale variant achiev-ing the highest scores. This demonstrates that incorporating multi-scale receptive fields can effectively enhance restoration 
+
+TABLE VI ABLATION RESULTS ON MULTI -S CALE KERNEL CONFIGURATIONS ON THE RICE2 DATASET .
+
+Kernel Size MAE ↓ PSNR ↑ SSIM ↑
+
+1 0.0153 36.64 0.9179 
+
+3 0.0151 36.64 0.9180 
+
+5 0.0153 36.52 0.9178 
+
+(1,3) 0.0150 36.65 0.9179 
+
+(3,5) 0.0150 36.66 0.9182 
+
+(1,3,5) 0.0147 36.77 0.9182 
+
+quality. To balance model efficiency and inference speed, we adopt a hybrid strategy during training: using the [3, 5] kernel configuration for higher-resolution stages (e.g., stages 1 and 5), and the [1, 3] configuration for lower-resolution stages (e.g., stage 3). V. D ISCUSSION 
+
+While the proposed ATT-CR framework achieves strong per-formance in cloud removal and exhibits competitive inference efficiency, several insights and limitations emerged from our analysis that deserve further discussion. The Feature Selection Gating Module (FSGM) is central to the model’s adaptive capability. Gate value visualizations show that FSGM dynamically adjusts feature selection across stages and cloud conditions. However, due to varying channel dimensions and the black-box nature of deep networks, inter-preting fine-grained channel behaviors remains challenging. Enhancing the interpretability of this gating process is apromising direction for future research. Additionally, due to the serial nature of triangular attention, we plan to explore JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 14 
+
+custom operators to accelerate triangular attention and further enhance runtime efficiency. VI. C ONCLUSION 
+
+This paper proposes the Adaptive Triangular Transformer for Cloud Removal (ATT-CR), which is designed to efficiently and effectively restore cloudy remote sensing images. Our model comprises two key modules: the Triangular Attention (TAN) and the Feature Selected Gating Module (FSGM). TAN captures the pixel-level long-range dependency with 
+
+O(N ) computational complexity and alleviates the low-rank limitation inherent in linear attention. FSGM adaptively selects important features across spatial and channel dimensions, enhancing robustness to cloudy contamination. The experi-mental results indicate that ATT-CR improves both accuracy and computational efficiency, demonstrating its potential as a promising method for cloud removal in remote sensing applications. Furthermore, while ATT-CR is primarily designed for cloud removal, its core components—Triangular Attention (TAN) and Feature Selection Gating Module (FSGM)—are inherently generalizable to a broader range of remote sensing restoration tasks. In particular, the ability of TAN to capture fine-grained long-range dependencies and the adaptive modulation pro-vided by FSGM make the model well-suited for handling other types of occlusion and degradation, such as haze, shadow, and atmospheric interference. These forms of degradation also involve large-scale structural occlusion and ambiguous texture, for which our architecture’s design can be readily adapted. In addition, incorporating semantic priors from large vision foundation models, which have shown strong transferable representations in related vision tasks [71]–[75], offers another promising avenue for improving robustness under complex and diverse degradations. REFERENCES [1] E. F. Vermote, D. Tanr´ e, J. Deuz´ e, M. Herman, and J. Morcette, “Second simulation of the satellite signal in the solar spectrum, 6s: an overview,” 
+
+IEEE Transactions on Geoscience and Remote Sensing , vol. 35, no. 3, pp. 675–686, 1997. [2] J. Liu, X. Wang, M. Chen, S. Liu, X. Zhou, Z. Shao, and P. Liu, “Thin cloud removal from single satellite images,” Optics express , vol. 22, no. 1, pp. 618–632, 2014. [3] J. Li, Q. Hu, and M. Ai, “Haze and thin cloud removal via sphere model improved dark channel prior,” IEEE Geoscience and Remote Sensing Letters , vol. 16, no. 3, pp. 472–476, 2019. [4] Q. Guo, H. Hu, and B. Li, “Haze and thin cloud removal using elliptical boundary prior for remote sensing image,” IEEE Transactions on Geoscience and Remote Sensing , vol. 57, no. 11, pp. 9124–9137, 2019. [5] W. Li, Y. Li, D. Chen, and J. C.-W. Chan, “Thin cloud removal with residual symmetrical concatenation network,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 153, pp. 137–150, 2019. [6] Y. Zi, F. Xie, N. Zhang, Z. Jiang, W. Zhu, and H. Zhang, “Thin cloud removal for multispectral remote sensing images using convolutional neural networks combined with an imaging model,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing ,vol. 14, pp. 3811–3823, 2021. [7] W. Yu, X. Zhang, and M. Pun, “Cloud removal in optical remote sensing imagery using multiscale distortion-aware networks,” IEEE Geoscience and Remote Sensing Letters , vol. 19, pp. 1–5, 2022. [8] Y. Zi, H. Ding, F. Xie, Z. Jiang, and X. Song, “Wavelet integrated convolutional neural network for thin cloud removal in remote sensing images,” Remote Sensing , vol. 15, no. 3, p. 781, 2023. [9] X. Xiang, Y. Tan, and L. Yan, “Cloud-guided fusion with sar-to-optical translation for thick cloud removal,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, pp. 1–15, 2024. [10] H. Ding, F. Xie, L. Qiu, X. Zhang, and Z. Shi, “Robust haze and thin cloud removal via conditional variational autoencoders,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, pp. 1–16, 2024. [11] H. Pan, “Cloud removal for remote sensing imagery via spatial attention generative adversarial network,” arXiv preprint arXiv:2009.13015 , 2020. [12] W. Huang, Y. Deng, Y. Wu, and J. Wang, “Attentive contextual attention for cloud removal,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, pp. 1–12, 2024. [13] H. Ding, Y. Zi, and F. Xie, “Uncertainty-based thin cloud removal network via conditional variational autoencoders,” in Computer Vision - ACCV 2022 - 16th Asian Conference on Computer Vision, Macao, China, December 4-8, 2022, Proceedings, Part III , ser. Lecture Notes in Computer Science, vol. 13843, 2022, pp. 52–68. [14] K. Chi, Y. Yuan, and Q. Wang, “Trinity-net: Gradient-guided swin transformer-based remote sensing image dehazing and beyond,” IEEE Transactions on Geoscience and Remote Sensing , vol. 61, pp. 1–14, 2023. [15] J. Liu, B. Pan, and Z. Shi, “Cascaded memory network for optical remote sensing imagery cloud removal,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, pp. 1–11, 2024. [16] Y. Wu, Y. Deng, S. Zhou, Y. Liu, W. Huang, and J. Wang, “Cr-former: Single-image cloud removal with focused taylor attention,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, pp. 1–14, 2024. [17] F. Xu, Y. Shi, P. Ebel, L. Yu, G.-S. Xia, W. Yang, and X. X. Zhu, “Glf-cr: Sar-enhanced cloud removal with global–local fusion,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 192, pp. 268–278, 2022. [18] S. Bhojanapalli, C. Yun, A. S. Rawat, S. J. Reddi, and S. Kumar, “Low-rank bottleneck in multi-head attention models,” in Proceedings of the 37th International Conference on Machine Learning, Virtual Event ,2020, pp. 864–873. [19] C. Zhang, F. Wang, X. Zhang, M. Wang, X. Wu, and S. Dang, “Mamba-cr: A state-space model for remote sensing image cloud removal,” IEEE Transactions on Geoscience and Remote Sensing , vol. 63, pp. 1–13, 2025. [20] J. Liu, B. Pan, and Z. Shi, “Cr-famba: A frequency-domain assisted mamba for thin cloud removal in optical remote sensing imagery,” IEEE Transactions on Multimedia , vol. 27, pp. 5659–5668, 2025. [21] A. Gu and T. Dao, “Mamba: Linear-time sequence modeling with selective state spaces,” arXiv preprint arXiv:2312.00752 , 2023. [22] W. Yu and X. Wang, “Mambaout: Do we really need mamba for vision?” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2025. [23] Z. Shen, M. Zhang, H. Zhao, S. Yi, and H. Li, “Efficient attention: Attention with linear complexities,” in Proceedings of IEEE Winter Conference on Applications of Computer Vision, Waikoloa, HI, USA ,2021, pp. 3530–3538. [24] H. Cai, J. Li, M. Hu, C. Gan, and S. Han, “Efficientvit: Multi-scale linear attention for high-resolution dense prediction,” arXiv preprint arXiv:2205.14756 , 2022. [25] K. Enomoto, K. Sakurada, W. Wang, H. Fukui, M. Matsuoka, R. Naka-mura, and N. Kawaguchi, “Filmy cloud removal on satellite imagery with multispectral conditional generative adversarial nets,” in Proceed-ings of IEEE Conference on Computer Vision and Pattern Recognition Workshops, Honolulu, HI, USA, , 2017, pp. 1533–1541. [26] P. Singh and N. Komodakis, “Cloud-gan: Cloud removal for sentinel-2 imagery using a cyclic consistent generative adversarial networks,” in Proceedings of IEEE International Geoscience and Remote Sensing Symposium, Valencia, Spain , 2018, pp. 1772–1775. [27] J. Anandakrishnan, V. M. Sundaram, and P. Paneer, “Cermf-net: A sar-optical feature fusion for cloud elimination from sentinel-2 imagery using residual multiscale dilated network,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 17, pp. 11 741–11 749, 2024. [28] R. Mao, H. Li, G. Ren, and Z. Yin, “Cloud removal based on sar-optical remote sensing data fusion via a two-flow network,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing ,vol. 15, pp. 7677–7686, 2022. [29] J. Li, Z. Wu, Z. Hu, J. Zhang, M. Li, L. Mo, and M. Molinier, “Thin cloud removal in optical remote sensing images based on generative adversarial networks and physical model of cloud distortion,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 166, pp. 373– 389, 2020. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 15 
+
+[30] Y. Guo, W. He, Y. Xia, and H. Zhang, “Blind single-image-based thin cloud removal using a cloud perception integrated fast fourier convolutional network,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 206, pp. 63–86, 2023. [31] Y. Zhou, W. Jing, J. Wang, G. Chen, R. Scherer, and R. Damasevicius, “Msar-defognet: Lightweight cloud removal network for high resolution remote sensing images based on multi scale convolution,” IET Image Process. , vol. 16, no. 3, pp. 659–668, 2022. [32] X. Wen, Z. Pan, Y. Hu, and J. Liu, “An effective network integrating residual learning and channel attention mechanism for thin cloud re-moval,” IEEE Geoscience and Remote Sensing Letters , vol. 19, pp. 1–5, 2022. [33] Y. Chen, Z. Cai, J. Yuan, and L. Wu, “A novel dense-attention network for thick cloud removal by reconstructing semantic information,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 16, pp. 2339–2351, 2023. [34] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin, “Attention is all you need,” in Proceedings of Advances in Neural Information Processing Systems, Long Beach, CA, USA , 2017, pp. 5998–6008. [35] A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X. Zhai, T. Unterthiner, M. Dehghani, M. Minderer, G. Heigold, S. Gelly, J. Uszkoreit, and N. Houlsby, “An image is worth 16x16 words: Transformers for image recognition at scale,” in Proceedings of 9th International Conference on Learning Representations. ICLR, Virtual Event, Austria , 2024. [36] W. Wang, E. Xie, X. Li, D. Fan, K. Song, D. Liang, T. Lu, P. Luo, and L. Shao, “Pyramid vision transformer: A versatile backbone for dense prediction without convolutions,” in Proceedings of IEEE/CVF International Conference on Computer Vision, ICCV, Montreal, QC, Canada , 2021, pp. 548–558. [37] Z. Liu, Y. Lin, Y. Cao, H. Hu, Y. Wei, Z. Zhang, S. Lin, and B. Guo, “Swin transformer: Hierarchical vision transformer using shifted windows,” in Proceedings of IEEE/CVF International Conference on Computer Vision, ICCV, Montreal, QC, Canada , 2021, pp. 9992–10 002. [38] X. Dong, J. Bao, D. Chen, W. Zhang, N. Yu, L. Yuan, D. Chen, and B. Guo, “Cswin transformer: A general vision transformer backbone with cross-shaped windows,” in Proceedings of IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR, New Orleans, LA, USA , 2022, pp. 12 114–12 124. [39] S. W. Zamir, A. Arora, S. Khan, M. Hayat, F. S. Khan, and M. Yang, “Restormer: Efficient transformer for high-resolution image restoration,” in Proceedings of IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR, New Orleans, LA, USA , 2022, pp. 5718– 5729. [40] K. Wu, P. Li, J. Fu, Y. Li, Y. Wu, Y. Liu, J. Wang, and S. Zhou, “Event-equalized dense video captioning,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2025, pp. 8417–8427. [41] X. Ma, Y. Huang, X. Zhang, M.-O. Pun, and B. Huang, “Cloud-egan: Rethinking cyclegan from a feature enhancement perspective for cloud removal by combining cnn and transformer,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 16, pp. 4999–5012, 2023. [42] P. Wu, Z. Pan, H. Tang, and Y. Hu, “Cloudformer: A cloud-removal network combining self-attention mechanism and convolution,” Remote. Sens. , vol. 14, no. 23, p. 6132, 2022. [43] H. Liu, J. Huang, J. Nie, J. Xie, L. Chen, and X. Zhou, “Density guided and frequency modulation dehazing network for remote sensing images,” 
+
+IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , pp. 1–13, 2025. [44] H. Zhu, Z. Wang, L. Han, M. Xu, W. Li, Q. Liu, S. Liu, and B. Du, “Tsmcf: Transformer-based sar and multispectral cross-attention fusion for cloud removal,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 18, pp. 6710–6720, 2025. [45] A. Katharopoulos, A. Vyas, N. Pappas, and F. Fleuret, “Transformers are rnns: Fast autoregressive transformers with linear attention,” in 
+
+Proceedings of the 37th International Conference on Machine Learning, Virtual Event , 2020, pp. 5156–5165. [46] J. Lu, J. Yao, J. Zhang, X. Zhu, H. Xu, W. Gao, C. Xu, T. Xiang, and L. Zhang, “SOFT: softmax-free transformer with linear complexity,” in Advances in Neural Information Processing Systems 34: Annual Conference on Neural Information Processing Systems, virtual , 2021, pp. 21 297–21 309. [47] J. Hu, L. Shen, and G. Sun, “Squeeze-and-excitation networks,” in 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 7132–7141. [48] J. Yu, Z. Lin, J. Yang, X. Shen, X. Lu, and T. S. Huang, “Free-form image inpainting with gated convolution,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 4471– 4480. [49] Y. N. Dauphin, A. Fan, M. Auli, and D. Grangier, “Language modeling with gated convolutional networks,” in International conference on machine learning , 2017, pp. 933–941. [50] W. Huang, Y. Deng, S. Hui, Y. Wu, S. Zhou, and J. Wang, “Sparse self-attention transformer for image inpainting,” Pattern Recognition , vol. 145, p. 109897, 2024. [51] P. Dai, S. Ji, and Y. Zhang, “Gated convolutional networks for cloud removal from bi-temporal remote sensing images,” Remote Sensing ,vol. 12, no. 20, p. 3427, 2020. [52] Y. Wang, B. Zhang, W. Zhang, D. Hong, B. Zhao, and Z. Li, “Cloud removal with sar-optical data fusion using a unified spatial–spectral residual network,” IEEE Transactions on Geoscience and Remote Sens-ing , vol. 62, pp. 1–20, 2024. [53] Z. Qin, W. Sun, H. Deng, D. Li, Y. Wei, B. Lv, J. Yan, L. Kong, and Y. Zhong, “cosformer: Rethinking softmax in attention,” in Proceedings of 10th International Conference on Learning Representations, ICLR, Virtual Event, April 25-29 , 2022. [54] D. Han, X. Pan, S. Song, and G. Huang, “Flatten transformer: Vision transformer using focused linear attention,” in Proceedings of IEEE/CVF International Conference on Computer Vision, Paris, France , 2023, pp. 5938–5948. [55] Z. Jin, Y. Qiu, K. Zhang, H. Li, and W. Luo, “Mb-taylorformer v2: Improved multi-branch linear transformer expanded by taylor formula for image restoration,” TPAMI , 2025. [56] G. R. dense transformer with grid structure for image restoration in adverse weather conditions, “Gridformer: Residual dense transformer with grid structure for image restoration in adverse weather conditions,” 
+
+International Journal of Computer Vision , pp. 1–23, 2024. [57] K. Zhang, R. Li, Y. Yu, W. Luo, and C. Li, “Deep dense multi-scale network for snow removal using semantic and depth priors,” IEEE Transactions on Image Processing , vol. 30, pp. 7419–7431, 2021. [58] W.-Y. Hsu and W.-C. Chang, “Wavelet approximation-aware residual network for single image deraining,” IEEE transactions on pattern analysis and machine intelligence , vol. 45, no. 12, pp. 15 979–15 995, 2023. [59] A. G. Howard, “Mobilenets: Efficient convolutional neural networks for mobile vision applications,” arXiv preprint arXiv:1704.04861 , 2017. [60] D. Lin, G. Xu, X. Wang, Y. Wang, X. Sun, and K. Fu, “A remote sensing image dataset for cloud removal,” CoRR , vol. abs/1901.00600, 2019. [61] P. Ebel, A. Meraner, M. Schmitt, and X. X. Zhu, “Multisensor data fusion for cloud removal in global and all-season sentinel-2 imagery,” 
+
+IEEE Transactions on Geoscience and Remote Sensing , vol. 59, no. 7, pp. 5866–5878, 2020. [62] P. Ebel, V. S. F. Garnot, M. Schmitt, J. D. Wegner, and X. X. Zhu, “Uncrtaints: Uncertainty quantification for cloud removal in optical satellite time series,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2023, pp. 2086–2096. [63] P. Isola, J. Zhu, T. Zhou, and A. A. Efros, “Image-to-image translation with conditional adversarial networks,” in Proceedings of IEEE Confer-ence on Computer Vision and Pattern Recognition, Honolulu, HI, USA ,2017, pp. 5967–5976. [64] G. Huang and P. Wu, “CTGAN : Cloud transformer generative adver-sarial network,” in Proceedings of IEEE International Conference on Image Processing, Bordeaux, France , 2022, pp. 511–515. [65] T. Chai and R. R. Draxler, “Root mean square error (rmse) or mean absolute error (mae)?–arguments against avoiding rmse in the literature,” 
+
+Geoscientific model development , vol. 7, no. 3, pp. 1247–1250, 2014. [66] F. A. Kruse, A. Lefkoff, J. Boardman, K. Heidebrecht, A. Shapiro, P. Barloon, and A. Goetz, “The spectral image processing system (sips)—interactive visualization and analysis of imaging spectrometer data,” Remote sensing of environment , vol. 44, no. 2-3, pp. 145–163, 1993. [67] J. Korhonen and J. You, “Peak signal-to-noise ratio revisited: Is simple beautiful?” in Proceedings of 4th International Workshop on Quality of Multimedia Experience , 2012, pp. 37–38. [68] Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli, “Image quality assessment: from error visibility to structural similarity,” IEEE Transactions on Image Processing , vol. 13, no. 4, pp. 600–612, 2004. [69] A. Meraner, P. Ebel, X. X. Zhu, and M. Schmitt, “Cloud removal in sentinel-2 imagery using a deep residual neural network and sar-optical data fusion,” ISPRS Journal of Photogrammetry and Remote Sensing ,vol. 166, pp. 333–346, 2020. JOURNAL OF L ATEX CLASS FILES, VOL. X, NO. X, X 2025 16 
+
+[70] W. Wang, E. Xie, X. Li, D.-P. Fan, K. Song, D. Liang, T. Lu, P. Luo, and L. Shao, “Pvt v2: Improved baselines with pyramid vision transformer,” 
+
+Computational Visual Media , vol. 8, no. 3, pp. 415–424, 2022. [71] Y. Liu, Q. Huang, S. Hui, J. Fu, S. Zhou, K. Wu, P. Li, and J. Wang, “Semantic-aware representation learning for homography estimation,” in 
+
+Proceedings of the 32nd ACM International Conference on Multimedia ,2024, pp. 2506–2514. [72] Y. Liu, J. Fu, Y. Wu, K. Wu, P. Li, J. Wu, S. Zhou, and J. Xin, “Mind the gap: Aligning vision foundation models to image feature matching,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2025, pp. 20 313–20 323. [73] Y. Qi, P. Fu, H. Li, Y. Liu, C. Jiang, B. Qin, Z. Luo, and J. Luan, “Patchcue: Enhancing vision-language model reasoning with patch-based visual cues,” arXiv preprint arXiv:2603.05869 , 2026. [74] Z. Yang, Y. Liu, J. Fu, M. Sugiyama, N. Zheng et al. , “Shaping schema via language representation as the next frontier for llm intelligence expanding,” arXiv preprint arXiv:2605.09271 , 2026. [75] Z. Liu, Y. Liu, and J. Fu, “Structured progressive knowledge ac-tivation for llm-driven neural architecture search,” arXiv preprint arXiv:2605.04057 , 2026.
