@@ -6,76 +6,53 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-10
-- 运行时间：2026-06-10 22:59:49 UTC
+- 最新运行日期：2026-06-11
+- 运行时间：2026-06-11 22:34:29 UTC
 - 运行状态：成功
-- 本次总论文数：18
-- 精读区：7
-- 速读区：11
+- 本次总论文数：11
+- 精读区：4
+- 速读区：7
 
 ### 今日简报（AI）
-今日18篇遥感与AI论文，聚焦点云分类与零样本遥感检测分割两大亮点。
-最值得看的是《Enhanced Geometric-Spectral》融合几何光谱特征的机载点云分类（9.0）和《ZODS-RS》零样本训练遥感检测分割（9.0）。
-建议关注零样本方法在遥感领域的应用潜力，以及时空多模态交互新架构。
-- 详情：[/202606/10/README](/202606/10/README)
+今日共收录11篇论文，精读4篇，速读7篇，重点关注零样本视觉语言导航与多智能体仿真方向。最值得关注的是《SpaceVLN》和《AgenticNav》两篇均获9.0分，分别通过空间认知记忆与工具调用实现零样本导航突破。建议普通读者优先研读这两篇的高分思路，再结合速读中基于语言的空间感知研究（《Language as a Sensor》）拓展实践。
+- 详情：[/202606/11/README](/202606/11/README)
 
 ### 精读区论文标签
-1. [An Enhanced Geometric-Spectral Feature Learning Framework for Airborne Multispectral Point Cloud Classification](/202606/10/2606.09123v1-an-enhanced-geometric-spectral-feature-learning-framework-for-airborne-multispectral-point-cloud-classification)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：基于注意力的几何-光谱特征融合的多光谱点云分类
-2. [ZODS-RS -- Zero-training Oriented Detection & Segmentation for Remote Sensing](/202606/10/2606.10769v1-zods-rs----zero-training-oriented-detection--segmentation-for-remote-sensing)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：遥感目标检测的零训练流水线
-3. [Earth-OneVision: Extending Remote Sensing Multimodal Large Language Models to More Sensor Modalities and Tasks](/202606/10/2606.10819v1-earth-onevision-extending-remote-sensing-multimodal-large-language-models-to-more-sensor-modalities-and-tasks)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：统一多模态遥感大语言模型，支持跨传感器融合
-4. [GMBFormer: An NDVI-Guided Global Memory Bank Transformer for Urban Green-Space Extraction from Ultra-High-Resolution Imagery](/202606/10/2606.06363v1-gmbformer-an-ndvi-guided-global-memory-bank-transformer-for-urban-green-space-extraction-from-ultra-high-resolution-imagery)  
+1. [SpaceVLN: A Zero-Shot Vision-and-Language Navigation Agent with Online Spatial Cognitive Memory and Reasoning](/202606/11/2606.08992v1-spacevln-a-zero-shot-vision-and-language-navigation-agent-with-online-spatial-cognitive-memory-and-reasoning)  
+   标签：评分：9.0/10、query:uav-vln
+   evidence：零样本视觉语言导航，具备空间记忆与推理
+2. [AgenticNav: Zero-Shot Vision-and-Language Navigation as a Tool-Calling Harness](/202606/11/2606.10577v1-agenticnav-zero-shot-vision-and-language-navigation-as-a-tool-calling-harness)  
+   标签：评分：9.0/10、query:uav-vln
+   evidence：零样本视觉语言导航（VLN-CE），直接匹配无人机视觉语言导航需求
+3. [Vision-Language-Action Models Meet World Models: Embodied Agentic AI for Low-Altitude Wireless Networks](/202606/11/2606.11618v1-vision-language-action-models-meet-world-models-embodied-agentic-ai-for-low-altitude-wireless-networks)  
+   标签：评分：9.0/10、query:uav-vln
+   evidence：使用视觉-语言-动作模型的无人机视觉语言导航具身框架
+4. [From 2D Grids to 1D Tokens: Reforming Shared Representations for Multimodal Image Fusion](/202606/11/2606.12303v1-from-2d-grids-to-1d-tokens-reforming-shared-representations-for-multimodal-image-fusion)  
    标签：评分：8.0/10、query:rs-fusion
-   evidence：NDVI引导的全局记忆库Transformer用于城市绿地提取
-5. [Vision-Language Guided Hyperspectral Object Tracking via Semantics Fusion and Contextual Template Updating](/202606/10/2606.09167v1-vision-language-guided-hyperspectral-object-tracking-via-semantics-fusion-and-contextual-template-updating)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：视觉语言引导的高光谱目标跟踪与语义融合
-6. [iSAGE: A Human-in-the-Loop Framework for Remote Sensing Semantic Segmentation via Sparse Point Supervision](/202606/10/2606.10136v1-isage-a-human-in-the-loop-framework-for-remote-sensing-semantic-segmentation-via-sparse-point-supervision)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：利用稀疏点监督的遥感语义分割
-7. [Content-Induced Spatial-Spectral Aggregation Network for Change Detection in Remote Sensing Images](/202606/10/2606.10328v1-content-induced-spatial-spectral-aggregation-network-for-change-detection-in-remote-sensing-images)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：遥感变化检测中的空间-光谱融合网络
+   evidence：面向遥感的多模态图像融合
 
 ### 速读区论文标签
-1. [SpaceVLN: A Zero-Shot Vision-and-Language Navigation Agent with Online Spatial Cognitive Memory and Reasoning](/202606/10/2606.08992v1-spacevln-a-zero-shot-vision-and-language-navigation-agent-with-online-spatial-cognitive-memory-and-reasoning)  
-   标签：评分：8.0/10、query:uav-vln
-   evidence：基于空间认知记忆的零样本视觉语言导航
-2. [AgenticNav: Zero-Shot Vision-and-Language Navigation as a Tool-Calling Harness](/202606/10/2606.10577v1-agenticnav-zero-shot-vision-and-language-navigation-as-a-tool-calling-harness)  
-   标签：评分：8.0/10、query:uav-vln
-   evidence：零样本连续环境视觉语言导航方法
-3. [GRAMformer: Any-Order Modality Interactions via Volumetric Multimodal Cross-Attention](/202606/10/2606.06249v1-gramformer-any-order-modality-interactions-via-volumetric-multimodal-cross-attention)  
+1. [MuJoCo-Drones-Gym: A GPU-Accelerated Multi-Drone Simulator for Control and Reinforcement Learning](/202606/11/2606.08039v1-mujoco-drones-gym-a-gpu-accelerated-multi-drone-simulator-for-control-and-reinforcement-learning)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：GPU加速多无人机模拟器，支持控制与强化学习，可服务于UAV VLN研究
+2. [Language as a Sensor: Calibrated Spatial Belief Estimation in 3D Scenes from Natural Language](/202606/11/2606.08666v1-language-as-a-sensor-calibrated-spatial-belief-estimation-in-3d-scenes-from-natural-language)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：使用自然语言进行3D空间信念估计，与语言引导导航相关
+3. [FreqKD: Frequency-Decoupled Cross-Modal Knowledge Distillation for Infrared Object Detection](/202606/11/2606.11572v1-freqkd-frequency-decoupled-cross-modal-knowledge-distillation-for-infrared-object-detection)  
    标签：评分：7.0/10、query:rs-fusion
-   evidence：用于任意顺序模态交互的体积多模态交叉注意力
-4. [SegmentAnyTreeV2: Scaling Transformer-Based Tree Instance Segmentation Across Sensors, Platforms, and Forests](/202606/10/2606.08206v1-segmentanytreev2-scaling-transformer-based-tree-instance-segmentation-across-sensors-platforms-and-forests)  
+   evidence：用于红外目标检测的跨模态知识蒸馏
+4. [Aerial imagery and deep learning accurately estimate maize foliar disease severity](/202606/11/biorxiv-10-64898-2026-06-03-729887-v1-aerial-imagery-and-deep-learning-accurately-estimate-maize-foliar-disease-severity)  
    标签：评分：7.0/10、query:rs-fusion
-   evidence：从遥感点云进行树木实例分割
-5. [NGram-MoSE: Efficient Remote Sensing Super-Resolution via N-Gram Context and Mixture-of-Experts](/202606/10/2606.08535v1-ngram-mose-efficient-remote-sensing-super-resolution-via-n-gram-context-and-mixture-of-experts)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：高效的遥感图像超分辨率
-6. [AirDreamer: Generalist Drone Navigation with World Models](/202606/10/2606.03252v1-airdreamer-generalist-drone-navigation-with-world-models)  
+   evidence：基于无人机的遥感影像进行病害严重度估计
+5. [MAD: Mapping-Aware World Models for Agile Quadrotor Flight](/202606/11/2606.04534v1-mad-mapping-aware-world-models-for-agile-quadrotor-flight)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：基于世界模型的通用无人机导航
-7. [WAM-Nav: Asymmetric Latent World-Action Modeling for Unified Visual Navigation](/202606/10/2606.04907v1-wam-nav-asymmetric-latent-world-action-modeling-for-unified-visual-navigation)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：用于统一视觉导航的潜在世界-动作模型
-8. [MuJoCo-Drones-Gym: A GPU-Accelerated Multi-Drone Simulator for Control and Reinforcement Learning](/202606/10/2606.08039v1-mujoco-drones-gym-a-gpu-accelerated-multi-drone-simulator-for-control-and-reinforcement-learning)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：多无人机仿真器，支持控制与强化学习，可用于无人机导航研究
-9. [Language as a Sensor: Calibrated Spatial Belief Estimation in 3D Scenes from Natural Language](/202606/10/2606.08666v1-language-as-a-sensor-calibrated-spatial-belief-estimation-in-3d-scenes-from-natural-language)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：基于语言的三维场景空间信念估计
-10. [Geometry-Aware Fisheye-LiDAR Fusion for Robust 3D Object Detection in Low-Overlap Setups](/202606/10/2606.08844v1-geometry-aware-fisheye-lidar-fusion-for-robust-3d-object-detection-in-low-overlap-setups)  
+   evidence：基于视觉的四旋翼无人机导航
+6. [Vision-Language Guided Hyperspectral Object Tracking via Semantics Fusion and Contextual Template Updating](/202606/11/2606.09167v1-vision-language-guided-hyperspectral-object-tracking-via-semantics-fusion-and-contextual-template-updating)  
    标签：评分：6.0/10、query:rs-fusion
-   evidence：多模态传感器融合用于3D检测
-11. [AllDayNav: Lifelong Navigation via Real-World Reinforcement Learning](/202606/10/2606.10927v1-alldaynav-lifelong-navigation-via-real-world-reinforcement-learning)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：终身导航与开放词汇指令生成
+   evidence：视觉语言引导高光谱跟踪；语义融合；多模态遥感
+7. [Understanding Cross-Sensor Feature Variations for Generalizable 3D Perception](/202606/11/2606.11573v1-understanding-cross-sensor-feature-variations-for-generalizable-3d-perception)  
+   标签：评分：6.0/10、query:rs-fusion
+   evidence：跨传感器特征变化建模用于多模态BEV感知
 
 
 <div class="dpr-home-promo-card">

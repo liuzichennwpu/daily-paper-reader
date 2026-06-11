@@ -1,0 +1,463 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-11T22:31:09.985215+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 4,
+    "deep_cap": 7,
+    "deep_selected": 4,
+    "quick_candidates": 7,
+    "quick_skim_target": 12,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2606.08992v1",
+      "source": "arxiv",
+      "title": "SpaceVLN: A Zero-Shot Vision-and-Language Navigation Agent with Online Spatial Cognitive Memory and Reasoning",
+      "abstract": "Vision-and-Language Navigation in continuous environments requires agents to understand the spatial structure of previously unseen environments in order to follow language instructions. Although foundation models have opened a promising path toward zero-shot navigation without task-specific policy training, many navigators still rely on local visual cues and linear history-based reasoning, overlooking the spatial nature of navigation across explored regions, traversed paths, landmarks, and their spatial relations. In this paper, we propose SpaceVLN, a navigation agent built around Spatial Cognitive Memory and Task-Guided Spatial Reasoning. Specifically, SpaceVLN introduces an efficient stagewise closed-loop framework where planning and execution are organized around verifiable space--landmark stages. During navigation, the agent progressively abstracts explored regions into Spatial Waypoints and dynamically maintains subtask-grounded landmark evidence, forming a hierarchical Spatial Cognitive Memory for progress localization and spatial-relation understanding. Built on this memory, Spatial-CoT integrates task-progress reasoning with spatial perception, analysis, and prediction, enabling Task-Guided Spatial Reasoning for embodied navigation. The unified stage interface enables SpaceVLN to address both Vision-and-Language Navigation and Object-Goal Navigation under a unified zero-shot setting, without task-specific policy training. Across R2R-CE, RxR-CE, GN-Bench, and HM3D-OVON, SpaceVLN achieves state-of-the-art zero-shot performance, and real-robot deployment further validates its applicability. These results highlight Spatial Cognitive Memory and Task-Guided Spatial Reasoning as a practical foundation for stronger embodied navigation agents.",
+      "authors": [
+        "Yucheng Deng",
+        "Pingrui Lai",
+        "Xinhai Li",
+        "Chenjia Bai",
+        "Xiaoheng Deng",
+        "Chengnuo Sun",
+        "Xuelong Li",
+        "Hua Yang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-06-08T03:42:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.08992v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "zero-shot vision-and-language navigation with spatial memory",
+      "llm_evidence_cn": "零样本视觉语言导航，具备空间记忆与推理",
+      "llm_evidence": "零样本视觉语言导航，具备空间记忆与推理",
+      "canonical_evidence": "零样本视觉语言导航，具备空间记忆与推理",
+      "llm_tldr_en": "Proposes SpaceVLN, a zero-shot VLN agent with spatial cognitive memory and task-guided spatial reasoning for continuous environments.",
+      "llm_tldr_cn": "连续环境中的视觉语言导航要求智能体理解未知环境空间结构以遵循指令。现有零样本方法多依赖局部视觉线索和线性历史推理，忽略空间特性。本文提出SpaceVLN，构建空间认知记忆与任务引导空间推理模块，通过分阶段闭环框架实现高效导航。在真实环境数据集上，SpaceVLN取得了零样本VLN的最新最佳性能，展示了空间建模的重要性。",
+      "llm_tldr": "连续环境中的视觉语言导航要求智能体理解未知环境空间结构以遵循指令。现有零样本方法多依赖局部视觉线索和线性历史推理，忽略空间特性。本文提出SpaceVLN，构建空间认知记忆与任务引导空间推理模块，通过分阶段闭环框架实现高效导航。在真实环境数据集上，SpaceVLN取得了零样本VLN的最新最佳性能，展示了空间建模的重要性。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.10577v1",
+      "source": "arxiv",
+      "title": "AgenticNav: Zero-Shot Vision-and-Language Navigation as a Tool-Calling Harness",
+      "abstract": "Zero-shot vision-and-language navigation in continuous environments (VLN-CE) has recently become feasible with large vision-language models (VLMs). However, existing methods typically rely on learned waypoint predictors to propose navigable actions. This severely limits the model's action space and fails to leverage depth inputs effectively. Moreover, memory is commonly handled by accumulating long textual or visual histories with substantial irrelevant context, or by retrieving cross-episode experiences, which weakens the zero-shot setting. In this paper, we rethink zero-shot VLN-CE as an agentic interface between the VLM and the environment, and present AgenticNav, a lightweight navigation harness that exposes action, depth, and memory as callable tools. Instead of choosing from predicted waypoints, the action tool allows the VLM to directly select a target pixel in RGB observations, converting it into executable motion. Depth is exposed through an on-demand pixel-depth tool, enabling the VLM to request precise metric distances only where they matter. For memory, AgenticNav provides a compact map image summarizing the historical trajectory, paired with a recall tool that allows the VLM to selectively revisit past visual observations without overwhelming the prompt context. On the R2R-CE benchmark, AgenticNav establishes new state-of-the-art (SOTA) performance among zero-shot methods given the same VLM backbone. Real-world validation further highlights its zero-shot generalization compared to prior methods. Ablations show that our action tool design outperforms traditional waypoint predictors, and that depth tool and agentic memory further contribute to navigation performance.",
+      "authors": [
+        "Yijian Li",
+        "Changze Li",
+        "Hantian Shi",
+        "Jiaying Luo",
+        "Jiyuan Cai",
+        "Ming Yang",
+        "Tong Qin"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-09T08:43:05+00:00",
+      "link": "https://arxiv.org/pdf/2606.10577v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "zero-shot vision-and-language navigation in continuous environments (VLN-CE)",
+      "llm_evidence_cn": "零样本视觉语言导航（VLN-CE），直接匹配无人机视觉语言导航需求",
+      "llm_evidence": "零样本视觉语言导航（VLN-CE），直接匹配无人机视觉语言导航需求",
+      "canonical_evidence": "零样本视觉语言导航（VLN-CE），直接匹配无人机视觉语言导航需求",
+      "llm_tldr_en": "Presents AgenticNav, a tool-calling harness for zero-shot VLN-CE that leverages VLMs with depth and memory as callable tools, achieving strong performance without learned waypoint predictors.",
+      "llm_tldr_cn": "现有零样本视觉语言导航方法依赖学习航点预测器，限制了动作空间且未有效利用深度信息。本文提出AgenticNav，将VLN-CE重构为VLM与环境的智能代理接口，将动作、深度和记忆作为可调用工具，无需预训练航点预测器。在多个基准上，AgenticNav实现了领先的零样本导航性能，并展示了更好的泛化能力。该工作为无人机视觉语言导航提供了直接可用的解决方案。",
+      "llm_tldr": "现有零样本视觉语言导航方法依赖学习航点预测器，限制了动作空间且未有效利用深度信息。本文提出AgenticNav，将VLN-CE重构为VLM与环境的智能代理接口，将动作、深度和记忆作为可调用工具，无需预训练航点预测器。在多个基准上，AgenticNav实现了领先的零样本导航性能，并展示了更好的泛化能力。该工作为无人机视觉语言导航提供了直接可用的解决方案。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.11618v1",
+      "source": "arxiv",
+      "title": "Vision-Language-Action Models Meet World Models: Embodied Agentic AI for Low-Altitude Wireless Networks",
+      "abstract": "Low-Altitude Wireless Networks (LAWNs), composed of Unmanned Aerial Vehicles (UAVs) and other aerial platforms, provide integrated perception, communication, and computation services in low-altitude airspace. However, deploying large generative models in this domain faces three major challenges: 1) Limited embodied action mapping; 2) Inadequate physical environment modeling; 3) Insufficient closed-loop optimization. To address these challenges, this study proposes an Embodied Agentic UAV framework. Centered on a Vision-Language-Action (VLA) model as the execution core, the framework establishes an end-to-end embodied decision-making pipeline from multimodal environmental perception to continuous control generation. In addition, a World Model (WM) is introduced to capture the coupling between UAV actions and environmental state evolution, thereby supporting environment prediction, policy verification, and dynamic optimization. Furthermore, memory and reflection mechanisms are incorporated to form an adaptive closed-loop optimization paradigm of decision, execution, evaluation, and update, thereby enhancing the system's autonomous decision-making capability and continual evolution ability in complex dynamic environments. Experimental results validate its effectiveness in enabling robust, predictive, and sustainable autonomous control in LAWNs.",
+      "authors": [
+        "Feibo Jiang",
+        "Li Dong",
+        "Lei Mao",
+        "Kezhi Wang",
+        "Cunhua Pan",
+        "Dong In Kim",
+        "Naofal Al-Dhahir"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-06-10T03:30:05+00:00",
+      "link": "https://arxiv.org/pdf/2606.11618v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "UAV VLN using Vision-Language-Action model and embodied agentic framework",
+      "llm_evidence_cn": "使用视觉-语言-动作模型的无人机视觉语言导航具身框架",
+      "llm_evidence": "使用视觉-语言-动作模型的无人机视觉语言导航具身框架",
+      "canonical_evidence": "使用视觉-语言-动作模型的无人机视觉语言导航具身框架",
+      "llm_tldr_en": "Proposes an embodied agentic UAV framework with Vision-Language-Action model for end-to-end navigation from multimodal perception to continuous control, addressing LAWN challenges.",
+      "llm_tldr_cn": "针对低空无线网络中无人机部署大模型的挑战，本文提出具身智能体无人机框架。以视觉-语言-动作模型为核心，建立从多模态环境感知到连续控制生成的端到端决策流水线，实现无人机在动态环境中的语言引导导航。实验验证了其在真实场景中的有效性。",
+      "llm_tldr": "针对低空无线网络中无人机部署大模型的挑战，本文提出具身智能体无人机框架。以视觉-语言-动作模型为核心，建立从多模态环境感知到连续控制生成的端到端决策流水线，实现无人机在动态环境中的语言引导导航。实验验证了其在真实场景中的有效性。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.12303v1",
+      "source": "arxiv",
+      "title": "From 2D Grids to 1D Tokens: Reforming Shared Representations for Multimodal Image Fusion",
+      "abstract": "Multimodal image fusion aims to integrate complementary information from different modalities into a fused image that preserves rich local details while maintaining globally consistent appearance. Existing approaches build shared representations on 2D feature grids, which excel at modeling local structures but offer limited leverage over image-level global appearance factors. To balance these objectives, we introduce a compact 1D token interface based on a frozen pretrained image tokenizer for modeling non-local appearance/base factors. Rather than using the tokenizer as a reconstruction backbone, our design uses the 1D token space as a global carrier while retaining the 2D spatial pathway for local structure restoration. Specifically, we introduce Selective Token Editing (STE), which sparsely updates/replaces a small set of critical tokens, providing a lightweight mechanism to steer global appearance coherence while keeping the fusion backbone unchanged and avoiding extra losses. Experiments on four commonly used benchmarks show that our method achieves the best overall performance, with consistent, multi-metric improvements in both global coherence and local fidelity. Project page: https://zju-xyc.github.io/1D-Fusion-Project-Page/",
+      "authors": [
+        "Yuchen Xian",
+        "Yunqiu Xu",
+        "Yang He",
+        "Yi Yang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T16:40:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.12303v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal image fusion for remote sensing",
+      "llm_evidence_cn": "面向遥感的多模态图像融合",
+      "llm_evidence": "面向遥感的多模态图像融合",
+      "canonical_evidence": "面向遥感的多模态图像融合",
+      "llm_tldr_en": "Proposes a compact 1D token interface for shared multimodal image fusion, balancing local detail and global appearance, applicable to remote sensing.",
+      "llm_tldr_cn": "针对现有多模态图像融合方法在局部细节与全局外观之间的权衡问题，提出一种基于冻结图像分词器的紧凑1D令牌接口作为全局载体，同时保留2D空间路径用于局部结构恢复。该方法在保持全局一致性的前提下保留了丰富的局部细节，为遥感图像融合提供了新思路。",
+      "llm_tldr": "针对现有多模态图像融合方法在局部细节与全局外观之间的权衡问题，提出一种基于冻结图像分词器的紧凑1D令牌接口作为全局载体，同时保留2D空间路径用于局部结构恢复。该方法在保持全局一致性的前提下保留了丰富的局部细节，为遥感图像融合提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "Multimodal feature fusion for remote sensing",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.08039v1",
+      "source": "arxiv",
+      "title": "MuJoCo-Drones-Gym: A GPU-Accelerated Multi-Drone Simulator for Control and Reinforcement Learning",
+      "abstract": "Robotic simulators are a cornerstone of modern research in aerial robotics, serving both as a vehicle for the development of new control algorithms and as the data source for training reinforcement learning (RL) policies. Yet, existing quadcopter learning environments often face a trade-off between physical fidelity, multi-agent support, and the throughput required by modern deep RL pipelines. In this paper, we present MuJoCo-Drones-Gym, an open-source Gymnasium-compatible multi-drone environment built on top of the MuJoCo physics engine. MuJoCo-Drones-Gym supports an arbitrary number of Bitcraze Crazyflie 2.x nano-quadcopters and exposes a modular API for selecting (i)~the physics model (rigid-body MuJoCo, explicit Python dynamics, or any subset of ground effect, blade drag, and inter-drone downwash), (ii)~the action interface (per-motor RPMs, collective normalized thrust, velocity setpoints, or PID waypoint commands), and (iii)~the observation space (kinematic state vectors, RGB / depth / segmentation cameras, or neighbourhood adjacency information). A PettingZoo ParallelEnv wrapper enables drop-in multi-agent reinforcement learning, while a suite of seven task environments, hover, velocity tracking, multi-drone hover, waypoint navigation, formation flight, gate racing, and a generic multi-agent template, demonstrates the breadth of the interface. We describe the environment design, the underlying physics and quadcopter dynamics, and illustrate its use through control and learning examples that mirror those of the closely related gym-pybullet-drones project, while taking advantage of MuJoCo's improved contact handling, rendering, and parallelizability.",
+      "authors": [
+        "Manan Tayal"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-06T07:59:45+00:00",
+      "link": "https://arxiv.org/pdf/2606.08039v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "GPU-accelerated multi-drone simulator for control and RL, enabling UAV VLN research",
+      "llm_evidence_cn": "GPU加速多无人机模拟器，支持控制与强化学习，可服务于UAV VLN研究",
+      "llm_evidence": "GPU加速多无人机模拟器，支持控制与强化学习，可服务于UAV VLN研究",
+      "canonical_evidence": "GPU加速多无人机模拟器，支持控制与强化学习，可服务于UAV VLN研究",
+      "llm_tldr_en": "MuJoCo-Drones-Gym provides an open-source multi-drone simulator with GPU acceleration, supporting arbitrary Crazyflie quadcopters for RL training, facilitating UAV navigation research.",
+      "llm_tldr_cn": "现有四旋翼学习环境在高物理保真度、多智能体支持和深度学习吞吐量之间存在权衡。本文基于MuJoCo引擎构建开源多无人机模拟环境，支持任意数量Crazyflie纳米四旋翼，提供模块化API选择物理模型，并利用GPU加速。该模拟器可为无人机视觉语言导航等任务提供高效的训练和数据生成平台。",
+      "llm_tldr": "现有四旋翼学习环境在高物理保真度、多智能体支持和深度学习吞吐量之间存在权衡。本文基于MuJoCo引擎构建开源多无人机模拟环境，支持任意数量Crazyflie纳米四旋翼，提供模块化API选择物理模型，并利用GPU加速。该模拟器可为无人机视觉语言导航等任务提供高效的训练和数据生成平台。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.04534v1",
+      "source": "arxiv",
+      "title": "MAD: Mapping-Aware World Models for Agile Quadrotor Flight",
+      "abstract": "Agile quadrotor flight in cluttered scenes requires more than a reactive mapping from a depth image to a control command: the vehicle must remember which regions have been observed, infer nearby occupied space, and act under partial visibility and tight latency. In this paper, we present Mapping-Aware Dreamer (MAD), a geometry-aware world model for vision-based quadrotor flight. Instead of using raw-image reconstruction as the main self-supervised objective, MAD learns recurrent latent dynamics that reconstruct robocentric occupancy and visibility grid maps together with proprioceptive states. This design forces the latent state to encode local geometry, visibility history, and ego-motion in a form that is directly relevant to collision avoidance. MAD is trained in DiffAero using a GPU-parallel map-construction module that provides high-throughput supervision for occupancy and visibility. The learned representation is used in three policy-learning modes: imagination-based MAD-Dreamer and feature-extractor variants based on PPO and SHAC. Across visual navigation and racing tasks, MAD-based agents achieve higher success rates, faster flight, and better cross-task transfer than corresponding vision-only baselines. The model also produces interpretable map predictions and accurate ego-motion estimates from depth observations. We further deploy the learned policy on a physical quadrotor with an Intel RealSense D435i and demonstrate safe indoor and outdoor flight under limited sensing, reaching 9.66 m/s in simulation and 5.05 m/s in real-world forest experiments. These results show that mapping-aware world models provide a practical middle ground between modular aerial navigation and end-to-end learning.",
+      "authors": [
+        "Xinhong Zhang",
+        "Runqing Wang",
+        "Yunfan Ren",
+        "Ding Yu",
+        "Boyu Zhou",
+        "Jian Sun",
+        "Fang Deng",
+        "Jie Chen",
+        "Gang Wang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-03T07:17:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.04534v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "vision-based navigation for quadrotor UAVs",
+      "llm_evidence_cn": "基于视觉的四旋翼无人机导航",
+      "llm_evidence": "基于视觉的四旋翼无人机导航",
+      "canonical_evidence": "基于视觉的四旋翼无人机导航",
+      "llm_tldr_en": "Presents mapping-aware world model for agile quadrotor flight, using latent dynamics to reconstruct occupancy and visibility maps.",
+      "llm_tldr_cn": "针对无人机在杂乱场景中敏捷飞行需要记忆与推理的问题，提出MAD（映射感知世界模型）。该模型学习循环潜在动力学，重建机器人中心占据图和可见性网格图，并结合本体感知状态。通过将几何结构和历史可见性编码到潜在状态，实现了高效的避障导航，在仿真和实际飞行中展现了鲁棒性。",
+      "llm_tldr": "针对无人机在杂乱场景中敏捷飞行需要记忆与推理的问题，提出MAD（映射感知世界模型）。该模型学习循环潜在动力学，重建机器人中心占据图和可见性网格图，并结合本体感知状态。通过将几何结构和历史可见性编码到潜在状态，实现了高效的避障导航，在仿真和实际飞行中展现了鲁棒性。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.08666v1",
+      "source": "arxiv",
+      "title": "Language as a Sensor: Calibrated Spatial Belief Estimation in 3D Scenes from Natural Language",
+      "abstract": "Robots deployed in human-centric environments routinely receive natural-language descriptions of spatial information (\"I left my backpack on the table\") that reference parts of the world beyond their perceptual field of view. Traditional metric-semantic mapping ignores this signal, while off-the-shelf multimodal models remain limited in 3D spatial reasoning and are not directly amenable to fusion with other sensor modalities. To convert language observations into a calibrated spatial distribution, we train a Language Sensor Model (LSM) that maps each utterance and its scene-graph context to a multimodal distribution, with mixture weights encoding referential ambiguity (e.g., \"which table\") and component covariances encoding spatial uncertainty (e.g., where \"on the table\" the target lies). We then introduce VL-Map (Vision-Language Metric-Semantic Mapping), a probabilistic framework that treats these language predictions as stochastic observations and fuses them with onboard perception within a unified belief map. On the VLA-3D benchmark as well as on a real-world mobile robot, LSM is the only language predictor whose covariance estimates remain within the calibrated regime; fused into VL-Map, it leads to more accurate predictions of the target object location (~70% more probability mass on the true target compared to the strongest foundation-model baseline).",
+      "authors": [
+        "Aryan Naveen",
+        "Jason Xinyu Liu",
+        "Luca Carlone",
+        "Andreea Bobu"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-07T15:17:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.08666v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "natural language for spatial belief in 3D scenes, relevant to language-guided navigation",
+      "llm_evidence_cn": "使用自然语言进行3D空间信念估计，与语言引导导航相关",
+      "llm_evidence": "使用自然语言进行3D空间信念估计，与语言引导导航相关",
+      "canonical_evidence": "使用自然语言进行3D空间信念估计，与语言引导导航相关",
+      "llm_tldr_en": "Proposes a Language Sensor Model to convert natural-language spatial descriptions into calibrated distributions, enabling robots to reason about unseen areas; demonstrates utility for spatial belief estimation.",
+      "llm_tldr_cn": "现有机器人系统通常忽略自然语言中的空间信息，而现有多模态模型在3D空间推理上能力有限。本文提出语言传感器模型（LSM），将语言描述和场景图映射为校准的空间分布，编码参照歧义和空间不确定性。该方法可作为传感器模态与度量语义映射结合，提升机器人在未知区域的空间认知能力。实验表明，LSM能有效利用语言进行空间信念估计。",
+      "llm_tldr": "现有机器人系统通常忽略自然语言中的空间信息，而现有多模态模型在3D空间推理上能力有限。本文提出语言传感器模型（LSM），将语言描述和场景图映射为校准的空间分布，编码参照歧义和空间不确定性。该方法可作为传感器模态与度量语义映射结合，提升机器人在未知区域的空间认知能力。实验表明，LSM能有效利用语言进行空间信念估计。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.09167v1",
+      "source": "arxiv",
+      "title": "Vision-Language Guided Hyperspectral Object Tracking via Semantics Fusion and Contextual Template Updating",
+      "abstract": "Hyperspectral object tracking (HOT) leverages the rich spectral information provided by hyperspectral videos (HSVs), offering substantial potential for object tracking. However, efficiently extracting and exploiting spectral information from redundant spectral bands remains a fundamental challenge, which severely limits model generalization and tracking performance. Moreover, in dynamic scenes, targets often experience drastic appearance variations due to factors such as occlusion and illumination changes. These variations lead to large deformations between the current frame and the template. Such discrepancies pose major challenges for existing temporal modeling approaches. In this work, we propose VLHTrack, a novel hyperspectral vision-language (VL) joint tracking framework. Specifically, we incorporate language priors to address the fundamental challenge of spectral redundancy by designing a Language-Guided Band Selection Module (LBSM). By leveraging Large Language Model (LLM) descriptions, LBSM establishes a semantic-to-spectral mapping that mitigates redundancy and accentuates discriminative spectral features. A Multi-Modal Vision-Language Fusion Module is then employed to seamlessly integrate visual and linguistic embeddings, harnessing their complementary advantages to learn coherent cross-modal representations. To address target deformation in long-term sequences, we propose a dynamic update template feature strategy implemented via the Dynamic Template Update with Mamba (DTUM) module. By leveraging selective state space modeling, DTUM learns inter-frame dependencies to update template feature, ensuring efficient template feature evolution guided by temporal context. Experiments on HOT2023 and HOT2024 demonstrate that VLHTrack outperforms state-of-the-art (SOTA) methods.",
+      "authors": [
+        "Rui Yao",
+        "Yuhong Zhang",
+        "Kunyang Sun",
+        "Hancheng Zhu",
+        "Jiaqi Zhao",
+        "Zhiwen Shao",
+        "Abdulmotaleb El Saddik"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T08:05:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.09167v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "vision-language guided hyperspectral tracking; semantics fusion; multimodal remote sensing",
+      "llm_evidence_cn": "视觉语言引导高光谱跟踪；语义融合；多模态遥感",
+      "llm_evidence": "视觉语言引导高光谱跟踪；语义融合；多模态遥感",
+      "canonical_evidence": "视觉语言引导高光谱跟踪；语义融合；多模态遥感",
+      "llm_tldr_en": "Proposes VLHTrack for hyperspectral object tracking using vision-language guidance and semantics fusion, addressing spectral redundancy and appearance variations.",
+      "llm_tldr_cn": "高光谱目标跟踪面临光谱冗余和动态场景外观变化挑战。本文提出VLHTrack，利用视觉-语言模型和语义融合模块，结合上下文模板更新策略，有效提取光谱信息并应对目标形变。在高光谱视频数据集上实验表明，该方法在跟踪精度和鲁棒性上均超越现有方法，为高光谱视频分析提供了新思路。",
+      "llm_tldr": "高光谱目标跟踪面临光谱冗余和动态场景外观变化挑战。本文提出VLHTrack，利用视觉-语言模型和语义融合模块，结合上下文模板更新策略，有效提取光谱信息并应对目标形变。在高光谱视频数据集上实验表明，该方法在跟踪精度和鲁棒性上均超越现有方法，为高光谱视频分析提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.11572v1",
+      "source": "arxiv",
+      "title": "FreqKD: Frequency-Decoupled Cross-Modal Knowledge Distillation for Infrared Object Detection",
+      "abstract": "Transfer learning from large-scale RGB foundation models to infrared (IR) imagery through knowledge distillation (KD) remains challenging due to fundamental differences in image formation physics. We investigate the spectral structure of the RGB--IR modality gap and observe that feature divergence is not uniform across spatial frequencies: low-frequency components (shape, layout) show greater cross-modal alignment than high-frequency components (texture, fine edges), which reflect modality-specific characteristics. Based on this analysis, we propose FreqKD, a frequency-decoupled distillation framework that applies asymmetric supervision adapted to each band's cross-modal consistency. The method employs strict mean squared error (MSE) on the low-frequency band to preserve shared structural information and a relaxed log-MSE loss (weighted at 0.1) on the high-frequency band to provide edge guidance while tolerating texture differences. Spectral divergence analysis on 500 paired samples shows that high-frequency divergence exceeds low-frequency divergence by a factor of 2.4x on average across all analysed transformer layers. On KAIST multispectral pedestrian detection, FreqKD achieves 64.1 mAP50, improving 2.4 points over the DINOv2 baseline. The learned representation transfers across datasets (FLIR ADAS, +2.1 mAP50), tasks (MFNet segmentation, +1.85 mean intersection-over-union), and architectures (ResNet-50, +1.0 mAP50). Code is available at: https://anonymous.4open.science/r/freq_decoupled_kd-5E5A",
+      "authors": [
+        "Keval Thaker",
+        "Venkatraman Narayanan",
+        "Abdalmalek Aburaddaha",
+        "Samir A. Rawashdeh"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T01:55:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.11572v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "cross-modal knowledge distillation for infrared object detection",
+      "llm_evidence_cn": "用于红外目标检测的跨模态知识蒸馏",
+      "llm_evidence": "用于红外目标检测的跨模态知识蒸馏",
+      "canonical_evidence": "用于红外目标检测的跨模态知识蒸馏",
+      "llm_tldr_en": "Proposes frequency-decoupled cross-modal knowledge distillation for transferring RGB knowledge to infrared object detection.",
+      "llm_tldr_cn": "针对RGB到红外知识迁移中的模态差异问题，提出FreqKD频率解耦蒸馏框架。研究发现特征分歧在空间频率上不均匀：低频成分跨模态对齐更好，高频成分体现模态特异性。方法对不同频率带施加不对称监督，从而有效迁移RGB基础模型知识到红外检测，提升了红外目标检测性能。",
+      "llm_tldr": "针对RGB到红外知识迁移中的模态差异问题，提出FreqKD频率解耦蒸馏框架。研究发现特征分歧在空间频率上不均匀：低频成分跨模态对齐更好，高频成分体现模态特异性。方法对不同频率带施加不对称监督，从而有效迁移RGB基础模型知识到红外检测，提升了红外目标检测性能。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "Deep learning methods for remote sensing multimodal fusion",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.11573v1",
+      "source": "arxiv",
+      "title": "Understanding Cross-Sensor Feature Variations for Generalizable 3D Perception",
+      "abstract": "Radar-camera BEV perception often suffers from degraded performance when evaluated across datasets, as changes in driving scenes, sensor configurations, and environmental conditions can alter both the input observations and the internal fused representations. This work studies this issue from the perspective of source-domain variation modeling, aiming to improve the robustness of BEV-based 3D detectors without relying on target-domain samples. We introduce a framework that characterizes visual scene variations in the frequency domain and uses them to synthesize diverse source-domain views. By comparing the resulting fused BEV representations, the framework further captures how image-level variations influence multi-modal BEV features. These variation patterns are then used to regularize the detector, encouraging the learned fusion space to remain stable under latent scene changes. The proposed method is applied only during training and leaves the inference pipeline unchanged. Experiments on cross-dataset radar-camera 3D detection between View-of-Delft and TJ4DRadSet demonstrate consistent improvements over multiple BEV fusion backbones, and the gains remain effective when a small amount of target-domain data is available.",
+      "authors": [
+        "Xin Qiu",
+        "Wenjie Liu",
+        "Fuyuan Ai",
+        "YuChen Tan",
+        "Zhiwei Xu",
+        "Chunyi Song"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T01:57:24+00:00",
+      "link": "https://arxiv.org/pdf/2606.11573v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "cross-sensor feature variation modeling for multi-modal BEV perception",
+      "llm_evidence_cn": "跨传感器特征变化建模用于多模态BEV感知",
+      "llm_evidence": "跨传感器特征变化建模用于多模态BEV感知",
+      "canonical_evidence": "跨传感器特征变化建模用于多模态BEV感知",
+      "llm_tldr_en": "This work models cross-sensor feature variations in the frequency domain to improve radar-camera BEV perception robustness across domains without target data.",
+      "llm_tldr_cn": "雷达-相机BEV感知在不同数据集上性能下降，因为传感器和环境变化导致融合特征偏移。本文从源域变化建模出发，在频率域刻画视觉场景变化并合成多样视角，分析图像变化如何影响多模态BEV特征。提出一种无需目标域样本的鲁棒感知框架，提升了跨数据集泛化能力，对遥感多源融合有借鉴意义。",
+      "llm_tldr": "雷达-相机BEV感知在不同数据集上性能下降，因为传感器和环境变化导致融合特征偏移。本文从源域变化建模出发，在频率域刻画视觉场景变化并合成多样视角，分析图像变化如何影响多模态BEV特征。提出一种无需目标域样本的鲁棒感知框架，提升了跨数据集泛化能力，对遥感多源融合有借鉴意义。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "biorxiv-10-64898-2026-06-03-729887-v1",
+      "source": "biorxiv",
+      "title": "Aerial imagery and deep learning accurately estimate maize foliar disease severity",
+      "abstract": "Southern leaf blight (SLB) is a foliar disease of maize (Zea mays L.) caused by the necrotrophic fungal pathogen Cochliobolus heterostrophus. Genetic resistance is the most effective control method for SLB. Developing disease resistant maize lines requires field trials during which disease phenotypes must be visually assessed. Remote sensing using drones is an emerging technology that can be leveraged for high-throughput phenotyping of disease severity that is otherwise labor-intensive and subjective. This project used a deep learning approach to estimate SLB disease severity of single-row maize plots from drone imagery. Over 26,000 plot-level images produced from flights conducted across three growing seasons were labeled with in-field visual scores taken contemporaneously by expert raters. Variation in environmental conditions contributed to a labeled image dataset that reflects the complexity of agronomic field experiments. We assessed the ability of nine deep learning models from three architectural families to estimate disease severity. The best-performing model, EVA-02-B, achieved strong cross year generalization (R2 = 0.697). Error analysis found that performance was more strongly associated with seasonal disease progression and flight-score time offset than with image-level noise. UAV-based deep learning estimated SLB severity with comparable precision to expert raters. This study lays the groundwork for integrating automated phenotypes into genetic studies of disease resistance.\n\nPLAIN LANGUAGE SUMMARYSouthern leaf blight (SLB) of maize is a disease that causes yield loss worldwide and developing resistant varieties offers the best hope for controlling the disease. Studying SLB resistance requires plant pathologists to visually score severity in the field, a labor-intensive method that requires expertise. To address these challenges, we asked whether SLB severity scoring could be automated using drone images and artificial intelligence (AI). We trained AI models using three years of image and score data then compared the results to visual scores taken by five plant pathologists. The best performing AI model showed a similar level of consistency to the experts and proved capable of scoring severity despite unpredictable and uncontrollable conditions that affect field imaging experiments such as weeds or shadows. These findings provide a validated method that improves the efficiency of maize disease research, a critical area of study for agricultural sustainability and productivity.",
+      "authors": [
+        "Hammett, C. H.",
+        "Rumley, K.",
+        "Balint-Kurti, P.",
+        "Gage, J. L."
+      ],
+      "primary_category": "plant biology",
+      "categories": [
+        "plant biology"
+      ],
+      "published": "2026-06-06T00:00:00+00:00",
+      "link": "https://www.biorxiv.org/content/10.64898/2026.06.03.729887v1.full.pdf",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "drone-based remote sensing for disease severity estimation",
+      "llm_evidence_cn": "基于无人机的遥感影像进行病害严重度估计",
+      "llm_evidence": "基于无人机的遥感影像进行病害严重度估计",
+      "canonical_evidence": "基于无人机的遥感影像进行病害严重度估计",
+      "llm_tldr_en": "Uses deep learning on drone aerial imagery to estimate southern leaf blight severity in maize, achieving accurate estimation over 26,000 plot images from multiple seasons.",
+      "llm_tldr_cn": "针对玉米叶部病害严重度人工评估耗时主观的问题，本文利用无人机航拍图像和深度学习模型进行自动估计。在跨越三个生长季的26,000余幅小区图像上训练模型，实现了与田间目测高度一致的严重度评分，为高通量表型分析提供了高效工具。",
+      "llm_tldr": "针对玉米叶部病害严重度人工评估耗时主观的问题，本文利用无人机航拍图像和深度学习模型进行自动估计。在跨越三个生长季的26,000余幅小区图像上训练模型，实现了与田间目测高度一致的严重度评分，为高通量表型分析提供了高效工具。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
