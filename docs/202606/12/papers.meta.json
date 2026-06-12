@@ -1,0 +1,69 @@
+{
+  "label": "2026-06-12",
+  "date": "2026-06-12",
+  "generated_at": "2026-06-12T22:10:44",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202606/12/2606.09167v1-vision-language-guided-hyperspectral-object-tracking-via-semantics-fusion-and-contextual-template-updating",
+      "section": "deep",
+      "title_en": "Vision-Language Guided Hyperspectral Object Tracking via Semantics Fusion and Contextual Template Updating",
+      "authors": "Rui Yao, Yuhong Zhang, Kunyang Sun, Hancheng Zhu, Jiaqi Zhao, Zhiwen Shao, Abdulmotaleb El Saddik",
+      "date": "2026-06-08",
+      "pdf": "https://arxiv.org/pdf/2606.09167v1",
+      "score": "9.0",
+      "evidence": "视觉语言引导的高光谱目标跟踪及语义融合",
+      "tldr": "高光谱目标跟踪面临光谱冗余和动态场景下目标形变两大挑战。本文提出VLHTrack框架，通过语言引导波段选择模块结合大语言模型先验减少冗余，利用多模态融合模块整合视觉与语言信息。同时设计动态模板更新模块基于Mamba模型学习帧间依赖，解决长期跟踪中的模板退化问题。在HOT2023和HOT2024数据集上达到最优性能。",
+      "tags": "query:rs-fusion",
+      "abstract_en": "Hyperspectral object tracking (HOT) leverages the rich spectral information provided by hyperspectral videos (HSVs), offering substantial potential for object tracking. However, efficiently extracting and exploiting spectral information from redundant spectral bands remains a fundamental challenge, which severely limits model generalization and tracking performance. Moreover, in dynamic scenes, targets often experience drastic appearance variations due to factors such as occlusion and illumination changes. These variations lead to large deformations between the current frame and the template. Such discrepancies pose major challenges for existing temporal modeling approaches. In this work, we propose VLHTrack, a novel hyperspectral vision-language (VL) joint tracking framework. Specifically, we incorporate language priors to address the fundamental challenge of spectral redundancy by designing a Language-Guided Band Selection Module (LBSM). By leveraging Large Language Model (LLM) descriptions, LBSM establishes a semantic-to-spectral mapping that mitigates redundancy and accentuates discriminative spectral features. A Multi-Modal Vision-Language Fusion Module is then employed to seamlessly integrate visual and linguistic embeddings, harnessing their complementary advantages to learn coherent cross-modal representations. To address target deformation in long-term sequences, we propose a dynamic update template feature strategy implemented via the Dynamic Template Update with Mamba (DTUM) module. By leveraging selective state space modeling, DTUM learns inter-frame dependencies to update template feature, ensuring efficient template feature evolution guided by temporal context. Experiments on HOT2023 and HOT2024 demonstrate that VLHTrack outperforms state-of-the-art (SOTA) methods.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/12/2606.09772v1-semdino-a-dinov3-driven-network-for-cross-temporal-semantic-alignment-in-change-detection",
+      "section": "deep",
+      "title_en": "SemDINO: A DINOv3-Driven Network for Cross-Temporal Semantic Alignment in Change Detection",
+      "authors": "Xinyu Tong, Meihua Zhou, Jinxiao Sun, Yingjie Tang, Lei Wang",
+      "date": "2026-06-08",
+      "pdf": "https://arxiv.org/pdf/2606.09772v1",
+      "score": "8.0",
+      "evidence": "遥感语义变化检测，融合多尺度时间交互与注意力机制",
+      "tldr": "语义变化检测面临跨时相特征对齐不足、多尺度表示弱及对光照、季节等伪变化鲁棒性差的问题。提出SemDINO网络，集成双分支编码器、多尺度时相双向Transformer交互、语义净化与变化增强模块，并采用解耦多任务预测头。在公开遥感数据集上，该方法在复杂场景下优于现有技术，有效提升变化检测精度与泛化能力。",
+      "tags": "query:rs-fusion",
+      "abstract_en": "Semantic change detection (SCD) aims to simultaneously locate land-cover changes and identify semantic categories before and after transition. However, existing methods suffer from insufficient cross-temporal alignment, weak multi-scale representation, and poor robustness to pseudo-changes caused by illumination, season, and registration noise. To address these issues, we propose a novel end-to-end semantic change detection network named SemDINO, which integrates a dual-branch encoder, multi-scale temporal interaction, semantic purification, change enhancement, and decoupled multi-task prediction into a unified framework. Specifically, we construct a dual-branch encoder that combines a CNN backbone and frozen DINOv3 features via gated pyramid fusion, enabling rich multi-scale semantic representation. Then, a multi-scale temporal bidirectional transformer interaction (M-TBTT) module is proposed to achieve global cross-temporal feature alignment and information interaction. To further enhance genuine changes and suppress pseudo-variations, we introduce semantic purification (SCP), bidirectional change enhancement (BiChangeEnhance), and multi-scale change enhancement (MCE) modules collaboratively. Finally, a multi-branch CD prediction head is designed to jointly output binary change mask, bi-temporal semantic maps, and edge constraint. Extensive experiments on public remote sensing CD datasets demonstrate that SemDINO achieves superior performance and generalization ability against state-of-the-art methods, especially in complex scenarios with interference factors.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/12/2606.10348v1-rethinking-embodied-navigation-via-relational-inductive-bias",
+      "section": "quick",
+      "title_en": "Rethinking Embodied Navigation via Relational Inductive Bias",
+      "authors": "Weitao An, Chenghao Xu, Xu Yang, Cheng Deng",
+      "date": "2026-06-09",
+      "pdf": "https://arxiv.org/pdf/2606.10348v1",
+      "score": "7.0",
+      "evidence": "具身导航结合视觉语言模型",
+      "tldr": "现有物体导航方法常忽视开放词汇感知中的不可靠语义线索，如虚假正例、过时先验和重复失败探索。DB-Nav提出双重关系偏置：激活偏置传播上下文证据，抑制偏置基于感知混淆与动作证伪剔除不可靠区域，统一为关系激活-抑制探索图。在ObjectNav基准上，该方法显著提升成功率和SPL，实现轻量、可解释的鲁棒导航，无需在线VLM推理。",
+      "tags": "query:uav-vln",
+      "abstract_en": "Object navigation requires an agent to locate a target in an unknown environment through visual observations. Existing methods typically rely on open-vocabulary detectors or vision-language models (VLMs) to answer where to search, but often overlook what not to trust - which semantic cues are unreliable. Open-vocabulary perception is prone to systematic misleading evidence: false positives, outdated static priors, and repeated failed exploration due to lack of embodied verification, which contaminates mapping and decision-making. Such errors are rooted in structured object relations in real-world scenes. To address this, we propose DB-Nav, a framework that reshapes the search space via dual relational biases. It factorizes target-centric relations into an Activation Bias (propagates contextual evidence) and an Inhibition Bias (suppresses unreliable regions via perceptual confusion and action-level falsification). These biases are unified into a Relational Activation-Inhibition Exploration Graph that modulates frontier exploration values using online observations and failed accesses. Experiments on ObjectNav benchmarks show that DB-Nav significantly outperforms existing methods in success rate (SR) and Success weighted by Path Length (SPL), offering a lightweight, interpretable, and robust navigation framework without costly online VLM reasoning.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/12/2606.08520v1-two-bridges-one-pathway-from-vlms-to-generalizable-vlas-with-embodied-trajectory-coupled-data",
+      "section": "quick",
+      "title_en": "Two Bridges, One Pathway: From VLMs to Generalizable VLAs with Embodied Trajectory-Coupled Data",
+      "authors": "Linqi Yin, Shiduo Zhang, Shenling Qiu, Chenxin Li, Zhaoyang Fu, Lei Xiao, Xiang Wang, Chenchen Yang, Zhe Xu, Pengfang Qian, Jingjing Gong, Xipeng Qiu, Xuanjing Huang, Yu-Gang Jiang",
+      "date": "2026-06-07",
+      "pdf": "https://arxiv.org/pdf/2606.08520v1",
+      "score": "6.0",
+      "evidence": "视觉语言到视觉语言动作的具身控制，与语言引导的无人机导航相关",
+      "tldr": "视觉语言模型（VLM）转化为机器人策略（VLA）面临视觉与行动预测两大鸿沟，直接微调导致泛化能力退化。本文提出具身轨迹耦合（ETC）数据作为中间桥梁，设计分布桥接、目标桥接和保留适应三阶段渐进训练。混合少量任务相关分布外ETC数据与动作数据即可实现跨视觉语言条件泛化。实验证明该策略能有效保留VLM泛化性，生成鲁棒、可部署的机器人策略。",
+      "tags": "query:uav-vln",
+      "abstract_en": "Vision-language models (VLMs) are powerful general-purpose reasoners, yet converting them into robot control policies (VLAs) is surprisingly difficult. The root cause is a two-fold gap: VLMs are trained on internet-scale images with language-understanding objectives, while VLAs must perceive robot scenes and predict motor actions. Fine-tuning a VLM directly on robot action data forces the model to cross both gaps at once -- the learning curve is steep and the rich generalizations learned during pretraining tend to degrade rather than transfer. We argue that this gap can be bridged gradually with the right intermediate data. We introduce \\emph{embodied trajectory-coupled (ETC) data} -- vision-language supervision derived from the same robot scenes and trajectories used for action learning. Because ETC data shares the visual context of robot operation while retaining familiar language-understanding objectives, it provides a natural stepping stone between VLM pretraining and VLA fine-tuning. Building on this, we design a three-stage training recipe. Distribution Bridging first adapts the VLM to embodied visual-language semantics. Objective Bridging then gradually shifts the model toward action prediction while preserving the acquired representations. Retentive Adaptation finally specializes the policy to the target deployment domain. We further show that mixing task-relevant out-of-distribution ETC data with a small amount of action data enables the model to generalize to novel visual-language conditions without requiring additional robot demonstrations. Simulation and real-robot experiments confirm that this gradual bridging strategy is the key to transferring VLM generalization into robust, deployable robot policies.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
