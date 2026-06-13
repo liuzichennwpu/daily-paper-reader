@@ -1,0 +1,190 @@
+Title: AerialClaw: An Open-Source Framework for LLM-Driven Autonomous Aerial Agents
+
+URL Source: https://arxiv.org/pdf/2606.12142v1
+
+Published Time: Thu, 11 Jun 2026 01:09:42 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# AerialClaw: An Open-Source Framework for LLM-Driven Autonomous Aerial Agents 
+
+# Ke Li 
+
+Xidian University Xi’an, China like0413@stu.xidian.edu.cn 
+
+# Jianfei Yang 
+
+Xidian University Xi’an, China yjf123@stu.xidian.edu.cn 
+
+# Luyao Zhang 
+
+Xidian University Xi’an, China lyzhang_5@stu.xidian.edu.cn 
+
+# Guo Yu 
+
+Xidian University Xi’an, China guoyu1999@stu.xidian.edu.cn 
+
+# Chengwei Yan 
+
+Xidian University Xi’an, China ycw@stu.xidian.edu.cn 
+
+# Yuan Ding 
+
+Xidian University Xi’an, China 25031110055@stu.xidian.edu.cn 
+
+# Di Wang ∗
+
+Xidian University Xi’an, China wangdi@xidian.edu.cn 
+
+# Nan Luo 
+
+Xidian University Xi’an, China nluo@xidian.edu.cn 
+
+# Gang Liu 
+
+Xidian University Xi’an, China gliu@xidian.edu.cn 
+
+# Xiao Gao 
+
+Xi’an University of Architecture and Technology Xi’an, China gaoxiao@xauat.edu.cn 
+
+# Quan Wang 
+
+Xidian University Xi’an, China qwang@xidian.edu.cn 
+
+## Abstract 
+
+Unmanned aerial vehicles (UAVs) are increasingly used in inspec-tion, search and rescue, environmental monitoring, and emergency response. However, most UAV applications still rely on pre-defined command sequences or task-specific pipelines, where developers manually connect perception, planning, flight control, simulation, logging, and safety modules. This limits the flexibility, reproducibil-ity, and extensibility of autonomous aerial systems. This paper presents AerialClaw, an open-source software framework that en-ables UAVs to operate as decision-making aerial agents rather than merely command-following platforms. Given a natural-language mission, AerialClaw allows an LLM-based agent to understand the task, maintain context, invoke executable aerial skills, observe per-ception and runtime feedback, and iteratively update its decisions in a closed loop. The framework adopts a modular brain–skill–runtime 
+
+architecture, combining hard skills for atomic UAV operations, Markdown-based soft skills for reusable task strategies, document-driven agent state and capability boundaries, memory-driven re-flection, safety-oriented runtime validation, and platform-agnostic  
+
+> ∗Corresponding author. Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than the author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+> MM ’26, Rio de Janeiro, Brazil
+> ©2026 Copyright held by the owner/author(s). Publication rights licensed to ACM. ACM ISBN 978-1-4503-XXXX-X/2026/11 https://doi.org/XXXXXXX.XXXXXXX
+
+execution adapters. AerialClaw supports lightweight mock execu-tion, PX4 SITL with Gazebo, and AirSim-based simulation, together with a web console, pluggable model backends, example missions, simulation assets, and staged deployment scripts. By combining standardized aerial skills, document-driven agent state, memory, and closed-loop LLM decision-making, AerialClaw provides a re-producible and extensible open-source framework for building UAV systems that can interpret missions, make decisions, execute skills, and adapt their behavior from feedback. 
+
+## CCS Concepts 
+
+• Computing methodologies → Artificial intelligence .
+
+## Keywords 
+
+Open-source software, autonomous aerial agents, UAV systems, large language models, embodied agents 
+
+ACM Reference Format: 
+
+Ke Li, Jianfei Yang, Luyao Zhang, Guo Yu, Chengwei Yan, Yuan Ding, Di Wang, Nan Luo, Gang Liu, Xiao Gao, and Quan Wang. 2026. AerialClaw: An Open-Source Framework for LLM-Driven Autonomous Aerial Agents. In 
+
+Proceedings of the 34th ACM International Conference on Multimedia (MM ’26). 
+
+ACM, New York, NY, USA, 5 pages. https://doi.org/XXXXXXX.XXXXXXX 
+
+Relevant ACM MM areas: Embodied and Immersive Multimedia; Multimedia Applications. 
+
+Open-source availability: AerialClaw is publicly available at https://github.com/XDEI-Group/AerialClaw. The repository pro-vides the source code, open-source license, documentation, build instructions, example missions, simulation assets, and configuration files. The supplementary ZIP archive submitted to the ACM MM  
+
+> arXiv:2606.12142v1 [cs.RO] 10 Jun 2026 MM ’26, Nov. 10–14, 2026, Rio de Janeiro, Brazil Ke Li, Jianfei Yang, Luyao Zhang, Guo Yu, Chengwei Yan, Yuan Ding, Di Wang, Nan Luo, Gang Liu, Xiao Gao, and Quan Wang
+
+Figure 1: The overall architecture of AerialClaw. The frame-work connects an LLM-based cognitive agent, hybrid skill system, memory modules, perception pipeline, safety-aware runtime, and platform-specific adapters for mock execution, PX4/Gazebo, AirSim, and custom UAV backends. 
+
+Open Source Software track packages the same release materials for offline inspection. 
+
+## 1 Introduction 
+
+Unmanned aerial vehicles (UAVs) have become important platforms for inspection, search and rescue, environmental monitoring, emer-gency response, and infrastructure maintenance. However, most UAV applications are still developed around pre-defined command sequences or task-specific pipelines. Developers usually specify waypoints, write control logic, connect perception modules, and manually handle runtime states for each mission. As a result, the UAV largely acts as a command-following platform rather than an autonomous agent that can understand a mission, reason about context, and decide what to do next. Recent advances in large language models (LLMs) and embodied agents suggest a new way to build aerial autonomy[ 1, 2, 5, 7, 8,10 ]. Instead of pre-scripting every mission procedure, a UAV can be equipped with an agentic control loop: it receives a natural-language mission, decomposes the task, selects executable skills, observes perception and runtime feedback, and updates its deci-sions during execution. To make this paradigm practical, developers need software infrastructure that connects high-level agent reason-ing with aerial skills, simulator or hardware backends, memory, runtime validation, and user-facing control tools. Existing UAV ecosystems support flight control, simulation, communication, and sensor integration, but they do not directly provide a reusable run-time for LLM-driven aerial agents. Developers therefore still need to rebuild integration logic for each new mission, simulator, or UAV platform, which limits reuse and reproducibility. We present AerialClaw, an open-source software framework for constructing LLM-driven autonomous aerial agents. AerialClaw moves UAV applications beyond pre-defined command execution by enabling UAV systems to operate as decision-making aerial agents. Given a natural-language mission, an LLM-based agent maintains context, invokes executable aerial skills, observes feedback, and it-eratively decides the next action. The framework adopts a modular 
+
+brain-skill-runtime architecture: the brain handles task understand-ing, planning, decision generation, and reflection; the skill system combines hard skills for atomic UAV operations with Markdown-based soft skills for reusable task strategies; and the runtime vali-dates and executes decisions through platform-agnostic adapters for mock execution, PX4[ 6]/Gazebo[ 3], AirSim[ 9], or custom UAV backends. A key design principle of AerialClaw is to make aerial-agent be-havior inspectable and extensible. Robot identity, hardware capabili-ties, available skills, task strategies, and accumulated experience are represented through human-readable documents. This document-centered interface allows developers to adjust agent behavior, add new task strategies, and extend platform capabilities without re-training models or rewriting the core runtime. AerialClaw also provides a web console for submitting missions and monitoring decisions, telemetry, logs, and runtime feedback. The public release includes source code, documentation, example missions, simulation assets, configuration files, deployment scripts, and an open-source license. The main contributions of this work are as follows: 
+
+• A decision-making framework for autonomous aerial agents. AerialClaw enables UAV systems to move beyond pre-scripted command execution by integrating natural-language mission understanding, closed-loop decision-making, executable skills, perception feedback, and runtime validation. 
+
+• A hybrid skill and document-centered agent interface. AerialClaw combines hard skills for atomic UAV operations with Markdown-based soft skills for reusable task strategies, while represent-ing agent identity, capability boundaries, and memory through human-readable documents. 
+
+• A platform-agnostic open-source execution stack. AerialClaw de-couples high-level agent reasoning from simulator- and hardware-specific control through a unified runtime and adapter interface, supporting mock execution, PX4/Gazebo, AirSim, and custom UAV backends. 
+
+## 2 Software Overview 
+
+Figure 1 shows the architecture of AerialClaw. The framework is organized as a modular “brain–skill–runtime” stack that turns a natural-language mission into closed-loop UAV behavior. Rather than executing a pre-defined command sequence, AerialClaw lets an LLM-based agent repeatedly understand the current task context, select an executable skill, observe feedback, and decide the next action. The system consists of four main components: an LLM Agent, a Skill System, an Execution Interface, and a Memory System. 
+
+## 2.1 LLM Agent 
+
+The LLM Agent is responsible for task understanding, step-wise planning, and decision generation. At each iteration, it receives a structured context that includes the user mission, available skills, perception summary, world state, execution history, and retrieved experiences. It then outputs an inspectable JSON decision specifying the next skill call and its arguments. The runtime validates this decision before execution, and the resulting observation is fed back to the agent for the next step. This closed-loop design allows the UAV to adapt its behavior during execution instead of following a fixed plan generated in advance. AerialClaw: An Open-Source Framework for LLM-Driven Autonomous Aerial Agents MM ’26, Nov. 10–14, 2026, Rio de Janeiro, Brazil 
+
+> Document-centered agent interface
+> SOUL.md : identity, communication style, operating principles
+> BODY.md : active sensors, flight limits, available skills
+> SKILLS/*.md : reusable task strategies and constraints
+> MEMORY.md : lessons, environment insights, skill feedback
+
+Figure 2: AerialClaw exposes agent behavior through human-readable documents, allowing users to inspect and modify identity, capability, strategy, and experience without chang-ing the core runtime. 
+
+## 2.2 Document-centered Interface 
+
+AerialClaw represents robot identity, capability boundaries, task strategies, and accumulated experience through human-readable documents, as shown in Fig. 2. SOUL.md defines the agent’s iden-tity and operating principles, while BODY.md is generated from the active adapter and sensor configuration at startup. This keeps the agent’s prompt aligned with the current simulator or hard-ware setup, including supported skills, sensor availability, flight limits, and battery-related constraints. Strategy documents under 
+
+SKILLS/*.md describe reusable soft skills, and MEMORY.md records lessons and feedback from previous missions. This interface makes agent behavior inspectable and editable without retraining models or modifying the core runtime. 
+
+## 2.3 Skill System 
+
+The Skill System grounds high-level reasoning in executable UAV behavior. AerialClaw distinguishes between hard skills and soft skills . Hard skills are callable functions for atomic operations such as takeoff, waypoint flight, observation, object detection, status query, map marking, and return-to-launch. Soft skills are Markdown-based strategy documents that describe reusable task procedures, such as target search, area patrol, rescue workflow, and inspection routine. During execution, the LLM Agent retrieves relevant soft-skill docu-ments and composes hard skills according to the current mission context. Developers can therefore extend low-level platform capa-bilities by adding hard skills, or modify high-level task behavior by editing soft skills. 
+
+## 2.4 Execution Interface 
+
+The Execution Interface decouples agent decisions from simulator-or hardware-specific control. The Runtime Layer validates each skill call using safety-oriented checks such as skill allowlists, parameter constraints, geofencing, human approval for critical commands, and sandboxing for dynamically generated code. The Adapter Layer then translates validated abstract skills into backend-specific com-mands. Current adapters support lightweight mock execution, PX4 SITL through MAVSDK/MAVLink[ 4 ], and AirSim through its RPC interface, while the same interface can be extended to real UAVs or custom platforms. This design allows the same agent logic to run across different execution backends. 
+
+## 2.5 Memory System and Model Backends 
+
+The Memory System provides context for decision-making and experience reuse. It includes working memory for current task state and execution history, skill memory for recent skill status and usage statistics, a reflection database for post-task lessons and semantic retrieval, and world state for robot status, known obstacles, marked targets, and environment information. After a mission, the Reflection Engine summarizes the execution trace into reusable lessons, which can later be retrieved for similar tasks or converted into new soft-skill documents. AerialClaw also uses an OpenAI-compatible client abstraction for LLM and VLM calls, allowing users to switch between cloud APIs, local models, and custom services through configuration. 
+
+## 3 Main Features and Applications 
+
+AerialClaw is designed for researchers and developers who need a reusable platform for building autonomous aerial agents. Its main features include natural-language mission execution, closed-loop perception–reasoning–action, hybrid hard/soft skills, memory-driven reflection, cross-backend deployment, and a web-based con-trol console. Instead of requiring users to predefine a complete mission procedure, AerialClaw allows the agent to interpret a high-level instruction, select executable skills, observe feedback, and decide the next action during execution. Through the web console, users can submit missions, monitor agent decisions, inspect execution logs, view telemetry and map state, and observe sensor outputs. This makes the decision process visible during operation and helps developers debug the interac-tion between reasoning, skill execution, perception, and runtime validation. AerialClaw supports application scenarios such as area recon-naissance, facility inspection, target search, environmental mon-itoring, emergency response, and education-oriented UAV agent prototyping. For multimedia and embodied-AI research, it provides a software testbed for connecting language instructions, aerial vi-sual observations, spatial state, and executable UAV actions. For system developers, it provides extensible interfaces for adding new sensors, simulators, UAV adapters, model backends, and task skills. 
+
+## 4 Implementation and Reproducibility 
+
+AerialClaw is implemented as an open-source Python framework with a web-based control interface. The backend uses Flask and Socket.IO for real-time bidirectional communication between the runtime and the user interface. The frontend is built with React and visualizes agent decisions, execution logs, telemetry, map state, and sensor outputs. Model calls are handled through an OpenAI-compatible interface, allowing planning, visual analysis, and reflec-tion modules to use cloud APIs, local models, or custom services through configuration. For execution backends, AerialClaw provides adapters for light-weight mock execution, PX4 SITL with Gazebo, and AirSim. The mock backend supports quick inspection of the agent loop without UAV hardware or full simulator dependencies. The PX4/Gazebo backend supports physics-based simulation through PX4 Autopilot, Gazebo, MAVSDK, and sensor-equipped UAV models. The AirSim backend is provided for camera-rich aerial scenes and VLM-based perception experiments. The repository includes the Python back-end, React frontend, hard-skill implementations, Markdown-based MM ’26, Nov. 10–14, 2026, Rio de Janeiro, Brazil Ke Li, Jianfei Yang, Luyao Zhang, Guo Yu, Chengwei Yan, Yuan Ding, Di Wang, Nan Luo, Gang Liu, Xiao Gao, and Quan Wang 
+
+soft-skill documents, simulator adapters, example configurations, technical documentation, and Gazebo assets. 
+
+## 4.1 Deployment and Quick Start 
+
+AerialClaw provides a progressive deployment path from software-only execution to embodied simulation while preserving the same agent architecture. The lightweight entry point is a containerized mock runtime , which launches the Web console, backend service, in-memory UAV adapter, skill interface, and agent loop without UAV hardware, PX4, Gazebo, AirSim, Unreal Engine, or GPU de-pendencies. Users can then enable the LLM-driven control loop 
+
+through an OpenAI-compatible endpoint, and further connect the same codebase to PX4 SITL + Gazebo for physics-based simula-tion with PX4 Autopilot, Gazebo, MAVSDK, and sensor-equipped UAV models. AirSim + Unreal Engine is maintained as an op-tional photorealistic extension for camera-rich aerial scenes and VLM-based perception experiments. 
+
+4.1.1 Containerized quick start. For lightweight and reproducible execution, AerialClaw provides a Docker entry point that starts the core software stack with a mock UAV adapter: 
+
+git clone https://github.com/XDEI-Group/AerialClaw.git cd AerialClaw docker compose up 
+
+The Web console is available at http://localhost:5001, and /api/status 
+
+provides a basic health check. This mode exposes natural-language task submission, skill invocation, execution tracing, memory state, and human override while avoiding simulator-specific installation requirements. 
+
+4.1.2 PX4/Gazebo quick start. The containerized mock runtime and the PX4/Gazebo simulator path are alternative launch modes sharing the default Web port 5001 . Before starting the simulator stack, the mock container should be stopped: 
+
+docker compose down ./scripts/sim_quickstart.sh --setup ./scripts/sim_quickstart.sh 
+
+The quickstart script orchestrates PX4 SITL, Gazebo, the Aerial-Claw backend, Web UI, Gazebo GUI, MAVSDK control link, and camera/LiDAR sensor bridge. It also performs built-in health checks for the Web service, PX4 adapter, sensor bridge, and camera end-point, preventing silent fallback from simulator control to mock control. Through the adapter interface, the high-level mission logic remains unchanged across mock and physics-based deployments. 
+
+## 4.2 Installation support and availability 
+
+AerialClaw follows the Open Source Software track recommen-dation of easing build and testing through containers and pack-age managers. The release provides Docker-based quick start com-mands, Python backend dependency installation, npm-based Web UI build instructions, and a guided PX4/Gazebo setup script. The optional AirSim/Unreal path is documented separately and is not required for the main open-source release. The public repository contains the source code, MIT license, documentation, example configurations, and build/install instructions. The supplementary archive packages the same release materials for offline inspection and reproducibility checking. 
+
+Figure 3: AerialClaw web console for monitoring an au-tonomous aerial inspection task, including camera view, sit-uation map, generated plan, and execution logs. 
+
+## 5 Demonstrations 
+
+Fig. 3 shows the web console used in our demonstration work-flows. In a representative area-reconnaissance task, the user issues a natural-language mission such as “patrol several waypoints, ob-serve each location, and report findings.” AerialClaw decomposes the mission into executable skills, including takeoff, waypoint naviga-tion, visual observation, status query, and report generation. During execution, the web console displays the generated decisions, execu-tion logs, telemetry, map state, and sensor outputs, allowing users to inspect how the agent selects actions and reacts to feedback. The demonstrations cover three deployment and reasoning ca-pabilities. First, mock-mode execution reproduces the complete agent loop and web interface without UAV hardware or full sim-ulator dependencies, making it suitable for quick inspection by reviewers and new users. Second, PX4/Gazebo simulation connects the same high-level mission logic to physics-based flight control, sensor-equipped UAV models, and camera/LiDAR streams through the adapter interface. Third, the Reflection Engine summarizes com-pleted task traces into structured lessons, which can be retrieved in later missions to support experience reuse without task-specific reprogramming. 
+
+## 6 Conclusion and Future Work 
+
+We introduced AerialClaw, an open-source software framework for building LLM-driven autonomous aerial agents. AerialClaw moves UAV applications beyond pre-defined command execution by integrating natural-language mission understanding, closed-loop decision-making, hybrid hard/soft skills, perception feedback, memory, runtime validation, platform adapters, and a web-based control console into a reusable software stack. With mock execution, PX4/Gazebo, AirSim, and pluggable model backends, AerialClaw lowers the engineering barrier for developing UAV systems that can interpret missions, execute skills, and adapt their behavior from feedback. Future work will improve perception grounding, long-horizon memory retrieval, and real-world UAV deployment. 
+
+## References  
+
+> [1] Fernando Cladera, Zachary Ravichandran, Jason Hughes, Varun Murali, Carlos Nieto-Granda, M. Ani Hsieh, George J. Pappas, Camillo J. Taylor, and Vijay Kumar.
+
+AerialClaw: An Open-Source Framework for LLM-Driven Autonomous Aerial Agents MM ’26, Nov. 10–14, 2026, Rio de Janeiro, Brazil 
+
+2025. Air-Ground Collaboration for Language-Specified Missions in Unknown Environments. IEEE Transactions on Field Robotics (2025), 1–1. [2] Dongjie Huo, Haoyun Liu, Guoqing Liu, Dekang Qi, Zhiming Sun, Maoguo Gao, Jianxin He, Yandan Yang, Xinyuan Chang, Feng Xiong, et al . 2026. ABot-Claw: A Foundation for Persistent, Cooperative, and Self-Evolving Robotic Agents. arXiv preprint arXiv:2604.10096 (2026). [3] Nathan Koenig and Andrew Howard. 2004. Design and use paradigms for gazebo, an open-source multi-robot simulator. In 2004 IEEE/RSJ international conference on intelligent robots and systems (IROS)(IEEE Cat. No. 04CH37566) , Vol. 3. Ieee, 2149–2154. [4] Anis Koubâa, Basit Qureshi, Mohamed-Foued Sriti, Azza Allouch, Yasir Javed, Mohammed Alajlan, Omar Cheikhrouhou, Mohamed Khalgui, and Eduardo Tovar. 2019. Micro Air Vehicle Link (MAVLink) in a Nutshell: A Survey. In 2019 IEEE International Systems Conference (SysCon) . IEEE, 1–8. [5] Haokun Liu, Zhaoqi Ma, Yunong Li, Junichiro Sugihara, Yicheng Chen, Jinjie Li, and Moju Zhao. 2025. Hierarchical Language Models for Semantic Navi-gation and Manipulation in an Aerial-Ground Robotic System. arXiv preprint arXiv:2506.05020 (2025). [6] Lorenz Meier, Dominik Honegger, and Marc Pollefeys. 2015. PX4: A node-based multithreaded open source robotics framework for deeply embedded platforms. In 2015 IEEE international conference on robotics and automation (ICRA) . IEEE, 6235–6240. [7] OpenClaw Contributors. 2026. OpenClaw: Personal AI Assistant. https://github. com/openclaw/openclaw. Accessed: 2026-03-08. [8] Zachary Ravichandran, Varun Murali, Mariliza Tzes, George J. Pappas, and Vijay Kumar. 2025. SPINE: Online Semantic Planning for Missions with Incomplete Natural Language Specifications in Unstructured Environments. In 2025 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 13714–13721. doi:10.1109/ICRA55743.2025.11128238 [9] Shital Shah, Debadeepta Dey, Chris Lovett, and Ashish Kapoor. 2017. Airsim: High-fidelity visual and physical simulation for autonomous vehicles. In Field and service robotics: Results of the 11th international conference . Springer, 621–635. [10] Wayne Xin Zhao, Kun Zhou, Junyi Li, Tianyi Tang, Zican Dong, Yupeng Hou, Beichen Zhang, Yingqian Min, Junjie Zhang, Peiyu Liu, et al . 2026. A survey of large language models. Frontiers of Computer Science 20, 12 (2026), 2012627.

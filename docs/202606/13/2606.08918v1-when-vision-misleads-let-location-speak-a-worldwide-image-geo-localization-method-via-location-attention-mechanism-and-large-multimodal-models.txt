@@ -1,0 +1,563 @@
+Title: When Vision Misleads, Let Location Speak: A Worldwide Image Geo-Localization Method via Location Attention Mechanism and Large Multimodal Models
+
+URL Source: https://arxiv.org/pdf/2606.08918v1
+
+Published Time: Tue, 09 Jun 2026 01:35:44 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+1
+
+# When Vision Misleads, Let Location Speak: A Worldwide Image Geo-Localization Method via Location Attention Mechanism and Large Multimodal Models 
+
+Junchao Cui , Wenqi Shi , Xuanzi Ma , Nan Wu , Shaoyong Du , Xiangyang Luo 
+
+Abstract —Worldwide image geo-localization aims to determine the capture location of an image on a global scale. Existing methods often mislocalize images by matching them to visually similar scenes from different geographic regions, which limits reliability in practical applications. To address this issue, we propose TransGeoCLIP, a novel retrieval-based framework that integrates a location attention mechanism and large multimodal models (LMMs). Using the Transformer encoder with location attention to encode GPS coordinates, TransGeoCLIP can ef-fectively distinguish geographic features among visually similar images. The framework consists of two stages: 1) Retrieval database construction, which employs Transformers equipped with location attention mechanisms to encode labeled GPS coordinates and enhance location semantics, subsequently enables joint image-text-GPS embedding through CLIP; 2) Retrieval-augmented inference, which leverages LMMs to infer the fi-nal image location prediction from retrieved database results. Extensive experimental results on diverse datasets, including IM2GPS, IM2GPS3k, YFCC4k, and YFCC26k, demonstrate that TransGeoCLIP significantly enhances localization performance for visually similar images. Particularly, street-level localization accuracy (within 1 km error) is substantially improved, surpass-ing state-of-the-art methods by 1.5%, 1.07%, 7.18%, and 9.75% on these benchmarks, respectively. 
+
+Index Terms —Worldwide Image Geo-localization, Image Re-trieval, Multimodal Learning, Large Multimodal Models. 
+
+I. I NTRODUCTION 
+
+# WORLDWIDE image geo-localization aims to find an image’s capture location anywhere on Earth [1], [2]. It holds significant value across numerous domains: in public security, it can provide crucial location clues for criminal tracking [3], [4]; in transportation and navigation, it enables more comprehensive and precise locational support for nav-igation systems [5]; in environmental protection, it offers accurate geographic coordinate references for environmental monitoring, facilitating dynamic management of ecological systems [6]. 
+
+This work is supported in part by the National Natural Science Foundation of China (No. U23A20305, No. 62372465), Natural Science Foundation of Henan Province (No. 262300422589), and Zhongyuan Scholars Project (No. 254000510007). (Corresponding author: Wenqi Shi.) 
+
+Junchao Cui, Wenqi Shi, Nan Wu, Shaoyong Du, and Xiangyang Luo are with the Henan Key Laboratory of Cyberspace Situation Awareness, Zhengzhou 450001, China.(email:cjc20250301@163.com; shi-wenqi1606@163.com; myhofzy@163.com; shaoyong.du.cs@aliyun.com; lu-oxy ieu@sina.com) Xuanzi Ma is with the Information Engineering University, Zhengzhou 450001, China.(email:mxz20251024@163.com) Method Method 
+
+> Query images
+> Image localization results
+> -0.118092
+> 51.509865
+> -0.118092
+> 51.509865 34.6937569
+> 135.5014539
+> 34.6937569
+> 135.5014539 39.906217
+> 116.3912757
+> 39.906217
+> 116.3912757 42.6511674
+> -73.754968
+> 42.6511674
+> -73.754968
+> -0.118092
+> 51.509865 34.6937569
+> 135.5014539 39.906217
+> 116.3912757 42.6511674
+> -73.754968
+> Retrieval
+> Classify
+
+Fig. 1. A worldwide image geo-localization system takes a single image as input, and outputs the GPS coordinates of the image’s capture location. 
+
+Traditional image geo-localization is often confined to loca-tion inference within specific areas, such as urban blocks [7], [8] or landmark buildings [9], [10], with typical tasks including cross-view localization [11]–[15]. In contrast, worldwide im-age geo-localization aims to estimate the GPS coordinates of where an image was captured anywhere on Earth based solely on a single image, establishing a mapping from visual input to coordinates on the Earth’s surface [16], which overcomes the limitations imposed by regional boundaries. As shown in Fig. 1, given an image taken by any device, the objective of worldwide image geo-localization system is to estimate its corresponding GPS coordinates. Based on the localization principle, current image geo-localization methods fall into three categories: classification-based [17], retrieval-based [16], and hybrid-based [1]. Classification-based approaches divide the Earth’s surface into predefined geo-cells ( e.g. , S2 cells [17] or geographic grids [18]), casting localization as a multi-class classification task. These methods predict the spatial cell for an image by leveraging deep models: visual features are extracted via con-volutional neural network (CNN) [19] or Vision Transformers (ViT) [20], and fully connected layers then produce a geo-graphic class probability distribution [17], [21], [22]. Recent studies have adopted multi-scale classification strategies [23]– [25] to improve discrimination for both coarse and fine-grained locations. However, localization accuracy is limited by grid granularity; even if the correct region is identified, errors may occur if the true location is far from the grid center. Retrieval-based methods avoid predefined spatial divisions and frame geo-localization as image-to-image or image-to-GPS matching. They infer locations by retrieving visually sim-    
+
+> arXiv:2606.08918v1 [cs.CV] 8 Jun 2026 2Tian Du City,
+> Hangzhou , China
+> GPS(120.26,30.39)
+> Window of the World,
+> Shenzhen , China
+> GPS(113.98,22.54)
+> LA Tour Eiffel,
+> Paris , France
+> GPS(48.51,2.17)
+> Fig. 2. Limitations of visual geo-localization. Although the appearance of the buildings in the images is highly similar, the actual locations where these photos were taken are far apart.
+
+ilar samples from a geotagged database [16]. These methods excel in localized regions according to visual feature similar-ity [9], [26]. Some approaches use contrastive learning [27] and LMMs [28], [29] for worldwide settings. However, retrieval-based methods that rely heavily on visual similarity often struggle to achieve high precision, as visually similar images can correspond to geographically distant locations. Hybrid-based methods integrate classification and retrieval mechanisms to enhance performance [23], [30]. A typical framework uses a dual-branch architecture: the classification branch predicts candidate regions to narrow retrieval scope, while the retrieval branch performs fine-grained matching within the constrained area. This reduces search overhead, mitigates false matches, and alleviates accuracy degradation near grid boundaries. However, the “classify-then-retrieve” strategy may sacrifice fine-grained information and filter out correct locations, ultimately impairing localization accuracy. Despite recent advances in worldwide image geo-localization, existing methods still face two major challenges: first, models exhibit limited capability in distinguishing fine-grained geographical locations, and their over-reliance on visual information leads to a high risk of misclassification; second, as illustrated in Fig. 2, they struggle to distinguish between scenes that are visually similar but geographically distant. To address these issues, this work investigates the role of locational semantic information in characterizing feature differences between visually similar images. We propose a novel framework named TransGeoCLIP, which is built upon two key innovations: a novel Transformer-based image GPS encoder and the integration of an attention mechanism into the locational encoding process. The main contributions are as follows: 
+
+• We propose a novel retrieval-based framework, Trans-GeoCLIP. Extensive experiments on diverse bench-marks, including IM2GPS, IM2GPS3k, YFCC4k, and YFCC26k, demonstrate that TransGeoCLIP consistently outperforms existing state-of-the-art methods; 
+
+• We introduce the first Transformer-based GPS encoder for worldwide image geo-localization. By leveraging Transformers to extract rich semantic representations from GPS coordinates during retrieval database construc-tion, our encoder significantly enhances the geographical awareness and leads to more accurate localization; 
+
+• We design a location attention mechanism that learns locational distances between images, dynamically re-orders images in the retrieval database, and strengthens the ability to distinguish visually similar scenes while mitigating interference from misleading visual cues. To facilitate evaluation on visually similar buildings, we construct and release TwinBuilds, small dataset of similar landmarks; The rest of the manuscript is organized as follows: Sec-tion II reviews existing work related to worldwide image geo-localization. Section III introduces the TransGeoCLIP method for worldwide image geo-localization. Section IV presents the implementation details, results, and experimental analysis of the proposed TransGeoCLIP alongside several existing methods. Finally, this work is summarized in Section V. II. R ELATED WORK 
+
+In this section, we categorize worldwide image geo-localization methods into three classes based on their technical approaches: retrieval-based, classification-based, and hybrid-based geo-localization. We subsequently introduce the fun-damental principles of representative existing methods within each category and discuss their limitations. 
+
+A. Retrieval-based Geo-localization 
+
+Retrieval-based methods predict a query image’s location by matching its visual features with those in a geotagged database, assigning the location of the most similar image as the result. Early methods like IM2GPS [16], one of the first worldwide geo-localization approaches, use handcrafted features [31] for nearest-neighbor retrieval, requiring large-scale databases with high computational and storage costs. Subsequent methods improve precision by restricting searches to smaller regions ( e.g. , natural environments). OpenAI’s CLIP [32] is a pre-trained contrastive learning model for image-text cross-modal matching, later applied to image recognition, and greatly advances worldwide image geo-localization. Cepeda et al. [27] propose GeoCLIP, which encodes GPS coordinates with Equal Earth Projection (EEP) [33] and images with CLIP to enable image-GPS cross-modal matching for retrieval database construction. It reduces costs via rich features and contrastive learning, supporting ranked candidate retrieval with underutilized results. Zhou et al. [28] introduce Img2Loc, building on GeoCLIP to feed query images and retrieved results into LMMs via retrieval-augmented generation (RAG); LMMs reason over context to predict locations and enhance accuracy. Recently, Jia et al. [29] propose G3, which uses image textual descriptions, aligns “image-GPS” and “image-text” data via CLIP for retrieval database construction, and em-ploys LMMs to generate multiple localization predictions for improved accuracy. However, it ignores spatial distances between image locations, limiting discrimination of visually similar images from different geographic regions. Further-more, Shatwell et al. [34] leverage a contrastive learning-based 3
+
+retrieval paradigm to establish matching relationships between images and their corresponding shooting locations and time. Retrieval-based methods rely on the completeness of the retrieval database. Thus, the lack of high-quality databases capable of capturing comprehensive worldwide image features leads to poor cross-region generalization and limited perfor-mance of these methods in identifying similar buildings. 
+
+B. Classification-based Geo-localization 
+
+Classification-based methods for worldwide image geo-localization partition the Earth into predefined grid units, treating localization as a classification task where each unit is represented by its central coordinates. These methods use deep learning models [36] to associate visual features ( e.g. ,architectural styles and vegetation patterns) with specific geo-graphic grids. The seminal work by Weyand et al. [17], PlaNet, formalizes the classification-based approach by partitioning the Earth using Google’s S2 grid system [42]. To address the accuracy limitations of fixed grid cells, CPlaNet [21] employs combi-natorial partitioning, generating multiple coarse partitions and intersecting them to create fine-grained output classes. Fur-ther advancing classification strategies, Eric M¨ uller-Budack et al. [16] propose a hierarchical method with Independent Scene Networks (ISNs) that classify images into indoor, outdoor, and urban scenes, training separate networks for precise location prediction. Theiner et al. [25] introduce Semantic Partitioning (SemP), which uses boundary information to divide the Earth, enabling geo-cells to better represent locations. Pramanick et al. [35] propose TransLocator, utilizing HRNet [37] to gen-erate semantic segmentation maps and training a dual-branch network on both images and maps, enhancing generalization across different shooting times and weather conditions. Clark et al. [18] further enhance feature interpretation with cross-attention mechanisms in their GeoDecoder method. Despite avoiding large-scale retrieval databases, classification-based methods remain constrained by grid granularity, often incurring significant errors when the true location lies far from the predicted grid center. 
+
+C. Hybrid-based Geo-localization 
+
+Hybrid-based methods integrate the core ideas of the above two types of methods, i.e. , both constructing an image retrieval database and partitioning the world map according to specific rules. It leverages classification to reduce training overhead while enhancing localization accuracy through retrieval mech-anisms. Vo et al. [1] integrated IM2GPS and PlaNet by exploring six discrete grid partitioning strategies and training with classification loss. They applied kernel density estimation for image localization, enhancing accuracy while lowering computational expenses. Recently, Hass et al. [23] introduce PIGEON and PI-GEOTTO for street-level and frontal-view images. Building upon the semantic partitioning of SemP [25], they address its data imbalance issue using the OPTICS clustering algo-rithm [38] and further incorporate multi-task contrastive pre-training to develop a model variant that accommodates mul-tiple image inputs ( e.g. , multi-image and panoramic queries), thereby extending worldwide image geo-localization to more diverse input types. Although hybrid-based methods reduce the storage and computation overhead associated with pure retrieval ap-proaches, the process of discretizing continuous geographic space into discrete class labels inevitably introduces quantiza-tion errors. This leads to limited granularity in geographical location discrimination, thereby compromising fine-grained localization accuracy to some extent. While significant progress has been made in worldwide image geolocalization technologies, existing methods often fail to capture the spatial relationships between images, making it difficult to distinguish visually similar images captured at distant locations. To address this challenge, we propose an in-novative approach, TransGeoCLIP, which learns the positional relationships among images to enhance localization accuracy. III. P ROPOSED METHOD 
+
+Current worldwide image geo-localization methods often struggle to distinguish fine-grained geographical locations, frequently misidentifying images with similar visual features but different geographic origins. To address these challenges, we propose TransGeoCLIP, a two-stage framework integrating retrieval database construction and retrieval-enhanced infer-ence, as illustrated in Fig. 3. 
+
+A. Backbone Framework 
+
+TransGeoCLIP achieves “image-text-GPS” multimodal alignment by uniformly encoding images in the retrieval database, enabling each image to embed its inherent geograph-ical information, as illustrated in Fig. 3(a). The core of TransGeoCLIP lies in constructing a worldwide image retrieval database enhanced with geospatial features, followed by retrieving this database to determine the capture location of a query image. Existing database construction methods typically employ visual encoders ( e.g. , ResNet [39] or ViT [27]) to encode images, while using MLP or FCNN to encode GPS coordinates, and achieve “image-GPS” corre-spondence through contrastive learning. However, it is important to note that visual similarity between images does not necessarily imply spatial proximity. Recent work [29] has shown that geographic features used for localization consist of both continuous and discrete attributes, which are critical for accurate geo-localization. Continuous features include climate, terrain, and vegetation that gradually vary along latitude and longitude, and are typically derived from the image content itself. Discrete features refer to cate-gorical identifiers such as city or country names, which can be obtained via reverse geocoding of GPS coordinates. Therefore, Jia et al. [29] enrich image representations by matching images with their corresponding descriptive texts. Building upon this foundation, our work deeply exploits both discrete and continuous geographic features. We leverage contrastive learning frameworks, such as CLIP, to compute the similarity matrix among images, text descriptions, and GPS coordinates. Then, we optimize the model with loss functions (Section III-D) to achieve tight image-text-GPS 4
+
+> Fig. 3. Overview of the TransGeoCLIP framework. It consists of two phases: retrieval database construction and retrieval-augmented inference. The construction of the retrieval database leverages a CLIP-based contrastive learning backbone integrated with a Transformer-based GPS encoder. The encoder utilizes a location attention mechanism to refine geographical representation.
+
+trimodal alignment. This strengthens the intrinsic connections between discrete and continuous features, thereby embedding richer geospatial information into the image representation. We construct our image retrieval database following the prior work [29], as shown in the “Building Retrieval Database” module in Fig. 3(a). 
+
+B. Transformer-based GPS Encoder 
+
+To encode GPS coordinates, it is necessary to transform the 2D GPS coordinates into a Cartesian coordinate system [40]. We first apply a Mercator projection to the 2D GPS coordinates. Unlike prior work [27], we do not adopt EEP, as previous studies [29] have shown that EEP primarily preserves area accuracy while neglecting angular distortion. In contrast, the Mercator projection effectively preserves directional trends along latitude and longitude, making it more suitable for modeling geospatial patterns. The formula for the Mercator projection is as follows: 
+
+( x = R · (λ − λ0)
+
+y = R · ln 
+
+h
+
+tan 
+
+ π 
+
+> 4
+
++ ϕ
+
+> 2
+
+i (1) where λ and ϕ denote the longitude and latitude in radians, respectively, and λ0 represents the longitude of the central meridian. R is a scaling constant related to the Earth’s radius, while x and y represent the resulting Cartesian coordinates after transformation. After the initial projection, Random Fourier Features (RFF) with varying frequencies are applied to capture high-frequency patterns and hierarchical representations of the coordinates. Instead of relying on MLP or FCNN architectures common in 5
+
+prior work, we employ a Transformer-based GPS encoder to model the intrinsic features embedded in these GPS vectors, as illustrated in Fig. 3(b). Our key contribution lies in a complementary attention design that enables context-aware geographic representation, overcoming the limitations of isolated encoding used by previous methods. At the intra-sample level, the Transformer utilizes self-attention to process the RFF-encoded locational features [27]. This allows geographically proximate samples to exert higher influence on attention scores during feature aggregation. At the inter-sample level, we introduce a specific location attention mechanism to capture relationships relations between images in the batch. This mechanism enables samples to perceive their locational connections with neighboring data points by focusing on relative location ordering. By jointly modeling both self-location awareness and inter-sample spatial relationships, our approach significantly enhances the semantic richness of location information within the retrieval database. We provide a detailed formulation of this location attention mechanism in Section III-C. 
+
+C. Location Attention Mechanism 
+
+During the GPS encoding process within the Transformer-based GPS encoder, we innovatively design a location attention mechanism, as illustrated in Fig. 3(c). Existing methods [27]–[29] determine image ordering in the retrieval database purely through contrastive learning, ignoring geographical correlations. Our location attention mechanism incorporates spatial distance into attention weight computa-tion, dynamically reorganizing image arrangement to assign higher similarity scores to geographically proximate pairs, even when they are visually distinct. The attention score Ai,j 
+
+incorporating geographic distance is computed as follows: 
+
+Ai,j = Qi · KTj
+
+√d · e− dist (i,j )max( dist ) (2) where Qi and KTj denote the query vector of the i-th sample and the key vector of the j-th sample, respectively. d is the vector dimension, dist (i, j ) represents the Haversine distance between samples i and j, and max( dist ) is the maximum distance within the batch. This formula transforms distance into similarity weights via an exponential function, assigning higher attention scores to sample pairs that are closer in space. The final attention output Oi is computed as: 
+
+Oi =
+
+> N
+
+X
+
+> j=1
+
+Softmax (Ai,j ) · Vj + xi (3) where Vj is the value vector of the j-th sample, and xi is the original input vector, which is preserved through a residual connection to maintain the original feature information. Building upon standard self-attention mechanisms, the lo-cation attention mechanism modulates attention distribution among samples through distance-based weighting. This allows geographically proximate samples to exert higher influence during feature aggregation, thereby ensuring that images from nearby regions are embedded closer together in the vector space of the retrieval database. 
+
+D. Contrastive Learning Loss Optimization 
+
+During model training, we adopt a multi-stage strategy to integrate multimodal learning outcomes and optimize the loss function. The training loss is described as follows. (1) text-image contrastive loss computation: 
+
+LT I = − 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+log e2sT I ii /τ 1
+
+P 
+
+> j
+
+esT I ij /τ 1
+
+  P 
+
+> j
+
+esT I ji /τ 1
+
+ (4) (2) location-image contrastive loss computation: 
+
+LLI = − 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+log e2sLI ii /τ 2
+
+P 
+
+> j
+
+esLI ij /τ 2
+
+  P 
+
+> j
+
+esLI ji /τ 2
+
+ (5) (3) text-location contrastive loss computation: 
+
+LT L = − 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+log e2sT L ii /τ 3
+
+P 
+
+> j
+
+esT L ij /τ 3
+
+  P 
+
+> j
+
+esT L ji /τ 3
+
+ (6) where sT I ij denotes the cosine similarity between the i-th image feature and the j-th text feature after projection, sLI ij represents the cosine similarity between the i-th image feature and the 
+
+j-th location feature after projection, and sT L ij denotes the cosine similarity between the i-th text feature and the j-th location feature after projection. τ1, τ2, and τ3 are temperature parameters, and N is the batch size. Additionally, we introduce a triplet loss to enhance multi-modal consistency: 
+
+(∆i = d(fT (i), f I (i)) − d(fT (i), f L(i)) 
+
+LT LI = 1
+
+> N
+
+PNi=1 max 
+
+
+
+0, m + ∆ i
+
+ (7) where d(x, y ) denotes the Euclidean distance, and m is a margin parameter that ensures the distance between text and location features is smaller than that between text and image features. The overall loss for the “image-text-GPS” multimodal contrastive learning is then computed as: 
+
+Loss = LTL + LLI + LTI + 0 .5 × LTLI (8) The triplet loss employed in TransGeoCLIP directly opti-mizes the consistency among image, text, and GPS modalities. Compared to conventional pairwise contrastive losses, it aligns text, geographic location, and image features into a unified semantic space more effectively. After completing the modality alignment, we encode the images from the MP16-Pro dataset and store the resulting em-beddings in a FAISS database with GPU acceleration support, enabling efficient retrieval for query images in subsequent geo-localization tasks. 
+
+E. LMM-based Location Inference 
+
+Some existing methods directly use the location of the most similar image in the database as the predicted location for the query image, without further reasoning. Other studies [28] use the retrieved GPS coordinates of the query image as reference information. They construct a query prompt containing a single GPS coordinate and input it to LMMs to generate predictions. In practice, we find that RAG prompts composed of a single 6
+
+GPS coordinate provide limited improvement in localization accuracy. To better leverage the retrieval results, TransGeoCLIP ex-pands the context provided to the LMMs, as illustrated in Fig. 3 (Retrieval-Augmented Inference). Specifically, for a query image, we retrieve the n most similar images and n most least similar images from the database. The GPS coordinates of these 2n images are incorporated into the prompt for contextual reference. Furthermore, our experiments reveal that during location inference via LMMs, the model may refuse to respond if the input image contains political or adult content. In such instances, we use the top-1 retrieval result as the final location prediction. For further clarification of the frequency of such occurrences, please refer to the supplementary materials. IV. E XPERIMENTAL RESULTS AND ANALYSIS 
+
+In this section, Section IV-A introduces the datasets and evaluation metrics used in our experiments. Section IV-B describes the implementation details. Section IV-C compares the performance of TransGeoCLIP with other state-of-the-art methods. Section IV-D presents an ablation study to evaluate the contributions of key components within the proposed TransGeoCLIP framework. Section IV-E presents the performance on visually similar landmarks recognition. Finally, Section IV-F conducts a hyperparameter analysis of the parameters in TransGeoCLIP. 
+
+A. Datasets and Evaluation Details 
+
+To comprehensively evaluate TransGeoCLIP, we construct our training and testing datasets using multiple commonly available public datasets. 
+
+Training dataset. We utilize the MP16-Pro dataset [29] for training and construct a worldwide image retrieval database based on it. MP16-Pro derives its images and location in-formation from the original MP16 dataset (which initially contained 4.72 million images), with corresponding textual descriptions generated by Jia et al. [29] for each image. Due to the expiration of some image links, the current MP16-Pro dataset consists of 4,122,119 images. 
+
+Testing dataset. To comprehensively evaluate the perfor-mance of TransGeoCLIP across different datasets, we conduct extensive comparative and ablation studies on IM2GPS3k [1] and YFCC4k [1]. Containing 2,997 and 4,368 images re-spectively, these two datasets serve as medium-scale bench-marks for worldwide image geo-localization. Furthermore, we perform comparative experiments on IM2GPS [16] and YFCC26k [24]. IM2GPS is a small-scale, manually cu-rated test set comprising which contains 237 images, while YFCC26k is a large-scale test set with 21,804 images (reduced from the original 25,600 due to expired image links). To further assess localization performance under visual ambiguity, we construct a small-scale test set named TwinBuilds , as no existing dataset specifically targets similar architectural struc-tures. We collect images of three iconic landmarks, namely the Eiffel Tower, Arc de Triomphe, and Statue of Liberty, along with their replicas across 14 cities including Las Vegas, Paris, Hangzhou, Tokyo, and Pyongyang. For each landmark, we  
+
+> Fig. 4. Examples in TwinBuilds dataset. (a) Similar buildings of the Statue of Liberty around the world. (b) Similar buildings of the Eiffel Tower around the world.
+
+gather three distinct views and apply random cropping trans-formations to generate a total of 210 images. Fig. 4 presents two sets of representative examples from the TwinBuilds dataset. Our code and the TwinBuilds dataset are publicly available at: https://github.com/CJ310177/TransGeoCILP. 
+
+Evaluation Metrics. We assess our method’s performance by measuring accuracy at multiple geographic granularities, ranging from street-level (1 km) to continent-level (2500 km), with intermediate thresholds at city-level (25 km), region-level (200 km), and country-level (750 km). For each test image, we compute the geodesic distance between predicted and ground-truth coordinates, reporting the proportion of predictions within each threshold. For the similar building recognition experiments, we assess prediction reliability using three metrics: (1) Acc(%) : The proportion of correctly localized (city-level) images within the entire test set; (2) Recall@5(%) : The probability that a correct match appears within the top-5 retrieved results; (3) Mean Error (km) : Mean error distance, which is calculated as the average deviation from the predicted location to the building center ( i.e. , the actual shooting point). (4) Top-5 Closest (GPS/ No.) : The coordinates and order of the top-5 retrieved results closest to the ground truth location. 
+
+B. Implementation Details 
+
+We employ the image and text encoders from the pre-trained CLIP ViT-L/14 model to process the dataset. The feature vectors for images and text are set to 768 dimensions, following BERT [41]. For encoding the GPS coordinates of training images, we configure the RFF to output 1024 dimen-sions, with the Earth’s half-circumference set to 20,037,508.34 meters. The GPS feature vectors transformed by RFF are subsequently compressed to 512 dimensions via a Trans-former network. These 512-dimensional representations are maintained for computing location attention scores. During the 7                                                                                                                                                                                                                                 
+
+> TABLE I PERFORMANCE COMPARISON OF TRANS GEO CLIP AND BASELINE METHODS .Method IM2GPS3k [1] YFCC4k [1] Street 1 km City 25 km Region 200 km Country 750 km Continent 2,500 km Street 1 km City 25 km Region 200 km Country 750 km Continent 2,500 km PlaNet [17] ECCV’16 8.5 24.8 34.3 48.4 64.6 5.6 14.3 22.2 36.4 55.8 [L]kNN, σ=4[1] ICCV’17 7.2 19.4 26.9 38.9 55.9 2.3 5.7 11.0 23.5 42.0 CPlaNet [21] ECCV’18 10.2 26.5 34.6 48.6 64.6 7.9 14.8 21.9 36.4 55.5 ISNs [24] ECCV’18 10.5 28.0 36.6 49.7 66.0 6.5 16.2 23.8 37.4 55.0 Translocator [35] ECCV’22 11.8 31.1 46.7 58.9 80.1 8.4 18.6 27.0 41.1 60.4 GeoDecoder [18] CVPR’23 12.8 33.5 45.9 61.0 76.1 10.3 24.4 33.9 50.0 68.7 GeoCLIP [27] NeurIPS’23 14.11 34.47 50.65 69.67 83.82 9.59 19.31 32.63 55.0 74.69 Img2loc [28] SIGIR’24 15.34 39.83 53.59 69.7 82.78 19.78 30.71 41.4 58.11 74.07 PIGEON [23] CVPR’24 11.3 36.7 53.8 72.4 85.3 10.4 23.7 40.6 62.2 77.7 G3 [29] NeurIPS’24 16.65 40.94 55.56 71.24 84.68 23.99 35.89 46.98 64.26 78.15
+> TransGeoCLIP 17.72 42.17 56.80 71.71 86.12 31.17 41.09 51.84 67.75 81.01
+> ∆(% points) +1.07 +1.23 +1.24 -0.69 +0.82 +7.18 +5.2 +4.86 +3.49 +2.86 Method IM2GPS [16] YFCC26k [24] Street 1 km City 25 km Region 200 km Country 750 km Continent 2,500 km Street 1 km City 25 km Region 200 km Country 750 km Continent 2,500 km PlaNet [17] ECCV’16 8.4 24.5 37.6 53.6 71.3 4.4 11.0 16.9 28.5 47.7 CPlaNet [21] ECCV’18 16.5 37.1 46.4 62.0 78.5 -----ISNs [24] ECCV’18 16.9 43.0 51.9 66.7 80.2 5.3 12.3 19.0 31.9 50.7 Translocator [35] ECCV’22 19.9 48.1 64.6 75.6 86.7 7.2 17.8 28.0 41.3 60.6 GeoDecoder [18] CVPR’23 22.1 50.2 69.0 80.0 89.1 10.1 23.9 34.1 49.6 69.0 PIGEON [23] CVPR’24 14.8 40.9 63.3 82.3 91.1 10.5 25.8 42.7 63.2 79.0
+> TransGeoCLIP 23.6 51.5 65.4 79.3 92.0 20.25 33.7 46.4 64.1 79.3
+> ∆(% points) +1.5 +1.3 -3.6 -3.0 +0.9 +9.75 +7.9 +3.7 +0.9 +0.3
+
+modality alignment process, these 512-dimensional location features are projected to 768 dimensions to ensure consistency with the image and text feature dimensions. TransGeoCLIP is trained using multi-card multi-process parallelism, with sub-processes set to 16 and batch size set to 256. The temperature parameters for contrastive learning are set to τ1 = 3 .9, τ2 = 4 .3, and τ3 = 3 .3, respectively, and the optimizer is set to AdamW with a 3e-5 learning rate. Regarding the selection of LMMs, we adopt qwen-vl-plus ,an available LMM, to perform image location inference. In terms of determining the number of candidate locations for RAG, extensive empirical testing (Section IV-E) indicates that setting the number of candidate locations to 20 (20 positive and 20 negative samples) is optimal for the IM2GPS3k and IM2GPS datasets, while a count of 5 (5 positive and 5 negative samples) is preferred for the YFCC4k and YFCC26k datasets. All experiments are conducted using PyTorch on two NVIDIA A6000 GPUs. More details on training and inference can be found in the supplementary material. 
+
+C. Comparison with State-of-the-art Methods 
+
+To thoroughly evaluate the geo-localization performance of TransGeoCLIP, we conduct extensive experiments on di-verse datasets, including IM2GPS, IM2GPS3k, YFCC4k, and YFCC26k. We compare TransGeoCLIP with recent SOTA methods, including [L]kNN [1], PlaNet [17], CPlaNet [21], ISNs [24], Translocator [35], GeoDecoder [18], GeoCLIP [27], Img2Loc [28], PIGEON [23], and G3 [29]. Due to regional access restrictions preventing the use of GPT-4V, we are unable to reproduce methods relying on this proprietary model. For such baselines, we strictly report the results as published in their original papers. As shown in Table I, TransGeoCLIP achieves consistent and significant improvements across most benchmarks. The performance advantage is evident at fine-grained scales (street and city). This superiority stems from our Transformer-based GPS encoder coupled with the proposed location attention mechanism, which effectively captures subtle visual cues es-sential for precise localization. Furthermore, the integration of LMM reasoning capabilities significantly mitigates large-scale geographic ambiguities, leading to marked improvements at the continent level. Notably, on the large-scale datasets with richer image diversity (YFCC4k and YFCC26k), our method demonstrates robust performance gains across all geographic thresholds. This consistency validates the strong generalization capability of TransGeoCLIP on data distributions differing from the training set. We also analyze specific scenarios where performance mar-gins were narrow. The slight dip in accuracy on the IM2GPS dataset at the region and country levels can be attributed to the dataset’s limited scale (only 237 images). This data scarcity restricts statistical diversity, making it challenging for deep models to generalize without overfitting. On IM2GPS3k, while TransGeoCLIP and other retrieval-based methods ( e.g. , G3) outperform most baselines, their accuracy at the 750 km threshold slightly trails that of the 8                                                                                     
+
+> TABLE II PERFORMANCE COMPARISON WITH BASELINE METHODS WITH THE LMM
+> REASONING COMPONENT DISABLED .Datasets Methods 1km 25km 200km 750km 2500km IM2GPS3k GeoCLIP [27] 13.11 32.17 47.98 66.53 82.32
+> G3 [29] 12.08 32.97 47.45 65.43 81.68 Ours 14.51 35.07 48.75 68.92 82.05
+> ∆(% points) +1.41 +2.1 +0.77 +2.67 -0.27 YFCC4k GeoCLIP [27] 9.96 20.03 33.88 57.01 76.69 G3 [29] 14.35 25.94 39.79 59.11 77.40
+> Ours 28.39 36.72 44.85 61.24 76.42
+> ∆(% points) +14.04 +10.78 +5.06 +2.13 -0.98 TABLE III EXPERIMENTAL RESULTS OF ABLATION STUDY .Datasets Methods 1km 25km 200km 750km 2500km IM2GPS3k w/o Geo-M 13.58 33.5 47.54 66.83 80.98 w/o Geo-L 13.35 33.27 44.56 61.23 79.08 w/o Geo-A 14.51 35.07 48.75 68.92 82.05
+> YFCC4k w/o Geo-M 26.02 35.67 43.98 59.61 76.79
+> w/o Geo-L 18.99 27.69 39.98 58.26 74.15 w/o Geo-A 28.39 36.72 44.85 61.24 76.42
+
+classification-based PIGEON. This gap stems from the in-herent structural constraints of classification methods, where fixed geographic partitions provide strong priors for coarse-grained localization. Nevertheless, TransGeoCLIP achieves superior fine-grained accuracy across all lower thresholds, demonstrating its strength in precise geo-localization. 
+
+D. Ablation Study 
+
+To evaluate the standalone efficacy of our proposed retrieval database, we conduct a comprehensive ablation study with the LMM reasoning components disabled. Specifically, we reproduce the retrieval databases of GeoCLIP [27] and G3 [29] using their official implementations as baselines. We then compare all three methods on the IM2GPS3k and YFCC4k datasets, relying solely on their respective retrieval outputs for prediction without any subsequent LMM refinement. The experimental results, summarize in Table II, demon-strate that TransGeoCLIP achieves superior performance even in this restricted setting. On the IM2GPS3k dataset, our method outperforms the strongest baseline (G3) by mar-gins of +1.41%, +2.10%, +0.77%, and +2.67% at the 1km, 25km, 200km, and 750km thresholds, respectively. The ad-vantage is even more pronounced on the larger-scale YFCC4k 
+
+dataset, where TransGeoCLIP yields substantial improvements of +14.04%, +10.78%, +5.06%, and +2.13% across the same fine-to-coarse geographic scales. These results confirm that the core architecture of our retrieval database inherently captures more discriminative geo-visual features than existing SOTA approaches. To further dissect the contributions of specific modules within the TransGeoCLIP retrieval database, we perform a component-wise ablation study (Table III):  
+
+> •
+
+w/o Geo-M : Removes the Transformer-based GPS en-coder (replaced by a simple MLP) and disables RAG. This tests the necessity of structured GPS tokenization.  
+
+> •
+
+w/o Geo-L : Removes the proposed location attention mechanism and disables RAG. This isolates the impact of spatial-aware feature aggregation.  
+
+> •
+
+w/o Geo-A : Represents the fully constructed TransGeo-CLIP retrieval database (including w/o Geo-M and w/o Geo-L ) but without the final RAG enhancement. This serves as the upper bound of our pure retrieval capability. Synthesizing the results from Tables II and III, we draw four key conclusions:  
+
+> •
+
+Modular Contribution: Each component ( w/o Geo-M, w/o Geo-L ) contributes incrementally to the final performance. The drop in accuracy when removing the location attention mechanism ( w/o Geo-L ) is particularly severe at fine-grained levels (1km and 25km), validating its critical role in capturing subtle local cues.  
+
+> •
+
+SOTA Retrieval Capability: Even without RAG en-hancement (the w/o Geo-A configuration), TransGeo-CLIP surpasses existing models across most thresholds (1km to 750km) on both datasets. This indicates that our improved feature alignment alone is sufficient to achieve state-of-the-art performance for pure retrieval-based geo-localization.  
+
+> •
+
+Fine-Grained Precision: The location attention mech-anism ( w/o Geo-L ) demonstrates the most significant impact on fine-grained localization, driving the majority of gains at the street and city levels.  
+
+> •
+
+The Role of LMM in Coarse Localization: The w/o Geo-A configuration exhibits limitations at the conti-nental scale, underscoring the essential role of LMM reasoning in bridging this performance gap to achieve SOTA results. The ablation study shows that the location attention mech-anism boosts prediction accuracy by reducing dependence on visual features. It operates via two key strategies: (1) reordering training images by geographic proximity during retrieval database construction, and (2) applying triplet loss to balance visual and locational information. 
+
+E. Performance on Visually Similar Landmarks 
+
+On the TwinBuilds dataset, we compare the performance of TransGeoCLIP, GeoCLIP [27], and G3 [29] on visually similar landmark recognition without using LMMs. As shown in Table IV, our method achieves superior localization per-formance in these ambiguous cases, owing to the location attention mechanism that helps distinguish between similar-looking images. Table V shows the prediction results for three similar landmarks. Even when TransGeoCLIP predicts incorrectly (e.g. , Case 3), it still ranks the correct geographic region among its top guesses. Thus, TransGeoCLIP without LMMs achieves higher accuracy and geographic awareness, enabling more robust localization under visual ambiguity. 97b 32b plus max 
+
+> 0.175
+> 0.200
+> 0.225
+> 0.250
+> 0.275
+> 0.300
+> Accuracy (%)
+
+Street    
+
+> yfcc4k
+> im2gps3k
+> 7b 32b plus max
+> 0.38
+> 0.39
+> 0.40
+> 0.41
+> 0.42
+> Accuracy (%)
+
+City    
+
+> yfcc4k
+> im2gps3k
+> 7b 32b plus max
+> 0.48
+> 0.50
+> 0.52
+> 0.54
+> 0.56
+> Accuracy (%)
+
+Region    
+
+> yfcc4k
+> im2gps3k
+> 7b 32b plus max
+> 0.64
+> 0.66
+> 0.68
+> 0.70
+> 0.72
+> Accuracy (%)
+
+Country    
+
+> yfcc4k
+> im2gps3k
+> 7b 32b plus max
+> 0.80
+> 0.82
+> 0.84
+> 0.86
+> Accuracy (%)
+
+Continent 
+
+> yfcc4k
+> im2gps3k
+
+Fig. 5. Impact of different LMMs on TransGeoCLIP. n=1 n=5 n=10 n=15 n=20 n=25 
+
+Number of Coordinates 
+
+14 
+
+16 
+
+18 
+
+> Accuracy (%)
+
+Street      
+
+> n=1 n=5 n=10 n=15 n=20 n=25
+
+Number of Coordinates 
+
+35 
+
+40 
+
+> Accuracy (%)
+
+City      
+
+> n=1 n=5 n=10 n=15 n=20 n=25
+
+Number of Coordinates 
+
+50 
+
+55 
+
+> Accuracy (%)
+
+Region      
+
+> n=1 n=5 n=10 n=15 n=20 n=25
+
+Number of Coordinates 
+
+68 
+
+70 
+
+72 
+
+74 
+
+> Accuracy (%)
+
+Country      
+
+> n=1 n=5 n=10 n=15 n=20 n=25
+
+Number of Coordinates 
+
+82 
+
+84 
+
+86 
+
+88 
+
+> Accuracy (%)
+
+Continent 
+
+Fig. 6. The influence of the number of coordinates (for both similar and dissimilar images) fed into the LMM on IM2GPS3k. n=1 n=5 n=10 n=15 n=20 
+
+Number of Coordinates 
+
+28 
+
+30 
+
+32 
+
+> Accuracy (%)
+
+Street 
+
+n=1 n=5 n=10 n=15 n=20 
+
+Number of Coordinates 
+
+35.0 
+
+37.5 
+
+40.0 
+
+42.5 
+
+> Accuracy (%)
+
+City 
+
+n=1 n=5 n=10 n=15 n=20 
+
+Number of Coordinates 
+
+45 
+
+50 
+
+> Accuracy (%)
+
+Region 
+
+n=1 n=5 n=10 n=15 n=20 
+
+Number of Coordinates 
+
+62.5 
+
+65.0 
+
+67.5 
+
+> Accuracy (%)
+
+Country 
+
+n=1 n=5 n=10 n=15 n=20 
+
+Number of Coordinates 
+
+76 
+
+78 
+
+80 
+
+82 
+
+> Accuracy (%)
+
+Continent 
+
+Fig. 7. The influence of the number of coordinates (for both similar and dissimilar images) fed into the LMM on YFCC4k. TABLE IV LOCALIZATION PERFORMANCE COMPARISON ON VISUALLY SIMILAR 
+
+LANDMARKS .Landmark Method Acc Recall @5 M ean Error 
+
+Arc de Triomphe GeoCLIP [27] 41.6 41.6 5585.54 G3 [29] 83.3 83.3 2281.1 TransGeoCLIP 83.3 100.0 1507.11 
+
+Eiffel Tower GeoCLIP [27] 50.0 50.0 2712.7 G3 [29] 50.0 50.0 3018.01 TransGeoCLIP 55.6 61.1 2477.43 
+
+Statue of Liberty GeoCLIP [27] 100.0 100.0 0.674 
+
+G3 [29] 75.0 75.0 1650.85 TransGeoCLIP 100.0 100.0 5.47 
+
+F. Impact of LMM on TransGeoCLIP 
+
+To investigate the impact of different LMMs on Trans-GeoCLIP, we evaluate four Qwen-VL variants: qwen2.5-vl-7b , qwen2.5-vl-32b , qwen-vl-plus , and qwen-vl-max , on IM2GPS3k and YFCC4k, using 20 and 5 candidate locations, respectively. As shown in Fig. 5, the choice of LLM, with 
+
+qwen-vl-plus yielding the largest improvement. Second, among all tested Qwen-VL models, qwen-vl-plus exhibits the most stable and consistent results across geographic scales. We further investigate the influence of the number of coordi-nates for both similar and dissimilar images fed into the LMM. Results in Fig. 6 and Fig. 7 show that with only one coordi-nate, the performance is nearly identical to that of using the worldwide retrieval database alone, offering negligible gain. 
+
+TABLE V RECOGNITION RESULTS OF VARIOUS METHODS ON VISUALLY SIMILAR 
+
+LANDMARKS .
+
+On IM2GPS3k, the accuracy steadily improves as the number of coordinates increases from 1 to 20, reflecting a higher probability of including candidates close to the ground truth. On YFCC4k, accuracy may peak at 5 coordinates; beyond this point, increasing the number of coordinates introduces noisy samples, leading to minor fluctuations or slight degradation. This highlights the importance of balancing the number of coordinates with their relevance. 10 
+
+V. C ONCLUSION 
+
+We present TransGeoCLIP, a novel framework for world-wide image geo-localization that effectively distinguishes vi-sually similar scenes across different geographic regions. It integrates a Transformer-based GPS encoder with a location attention mechanism to achieve tight image-text-GPS align-ment. Extensive experiments show that our method achieves SOTA performance, particularly excelling in fine-grained lo-calization and distinguishing visually similar landmarks. Additionally, through comprehensive ablation study and hyperparameter analysis, we provide insights into TransGeo-CLIP’s design choices, offering valuable guidance for future research in the field of image geo-localization. REFERENCES [1] N. Vo, N. Jacobs and J. Hays, “Revisiting IM2GPS in the Deep Learning Era,” in ICCV , pp. 2640–2649, 2017. [2] W. Wu and Y. Liu, “Editorial for the Special Issue: ’Integrated Ap-plications of Geo-Information in Environmental Monitoring’,” Remote Sensing , vol. 14, pp. 4251–4254, 2022. [3] J. Choi, C. Wong, A. Hajj-Ahmad, M. Wu and Y. Ren, “Invisible Geolo-cation Signature Extraction From a Single Image,” IEEE Transactions on Information Forensics and Security , vol. 17, pp. 2598–2613, 2022. [4] V. A. Krylov, E. K. and R. Dahyot, “Automatic Discovery and Geotag-ging of Objects from Street View Imagery,” Remote Sensing , vol. 10, pp. 661–680, 2017. [5] S. Chuprov, P. Belyaev, R. Gataullin, L. Reznik, E. Neverov and I. Viksnin, “Robust Autonomous Vehicle Computer-Vision-Based Local-ization in Challenging Environmental Conditions,” Applied Sciences ,vol. 13, pp. 1–15, 2023. [6] Y. Himeur, B. Rimal, A. Tiwary and A. Amira, “Using artificial intelligence and data fusion for environmental monitoring: A review and future perspectives,” Information Fusion , vol. 86–87, pp. 44–75, 2022. [7] H. Noh, A. Araujo, J. Sim, T. Weyand and B. Han, “Large-Scale Image Retrieval with Attentive Deep Local Features,” in ICCV , pp. 3476–3485, 2017. [8] A. R. Zamir and M. Shah, “Image Geo-Localization Based on Multiple Nearest Neighbor Feature Matching Using Generalized Graphs,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 36, no. 8, pp. 1546–1558, 2014. [9] Y. Zheng, M. Zhao, Y. Song, H. Adam, U. Buddemeier, A. Bissacco, F. Brucher, T. Chua and H. Neven, “Tour the world: Building a web-scale landmark recognition engine,” in CVPR , pp. 1085–1092, 2009. [10] T. Weyand, A. Ara´ ujo, B. Cao and J. Sim, “Google Landmarks Dataset v2 – A Large-Scale Benchmark for Instance-Level Recognition and Retrieval,” in CVPR , pp. 2572–2581, 2020. [11] X. Gu, Y. Wong, L. Shou, P. Peng, G. Chen, and M. S. Kankanhalli, “Multi-modal and multi-domain embedding learning for fashion retrieval and analysis,” IEEE Transactions on Multimedia , vol. 26, pp. 1524— 1537, 2019. [12] Y. Jiang, K. Chen, W. Yan, X. Yan, G. Yang, and K. Zeng, “Robust secret image sharing resistant to jpeg recompression based on stable block condition,” IEEE Transactions on Multimedia , vol. 26, pp. 10446– 10461, 2024. [13] Z. Zeng, Z. Wang, Z. Wang, Y. Zheng, Y.-Y. Chuang, and S. Satoh, “Illumination-adaptive person re-identification,” IEEE Transactions on Multimedia , vol. 22, pp. 3064—3074, 2020. [14] C. Zheng, L. Zhu, Z. Cheng, J. Li, and A.-A. Liu, “Adaptive partial multi-view hashing for efficient social image retrieval,” IEEE Transac-tions on Multimedia , vol. 23, pp. 4079—4092, 2021. [15] N. Wu, C. Yang, B. Qi, M. Zhu, J. Li, and X. Luo, “CCIGeo: Cross-View and Cross-Day-Night Image Geo-localization Using Daytime Image Supervision,” IEEE Transactions on Multimedia , vol. 27, pp. 6475–6488, 2025. [16] J. Hays and A. A. Efros, “IM2GPS: estimating geographic information from a single image,” in CVPR , pp. 1–8, 2008. [17] T. Weyand, I. Kostrikov and J. Philbin, “PlaNet - Photo Geolocation with Convolutional Neural Networks,” in ECCV , pp. 37–55, 2016. [18] B. Clark, A. Kerrigan, P. P. Kulkarni, V. V. Cepeda and M. Shah, “Where We Are and What We’re Looking At: Query Based Worldwide Image Geo-localization Using Hierarchies and Scenes,” in CVPR , pp. 23182– 23190, 2023. [19] Z. Li, F. Liu, W. Yang, S. Peng and J. Zhou, “A Survey of Convolu-tional Neural Networks: Analysis, Applications, and Prospects,” IEEE Transactions on Neural Networks and Learning Systems , vol. 33, pp. 6999–7019, 2020. [20] K. Han, Y. Wang, H. Chen, X. Chen, J. Guo, Z. Liu, Y. Tang, A. Xiao, C. Xu, Y. Xu, Z. Yang, Y. Zhang and D. Tao, “A Survey on Vision Transformer,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 45, pp. 87–110, 2023. [21] P. H. Seo, T. Weyand, J. Sim and B. Han, “CPlaNet: Enhancing Image Geolocalization by Combinatorial Partitioning of Maps,” in ECCV , pp. 544–560, 2018. [22] G. Luo, G. Biamby, T. Darrell, D. Fried and A. Rohrbach, “G 3:Geolocation via Guidebook Grounding,” in Findings of the Association for Computational Linguistics: EMNLP , pp. 5841–5853, 2022. [23] L. Haas, M. Skreta, S. Alberti and C. Finn, “PIGEON: Predicting Image Geolocations,” in CVPR , pp. 12893–12902, 2024. [24] E. M¨ uller-Budack, K. Pustu-Iren and R. Ewerth, “Geolocation Estima-tion of Photos Using a Hierarchical Model and Scene Classification,” in 
+
+ECCV , pp. 575–592, 2018. [25] J. Theiner, E. M¨ uller-Budack and R. Ewerth, “Interpretable Semantic Photo Geolocation,” in WACV , pp. 1474–1484, 2022. [26] Y. Shi, L. Liu, X. Yu and H. Li, “Spatial-aware feature aggregation for cross-view image based geo-localization,” in NeurIPS , pp. 1–11, 2019. [27] V. V. Cepeda, G. K. Nayak and M. Shah, “GeoCLIP: clip-inspired alignment between locations and images for effective worldwide geo-localization,” in NeurIPS , pp. 1–12, 2023. [28] Z. Zhou, J. Zhang, Z. Guan, M. Hu, N. Lao, L. Mu, S. Li and G. Mai, “Img2Loc: Revisiting Image Geolocalization using Multi-modality Foundation Models and Image-based Retrieval-Augmented Generation,” in SIGIR , pp. 2749–2754, 2024. [29] P. Jia, Y. Liu, X. Li, Y. Wang, Y. Du, X. Han, X. Wei, S. Wang, D. Yin and X. Zhao, “G3: an effective and adaptive framework for worldwide geolocalization using large multi-modality models,” in NeurIPS , pp. 1– 24, 2024. [30] M. Izbicki, E. E. Papalexakis and V. J. Tsotras, “Exploiting the Earth’s Spherical Geometry to Geolocate Images,” in ECML PKDD , pp. 3–19, 2020. [31] J. Kosecka and W. Zhang, “Video Compass,” in ECCV , pp. 476–490, 2002. [32] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, G. Krueger and I. Sutskever, “Learning Transferable Visual Models From Natural Language Super-vision,” in ICML , pp. 8748–8763, 2021. [33] C. Hirt and M. Rexer, “Earth2014: 1 arc-min shape, topography, bedrock and ice-sheet models - Available as gridded data and degree-10, 800 spherical harmonics,” International Journal of Applied Earth Observation and Geoinformation , vol. 39, pp. 103–112, 2015. [34] D. G. Shatwell, I. R. Dave, S. S. and M. Shah, “GT-Loc: Unifying When and Where in Images Through a Joint Embedding Space,” in ICCV , pp. 1–11, 2025. [35] S. Pramanick, E. M. Nowara, J. Gleason, C. D. Castillo and R. Chellappa, “Where in the World Is This Image? Transformer-Based Geo-localization in the Wild,” in ECCV , pp. 196–215, 2022. [36] X. Xin, J. Jiang and Y. Zou, “A review of Visual-Based Localization,” in RICAI , pp. 94–105, 2019. [37] J. Wang, K. Sun, T. Cheng, B. Jiang, C. Deng, Y. Zhao, D. Liu, Y. Mu, M. Tan, X. Wang, W. Liu and B. Xiao, “Deep High-Resolution Representation Learning for Visual Recognition,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 43, pp. 3349–3364, 2021. [38] M. Ankerst, M. M. Breunig, H. Kriegel and J. Sander, “OPTICS: ordering points to identify the clustering structure,” in SIGMOD , 1999. [39] S. Gao, M. Cheng, K. Zhao, X. Zhang, M. Yang and P. H. Torr, “Res2Net: A New Multi-Scale Backbone Architecture,” IEEE Trans-actions on Pattern Analysis and Machine Intelligence , vol. 43, pp. 652– 662, 2019. [40] P. Civicioglu, “Transforming geocentric cartesian coordinates to geodetic coordinates by using differential search algorithm,” Computers and Geosciences , vol. 46, pp. 229–247, 2012. [41] J. Devlin, M. Chang, K. Lee and K. Toutanova, “BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,” in 
+
+NAACL , pp. 4171–4186, 2019. [42] H. Tamiminia, B. Salehi, M. Mahdianpari, L. Quackenbush, S. Adeli and B. Brisco, “Google Earth Engine for geo-big data applications: A meta-analysis and systematic review,” Isprs Journal of Photogrammetry and Remote Sensing , vol. 164, pp. 152–170, 2020.

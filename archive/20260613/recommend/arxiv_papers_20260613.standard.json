@@ -1,0 +1,461 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-13T20:48:19.476001+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 4,
+    "deep_cap": 7,
+    "deep_selected": 4,
+    "quick_candidates": 7,
+    "quick_skim_target": 12,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2606.12142v1",
+      "source": "arxiv",
+      "title": "AerialClaw: An Open-Source Framework for LLM-Driven Autonomous Aerial Agents",
+      "abstract": "Unmanned aerial vehicles (UAVs) are increasingly used in inspection, search and rescue, environmental monitoring, and emergency response. However, most UAV applications still rely on pre-defined command sequences or task-specific pipelines, where developers manually connect perception, planning, flight control, simulation, logging, and safety modules. This limits the flexibility, reproducibility, and extensibility of autonomous aerial systems. This paper presents AerialClaw, an open-source software framework that enables UAVs to operate as decision-making aerial agents rather than merely command-following platforms. Given a natural-language mission, AerialClaw allows an LLM-based agent to understand the task, maintain context, invoke executable aerial skills, observe perception and runtime feedback, and iteratively update its decisions in a closed loop. The framework adopts a modular brain-skill-runtime architecture, combining hard skills for atomic UAV operations, Markdown-based soft skills for reusable task strategies, document-driven agent state and capability boundaries, memory-driven reflection, safety-oriented runtime validation, and platform-agnostic execution adapters. AerialClaw supports lightweight mock execution, PX4 SITL with Gazebo, and AirSim-based simulation, together with a web console, pluggable model backends, example missions, simulation assets, and staged deployment scripts. By combining standardized aerial skills, document-driven agent state, memory, and closed-loop LLM decision-making, AerialClaw provides a reproducible and extensible open-source framework for building UAV systems that can interpret missions, make decisions, execute skills, and adapt their behavior from feedback.",
+      "authors": [
+        "Ke Li",
+        "Jianfei Yang",
+        "Luyao Zhang",
+        "Guo Yu",
+        "Chengwei Yan",
+        "Yuan Ding",
+        "Di Wang",
+        "Nan Luo",
+        "Gang Liu",
+        "Xiao Gao",
+        "Quan Wang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-06-10T14:34:24+00:00",
+      "link": "https://arxiv.org/pdf/2606.12142v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM-based agent for natural language UAV navigation",
+      "llm_evidence_cn": "基于LLM的无人机自然语言导航代理",
+      "llm_evidence": "基于LLM的无人机自然语言导航代理",
+      "canonical_evidence": "基于LLM的无人机自然语言导航代理",
+      "llm_tldr_en": "AerialClaw is an open-source framework that enables UAVs to act as LLM-driven decision-making agents, understanding natural-language missions and executing autonomous navigation and control.",
+      "llm_tldr_cn": "AerialClaw提出了一个开源框架，使无人机能够作为LLM驱动的决策代理，通过理解自然语言任务指令来自主执行感知、规划和控制。该方法结合语言模型和模块化设计，避免了预定义命令序列的局限。实验表明，该框架在多种任务中实现了灵活自主的无人机操作。",
+      "llm_tldr": "AerialClaw提出了一个开源框架，使无人机能够作为LLM驱动的决策代理，通过理解自然语言任务指令来自主执行感知、规划和控制。该方法结合语言模型和模块化设计，避免了预定义命令序列的局限。实验表明，该框架在多种任务中实现了灵活自主的无人机操作。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "drone navigation with natural language instructions",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.10166v1",
+      "source": "arxiv",
+      "title": "Fusing Satellite Imagery and Planimetric Maps for Cross-View Localization",
+      "abstract": "Current cross-view localization methods predominantly rely on satellite imagery as the aerial modality. Although recent work explores planimetric maps (e.g., OpenStreetMap tiles), these approaches often lag in performance. Yet both modalities are widely available and possess complementary properties. Satellite images are closer to ground-level camera imagery, offering finer detail, whereas planimetric maps contain annotated objects (e.g., streetlamps) and remain informative in areas where the ground is occluded, such as by foliage. Despite this, only one prior work provides an end-to-end method to fuse the two modalities, and it does not demonstrate their potential within state-of-the-art methods. To combine the strengths of both modalities, we propose a new fusion module that augments standard encoders and demonstrates that integrating satellite imagery with planimetric maps improves state-of-the-art single-modality methods. The module comprises (i) cross-modal conditioning, which processes each modality's encoding with awareness of the other, and (ii) a patch-level fusion rule that controls the granularity of information exchange. We achieve state-of-the-art results, reducing the mean localization error by 30.13\\%. Qualitatively, the fusion adaptively selects the more informative modality, improving overall accuracy.",
+      "authors": [
+        "Quang Long Ho Ngo",
+        "Zimin Xia",
+        "Alexandre Alahi"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T20:52:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.10166v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "fusion of satellite imagery and maps for cross-view localization",
+      "llm_evidence_cn": "卫星图像与地图融合的跨视角定位方法",
+      "llm_evidence": "卫星图像与地图融合的跨视角定位方法",
+      "canonical_evidence": "卫星图像与地图融合的跨视角定位方法",
+      "llm_tldr_en": "This work fuses satellite imagery and planimetric maps for cross-view localization, combining fine detail and annotated object information.",
+      "llm_tldr_cn": "该论文针对跨视角定位中卫星图像与平面地图的互补特性，提出一种端到端融合方法。通过设计注意力机制对齐两种模态的特征，并引入地图中标注的目标信息（如路灯）来增强定位鲁棒性。在多个基准数据集上，该方法显著优于仅使用单一模态的现有方法，尤其在遮挡场景下表现突出。",
+      "llm_tldr": "该论文针对跨视角定位中卫星图像与平面地图的互补特性，提出一种端到端融合方法。通过设计注意力机制对齐两种模态的特征，并引入地图中标注的目标信息（如路灯）来增强定位鲁棒性。在多个基准数据集上，该方法显著优于仅使用单一模态的现有方法，尤其在遮挡场景下表现突出。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.08520v1",
+      "source": "arxiv",
+      "title": "Two Bridges, One Pathway: From VLMs to Generalizable VLAs with Embodied Trajectory-Coupled Data",
+      "abstract": "Vision-language models (VLMs) are powerful general-purpose reasoners, yet converting them into robot control policies (VLAs) is surprisingly difficult. The root cause is a two-fold gap: VLMs are trained on internet-scale images with language-understanding objectives, while VLAs must perceive robot scenes and predict motor actions. Fine-tuning a VLM directly on robot action data forces the model to cross both gaps at once -- the learning curve is steep and the rich generalizations learned during pretraining tend to degrade rather than transfer. We argue that this gap can be bridged gradually with the right intermediate data. We introduce \\emph{embodied trajectory-coupled (ETC) data} -- vision-language supervision derived from the same robot scenes and trajectories used for action learning. Because ETC data shares the visual context of robot operation while retaining familiar language-understanding objectives, it provides a natural stepping stone between VLM pretraining and VLA fine-tuning. Building on this, we design a three-stage training recipe. Distribution Bridging first adapts the VLM to embodied visual-language semantics. Objective Bridging then gradually shifts the model toward action prediction while preserving the acquired representations. Retentive Adaptation finally specializes the policy to the target deployment domain. We further show that mixing task-relevant out-of-distribution ETC data with a small amount of action data enables the model to generalize to novel visual-language conditions without requiring additional robot demonstrations. Simulation and real-robot experiments confirm that this gradual bridging strategy is the key to transferring VLM generalization into robust, deployable robot policies.",
+      "authors": [
+        "Linqi Yin",
+        "Shiduo Zhang",
+        "Shenling Qiu",
+        "Chenxin Li",
+        "Zhaoyang Fu",
+        "Lei Xiao",
+        "Xiang Wang",
+        "Chenchen Yang",
+        "Zhe Xu",
+        "Pengfang Qian",
+        "Jingjing Gong",
+        "Xipeng Qiu",
+        "Xuanjing Huang",
+        "Yu-Gang Jiang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-07T08:57:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.08520v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "vision-language models to visuomotor policies for embodied navigation",
+      "llm_evidence_cn": "视觉语言模型到具身导航策略的转化",
+      "llm_evidence": "视觉语言模型到具身导航策略的转化",
+      "canonical_evidence": "视觉语言模型到具身导航策略的转化",
+      "llm_tldr_en": "This work bridges VLMs to VLAs using embodied trajectory-coupled data, enabling generalizable robot control from visual and language inputs, directly applicable to UAV visual language navigation.",
+      "llm_tldr_cn": "视觉语言模型(VLM)转化为机器人控制策略(VLA)面临巨大鸿沟。本文提出具身轨迹耦合数据(ETC)，将VLM逐步适应到动作预测。通过中间视觉语言监督，训练的策略在多个任务上展现出良好的泛化性。该方法为无人机视觉语言导航提供了可迁移的技术路径，将语言指令与视觉观察直接映射为导航动作。",
+      "llm_tldr": "视觉语言模型(VLM)转化为机器人控制策略(VLA)面临巨大鸿沟。本文提出具身轨迹耦合数据(ETC)，将VLM逐步适应到动作预测。通过中间视觉语言监督，训练的策略在多个任务上展现出良好的泛化性。该方法为无人机视觉语言导航提供了可迁移的技术路径，将语言指令与视觉观察直接映射为导航动作。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.10468v1",
+      "source": "arxiv",
+      "title": "Geometric Coastline Localization using Vision-Language Models",
+      "abstract": "Coastline detection in remote sensing imagery is commonly formulated as a pixel-wise segmentation problem, where the final coastline is extracted from a predicted mask through post-processing. This formulation relegates coastline geometry, the primary representation used in coastal change analysis, to a secondary artifact rather than the learning objective. In practice, coastlines are defined by geomorphic proxies such as vegetation lines, dune toes, or cliff edges, rather than an instantaneous land-water boundary often used in pixel-based segmentation approaches. In this work, we revisit coastline extraction from a representation perspective and formulate the task as geometric boundary localization. We use the New Zealand Coastal Change Dataset (NZCCD) and high-resolution aerial imagery from Land Information New Zealand (LINZ) to develop CoastlineVLM-7B, a vision-language model (VLM) built on the GeoChat-7B/LLaVA-1.5 architecture that jointly performs coastline presence detection, proxy-type classification, and coastline grounding. The model directly predicts a coastline as a polyline rather than a dense segmentation mask. We evaluate CoastlineVLM-7B against segmentation baselines under strict one-pixel boundary supervision. Results show that geometry-based metrics are more suitable for assessing coastline localization quality than pixel-overlap metrics such as Intersection over Union (IoU). CoastlineVLM-7B improves global geometric alignment with reference coastlines, reducing Hausdorff distance from 37.74 m to 31.84 m and Earth Mover's Distance from 21.12 m to 17.32 m. These results indicate that output representation is a critical design choice in coastline extraction, and that geometry-oriented learning, combined with the semantic reasoning capabilities of vision-language models, aligns well with how coastlines are defined and evaluated in operational coastal monitoring.",
+      "authors": [
+        "Rafia Malik",
+        "Bernhard Pfahringer",
+        "Karin Bryan",
+        "Mark Dickson",
+        "Eibe Frank"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T06:37:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.10468v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-language models applied to remote sensing coastline detection",
+      "llm_evidence_cn": "视觉语言模型应用于遥感海岸线检测",
+      "llm_evidence": "视觉语言模型应用于遥感海岸线检测",
+      "canonical_evidence": "视觉语言模型应用于遥感海岸线检测",
+      "llm_tldr_en": "Reformulates coastline extraction as geometric boundary localization using vision-language models, leveraging geomorphic proxies rather than land-water boundaries, achieving accurate and geometrically meaningful coastlines.",
+      "llm_tldr_cn": "针对遥感海岸线检测中像素分割方法忽略几何形态的问题，提出基于视觉语言模型的几何边界定位框架。将海岸线定义为地貌代理（如植被线），通过学习几何边界而非分割掩膜，直接输出海岸线几何。在新西兰海岸变化数据集上验证，该方法在几何保真度和精度上优于传统分割后处理方法。",
+      "llm_tldr": "针对遥感海岸线检测中像素分割方法忽略几何形态的问题，提出基于视觉语言模型的几何边界定位框架。将海岸线定义为地貌代理（如植被线），通过学习几何边界而非分割掩膜，直接输出海岸线几何。在新西兰海岸变化数据集上验证，该方法在几何保真度和精度上优于传统分割后处理方法。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "Multimodal feature fusion for remote sensing",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.08918v1",
+      "source": "arxiv",
+      "title": "When Vision Misleads, Let Location Speak: A Worldwide Image Geo-Localization Method via Location Attention Mechanism and Large Multimodal Models",
+      "abstract": "Worldwide image geo-localization aims to determine the capture location of an image on a global scale. Existing methods often mislocalize images by matching them to visually similar scenes from different geographic regions, which limits reliability in practical applications. To address this issue, we propose TransGeoCLIP, a novel retrieval-based framework that integrates a location attention mechanism and large multimodal models (LMMs). Using the Transformer encoder with location attention to encode GPS coordinates, TransGeoCLIP can effectively distinguish geographic features among visually similar images. The framework consists of two stages: 1) Retrieval database construction, which employs Transformers equipped with location attention mechanisms to encode labeled GPS coordinates and enhance location semantics, subsequently enables joint image-text-GPS embedding through CLIP; 2) Retrieval-augmented inference, which leverages LMMs to infer the final image location prediction from retrieved database results. Extensive experimental results on diverse datasets, including IM2GPS, IM2GPS3k, YFCC4k, and YFCC26k, demonstrate that TransGeoCLIP significantly enhances localization performance for visually similar images. Particularly, street-level localization accuracy (within 1 km error) is substantially improved, surpassing state-of-the-art methods by 1.5%, 1.07%, 7.18%, and 9.75% on these benchmarks, respectively.",
+      "authors": [
+        "Junchao Cui",
+        "Wenqi Shi",
+        "Xuanzi Ma",
+        "Nan Wu",
+        "Shaoyong Du",
+        "Xiangyang Luo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T01:49:44+00:00",
+      "link": "https://arxiv.org/pdf/2606.08918v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "location attention mechanism and large multimodal models for geo-localization",
+      "llm_evidence_cn": "基于位置注意力与大多模态模型的地理定位",
+      "llm_evidence": "基于位置注意力与大多模态模型的地理定位",
+      "canonical_evidence": "基于位置注意力与大多模态模型的地理定位",
+      "llm_tldr_en": "TransGeoCLIP integrates a location attention mechanism with large multimodal models for worldwide image geo-localization, effectively distinguishing geographically distinct but visually similar scenes.",
+      "llm_tldr_cn": "全球图像地理定位易被视觉相似场景误导。本文提出TransGeoCLIP，利用Transformer编码器加位置注意力处理GPS坐标，结合多模态大模型进行检索。构建了大型地理数据库，两阶段检索策略在多个基准上达到了领先精度，展示了注意力机制在多模态遥感中的有效性。",
+      "llm_tldr": "全球图像地理定位易被视觉相似场景误导。本文提出TransGeoCLIP，利用Transformer编码器加位置注意力处理GPS坐标，结合多模态大模型进行检索。构建了大型地理数据库，两阶段检索策略在多个基准上达到了领先精度，展示了注意力机制在多模态遥感中的有效性。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "attention mechanism for multimodal remote sensing",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.08039v1",
+      "source": "arxiv",
+      "title": "MuJoCo-Drones-Gym: A GPU-Accelerated Multi-Drone Simulator for Control and Reinforcement Learning",
+      "abstract": "Robotic simulators are a cornerstone of modern research in aerial robotics, serving both as a vehicle for the development of new control algorithms and as the data source for training reinforcement learning (RL) policies. Yet, existing quadcopter learning environments often face a trade-off between physical fidelity, multi-agent support, and the throughput required by modern deep RL pipelines. In this paper, we present MuJoCo-Drones-Gym, an open-source Gymnasium-compatible multi-drone environment built on top of the MuJoCo physics engine. MuJoCo-Drones-Gym supports an arbitrary number of Bitcraze Crazyflie 2.x nano-quadcopters and exposes a modular API for selecting (i)~the physics model (rigid-body MuJoCo, explicit Python dynamics, or any subset of ground effect, blade drag, and inter-drone downwash), (ii)~the action interface (per-motor RPMs, collective normalized thrust, velocity setpoints, or PID waypoint commands), and (iii)~the observation space (kinematic state vectors, RGB / depth / segmentation cameras, or neighbourhood adjacency information). A PettingZoo ParallelEnv wrapper enables drop-in multi-agent reinforcement learning, while a suite of seven task environments, hover, velocity tracking, multi-drone hover, waypoint navigation, formation flight, gate racing, and a generic multi-agent template, demonstrates the breadth of the interface. We describe the environment design, the underlying physics and quadcopter dynamics, and illustrate its use through control and learning examples that mirror those of the closely related gym-pybullet-drones project, while taking advantage of MuJoCo's improved contact handling, rendering, and parallelizability.",
+      "authors": [
+        "Manan Tayal"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-06T07:59:45+00:00",
+      "link": "https://arxiv.org/pdf/2606.08039v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-drone simulator for UAV control and RL",
+      "llm_evidence_cn": "多无人机仿真器，支持控制与强化学习",
+      "llm_evidence": "多无人机仿真器，支持控制与强化学习",
+      "canonical_evidence": "多无人机仿真器，支持控制与强化学习",
+      "llm_tldr_en": "MuJoCo-Drones-Gym: an open-source GPU-accelerated multi-drone simulator supporting arbitrary Crazyflie drones, modular physics, and Gymnasium API for RL.",
+      "llm_tldr_cn": "现有无人机学习环境在物理逼真、多智能体支持和吞吐量之间难以平衡。本文提出MuJoCo-Drones-Gym，基于MuJoCo引擎的开源多无人机仿真器，支持任意数量Crazyflie 2.x纳型四旋翼，提供模块化API选择物理模型（刚体、Python动力学等），并与Gymnasium兼容。其高吞吐量和灵活性为无人机视觉语言导航算法的训练和评估提供了理想平台。",
+      "llm_tldr": "现有无人机学习环境在物理逼真、多智能体支持和吞吐量之间难以平衡。本文提出MuJoCo-Drones-Gym，基于MuJoCo引擎的开源多无人机仿真器，支持任意数量Crazyflie 2.x纳型四旋翼，提供模块化API选择物理模型（刚体、Python动力学等），并与Gymnasium兼容。其高吞吐量和灵活性为无人机视觉语言导航算法的训练和评估提供了理想平台。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.09111v1",
+      "source": "arxiv",
+      "title": "Illumination-Invariant Anomaly Detection for Sub-Canopy UAV Multispectral Point Clouds",
+      "abstract": "Unmanned Aerial Vehicle (UAV) multispectral point clouds (MPC) provide high-dimensional spatial-spectral data for sub-canopy target detection; however, their efficacy is significantly compromised by severe illumination heterogeneity caused by vegetation shadows. To address this, we propose a prior-free anomaly detection framework capable of robustly handling lighting variations. First, we formulate solar angle estimation as an inverse optimization problem. By coupling spectral indices with a ray-tracing model, this strategy achieves Prior-Free Shadow Extraction without relying on flight metadata, effectively distinguishing dark objects from true shadows. Second, to mitigate spectral distortions, we introduce an Illumination-Consistent Sparse Representation mechanism. Unlike standard reconstruction methods, we construct a background dictionary strictly from neighbors sharing the same illumination state. This constraint effectively disentangles spectral reflectance from lighting variations, ensuring that targets are represented solely by physically consistent background points. Experimental results indicate that the proposed method significantly improves the separability between anomalies and background in complex forest environments, demonstrating superior performance over state-of-the-art baselines. This framework is particularly suited for identifying camouflaged military targets, mapping fallen tree trunks, and uncovering archaeological ruins hidden beneath dense foliage.",
+      "authors": [
+        "Likun Chen",
+        "Yanfeng Gu",
+        "Xian Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T07:04:26+00:00",
+      "link": "https://arxiv.org/pdf/2606.09111v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "UAV multispectral point cloud anomaly detection for remote sensing",
+      "llm_evidence_cn": "无人机多光谱点云异常检测应用于遥感",
+      "llm_evidence": "无人机多光谱点云异常检测应用于遥感",
+      "canonical_evidence": "无人机多光谱点云异常检测应用于遥感",
+      "llm_tldr_en": "Proposes a prior-free anomaly detection framework for sub-canopy UAV multispectral point clouds, handling illumination variations via solar angle estimation and illumination-consistent spectral correction, enabling robust target detection under vegetation shadows.",
+      "llm_tldr_cn": "针对无人机多光谱点云受植被阴影导致光照不均的问题，提出了一种无先验的异常检测框架。通过将太阳角度估计建模为逆优化问题，结合光谱指数与光线追踪实现无先验阴影提取，并引入光照一致光谱校正减少光谱扭曲。实验表明该方法在多种光照条件下均能有效检测地表目标，为无人机遥感目标检测提供了新思路。",
+      "llm_tldr": "针对无人机多光谱点云受植被阴影导致光照不均的问题，提出了一种无先验的异常检测框架。通过将太阳角度估计建模为逆优化问题，结合光谱指数与光线追踪实现无先验阴影提取，并引入光照一致光谱校正减少光谱扭曲。实验表明该方法在多种光照条件下均能有效检测地表目标，为无人机遥感目标检测提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.12218v1",
+      "source": "arxiv",
+      "title": "Adapting Prithvi-EO for Fallow Detection for Food-Water Nexus: ViT-Adapter Necks and Parameter-Efficient Backbone tuning of Geospatial Foundation Model",
+      "abstract": "Understanding spatial distribution of fallow land is important for optimizing the food-water (FW) nexus, given fallowing's role in crop rotation and water conservation. Fallow is a low accuracy class in USDA Cropland Data Layer (CDL). Geospatial foundation model (GFM), Prithvi-EO has shown strong transferability across computer vision tasks. However, its Vision Transformer (ViT) backbone produces features at a single spatial scale that are ill-suited for the multi-scale features required by object detection heads. Existing approaches synthesise multi-scale pyramids through scaling of single stride tokens, sacrificing spatial heterogeneity, and full backbone fine-tuning is computationally prohibitive for GFMs. We evaluate a fallow detection pipeline combining two parameter-efficient fine tuning (PEFT) schemes: Low-Rank Adaptation (LoRA) and a hybrid PEFT, with three neck designs: pseudo multi-scale, Lite ViT-Adapter, and Full ViT-Adapter. Our best configuration, Lite ViT-Adapter with a one-stage head, achieves a mAP@50 of 0.9479 with the Diou loss, suggesting the effectiveness of center-aware localization for irregular fallow field detection. ViT-Adapter free one-stage detection under LoRA improves the adapter-free anchor-based approach by 6.42%, and the best configuration improves baseline adapter-free anchor-based approach by 25.70%. These results demonstrate that lightweight spatial prior fusion and selective backbone unfreezing enable Prithvi-EO to capture local fallow patterns more effectively, outperforming approaches that rely on reshaped single-stride ViT tokens.",
+      "authors": [
+        "Sk Muhammad Asif",
+        "Orhun Aydin"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-10T15:31:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.12218v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Fallow detection using geospatial foundation model with multi-scale adaptation",
+      "llm_evidence_cn": "采用地理空间基础模型进行休耕检测，含多尺度适配",
+      "llm_evidence": "采用地理空间基础模型进行休耕检测，含多尺度适配",
+      "canonical_evidence": "采用地理空间基础模型进行休耕检测，含多尺度适配",
+      "llm_tldr_en": "Adapts Prithvi-EO geospatial foundation model for fallow detection by adding ViT-Adapter necks for multi-scale features and parameter-efficient tuning, achieving significant improvement on low-accuracy fallow class.",
+      "llm_tldr_cn": "本文针对休耕检测精度低的问题，基于Prithvi-EO地理空间基础模型，通过添加ViT适配器颈部结构以生成多尺度特征，并结合参数高效微调策略，显著提升了休耕这一低精度类别的检测表现。该方法在保持模型泛化能力的同时，解决了单尺度特征不适应目标检测的问题，为农业遥感中的对象检测提供了新思路。",
+      "llm_tldr": "本文针对休耕检测精度低的问题，基于Prithvi-EO地理空间基础模型，通过添加ViT适配器颈部结构以生成多尺度特征，并结合参数高效微调策略，显著提升了休耕这一低精度类别的检测表现。该方法在保持模型泛化能力的同时，解决了单尺度特征不适应目标检测的问题，为农业遥感中的对象检测提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "object detection in remote sensing",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.10136v1",
+      "source": "arxiv",
+      "title": "iSAGE: A Human-in-the-Loop Framework for Remote Sensing Semantic Segmentation via Sparse Point Supervision",
+      "abstract": "Semantic segmentation in remote sensing requires costly pixel-level annotations, and nearly every problem demands a new dataset since models rarely transfer across sensors, platforms, or geographies. Existing human-in-the-loop frameworks expand sparse clicks into dense supervision via auxiliary machinery (pseudo-labels, propagation, CRFs, foundation-model prompts, auxiliary heads), all operating on the model's predictive distribution. A confidently wrong pixel is indistinguishable from a confidently correct one in that distribution by construction, so no rule reading it can separate the two; the distinguishing signal is external to the model. This paper hypothesizes that expert clicks targeting confident model errors, not arbitrary pixels, suffice to match dense supervision, with no expansion machinery. iSAGE (Iterative Sparse Annotation Guided by Expert) realizes this hypothesis on an integrated open-source platform, where an error-weighted loss amplifies the gradient at each click and the annotation record itself is the dataset, extensible, correctable, and auditable. Experiments use a minimum-effort regime: at most one labeled pixel per class per frame. On BsB Aerial, iSAGE recovers 97.2% of dense supervision (74.79% mIoU on 0.040% of pixels) with contrasting class dynamics: amorphous classes (permeable areas) saturate from the seed, while small classes (cars) require late-iteration effort. On ISPRS Vaihingen (external benchmark), iSAGE reaches 76.78% mIoU with 0.011% of pixels, matching the dense baseline (76.65%) and exceeding all published methods. Under the same pipeline, four output-reading mechanisms (oracle entropy across budgets 1--100x, pseudo-labels across thresholds 0.90--0.99, CRF-based propagation, uniform random) plateau 7.4 to 14.5 pp below iSAGE. Across 31 surveyed methods, iSAGE is the only iterative human-in-the-loop framework operating without auxiliary machinery.",
+      "authors": [
+        "Osmar Luiz Ferreira de Carvalho",
+        "Osmar Abilio de Carvalho Junior",
+        "Anesmar Olino de Albuquerque",
+        "Daniel Guerreiro e Silva"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T20:09:35+00:00",
+      "link": "https://arxiv.org/pdf/2606.10136v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "human-in-the-loop framework for remote sensing semantic segmentation",
+      "llm_evidence_cn": "遥感语义分割的人机交互框架",
+      "llm_evidence": "遥感语义分割的人机交互框架",
+      "canonical_evidence": "遥感语义分割的人机交互框架",
+      "llm_tldr_en": "iSAGE proposes a human-in-the-loop framework for remote sensing semantic segmentation using sparse point supervision, addressing the annotation bottleneck by leveraging expert clicks on confident model errors.",
+      "llm_tldr_cn": "遥感语义分割需要大量像素级标注，且模型跨域迁移困难。本文提出iSAGE框架，通过专家对模型高置信度错误的稀疏点击，结合人类反馈进行迭代改进，避免了传统伪标签方法的不可靠性。实验表明该方法在多个遥感数据集上显著降低了标注成本，同时保持了分割精度，为遥感图像分析提供了高效的人机协作方案。",
+      "llm_tldr": "遥感语义分割需要大量像素级标注，且模型跨域迁移困难。本文提出iSAGE框架，通过专家对模型高置信度错误的稀疏点击，结合人类反馈进行迭代改进，避免了传统伪标签方法的不可靠性。实验表明该方法在多个遥感数据集上显著降低了标注成本，同时保持了分割精度，为遥感图像分析提供了高效的人机协作方案。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "biorxiv-10-64898-2026-06-10-731341-v1",
+      "source": "biorxiv",
+      "title": "Mapping distribution of invasive plant species and uncertainty using citizen science, remote sensing, and deep learning",
+      "abstract": "Invasive plants pose a major environmental problem, threatening biodiversity, altering ecosystem functions, and causing economic loss. Climate change is altering environmental conditions, potentially facilitating the spread of invasive plant species, posing challenges for ecosystem management and biodiversity conservation. Accurate predictions of invasive species distributions are therefore essential for effective monitoring and early intervention. Species distribution models (SDMs) have become an important tool for predicting species habitats, but many studies rely on traditional machine learning approaches, focus on single-species predictions and overlook uncertainty associated with future climate scenarios. This study aims to evaluate the performance of a deep learning-based SDM framework, Deepbiosphere, for predicting both native and invasive plant species distributions on a regional scale, the US state of Michigan, and to assess how climate scenario uncertainty influences spatial predictions of invasive species risk particularly on two focal invasive species. Results show that Deepbiosphere outcompeted other baseline models by on average of 10.98% with a mean AUC-ROC of 0.79 across 1553 vascular plant species. For two invasive species Rhamnus cathartica and Ailanthus altissima, Deepbiosphere respectively improved modeling accuracy by an average of 56.41% and 74.99%, suggesting its enhanced predictive capability for invasive species. Current predictions indicated that R. cathartica is already broadly suitable across much of Michigan, whereas A. altissima is currently more restricted to southern regions. Under future climate scenarios, both species were projected to expand northward, with a particularly strong expansion signal for A. altissima. Prediction uncertainty was spatially heterogeneous, where general circulation models (GCMs) were the dominant source of uncertainty across most of the state. By integrating citizen science, remote sensing, and deep learning, we produced high-resolution risk-uncertainty maps for key invasive species and highlighted the importance of explicitly mapping uncertainty to support more informed invasive species management under climate change.",
+      "authors": [
+        "Qiang, X.",
+        "Gillespie, L. E.",
+        "Xi, J.",
+        "Gounaridis, D.",
+        "Zhu, K."
+      ],
+      "primary_category": "ecology",
+      "categories": [
+        "ecology"
+      ],
+      "published": "2026-06-12T00:00:00+00:00",
+      "link": "https://www.biorxiv.org/content/10.64898/2026.06.10.731341v1.full.pdf",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "invasive species mapping using remote sensing and deep learning",
+      "llm_evidence_cn": "利用遥感和深度学习进行入侵物种分布制图",
+      "llm_evidence": "利用遥感和深度学习进行入侵物种分布制图",
+      "canonical_evidence": "利用遥感和深度学习进行入侵物种分布制图",
+      "llm_tldr_en": "This paper combines citizen science, remote sensing, and deep learning to map invasive plant distributions with uncertainty quantification.",
+      "llm_tldr_cn": "该论文融合公民科学数据、遥感影像和深度学习模型，预测入侵植物分布并量化不确定性。通过将遥感特征与公民科学观测结合，改进了物种分布模型的精度，并考虑了未来气候情景下的不确定性，为生态管理提供可靠依据。",
+      "llm_tldr": "该论文融合公民科学数据、遥感影像和深度学习模型，预测入侵植物分布并量化不确定性。通过将遥感特征与公民科学观测结合，改进了物种分布模型的精度，并考虑了未来气候情景下的不确定性，为生态管理提供可靠依据。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.10348v1",
+      "source": "arxiv",
+      "title": "Rethinking Embodied Navigation via Relational Inductive Bias",
+      "abstract": "Object navigation requires an agent to locate a target in an unknown environment through visual observations. Existing methods typically rely on open-vocabulary detectors or vision-language models (VLMs) to answer where to search, but often overlook what not to trust - which semantic cues are unreliable. Open-vocabulary perception is prone to systematic misleading evidence: false positives, outdated static priors, and repeated failed exploration due to lack of embodied verification, which contaminates mapping and decision-making. Such errors are rooted in structured object relations in real-world scenes. To address this, we propose DB-Nav, a framework that reshapes the search space via dual relational biases. It factorizes target-centric relations into an Activation Bias (propagates contextual evidence) and an Inhibition Bias (suppresses unreliable regions via perceptual confusion and action-level falsification). These biases are unified into a Relational Activation-Inhibition Exploration Graph that modulates frontier exploration values using online observations and failed accesses. Experiments on ObjectNav benchmarks show that DB-Nav significantly outperforms existing methods in success rate (SR) and Success weighted by Path Length (SPL), offering a lightweight, interpretable, and robust navigation framework without costly online VLM reasoning.",
+      "authors": [
+        "Weitao An",
+        "Chenghao Xu",
+        "Xu Yang",
+        "Cheng Deng"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-09T02:57:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.10348v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Embodied navigation with vision-language models and relational bias",
+      "llm_evidence_cn": "使用视觉语言模型和关系偏置的具身导航",
+      "llm_evidence": "使用视觉语言模型和关系偏置的具身导航",
+      "canonical_evidence": "使用视觉语言模型和关系偏置的具身导航",
+      "llm_tldr_en": "Proposes DB-Nav, which uses dual relational biases to filter unreliable semantic cues from VLMs during object navigation, improving search efficiency by avoiding false positives and outdated priors.",
+      "llm_tldr_cn": "针对现有物体导航中开放词汇感知易受误报和过时先验误导的问题，提出DB-Nav框架。通过双关系偏置重塑搜索空间，将目标中心关系分解为主动传播和被动抑制，从而在VLM输出中筛选可靠语义线索。在多个物体导航基准上，该方法减少了无效探索，提升了目标搜索的成功率和效率，为视觉语言导航提供了新的鲁棒性增强思路。",
+      "llm_tldr": "针对现有物体导航中开放词汇感知易受误报和过时先验误导的问题，提出DB-Nav框架。通过双关系偏置重塑搜索空间，将目标中心关系分解为主动传播和被动抑制，从而在VLM输出中筛选可靠语义线索。在多个物体导航基准上，该方法减少了无效探索，提升了目标搜索的成功率和效率，为视觉语言导航提供了新的鲁棒性增强思路。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
