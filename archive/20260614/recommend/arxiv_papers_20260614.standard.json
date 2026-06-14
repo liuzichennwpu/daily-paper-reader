@@ -1,0 +1,376 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-14T21:20:05.975984+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 2,
+    "deep_cap": 7,
+    "deep_selected": 2,
+    "quick_candidates": 7,
+    "quick_skim_target": 12,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2606.09772v1",
+      "source": "arxiv",
+      "title": "SemDINO: A DINOv3-Driven Network for Cross-Temporal Semantic Alignment in Change Detection",
+      "abstract": "Semantic change detection (SCD) aims to simultaneously locate land-cover changes and identify semantic categories before and after transition. However, existing methods suffer from insufficient cross-temporal alignment, weak multi-scale representation, and poor robustness to pseudo-changes caused by illumination, season, and registration noise. To address these issues, we propose a novel end-to-end semantic change detection network named SemDINO, which integrates a dual-branch encoder, multi-scale temporal interaction, semantic purification, change enhancement, and decoupled multi-task prediction into a unified framework. Specifically, we construct a dual-branch encoder that combines a CNN backbone and frozen DINOv3 features via gated pyramid fusion, enabling rich multi-scale semantic representation. Then, a multi-scale temporal bidirectional transformer interaction (M-TBTT) module is proposed to achieve global cross-temporal feature alignment and information interaction. To further enhance genuine changes and suppress pseudo-variations, we introduce semantic purification (SCP), bidirectional change enhancement (BiChangeEnhance), and multi-scale change enhancement (MCE) modules collaboratively. Finally, a multi-branch CD prediction head is designed to jointly output binary change mask, bi-temporal semantic maps, and edge constraint. Extensive experiments on public remote sensing CD datasets demonstrate that SemDINO achieves superior performance and generalization ability against state-of-the-art methods, especially in complex scenarios with interference factors.",
+      "authors": [
+        "Xinyu Tong",
+        "Meihua Zhou",
+        "Jinxiao Sun",
+        "Yingjie Tang",
+        "Lei Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T17:32:31+00:00",
+      "link": "https://arxiv.org/pdf/2606.09772v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes SemDINO with DINOv3 features and attention for semantic change detection in remote sensing",
+      "llm_evidence_cn": "提出SemDINO，利用DINOv3和注意力机制进行遥感语义变化检测",
+      "llm_evidence": "提出SemDINO，利用DINOv3和注意力机制进行遥感语义变化检测",
+      "canonical_evidence": "提出SemDINO，利用DINOv3和注意力机制进行遥感语义变化检测",
+      "llm_tldr_en": "SemDINO integrates a dual-branch encoder with DINOv3 and attention mechanisms for robust semantic change detection in remote sensing, addressing cross-temporal alignment.",
+      "llm_tldr_cn": "针对语义变化检测中跨时相对齐不足和多尺度表示弱的问题，提出SemDINO网络。它采用双分支编码器，将CNN与冻结的DINOv3特征通过门控融合，并引入多尺度时相交互、语义纯化和变化增强模块。实验表明，该方法在多个数据集上优于现有方法，对光照和季节变化具有鲁棒性。这项研究为遥感变化检测提供了新的深度学习架构。",
+      "llm_tldr": "针对语义变化检测中跨时相对齐不足和多尺度表示弱的问题，提出SemDINO网络。它采用双分支编码器，将CNN与冻结的DINOv3特征通过门控融合，并引入多尺度时相交互、语义纯化和变化增强模块。实验表明，该方法在多个数据集上优于现有方法，对光照和季节变化具有鲁棒性。这项研究为遥感变化检测提供了新的深度学习架构。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "attention mechanism for multimodal remote sensing",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.12826v1",
+      "source": "arxiv",
+      "title": "DIMOS: Disentangling Instance-level Moving Object Segmentation",
+      "abstract": "Moving instance segmentation (MIS) attracts increasing attention due to its broad applications in traffic surveillance, autonomous driving, and animal tracking. Event cameras record asynchronous brightness changes, providing high temporal resolution and dynamic range, which makes them highly sensitive to motion information. By fusing event and image features, motion cues from events can complement spatial details from images, enhancing the performance of MIS. However, current multimodal MIS methods still struggle to segment small moving instances, as event cameras often yield sparse features under limited resolution. Moreover, event features entangle appearance attributes with motion cues, which further restricts effective cross-modal fusion. To address these challenges, we first propose a dual-disentangling feature extraction framework that separates and extracts appearance and motion information within both image and event modalities, thereby improving feature density. Subsequently, a multi-granularity cross-modal alignment is introduced to align distributionally and semantically consistent features across modalities, enabling more effective fusion with rich spatial and temporal details. The experiment results demonstrate that our method achieves state-of-the-art performance in multimodal MIS, especially for small instances under challenging conditions such as fast motion and low-light settings.",
+      "authors": [
+        "Hongxiang Huang",
+        "Hongwei Ren",
+        "Xiaopeng Lin",
+        "Yulong Huang",
+        "Zeke Xie",
+        "Bojun Cheng"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-11T02:44:30+00:00",
+      "link": "https://arxiv.org/pdf/2606.12826v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal fusion of event and image data for instance segmentation",
+      "llm_evidence_cn": "事件与图像数据多模态融合用于实例分割",
+      "llm_evidence": "事件与图像数据多模态融合用于实例分割",
+      "canonical_evidence": "事件与图像数据多模态融合用于实例分割",
+      "llm_tldr_en": "DIMOS fuses event and image features for moving instance segmentation, addressing small object and feature entanglement issues.",
+      "llm_tldr_cn": "DIMOS针对运动实例分割中事件相机稀疏特征和模态融合受限的问题，提出解耦外观与运动特征的多模态融合方法。通过融合事件和图像特征，提升了小目标的实例分割精度，在交通监控和动物追踪等场景有重要应用价值。",
+      "llm_tldr": "DIMOS针对运动实例分割中事件相机稀疏特征和模态融合受限的问题，提出解耦外观与运动特征的多模态融合方法。通过融合事件和图像特征，提升了小目标的实例分割精度，在交通监控和动物追踪等场景有重要应用价值。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.09162v1",
+      "source": "arxiv",
+      "title": "Zero-Parameter Geometric Gating for Temporally Stable Low-Altitude UAV Video Semantic Segmentation",
+      "abstract": "Video semantic segmentation for low-altitude UAVs requires temporal consistency, yet dense optical flow introduces spatially structured noise in the planar regions that dominate aerial imagery. We propose a zero-parameter geometric gate that uses RANSAC homography inlier ratios on a $16\\times16$ spatial grid to route each region to either homography or optical flow warp before fusion via Semantic Similarity Propagation. The gate requires no learned parameters -- only a median-threshold binary decision on RANSAC statistics -- adding only 211K trainable parameters (the SSP fusion layer) to a frozen backbone. On synthetic UAVid, the method achieves +4.24--4.91\\% mIoU improvement over base models across two architectures (SegFormer-b2 and Hiera-S+UPerNet). Mechanism diagnostics reveal that flow residuals in planar regions are spatially autocorrelated (Moran's I = 0.32, $p < 0.001$), predict boundary instability (Spearman $ρ= 0.66$), and that rigidification recovers temporal consistency from 62\\% to 92\\% (+29.5pp) in homography-valid regions.",
+      "authors": [
+        "Jingpu Yang",
+        "Fengxian Ji",
+        "Zhengzhao Lai",
+        "Juanfan Wu",
+        "Mingxuan Cui",
+        "Yufeng Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T07:55:31+00:00",
+      "link": "https://arxiv.org/pdf/2606.09162v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "UAV video semantic segmentation with geometric gating for temporal consistency",
+      "llm_evidence_cn": "带几何门控的低空无人机视频语义分割以保持时间一致性",
+      "llm_evidence": "带几何门控的低空无人机视频语义分割以保持时间一致性",
+      "canonical_evidence": "带几何门控的低空无人机视频语义分割以保持时间一致性",
+      "llm_tldr_en": "Proposes zero-parameter geometric gating for temporally stable UAV video semantic segmentation, improving mIoU by 4.24-4.91%.",
+      "llm_tldr_cn": "低空无人机视频语义分割要求时间一致性，但稠密光流在平面区域引入噪声。本文提出零参数几何门控，根据RANSAC内点率将区域路由至单应变换或光流，再通过语义相似性传播融合。在合成UAVid数据集上，基于SegFormer等骨干网络实现了4.24%-4.91% mIoU提升，为无人机航拍视频分析提供了高效解决方案。",
+      "llm_tldr": "低空无人机视频语义分割要求时间一致性，但稠密光流在平面区域引入噪声。本文提出零参数几何门控，根据RANSAC内点率将区域路由至单应变换或光流，再通过语义相似性传播融合。在合成UAVid数据集上，基于SegFormer等骨干网络实现了4.24%-4.91% mIoU提升，为无人机航拍视频分析提供了高效解决方案。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.08039v1",
+      "source": "arxiv",
+      "title": "MuJoCo-Drones-Gym: A GPU-Accelerated Multi-Drone Simulator for Control and Reinforcement Learning",
+      "abstract": "Robotic simulators are a cornerstone of modern research in aerial robotics, serving both as a vehicle for the development of new control algorithms and as the data source for training reinforcement learning (RL) policies. Yet, existing quadcopter learning environments often face a trade-off between physical fidelity, multi-agent support, and the throughput required by modern deep RL pipelines. In this paper, we present MuJoCo-Drones-Gym, an open-source Gymnasium-compatible multi-drone environment built on top of the MuJoCo physics engine. MuJoCo-Drones-Gym supports an arbitrary number of Bitcraze Crazyflie 2.x nano-quadcopters and exposes a modular API for selecting (i)~the physics model (rigid-body MuJoCo, explicit Python dynamics, or any subset of ground effect, blade drag, and inter-drone downwash), (ii)~the action interface (per-motor RPMs, collective normalized thrust, velocity setpoints, or PID waypoint commands), and (iii)~the observation space (kinematic state vectors, RGB / depth / segmentation cameras, or neighbourhood adjacency information). A PettingZoo ParallelEnv wrapper enables drop-in multi-agent reinforcement learning, while a suite of seven task environments, hover, velocity tracking, multi-drone hover, waypoint navigation, formation flight, gate racing, and a generic multi-agent template, demonstrates the breadth of the interface. We describe the environment design, the underlying physics and quadcopter dynamics, and illustrate its use through control and learning examples that mirror those of the closely related gym-pybullet-drones project, while taking advantage of MuJoCo's improved contact handling, rendering, and parallelizability.",
+      "authors": [
+        "Manan Tayal"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-06T07:59:45+00:00",
+      "link": "https://arxiv.org/pdf/2606.08039v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-drone simulator for control and RL, enabling UAV navigation research",
+      "llm_evidence_cn": "多无人机模拟器支持控制与强化学习，为无人机导航研究提供平台",
+      "llm_evidence": "多无人机模拟器支持控制与强化学习，为无人机导航研究提供平台",
+      "canonical_evidence": "多无人机模拟器支持控制与强化学习，为无人机导航研究提供平台",
+      "llm_tldr_en": "MuJoCo-Drones-Gym is a GPU-accelerated multi-drone simulator for control and RL, useful for developing and testing UAV navigation policies.",
+      "llm_tldr_cn": "MuJoCo-Drones-Gym是一个基于MuJoCo物理引擎的开源多无人机模拟器，支持任意数量的Crazyflie无人机，提供模块化API和GPU加速，适用于控制算法开发和强化学习训练。该平台为无人机视觉语言导航等下游任务提供了理想的训练与测试环境。",
+      "llm_tldr": "MuJoCo-Drones-Gym是一个基于MuJoCo物理引擎的开源多无人机模拟器，支持任意数量的Crazyflie无人机，提供模块化API和GPU加速，适用于控制算法开发和强化学习训练。该平台为无人机视觉语言导航等下游任务提供了理想的训练与测试环境。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.10348v1",
+      "source": "arxiv",
+      "title": "Rethinking Embodied Navigation via Relational Inductive Bias",
+      "abstract": "Object navigation requires an agent to locate a target in an unknown environment through visual observations. Existing methods typically rely on open-vocabulary detectors or vision-language models (VLMs) to answer where to search, but often overlook what not to trust - which semantic cues are unreliable. Open-vocabulary perception is prone to systematic misleading evidence: false positives, outdated static priors, and repeated failed exploration due to lack of embodied verification, which contaminates mapping and decision-making. Such errors are rooted in structured object relations in real-world scenes. To address this, we propose DB-Nav, a framework that reshapes the search space via dual relational biases. It factorizes target-centric relations into an Activation Bias (propagates contextual evidence) and an Inhibition Bias (suppresses unreliable regions via perceptual confusion and action-level falsification). These biases are unified into a Relational Activation-Inhibition Exploration Graph that modulates frontier exploration values using online observations and failed accesses. Experiments on ObjectNav benchmarks show that DB-Nav significantly outperforms existing methods in success rate (SR) and Success weighted by Path Length (SPL), offering a lightweight, interpretable, and robust navigation framework without costly online VLM reasoning.",
+      "authors": [
+        "Weitao An",
+        "Chenghao Xu",
+        "Xu Yang",
+        "Cheng Deng"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-09T02:57:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.10348v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "addresses object navigation using VLMs and relational bias, relevant to vision-language navigation",
+      "llm_evidence_cn": "使用视觉语言模型和关系偏置进行目标导航，与视觉语言导航相关",
+      "llm_evidence": "使用视觉语言模型和关系偏置进行目标导航，与视觉语言导航相关",
+      "canonical_evidence": "使用视觉语言模型和关系偏置进行目标导航，与视觉语言导航相关",
+      "llm_tldr_en": "Proposes DB-Nav, a framework using relational inductive bias to reshape search space for object navigation, improving on VLM-based approaches.",
+      "llm_tldr_cn": "该论文提出DB-Nav框架，利用关系归纳偏置解决目标导航中视觉语言模型的不可靠问题。现有方法依赖开放词汇检测器，易受虚假信息误导。DB-Nav通过双关系偏置重新组织搜索空间，减少错误累积。在室内外场景中，该方法提升了导航成功率。虽然不直接针对无人机，但其方法可迁移至无人机视觉语言导航。",
+      "llm_tldr": "该论文提出DB-Nav框架，利用关系归纳偏置解决目标导航中视觉语言模型的不可靠问题。现有方法依赖开放词汇检测器，易受虚假信息误导。DB-Nav通过双关系偏置重新组织搜索空间，减少错误累积。在室内外场景中，该方法提升了导航成功率。虽然不直接针对无人机，但其方法可迁移至无人机视觉语言导航。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.12628v1",
+      "source": "arxiv",
+      "title": "Context-Aware Feature-Fusion for Co-occurring Object Detection in Autonomous Driving",
+      "abstract": "Object detection in autonomous driving requires precise localization and an inherent understanding of the relational context between co-occurring objects. In extremely complex heterogeneous environments rare classes, small-scale objects, and frequently appearing objects are difficult for standard object detection frameworks to handle. In this paper, we propose a novel framework called Context-Centric Feature Fusion (CCFF), which utilizes two attention-based modules, Local Context Fusion Module (LCFM) uses the RoI-to-RoI self-attention mechanism to resolve spatial interactions, mainly considering small and partially obscured objects, while Global Context Attention Module (GCAM) converts the co-occurrence of objects priors by pooling top-K RoI features into a global context attention token, avoiding the computational overhead of pixel-level global pooling. This fusion of local and object-centric global features yields contextualized embeddings that enhance classification results and co-occurring objects detection. Our method is evaluated on two datasets, Cityscapes and BDD100K which demonstrate significant improvement on relational consistency, achieving a Category-level Consistency Strategy (CCS) of 0.973 and 0.969, respectively. Furthermore, our approach produces substantial gains in small object detection (AP_S: 14.1%) and successfully recovers rare classes such as \"Train\" that are typically lost in large distributions. Our efficiency report shows that the framework processes images in real time with a 0.2 FPS overhead. The code is available at https://github.com/BinayKSingh/CCFF.",
+      "authors": [
+        "Binay Kumar Singh",
+        "Niels Da Vitoria Lobo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T19:33:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.12628v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Context-aware feature fusion with attention mechanisms for object detection",
+      "llm_evidence_cn": "上下文感知的特征融合，注意力机制用于目标检测",
+      "llm_evidence": "上下文感知的特征融合，注意力机制用于目标检测",
+      "canonical_evidence": "上下文感知的特征融合，注意力机制用于目标检测",
+      "llm_tldr_en": "CCFF framework uses local and global attention-based feature fusion to improve co-occurring object detection in autonomous driving.",
+      "llm_tldr_cn": "自动驾驶中目标检测需理解物体间关系。本文提出上下文中心特征融合（CCFF）框架，包含局部和全局注意力模块，分别处理小目标遮挡和共现先验。在复杂场景中提升了检测性能。该特征融合方法可推广至遥感多模态目标检测任务。",
+      "llm_tldr": "自动驾驶中目标检测需理解物体间关系。本文提出上下文中心特征融合（CCFF）框架，包含局部和全局注意力模块，分别处理小目标遮挡和共现先验。在复杂场景中提升了检测性能。该特征融合方法可推广至遥感多模态目标检测任务。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "feature fusion methods",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.10775v2",
+      "source": "arxiv",
+      "title": "Spatially Selective Self-Training for Unsupervised Building Change Detection",
+      "abstract": "Unsupervised building change detection aims to learn building-change masks from unlabeled bi-temporal remote sensing images. Existing label-free methods often follow a discrepancy-to-mask paradigm, directly using temporal differences, frozen foundation-model responses, prompt-based outputs, or post-processing results as final change maps. Although these strategies provide annotation-free cues, they do not learn a task-specific building-change detector and remain vulnerable to the gap between generic temporal discrepancies and building-defined structural changes. In practice, such discrepancies are often noisy and task-irrelevant, as appearance shifts, registration errors, and non-building modifications can produce strong but misleading responses. To address this problem, we propose SST-CD, a spatially selective self-training framework that reformulates fully label-free building change detection as end-to-end detector learning under noisy pseudo supervision. SST-CD uses temporal discrepancies as candidate pseudo labels and trains the detector only on spatially reliable pixels, whose reliability is estimated by a local consistency criterion that filters inconsistent regions from supervision. To further stabilize noisy self-training, a lightweight feature adapter recalibrates bi-temporal features, while a prototype-based decoder produces compact change and no-change representations. Experiments on LEVIR-CD, WHU-CD, and DSIFN-CD show that SST-CD achieves F1 scores of 83.08%, 91.69%, and 86.60%, respectively, outperforming existing unsupervised and label-free baselines.",
+      "authors": [
+        "Wafaa I. M. Hussin",
+        "Zhi Lu",
+        "Anas M. I. Mohammed",
+        "Xiang Zhou",
+        "Ratiba A. H. Abubaker",
+        "Zhenming Peng"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T12:31:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.10775v2",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "unsupervised building change detection in remote sensing",
+      "llm_evidence_cn": "遥感无监督建筑变化检测",
+      "llm_evidence": "遥感无监督建筑变化检测",
+      "canonical_evidence": "遥感无监督建筑变化检测",
+      "llm_tldr_en": "Proposes spatially selective self-training for unsupervised building change detection, improving detection accuracy.",
+      "llm_tldr_cn": "现有无监督建筑变化检测方法直接利用时相差异或预训练模型输出，噪声大且任务无关。本文提出空间选择性自训练方法，通过迭代伪标签和空间选择模块，学习任务专用的建筑变化检测器。在遥感图像上有效抑制非建筑变化，提升变化检测精度。",
+      "llm_tldr": "现有无监督建筑变化检测方法直接利用时相差异或预训练模型输出，噪声大且任务无关。本文提出空间选择性自训练方法，通过迭代伪标签和空间选择模块，学习任务专用的建筑变化检测器。在遥感图像上有效抑制非建筑变化，提升变化检测精度。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "object detection in remote sensing",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.13503v1",
+      "source": "arxiv",
+      "title": "Heterogeneous LiDAR Early Fusion and Learned Re-Ranking Strategy for Robust Long-Term Place Recognition in Unstructured Environments",
+      "abstract": "Robust localization in unstructured environments, such as agricultural fields, is a critical challenge for autonomous systems. LiDAR sensors provide detailed 3D information about the environment and are invariant to lighting conditions. For this reason, LiDAR-based place recognition methods have gained significant attention. In this paper, we propose MinkUNeXt-VINE++, a novel approach that combines early fusion of heterogeneous LiDAR data from two sensors (Livox Mid-360 and Velodyne VLP-16) and a learned re-ranking strategy in inference time. This fusion leverages the strengths of each sensor to provide a more comprehensive representation of the environment. Additionally, the re-ranking approach is particularly important in repetitive environments, such as vineyards, as finding true positives is a major challenge. We evaluated our approach using the TEMPO-VINE dataset, which provides heterogeneous LiDAR data in vineyard environments across different phenological stages. Our results demonstrate that MinkUNeXt-VINE++ significantly improves place recognition performance compared to single-sensor approaches and state-of-the-art methods. MinkUNeXt-VINE++ achieves a 20% improvement in the Recall@1 metric compared to single-sensor approaches, and +30% including re-ranking. The code of our method is publicly available for reproduction.",
+      "authors": [
+        "Judith Vilella-Cantos",
+        "Juan José Cabrera",
+        "Mónica Ballesta",
+        "David Valiente",
+        "Luis Payá"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "published": "2026-06-11T15:52:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.13503v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "heterogeneous LiDAR early fusion for place recognition",
+      "llm_evidence_cn": "异构LiDAR早期融合用于位置识别",
+      "llm_evidence": "异构LiDAR早期融合用于位置识别",
+      "canonical_evidence": "异构LiDAR早期融合用于位置识别",
+      "llm_tldr_en": "Proposes MinkUNeXt-VINE++ with early fusion of heterogeneous LiDAR and re-ranking for robust place recognition.",
+      "llm_tldr_cn": "非结构化环境中的鲁棒定位是自主系统的关键挑战。本文提出MinkUNeXt-VINE++，通过早期融合两种异构LiDAR（Livox和Velodyne）数据，并引入学习式重排序策略，提升了长时位置识别的鲁棒性。方法在农业等非结构化场景验证有效，为多传感器融合技术提供了新思路。",
+      "llm_tldr": "非结构化环境中的鲁棒定位是自主系统的关键挑战。本文提出MinkUNeXt-VINE++，通过早期融合两种异构LiDAR（Livox和Velodyne）数据，并引入学习式重排序策略，提升了长时位置识别的鲁棒性。方法在农业等非结构化场景验证有效，为多传感器融合技术提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "biorxiv-10-64898-2026-06-03-729902-v1",
+      "source": "biorxiv",
+      "title": "Iterative Spatial Resolution Enhancement in Imaging Mass Spectrometry via Hydrogel Tissue Expansion and Multimodal Image Fusion",
+      "abstract": "The pixel size of imaging mass spectrometry (IMS) is fundamentally limited by several factors, including the diameter of the incident probe and the raster step size of the sample stage. We have previously demonstrated that hydrogel-based tissue expansion, originally developed for microscopy (ExM), can also be adapted for imaging mass spectrometry to physically magnify the size of the tissue. Expansion imaging mass spectrometry (ExIMS) uses a superabsorbent hydrogel to isotropically expand thin tissue sections, which can then be sampled via imaging mass spectrometry, resulting in improved effective spatial resolution. Separately, multimodal image fusion has been used to computationally upsample the effective spatial resolution in imaging mass spectrometry by predictively mapping mass spectrometric intensity values to the smaller diameter pixel sizes of a microscopy image of the same tissue section. Here, we present ExFusion, a unified workflow that combines these two approaches by computationally fusing structurally detailed fluorescent ExM and chemically detailed lipid ExIMS data obtained from the same 9.4-fold expanded mouse brain tissue. Following a 10-fold upsampling from image fusion, multimodal expansion image fusion enabled prediction of MS images at a [~]106 nm pixel size on a commercial mass spectrometer using a 10 m raster step size. At this resolution, lipids in the Purkinje cells of the cerebellum are clearly defined with intracellular distributions.",
+      "authors": [
+        "Mayo, E.",
+        "Samuel, J. M.",
+        "Guo, Y.",
+        "Ciccone, A. B.",
+        "Liang, Z.",
+        "Prentice, B. M."
+      ],
+      "primary_category": "biochemistry",
+      "categories": [
+        "biochemistry"
+      ],
+      "published": "2026-06-08T00:00:00+00:00",
+      "link": "https://www.biorxiv.org/content/10.64898/2026.06.03.729902v1.full.pdf",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multimodal image fusion for resolution enhancement",
+      "llm_evidence_cn": "多模态图像融合用于分辨率增强",
+      "llm_evidence": "多模态图像融合用于分辨率增强",
+      "canonical_evidence": "多模态图像融合用于分辨率增强",
+      "llm_tldr_en": "Proposes expansion imaging mass spectrometry with multimodal fusion to upsample spatial resolution, offering a generic fusion method applicable to remote sensing.",
+      "llm_tldr_cn": "该论文针对成像质谱中空间分辨率不足的问题，提出结合水凝胶组织膨胀与多模态图像融合的方法。通过物理膨胀放大组织，再使用多模态融合计算上采样，显著提升有效分辨率。该方法为多模态融合提供了通用框架，可迁移至遥感等其他图像融合任务。",
+      "llm_tldr": "该论文针对成像质谱中空间分辨率不足的问题，提出结合水凝胶组织膨胀与多模态图像融合的方法。通过物理膨胀放大组织，再使用多模态融合计算上采样，显著提升有效分辨率。该方法为多模态融合提供了通用框架，可迁移至遥感等其他图像融合任务。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

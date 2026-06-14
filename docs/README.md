@@ -6,53 +6,49 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-13
-- 运行时间：2026-06-13 20:51:08 UTC
+- 最新运行日期：2026-06-14
+- 运行时间：2026-06-14 21:23:53 UTC
 - 运行状态：成功
-- 本次总论文数：11
-- 精读区：4
+- 本次总论文数：9
+- 精读区：2
 - 速读区：7
 
 ### 今日简报（AI）
-今日共解读11篇论文，重点精读4篇，涵盖自主无人机与视觉-语言模型。最值得关注的是高分框架AerialClaw（LLM驱动自主空中代理）与Two Bridges（VLM到VLA的泛化路径）。下一步可深入探索AerialClaw在真实无人机自主任务中的应用，并关注VLAs的泛化数据策略。
-- 详情：[/202606/13/README](/202606/13/README)
+今日9篇论文聚焦变化检测与分割，精读两篇高分论文SemDINO和DIMOS。  
+最值得关注SemDINO的跨时序语义对齐变化检测（9.0分）和DIMOS的实例级移动目标分割（8.0分）。  
+建议优先精读SemDINO的方法，适用于遥感变化检测任务。
+- 详情：[/202606/14/README](/202606/14/README)
 
 ### 精读区论文标签
-1. [AerialClaw: An Open-Source Framework for LLM-Driven Autonomous Aerial Agents](/202606/13/2606.12142v1-aerialclaw-an-open-source-framework-for-llm-driven-autonomous-aerial-agents)  
-   标签：评分：9.0/10、query:uav-vln
-   evidence：基于LLM的无人机自然语言导航代理
-2. [Two Bridges, One Pathway: From VLMs to Generalizable VLAs with Embodied Trajectory-Coupled Data](/202606/13/2606.08520v1-two-bridges-one-pathway-from-vlms-to-generalizable-vlas-with-embodied-trajectory-coupled-data)  
-   标签：评分：8.0/10、query:uav-vln
-   evidence：视觉语言模型到具身导航策略的转化
-3. [Fusing Satellite Imagery and Planimetric Maps for Cross-View Localization](/202606/13/2606.10166v1-fusing-satellite-imagery-and-planimetric-maps-for-cross-view-localization)  
+1. [SemDINO: A DINOv3-Driven Network for Cross-Temporal Semantic Alignment in Change Detection](/202606/14/2606.09772v1-semdino-a-dinov3-driven-network-for-cross-temporal-semantic-alignment-in-change-detection)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：提出SemDINO，利用DINOv3和注意力机制进行遥感语义变化检测
+2. [DIMOS: Disentangling Instance-level Moving Object Segmentation](/202606/14/2606.12826v1-dimos-disentangling-instance-level-moving-object-segmentation)  
    标签：评分：8.0/10、query:rs-fusion
-   evidence：卫星图像与地图融合的跨视角定位方法
-4. [Geometric Coastline Localization using Vision-Language Models](/202606/13/2606.10468v1-geometric-coastline-localization-using-vision-language-models)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：视觉语言模型应用于遥感海岸线检测
+   evidence：事件与图像数据多模态融合用于实例分割
 
 ### 速读区论文标签
-1. [When Vision Misleads, Let Location Speak: A Worldwide Image Geo-Localization Method via Location Attention Mechanism and Large Multimodal Models](/202606/13/2606.08918v1-when-vision-misleads-let-location-speak-a-worldwide-image-geo-localization-method-via-location-attention-mechanism-and-large-multimodal-models)  
+1. [Zero-Parameter Geometric Gating for Temporally Stable Low-Altitude UAV Video Semantic Segmentation](/202606/14/2606.09162v1-zero-parameter-geometric-gating-for-temporally-stable-low-altitude-uav-video-semantic-segmentation)  
    标签：评分：7.0/10、query:rs-fusion
-   evidence：基于位置注意力与大多模态模型的地理定位
-2. [Illumination-Invariant Anomaly Detection for Sub-Canopy UAV Multispectral Point Clouds](/202606/13/2606.09111v1-illumination-invariant-anomaly-detection-for-sub-canopy-uav-multispectral-point-clouds)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：无人机多光谱点云异常检测应用于遥感
-3. [iSAGE: A Human-in-the-Loop Framework for Remote Sensing Semantic Segmentation via Sparse Point Supervision](/202606/13/2606.10136v1-isage-a-human-in-the-loop-framework-for-remote-sensing-semantic-segmentation-via-sparse-point-supervision)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：遥感语义分割的人机交互框架
-4. [Rethinking Embodied Navigation via Relational Inductive Bias](/202606/13/2606.10348v1-rethinking-embodied-navigation-via-relational-inductive-bias)  
+   evidence：带几何门控的低空无人机视频语义分割以保持时间一致性
+2. [Rethinking Embodied Navigation via Relational Inductive Bias](/202606/14/2606.10348v1-rethinking-embodied-navigation-via-relational-inductive-bias)  
    标签：评分：7.0/10、query:uav-vln
-   evidence：使用视觉语言模型和关系偏置的具身导航
-5. [MuJoCo-Drones-Gym: A GPU-Accelerated Multi-Drone Simulator for Control and Reinforcement Learning](/202606/13/2606.08039v1-mujoco-drones-gym-a-gpu-accelerated-multi-drone-simulator-for-control-and-reinforcement-learning)  
+   evidence：使用视觉语言模型和关系偏置进行目标导航，与视觉语言导航相关
+3. [Spatially Selective Self-Training for Unsupervised Building Change Detection](/202606/14/2606.10775v2-spatially-selective-self-training-for-unsupervised-building-change-detection)  
+   标签：评分：7.0/10、query:rs-fusion
+   evidence：遥感无监督建筑变化检测
+4. [MuJoCo-Drones-Gym: A GPU-Accelerated Multi-Drone Simulator for Control and Reinforcement Learning](/202606/14/2606.08039v1-mujoco-drones-gym-a-gpu-accelerated-multi-drone-simulator-for-control-and-reinforcement-learning)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：多无人机仿真器，支持控制与强化学习
-6. [Adapting Prithvi-EO for Fallow Detection for Food-Water Nexus: ViT-Adapter Necks and Parameter-Efficient Backbone tuning of Geospatial Foundation Model](/202606/13/2606.12218v1-adapting-prithvi-eo-for-fallow-detection-for-food-water-nexus-vit-adapter-necks-and-parameter-efficient-backbone-tuning-of-geospatial-foundation-model)  
+   evidence：多无人机模拟器支持控制与强化学习，为无人机导航研究提供平台
+5. [Context-Aware Feature-Fusion for Co-occurring Object Detection in Autonomous Driving](/202606/14/2606.12628v1-context-aware-feature-fusion-for-co-occurring-object-detection-in-autonomous-driving)  
    标签：评分：6.0/10、query:rs-fusion
-   evidence：采用地理空间基础模型进行休耕检测，含多尺度适配
-7. [Mapping distribution of invasive plant species and uncertainty using citizen science, remote sensing, and deep learning](/202606/13/biorxiv-10-64898-2026-06-10-731341-v1-mapping-distribution-of-invasive-plant-species-and-uncertainty-using-citizen-science-remote-sensing-and-deep-learning)  
+   evidence：上下文感知的特征融合，注意力机制用于目标检测
+6. [Heterogeneous LiDAR Early Fusion and Learned Re-Ranking Strategy for Robust Long-Term Place Recognition in Unstructured Environments](/202606/14/2606.13503v1-heterogeneous-lidar-early-fusion-and-learned-re-ranking-strategy-for-robust-long-term-place-recognition-in-unstructured-environments)  
    标签：评分：6.0/10、query:rs-fusion
-   evidence：利用遥感和深度学习进行入侵物种分布制图
+   evidence：异构LiDAR早期融合用于位置识别
+7. [Iterative Spatial Resolution Enhancement in Imaging Mass Spectrometry via Hydrogel Tissue Expansion and Multimodal Image Fusion](/202606/14/biorxiv-10-64898-2026-06-03-729902-v1-iterative-spatial-resolution-enhancement-in-imaging-mass-spectrometry-via-hydrogel-tissue-expansion-and-multimodal-image-fusion)  
+   标签：评分：6.0/10、query:rs-fusion
+   evidence：多模态图像融合用于分辨率增强
 
 
 <div class="dpr-home-promo-card">
