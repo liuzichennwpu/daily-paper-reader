@@ -1,0 +1,677 @@
+Title: Paper Title (use style: paper title)
+
+URL Source: https://arxiv.org/pdf/2606.10350v1
+
+Published Time: Wed, 10 Jun 2026 00:28:20 GMT
+
+Number of Pages: 4
+
+Markdown Content:
+XXX -X-XXXX -XXXX -X/XX/$XX.00 ©20XX IEEE 
+
+# Multi -Angular Reflectance Anisotropy Observed 
+
+# from UAV Multispectral Imagery 
+
+Zhenqiang Qin 
+
+Geospatial Information 
+
+College 
+
+Information Engineering 
+
+University 
+
+Zhengzhou, China 
+
+18530399015@163.com 
+
+Chenguang Dai 
+
+Geospatial Information 
+
+College 
+
+Information Engineering 
+
+University 
+
+Zhengzhou, China 
+
+cgdai2008 @163.com 
+
+Min Wang 
+
+Hebi Meteorological 
+
+Bureau of Henan Province 
+
+Hebi , China 
+
+wangqhebi@163.com 
+
+Xian Li* 
+
+School of Electronics and 
+
+Information Engineering 
+
+Harbin Institute of 
+
+Technology 
+
+Harbin, China 
+
+xianli@hit.edu.cn 
+
+Abstract —UAV multispectral imagery naturally contains 
+
+multi -angular observations due to low flight altitude and wide 
+
+field -of -view imaging, which may introduce geometry -driven 
+
+radiometric variability. This study proposes a geometry -aware 
+
+multi -angular observation extraction workflow to quantify 
+
+observation -geometry effects from a BRDF perspective. 
+
+Specifically, camera intrinsics and extrinsics are refined via 
+
+structure -from -motion (S FM), and homogeneous regions 
+
+annotated on an orthomosaic are reprojected onto multip le raw 
+
+sub -images acquired from different viewpoints. This enables 
+
+joint extraction of multi -band reflectance and observation 
+
+geometry parameters for the same ground targets under 
+
+varying viewing directions. The extracted observations are 
+
+further analyzed using band -wise polar visualization in the 
+
+(VZA, RAA) domain. Results on a grassland target show clear 
+
+reflectance anisotropy across ten bands, with red -edge and near -
+
+infrared bands exhibiting 119 –137% variability between 
+
+maximum and minimum reflectance, indicating non -negligible 
+
+observation -geometry effects on radiometric consistency. 
+
+Keywords —UAV , multispectral, observation geometry, BRDF, 
+
+multi -angular observation 
+
+I. INTRODUCTION 
+
+Unmanned aerial vehicles (UAVs) equipped with 
+
+multispectral sensors have been widely used in remote sensing 
+
+due to their high spatial resolution and flexibility . However, 
+
+low flight altitude and wide field -of -view imaging systems 
+
+naturally produce multi -angular observations even within a 
+
+single flight, meaning that the same surface target can be 
+
+observed under varying viewing geometries. Such geometry -
+
+driven directional variations in reflectance may degrade 
+
+radiometric consistency and affect quantitative interpretation. 
+
+The angular dependence of surface reflectance is 
+
+commonly descr ibed by the BRDF [1]. Although BRDF 
+
+studies have been extensively conducted for satellite multi -
+
+angular remote sensing, UAV platforms have also 
+
+demonstrated strong potential for high -resolution multi -
+
+angular reflectance measurements and anisotropy 
+
+characte rization [3] –[5], as well as high -precision BRDF 
+
+modeling [2]. In addition, polarization and multi -angular 
+
+reflectance measurements from UAVs further highlight the 
+
+importance of geometry -dependent effects in close -range 
+
+remote sensing [4]. Meanwhile, recen t studies have shown the 
+
+feasibility of extracting BRDF -related information from UAV 
+
+multispectral observations and emphasized the value of robust 
+
+geometric processing in UAV workflows [6] -[8]. 
+
+Motivated by these studies, this work proposes a
+
+geometry -awa re multi -angular observation extraction 
+
+workflow to quantify observation -geometry effects from a 
+
+BRDF perspective. S FM-refined camera parameters are used 
+
+to reproject orthomosaic -annotated homogeneous regions 
+
+onto multiple sub -images acquired from differen t viewpoints, 
+
+enabling joint extraction of multi -band reflectance and 
+
+observation geometry for the same ground targets under 
+
+different views. Band -wise polar visualization in the view 
+
+zenith angle, relative azimuth angle (VZA, RAA) domain is 
+
+further employ ed to reveal geometry -driven reflectance 
+
+patterns and provide an intuitive interpretation of multi -
+
+angular reflectance variability in UAV multispectral imagery. 
+
+II. STUDY AREA AND DATA 
+
+A. Study Area 
+
+The experiments were conducted on the Harbin Institute 
+
+of Techno logy (HIT) campus, where a grassland area with 
+
+relatively homogeneous surface conditions was selected as the 
+
+case study , as shown in Fig.1 . The site exhibits limited 
+
+topographic variation, and the surface condition remained 
+
+stable during the UAV acquisitio n, making it suitable for 
+
+analyzing reflectance variations primarily driven by 
+
+observation geometry. 
+
+An orthomosaic was generated from the UAV image to 
+
+provide an overview of the scene. Based on the orthomosaic, 
+
+multiple homogeneous grassland sub -regions w ere manually 
+
+selected as regions of interest (ROIs) for multi -angular 
+
+analysis. These ROIs exhibit good spectral continuity, which 
+
+helps reduce the influence of land -cover heterogeneity and 
+
+local shadow effects. By focusing on these grassland ROIs, 
+
+the ana lysis emphasizes observation -geometry -induced 
+
+reflectance anisotropy rather than surface type differences. 
+
+B. UAV Multispectral Data Acquisition 
+
+The multispectral dataset was acquired using a UAV 
+
+platform equipped with a MicaSense RedEdge -MX Dual 
+
+camera, which provides 10 discrete spectral bands spanning 
+
+th e visible to near -infrared range. The sensor adopts a frame -
+
+based imaging mode to capture multispectral images. 
+
+Data acquisition was conducted during a single flight 
+
+mission under clear -sky conditions, resulting in several 
+
+hundred multispectral frames. Due to the low flight altitude 
+
+This work was supported by an Internal Independent Research Project 
+
+of the University of Information Engineering and by Heilongjiang Provincial 
+
+Outstanding Youth Science Fund Project (Grant No. YQ2024F003). 
+
+(a)  (b) 
+
+Fig. 1. Orthomosaic of the study area on the HIT campus and selected 
+
+homogeneous grassland ROIs .and the wide field -of -view of the sensor, the acquired imagery 
+
+naturally contains a wide range of viewing geometries, from 
+
+near -nadir to relatively large off -nadir angles, even within the 
+
+same flight. 
+
+III. OBSERVATION GEOMETRY 
+
+Multi -angular reflectance observed in UAV multispectral 
+
+imagery arises from variations in illumination and viewing 
+
+geometry. Following standard BRDF geometry conventions, 
+
+the observation geometry of each pixel is described by the 
+
+solar zenith angle s
+
+ , view zenith angle v
+
+ , solar azimuth 
+
+angle s
+
+ , and viewing azimuth angle v
+
+ , as illustrated in Fig. 
+
+2. The relative azimuth angle  is defi ned as .v s
+
+  = −
+
+(1)
+
+Let n denote the surface normal vector, s the solar 
+
+illumination direction, and v the sensor viewing direction. 
+
+The corresponding zenith angles are computed as :( ) ( )
+
+arccos , arccos s v
+
+=  = n s n v 
+
+(2)
+
+Under these definitions, surface reflectance in band λ can 
+
+be expressed as a function of observation geometry: ( )
+
+, ,s vR R 
+
+> 
+
+  =
+
+(3)
+
+The directional dependence of reflectance can be 
+
+interpreted under the BRDF framework. In remote sensing, 
+
+BRDF is often represented using an approximate form such as 
+
+a linear combination of geometry -dependent k ernel functions: ( ) ( ), , , ,s v i i s vi
+
+R a K 
+
+     
+
+(4)
+
+Where iK denotes the kernel functions and ia represents 
+
+the corresponding coefficients. In this study, we focus on 
+
+observation -geometry -driven reflectance variations captured 
+
+by UAV image s. Since solar geometry varies only slightly 
+
+during a s ingle UAV flight, subsequent analysis primarily 
+
+emphasizes reflectance patterns associated with v
+
+ and  .
+
+IV. METHOD 
+
+Fig. 3 illustrates the overall workflow of the proposed 
+
+geometry -aware multi -angular observation extraction and 
+
+analysis pipeline. The method consists of four main stages: (1) 
+
+SFM-based reconstruction for refined camera parameters and 
+
+orthomosaic generation, (2) ROI annotation on the 
+
+orthomosaic, (3) geometry -aware observation extraction via 
+
+reprojection to raw images, and (4) polar visualization of 
+
+multi -angular reflectance. 
+
+A. Data Preprocessing 
+
+Prior to multi -angular analysis, the UAV multispectral 
+
+images were pr eprocessed to improve both radiometric and 
+
+geometric consistency. Radiometric calibration was applied to 
+
+convert raw DN s to reflectance. In addition, band -to -band 
+
+registration was performed to correct potential misalignment 
+
+among spectral bands, ensuring t hat reflectance measurements 
+
+from different bands correspond to the same ground targets .
+
+B. SFM -based reconstruction 
+
+To obtain accurate imaging geometry for multi -angular 
+
+analysis, a S FM based reconstruction is first performed using 
+
+multi -view UAV imagery. The objective of S FM is to jointly 
+
+estimate camera intrinsic parameters, camera poses, and the 
+
+three -dimensional structure from image correspondences. 
+
+In the SfM framework, the projection of a 3D point jX
+
+onto the image plane of the i -th view can be expressed as ( )    
+
+> ij iiji
+
++x K R X t:
+
+(5)
+
+where iK denotes the intrinsic matrix, and iR ,it represent 
+
+the rotation and translation of the camera pose, respectively. 
+
+After establishing multi -view correspondences, bundle 
+
+adjustment is applied to refine ca mera poses and 3D points by 
+
+minimizing the reprojection error: ( )
+
+# ( )  
+
+> 2,,,
+
+min       
+
+> iii
+> ij iijii j
+
+= − +R t K x K R X t
+
+(6)
+
+where ( ) 
+
+ denotes the projection operator. 
+
+For each view , SFM provides the refined camera intrinsics ˆ iK
+
+and extrinsics ˆ iR and ˆit , used to establish geometric 
+
+correspondence between the orthomosaic and raw sub -images. 
+
+C. ROI annotation 
+
+To analyze reflectance anisotropy under controlled surface 
+
+conditions, representative grassland ROIs were manually 
+
+annotated on the orthomosaic using ENVI or ArcGIS. The   
+
+> Fig. 3. Workflow of the proposed pipeline.
+> .
+> Fig. 2. Illustration of observation geometry .
+
+selected ROIs exhibit relatively homoge neous texture and 
+
+spectral uniformity, which helps reduce the influence of land -
+
+cover heterogeneity and enables the analysis to focus on 
+
+geometry -induced reflectance variations. 
+
+D. Observation Extraction 
+
+Based on the refined camera intrinsics ˆ iK and extrinsics ˆ iR
+
+and ˆit obtained from the S FM reconstruction and the ROI 
+
+annotations from Section IV.C, the image projection result on 
+
+the 𝑗 -th sub -image f ollows the perspective projection model :( )
+
+ˆ ˆ ˆˆ j j j j+x K R X t:
+
+(7)
+
+where ˆ jx denotes the pixel location in the raw sub -image. 
+
+Using this geometric relationship, ROI pixels are sampled in 
+
+each view and the corresponding band reflectance values are 
+
+extracted, denoted as jR 
+
+> 
+
+for band  .
+
+For each valid reprojection, band -wise reflectance values 
+
+were extracted from the corresponding sub -image. Meanwhile, 
+
+observation geometry parameters ( )
+
+, ,s v
+
+   were computed 
+
+for each sample based on the refined camera pose and the 
+
+illumin ation direction described in Section III .
+
+Aggregating all ROI samples across available views forms 
+
+a multi -angular observation set: ( )
+
+# ( )
+
+#  
+
+> 1
+
+ˆ , , Nj j v j
+
+R 
+
+> 
+
+ 
+
+> =
+
+= x£
+
+(8)
+
+where N is the number of valid views. 
+
+E. Polar Visualization of Multi -Angular Reflectance 
+
+To provide an intuitive representation of observation -
+
+geometry -driven reflectance variations, polar -coordinate 
+
+visualizatio n was applied to each spectral band. In the polar 
+
+plots, the radial coordinate represents the view zenith angle v
+
+
+
+, while the angular coordinate corresponds to the relative 
+
+azimuth angle  . The reflectance i n each band is encoded by 
+
+the color intensity. By comparing polar plots across spectral 
+
+bands, the spectral dependence of multi -angular anisotropy 
+
+can be visually assessed under the BRDF framework.             
+
+> (a) B1 -Blue -444nm (b) B2 -Blue -475nm (c) B3 -Green -531nm (d) B4 -Green -560nm
+> (e) B5 -Red -650nm (f) B6 -Red -668nm (g) B7 -Red edge -705nm (h) B8 -Red edge -717nm
+> (i) B9 -Red edge -740nm (j) B10 -NIR -842nm
+> Fig. 5. Polar maps of multi -angular reflectance across ten spectral bands for the grassland region. The radial coordinate denotes the view zenith angle ,the
+> angular coordinate denotes the relative azimuth angle, and color indicates reflectance magnitude.
+> Fig. 4. Spectral reflectance curves of a grassland ROI observed from 20
+> viewing angles.
+
+V. RESULT 
+
+Based on the proposed geometry -aware multi -angular 
+
+observation extraction framework, the reflectance 
+
+characteristics of the grassland ROI under varying observation 
+
+geometries are analyzed. By combining refined camera 
+
+parameters obtained from SfM reconstruc tion with ROI 
+
+annotation in orthomosaic space, consistent geometric 
+
+correspondence across multiple views is established, ensuring 
+
+the comparability of reflectance observations acquired from 
+
+different viewing angles. 
+
+Figure 4 illustrates the polar -coordina te distributions of 
+
+multi -angular reflectance for different spectral bands under 
+
+explicitly defined observation geometry. Systematic 
+
+reflectance variations with respect to view zenith and relative 
+
+azimuth angles are observed in all bands, indicating that t he 
+
+extracted reflectance changes are strongly associated with 
+
+observation geometry rather than random noise or 
+
+misregistration effects. This confirms the effectiveness of the 
+
+geometry -aware extraction strategy in characterizing 
+
+reflectance anisotropy. 
+
+Fro m a spectral perspective, the red -edge and near -
+
+infrared bands (B7 –B10) exhibit noticeable but relatively 
+
+moderate angular dependence, with the maximum reflectance 
+
+reaching approximately 119 –137% of the minimum value 
+
+across viewing angles. In contrast, the visible bands show 
+
+stronger sensitivity to observation geometry, with maximum -
+
+to -minimum ratios of approximately 106 –227% , highlighting 
+
+more pronounced angular -induced fluctuations. It should be 
+
+noted that visible -band reflectance over vegetation is typic ally 
+
+low, and ratio -based metrics may therefore be more sensitive 
+
+to small absolute changes. Nevertheless, these statistics 
+
+highlight that observation geometry can introduce non -
+
+negligible radiometric variability across viewing directions, 
+
+even for a homog eneous grassland target within a single UAV 
+
+mission. 
+
+Figure 5 presents the spectral reflectance curves of the 
+
+same grassland ROI observed from 20 viewing angles. Owing 
+
+to the geometry -aware ROI back -projection and observation 
+
+extraction, the spectral shape s remain consistent across all 
+
+views, while the reflectance magnitudes vary systematically 
+
+with viewing geometry. These results further demonstrate that 
+
+the observed variability is primarily driven by geometry -
+
+dependent effects rather than intrinsic surfac e heterogeneity. 
+
+VI. CONCLUSION 
+
+This study presents a UAV -based framework for multi -
+
+angular reflectance analysis using multispectral imagery. 
+
+Refined camera parameters are obtained through SFM
+
+reconstruction and combined with ROI annotation in 
+
+orthomosaic spac e to enable accurate extraction of reflectance 
+
+observations for the same surface area under multiple viewing 
+
+angles. Based on this framework, polar -coordinate 
+
+visualization is employed to systematically analyze angular -
+
+dependent reflectance characteristics across spectral bands. 
+
+The experimental results demonstrate that pronounced 
+
+angular effects exist even over relatively homogeneous 
+
+grassland surfaces. Noticeable reflectance variations are 
+
+observed across viewing angles in the red -edge and near -
+
+infrared b ands, while the visible bands exhibit even stronger 
+
+angular -induced fluctuations. These findings highlight the 
+
+non -negligible influence of observation geometry in UAV -
+
+based multispectral reflectance analysis. 
+
+The proposed workflow provides a practical basi s for 
+
+organizing and analyzing multi -angular UAV observations. 
+
+Future work will focus on integrating quantitative BRDF 
+
+modeling and multi -temporal observations to further improve 
+
+the reliability of UAV multispectral data for surface parameter 
+
+retrieval and fine -scale remote sensing applications. .
+
+REFERENCES

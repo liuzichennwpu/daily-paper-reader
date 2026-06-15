@@ -1,0 +1,623 @@
+Title: Spectrum Aware Illumination Estimation Using Multispectral Image
+
+URL Source: https://arxiv.org/pdf/2606.14248v1
+
+Published Time: Mon, 15 Jun 2026 00:45:26 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 1
+
+# Spectrum Aware Illumination Estimation Using Multispectral Image 
+
+Hyejin Oh , Woo-Shik Kim , Sangyoon Lee , YungKyung Park , Je-Won Kang 
+
+Abstract —Multispectral (MS) imaging extends beyond conven-tional RGB imaging by capturing more spectral bands, thereby improving illuminant spectrum estimation (ISE). However, existing methods often fail to fully exploit spectral information, resulting in suboptimal performance under diverse lighting conditions and across different sensor domains. Hence, we propose a deep learning framework with a spatio-spectral feature extraction block, which incorporates spectral attention mechanisms to enhance spectral correlation and preserve illuminant-relevant spatial features. Through the inclusion of an illuminant prior (IP), our approach prioritizes specific channels that provide more meaningful information in an MS image. We also propose a spectral-domain transform across different MS sensor spaces. The results demonstrate that illuminant spectra learned in high-dimensional sensor spaces can be effectively transformed to various lower-dimensional camera sensor spaces without any additional training. To facilitate evaluation, we introduce a real-world MS dataset containing high-dimensional ground-truth illumination spectra captured under diverse lighting conditions. Through extensive experiments, we demonstrate that our method achieves superior accuracy compared to existing models, thus providing a practical solution for real-world ISE. The code and dataset are available at https://github.com/hyejin5/Spectrum-Aware-Illumination-Estimation-Using-Multispectral-Image .
+
+I. I NTRODUCTION 
+
+Though RGB sensors have been the mainstreams for the imaging devices with high resolution and sensitivity, they can capture only a limited range of spectral bands across the electromagnetic spectrum and struggle to handle complex lighting conditions [ 8 , 49 ]. To address these problems, mul-tispectral (MS) image sensors, which can acquire a broader range of spectral bands than RGB sensors, have been used to obtain detailed spectral information about a scene or objects. Due to these advantages, MS imaging has enabled applications across various fields, including image classification, super-resolution, remote sensing, autonomous driving, and industrial inspection [ 4, 5, 44 , 57 , 70 ]. Despite the fact that 
+
+Manuscript received XXXX XX, 2025; revised XXXX XX, 2025. The work was supported by Samsung Electronics and the National Research Foundation of Korea(NRF) grant funded by the Korea government(MSIT) (RS-2025-23524046). H. Oh is with the Department of Electronic and Electrical Engineering, Ewha W. University, Seoul, Korea, 03760. (e-mail: hyejin5@ewha.ac.kr). W.-S. Kim is with Telechips, Gyeonggi-do, Korea, 13453. This work was done while he was with the Samsung Advanced Institute of Technology. (e-mail: jacob.kim@telechips.com). S. Lee is with the Samsung Advanced Institute of Technology, Gyeonggi-do, Korea, 16678. (e-mail: sangy00n.lee@samsung.com). Y. Park is with the Department of Design, Ewha W. University, Seoul, Korea. (e-mail: yungkyung.park@ewha.ac.kr). J.-W. Kang is with the Department of Electronic and Electrical Engineering, Ewha W. University, Seoul, Korea. (e-mail: jewonk@ewha.ac.kr). Corresponding author: J.-W. Kang. Copyright © 2026 IEEE. Personal use of this material is permitted. However, permission to use this material for any other purposes must be obtained from the IEEE by sending an email to pubs-permissions@ieee.org. Digital Object Identifier (DOI): 10.1109/TCSVT.2026.3701975 MS         
+
+> Image Domain
+> MS Image Sensor
+> MS Image
+> Acquisition
+> XYZ Tristimulus
+> Space
+> Low -D
+> MS Space
+> Training -free Spectral -Domain Transform
+> Linear transform
+> (target -domain matrix)
+> 𝑪 𝒐𝒖𝒕
+> 1
+> 2
+> 3
+> 1
+> 2
+> 3
+> ⋮
+> 𝑪 𝒕𝒂𝒓
+> 𝑳 𝑿𝒀𝒁
+> 𝑳 𝑴𝑺
+> 𝒍
+> 𝑳 𝑴𝑺
+> 𝒉
+> ×
+> ×=
+> =
+> 𝑪 𝒐𝒖𝒕
+> ℱ𝜃
+> ISE
+> Network
+> Network
+> Mapping
+> 𝝀
+> 𝐒 𝐏 𝐃
+> Estimated
+> High -D
+> illuminant
+> High -D Illuminant SPD
+> Estimation
+> ℱ𝜃 :ℝ𝐶 𝑖𝑛 ×𝐻 ×𝑊 →ℝ𝐶 𝑜𝑢𝑡 𝐌 𝐂𝐌𝐅
+> 𝐌 𝐂𝐒𝐅
+> I∈ℝ𝐶 𝑖𝑛 ×𝐻 ×𝑊
+
+Fig. 1: Overall pipeline of the proposed framework. The ISE network estimates a high-dimensional illuminant SPD from an MS image, and the estimated SPD is linearly projected to multiple target domains using target-domain matrices, such as CMF for the XYZ tristimulus space and CSF for the low-dimensional MS sensor space. such MS sensors can provide abundant spectral information, the widespread adoption of hyperspectral imaging has been limited by its high production costs. Recently, however, MS sensors have become more cost-effective, thereby facilitating the acquisition of high-resolution images [27]. Illuminant spectrum estimation (ISE) aims to recover the spectral power distribution (SPD) of the scene illumination from captured MS images. Because the SPD is closely related to the chromatic characteristics of illumination, it directly affects MS pixel values and downstream processes that rely on stable spectral measurements. This is particularly relevant in real-world pipelines. For example, in camera image signal processor (ISP), reliable estimation of illuminant chromaticity supports auto white balance (AWB) and consistent color rendering [1 , 26 , 43 , 52 ]. In industrial inspection, color correction improves inspection accuracy [ 39 , 40 , 76 ]. In spectral-imaging applications such as in medical and microscopy imaging, illumination variation can bias quantitative analysis [47, 56]. Recent studies [ 19 , 20 , 27 ] have demonstrated that the increasing number of spectral bands enables more accurate reconstruction of an illuminant SPD function, thereby im-proving illumination estimation. Various illumination esti-mation methods based on spectral images have been devel-oped [ 27 , 34 , 36 , 46 , 58 , 81 ]. However, achieving effective ISE remains a challenge, since an illumination estimation problem involves solving an under-constrained problem that requires the simultaneous recovery of both the illumination spectrum and surface reflectance [ 13 , 32 , 81 ]. Studies have attempted to impose several constraints on MS images and have used low-rank matrix factorizations to separate scene illumination from surface reflectance [ 2, 15 , 81 ]. However, when the  
+
+> arXiv:2606.14248v1 [eess.IV] 12 Jun 2026 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 2
+
+number of channels is less than that of basis functions, the recovery of scene illuminants becomes unstable. The intrinsic interdependence between illumination and surface reflectance spectra hinders accurate illumination estimation of spectral images, especially in complex spectral scenes [37, 38, 80]. Apart from the challenge in intrinsic image decomposition, MS images possess inherent complexities in terms of channel variations within the spectral domain. The dimensions of a ground-truth (GT) illuminant spectrum can vary with the channel-sampling intervals and sensor characteristics. Various deep learning techniques have been developed for RGB [ 8,9, 31 , 48 , 49 , 60 , 75 ] and spectral images [ 27 , 28 , 46 , 58 ]. However, the aforementioned dimensional variation creates a unique challenge in illuminant estimation, particularly when applying a pre-trained network using one sensor to a dataset acquired using another sensor. Therefore, for practical applica-tions, it is necessary to develop a spectral-domain transform for illuminant estimation that can accommodate these spectral variations without retraining of a network for each specific case. In this paper, we propose a comprehensive framework for ISE using MS images, as illustrated in Fig. 1. We present a novel deep learning framework that efficiently utilizes rich spectral information in a spectral image to achieve accurate ISE. Existing techniques operating in the spatial domain treat all channels equally, which result in a loss of spectral correlation among channels, thus leading to a limited capacity to capture spectral information [ 44 , 57 ]. Existing models built on a standard transformer model [ 18 ] often fail to prioritize specific channels that provide more meaningful information. To overcome these drawbacks and leverage the information of the images more effectively, on top of the baseline, the proposed network uses a spatio-spectral feature extraction block incorporating the spectral attention block with illuminant prior (SABIP) and the multi-head spectral self-attention block (MSSAB). These attention blocks are used to exploit inter-channel relations in the spectral images and preserve spectral information with respect to the illuminant relevant spatial features. Furthermore, we propose a spectral-domain transformation method that considers the relationships between both the input image channels ( Cin ) and the output illuminant channels (Cout ). This consideration enables the development of a flexible framework that can effectively handle various spectral configu-rations while maintaining estimation accuracy. Thus, illuminant information learned in higher-dimensional spectral domains can be effectively utilized in lower-dimensional domains through simple transform matrices. The proposed technique produces accurate estimations without requiring additional training procedures. Thus, by generalizing a single model to different MS cameras and conventional trichromatic spaces, encompassing various sensor spaces, practical benefits and versatile solutions can be obtained for real-world illumination estimation problems. To facilitate this study, we introduce a real-world MS image dataset MILD (Multispectral Image dataset with Lighting Diver-sity), which includes scenes under natural outdoor sunlight, a fluorescent lamp, or a daylight series synthesized using a multi-channel LED lighting booth. Our dataset also includes scenes under extreme lighting conditions, including high chromaticity color illuminants, which has not been examined in other studies. We placed more than two references inside each scene—a color chart, 3D gray, and white. The acquisition was performed using the MS image sensor, fabricated on top of the CMOS image sensor (CIS) for a smartphone, which provides 16-channel information. The GT spectrum for all illuminants is measured using a spectroradiometer resampled to 36 channels in 10 nm intervals across 380-730 nm. The GT data from the spectroradiometer enables the model to learn higher-dimensional illumination spectra. We conduct extensive experiments on multiple benchmarks, including our dataset containing challenging monochromatic illumination cases that are difficult to handle with RGB images, and provide ablation analyses to validate the effectiveness of each proposed component. The proposed framework achieves state-of-the-art performance across these settings. The key contributions of this study are as follows:  
+
+> •
+
+Method: spatio–spectral modeling for MS ISE. We propose a novel spectral attention-based deep learning framework for ISE from MS images. The proposed design explicitly models spectral inter-channel dependencies via spectral attention, while preserving spectral details with dedicated modules. Our methods enable effective extrac-tion of illuminant cues from complex MS measurements.  
+
+> •
+
+Generalization: training-free spectral-domain transfer. 
+
+We introduce a training-free sensor-space transformation that maps the estimated high-dimensional illuminant spectrum to lower-dimensional target spaces (e.g., MS sensor spaces or XYZ tristimulus space) without additional training. This provides a practical approach to deploy a single ISE model across different sensor configurations.  
+
+> •
+
+Dataset: MS data with spectroradiometer-measured GT and extreme lighting. We present MILD, a MS image dataset with spectroradiometer-measured ground-truth illuminant spectra, covering indoor illuminants and natural daylight as well as extreme mono-wavelength lighting con-ditions. This design enables robustness evaluation under extreme illuminant distributions and supports assessing applicability across diverse illumination scenarios. II. R ELATED WORK 
+
+A. Illumination Estimation 1) Statistics-based Illumination Estimation: Early studies in this domain focused on estimating illumination from RGB images. Statistics-based and deep learning-based methods have been developed to improve the accuracy of illumination estimation. Statistics-based methods [ 10 , 11 , 13 , 22 , 41 , 42 , 67 ]involve modeling techniques that utilized prior information derived from human visual characteristics, physical properties, and statistical observations. The Max-RGB algorithm [41 ]assumes the existence of at least one white patch that reflects the perfect illuminant in an image to estimate illumination from the pixel with the maximum spectral response. The Gray-World (GW) algorithm [11 ] assumes that the average reflectance of surfaces in a scene which contains diverse objects JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 3
+
+is achromatic, similar to gray. The Gray-Edge (GE) algorithm [67 ] extends these assumptions to image derivatives, assuming that the average edge difference in a scene is achromatic; by comparison, the Shades-of-Gray algorithm [ 22 ] follows a more generalized assumption, implementing the Minkowski norm as a balance between the GW and Max-RGB methods. While these statistical methods are computationally efficient, they often underperform in particular scenes that deviate from their underlying assumptions. In recent studies, well-established statistical models and relevant assumptions have been extended from RGB to spectral domains [ 2, 15 , 35 , 64 ]. In [ 35 ], traditional statistics-based illumination estimation algorithms, such as Max-RGB, GW, and GE are extended from RGB to higher dimensional spectral data. In [ 2, 15 , 81 ], scene illumination is separated from surface reflectance via low-rank matrix factorizations. This approach enables a more intricate decomposition of the scene, isolating illumination effects from object colors based on their spectral attributes. 
+
+2) Deep Learning-based Illumination Estimation: Deep learning-based methods have been employed to achieve accu-rate illumination estimation, particularly in complex scenes, such as those with highly specular materials, unusual color distributions, extreme lighting conditions, or limited color diversity where traditional statistical approaches often fail. Such methods [ 8, 9, 31 , 48 , 49 , 60 , 75 ] have significantly improved accuracy in complex scenarios by leveraging the spatial characteristics of RGB images. In [ 79 ], complex scene contents are decoupled from illumination using semantic priors in the RGB color domain. Deep learning-based methods have also been extended to the MS domain for accurate ISE [ 27 , 28 , 46 , 58 ]. In [46 ], ISE was formulated as a constrained matrix factorization problem, which was optimized using a deep unrolling network to obtain a solution. In [58 ], a convolutional neural network (CNN) was employed to estimate pixel-wise scene illuminants by processing image patches at multiple scales; however, it struggled to fully exploit the channel and spectral information in MS images. The unsupervised segmentation method in [28 ] can model illumination as a piecewise-constant spectrum but fails to handle diverse lighting conditions. In [ 27 ], a pyramid-based convolutional block was designed to process spectral images via triplet decomposition. However, research on ISE using MS images remains limited. The method used in [46 ] rely on spectral reflectance images, each of which must be calibrated using a reference or measurement device [ 45 ]. The limited availability of GT reflectance data under diverse lighting conditions compromises the effectiveness of these aforementioned methods in practical applications. The networks proposed in [ 27 , 28 , 58 ] cannot fully utilize the rich spectral characteristics of MS images. These models often fail to leverage image features relevant to illuminant properties, thereby struggling to accommodate diverse illumination spectra. Illumination estimation methods have evolved along different trajectories. While statistics-based methods leverage low-level features, including image statistics and spectral information, deep learning-based approaches focus on exploiting data-driven spatial information in images. Moreover, recent studies have increasingly employed illumination estimation as an auxiliary module in various tasks, ranging from low-level vision such as low-light enhancement [82 ], texture enhancement [71 ], and image denoising [29 ] to high-level vision tasks such as person re-identification [ 78 ]. In [ 82 ], low-light enhancement is casted as a re-imaging process for objects in dark scenes, in which the illumination estimation is used for a light modulation network. In [ 29 ], artifact reduction is addressed under spatially varying illumination conditions. They decompose mixed illumination into mixture weights over a predefined canonical illuminant basis. [ 71 ] compensate illuminance drift as a scalar harmonic field via Hodge decomposition. While these approaches advance illumination modeling in the RGB color space, they do not target wavelength-resolved illuminant SPD estimation from high-dimensional MS measurements. Deep learning-based ISE frameworks can effectively leverage the rich spectral information contained within MS images while maintaining the advantages of data-driven feature learning. 
+
+B. Spectral Information Processing in MS images 
+
+Deep learning-based methods exploit various attention mechanisms to leverage spectral information effectively. The method proposed in [ 59 ] uses the squeeze and excitation (SE) blocks [ 30 ], which recalibrate feature maps by explicitly modeling interdependencies between channels. Likewise, the technique from [70 ] utilizes SE blocks to adaptively learn the weights for different spectral bands and for different neighboring pixels. The self-attention mechanism, introduced in transformers [ 68 ], has also been actively used to extract both spectral and spatial features. It effectively captures global long-range dependencies without relying on spatial and temporal locality. Accordingly, spectral self-attention mechanisms have been utilized for various tasks involving spectral images. For image denoising, [ 44 ] used a spatio-spectral transformer to fully exploit both the non-local spatial similarity and global spectral correlation in MS images. Additionally, [ 57 ] used the spectral self-attention mechanism to extract spectral–spatial features for image classification. Furthermore, to handle cross-modality fusion in MS images, a reverse spectral cross-attention mechanism was employed in [ 14 ] to model the differences and similarities between spectral priors and fused features, and a channel-wise fusion attention strategy was adopted in [73 ] to capture modality-specific spectral dependencies. Recent approaches have focused on combining the strengths of CNNs and transformers into hybrid architectures [50 , 72 ]. Such hybrid models use CNNs to extract local spatial features while employing transformer modules to capture global spectral rela-tionships. This combination enables for more comprehensive feature learning, whereby local spatial details are preserved while long-range spectral dependencies are effectively modeled. While the aforementioned spectral-information-processing architectures have shown promising results in various vision tasks, their application to illumination estimation remains largely unexplored. Accurate illumination estimation neces-sitates the designing of task-specific architectures that can leverage both spatial and spectral information effectively by capturing illumination-relevant features from the rich spatio-spectral information available in MS images. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 4
+
+C. Spectral Image Datasets for Illumination Estimation 1) Dataset for ISE: For illumination estimation or tasks related to color processing, numerous previous studies have identified appropriate characteristics of datasets, which have been developed in various formats. Many studies have high-lighted the strong dependency of ISE results on the datasets. Bianco et al. developed datasets for several scenarios, including indoor and outdoor lighting [ 7] and single and multiple illuminants [9], as well as datasets containing facial imagery [ 6]. Busselli et al. investigated [12 ] how image contents and luminance levels affect the performance of common ISE models, observing that images with diverse objects and well-known subjects are more effective for algorithm evaluation. In addition, various reference materials have been used to increase the accuracy of illuminant estimation in the image. Gehler et al. [25 ] and Cheng et al. [ 16 ] used the color charts as a reference, while Ciurea [ 17 ] and Ershov [21 ] used 3-D gray references. 
+
+2) Dataset for Spectral Imaging: Numerous spectral image datasets have been developed for computer vision applications [3, 23 , 24 , 46 , 53 – 55 , 74 ]. The rich spectral information in these datasets offers significant advantages for research, as adaptive channel selection through post-processing can be performed to meet various experimental targets. However, existing spectral datasets are inherently constrained by their long acquisition times [ 27 ], with the majority being confined to static scenes with limited dynamic content. Furthermore, while spectral reflectance datasets without any illuminant involved would allow illumination manipulation through post-processing, they struggle to accurately repre-sent complex real-world lighting conditions, including inter-reflections, specularity, and variations in spatial illumination. These observations highlight the need for comprehensive spectral datasets that contain diverse real-world scenes and complex lighting conditions while providing accurate GT illumination information—addressing the current limitations in dataset availability for ISE research. III. P ROPOSED METHOD 
+
+A. Problem Formulation 
+
+An image captured by a sensor under the assumption of Lambertian reflectance can be described as: 
+
+Ik(x, y ) = 
+
+Z
+
+> Λ
+
+L(λ)R(x, y, λ )Ck(λ)dλ, k ∈ [1 · · · N ], (1) where Ik(x, y ) represents an MS image sample at a coordinate 
+
+(x, y ) for the k-th channel, and L(λ) is an illuminant SPD. Note that L(x, y, λ ) is approximated to L(λ) assuming the uniform illuminant within a single image. R(x, y, λ ) and Ck(λ)
+
+represent the surface spectral reflectance and sensor spectral sensitivity, respectively. k is the channel index, which ranges from 1 to N , where N is the total number of the channels. 
+
+λ and Λ denote wavelength and the wavelength range of the electromagnetic spectrum, respectively. By estimating the illumination spectrum accurately, the effects of lighting can be removed from the image, which would enable the recovery of the surface reflectance and the corresponding intrinsic color characteristics of the objects in the image. Due to the inherent spectral entanglement between illumination and surface reflectance, estimating the illuminant spectrum accurately is particularly challenging [66]. 
+
+B. Overall Architecture 
+
+Fig. 2 illustrates the overall architecture of the proposed network. This network produces an illuminant spectrum vector 
+
+L ∈ RCo that approximates L(λ), from an input image 
+
+I ∈ RCi×H×W , where H and W are the height and width, respectively, and Ci and Co are the input and output channel sizes, respectively. These terms are described in Section V-A. As shown in Fig. 2, the proposed network comprises two successive spatio-spectral feature extractors (SSFEs). A 3D convolution is performed to generate spectral features, which are processed using two spectral attention modules. The first module contains a SABIP, which exploits the illuminant prior (IP) and focuses on the most important spectral channels. The second module includes an MSSAB, which captures useful spectral information available across the spectral channels. 
+
+C. Spatio-Spectral Feature Extractor 
+
+An SSFE generates a spatio-spectral feature from an input MS feature. The proposed network contains two successive SSFEs, each of which comprises three key components—3D convolution, SABIP, and MSSAB—tailored to extract useful features from an MS image for effective ISE. Upon entering the SSFE, the input feature goes through a 3D convolution [ 33 ] and is delivered to the SABIP. Unlike traditional 2D convolution kernels, 3D convolution kernels move over both the spatial and channel dimensions, thus ensuring that spectral details are not overlooked during convolutional operations. 
+
+1) Spectral Attention Block with Illuminant Prior: The SABIP is introduced to exploit the spectral correlation within the channels of an input spectral feature. It produces a spectral attention cube feature XSA ∈ Rc×d×h×w (Fig. 2) using a channel-wise 3D feature recalibration method based on an IP vector. Here, c represents the number of feature channels, d
+
+represents the spectral resolution, and h and w (height and width) represent the spatial dimensions (height and width) respectively. The IP can be obtained using the following equation: 
+
+IP k =
+
+R Ik(x, y )dxdy 
+
+R dxdy , k ∈ [1 · · · N ] (2) where IP k represents the IP for the k-th channel, which ranges from 1 to N . The IP is computed by normalizing the sum of all pixels in each channel of an input MS image with respect to the total number of pixels. As described in the image formation model in Eq. (1), the response of each MS channel is jointly determined by the illuminant SPD, the surface reflectance, and the sensor spectral sensitivity. Therefore, the IP vector, computed as the channel-wise spatial mean response, is interpreted as an image-derived sensor-weighted illumination cue. Under the global-illumination condition and the gray-world assumption that the average reflectance of a sufficiently diverse scene is relatively JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 5
+
+Fig. 2: Proposed architecture with two successive SSFEs. achromatic, the IP vector can provide coarse information about the sensor-weighted illuminant distribution. As shown in Fig. 3, the IP vector is correlated with the overall spectral tendency of the scene illumination. Thus, we use the IP vector as a physical prior that provides coarse spectral guidance to the attention module for ISE. Fig. 2 illustrates the implementation of the SABIP, which first aggregates global information through the spatial average pooling of the input spatial feature x ∈ Rc×d×h×w. This pro-cess preserves spectral information and creates an embedding of a feature in R(c×d)×1×1, where c and d represent spectral information. Then, this spectral embedding feature goes through an illuminant-aware feature recalibrator (IAFR), which uses a fully connected (FC) layer with the ReLU activation function to compute the interdependency within the spectral embedding feature. To the intermediate feature, we then add an IP vector approximating a scene illuminant that directs the network to focus on the illuminant-relevant spectral characteristics, as follows: 
+
+x′ = ReLU(FC 1(x)) + IP , (3) where x′ is the IP-added intermediate representation. This representation is further refined by being passed through another FC layer and a sigmoid activation, which produces a vector containing crucial spectral information related to the illuminant: 
+
+s = σ(FC 2(( x′))) , (4) where s is the illuminant-related spectral vector. Finally, s is then multiplied with the input feature map to perform spectral recalibration, which generates a spectrally recalibrated feature ( XSA ): 
+
+XSA = x ⊙ s, (5) GT Illumination 
+
+> Illuminant Prior
+
+Fig. 3: Comparison between illuminant spectrum and IP vector for each channel of MS image. Left: Comparison between GT illuminant spectrum and IP vector. Right: RGB-rendered image (top left) and each channel of MS image. where ⊙ denotes the Hadamard product. This process enhances spectral representations by incorporating illuminant-related information into them. 
+
+2) Multihead Spectral Self Attention Block: The MSSAB captures meaningful inter-channel relationships and identifies the most important channels in XSA . This is achieved based on the MSSA scheme from an existing transformer model [ 69 ]. However, while [ 69 ] focused on spatial resolution, our spectral self-attention scheme uses embeddings for spectral dimensions. It calculates the similarities between the channels within XSA 
+
+to determine their relative importance. This process includes a 3D convolution to preserve spectral information from feature. The query, key, and value—denoted as Q, K, and V—are obtained through a 3D convolution on XSA 
+
+Q = K = V = Conv3D (XSA ), (6) where the dimensions of each embedding are Q, K, V ∈
+
+Rc×d×h×w. These embeddings are then divided into the designated number of heads, which enables the calculation of attention scores, before being passed to the spectral self-JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 6
+
+attention block. Through its multi-head attention manner, MSSAB exploits channel dependencies from the perspectives of different heads, allowing the network to implicitly learn subtler information. By leveraging this two-stage attention processing involving the SABIP and MSSAB, the SSFE analyzes spectral corre-lations in a progressively refined manner. The SABIP first recalibrates the features using global illumination context, and the MSSAB then builds upon these enhanced features to learn consistent spectral relationships across the image. This attention mechanism enables the network to learn meaningful global spectral relationships across the image, focusing on the inherent correlations between different wavelengths reflecting the illumination in the scene. 
+
+D. Objective Function 
+
+When estimating an illuminant spectrum, it is crucial to capture the relative differences across spectral channels, which encode the illuminant’s chromatic characteristics. In our formulation, the orientation of the illuminant spectrum vector corresponds to its relative spectral shape (chromaticity), whereas the magnitude is associated with intensity-dependent photometric factors (illuminance) that can vary with exposure and acquisition conditions. Therefore, we employ angular error (AE) as the loss function, which measures agreement in the spectral shape while being invariant to global magnitude differences. Specifically, AE is defined as 
+
+LAE = AE (ˆL, L) = arccos ˆL · L
+
+∥ˆL∥∥ L∥
+
+!
+
+, (7) where L and ˆL are the GT and predicted illumination spectrum vectors, respectively. 
+
+E. Spectral-Domain Transform 1) Transformation Methods: We propose a spectral-domain transformation method that utilizes sensor-agnostic high-dimensional illuminant estimates from a deep learning model. The model is trained using high-dimensional GT lighting in-formation acquired using a spectroradiometer to accommodate various spectral configurations. We use two specific spaces: the MS camera domain, which can be transformed using a camera sensitivity function (CSF), and the XYZ tristimulus space which can be transformed using a color-matching function (CMF). The transformation from a high-dimensional illuminant spectrum to the low-dimensional MS camera domain can be expressed as ˆLl 
+
+> MS
+
+= MCSF ˆLh
+
+> MS
+
+, (8) where ˆLh 
+
+> MS
+
+and ˆLl 
+
+> MS
+
+represent the estimated high-dimensional and low-dimensional illuminant spectra in MS camera domain, respectively, and MCSF represents a transformation matrix for the CSF (Fig. 5). For the trichromatic color space, specifically the XYZ color space, we use the CIE-1931 CMF [ 61 ] as a transformation matrix to convert the illuminant into XYZ tristimulus values, which can be expressed as 
+
+ˆLXYZ = MCMF ˆLh
+
+> MS
+
+, (9) where ˆLXYZ is the illumination color vector in the XYZ color space and MCMF is the transformation matrix for the CIE-1931 CMF. Through the aforementioned spectral-domain transformation, a single training process in the high-dimensional MS space allows the model to be applied across various domains without additional training. This ensures that the model performs consistently across different imaging domains, without being affected by specific sensor characteristics. Hence, our approach is highly practical for real-world applications. 
+
+2) Mathematical Analysis of Domain Transformation: We mathematically analyze the high-dimensional illumination esti-mation and its evaluation across diverse lower-dimensional do-mains, focusing on which components of the high-dimensional estimated SPD affect the lower-dimensional target-domain response. Let Mtar ∈ RK×N denote a target-domain transform matrix from an N -dimensional MS spectral domain to a K-dimensional target color or sensor domain, where K < N . Here, 
+
+Mtar can correspond to either a CMF-based transformation for the CIE XYZ space or a CSF-based transformation for a target camera sensor space. Because angular error is computed from the normalized inner product between the ground-truth and estimated illuminants, we analyze the projected-domain inner product to identify which high-dimensional spectral components affect the target-domain evaluation. Since both the GT and estimated high-dimensional SPDs are projected by the same matrix, the inner product in the lower-dimensional target domain can be written as follows: 
+
+(Ll
+
+> MS
+
+)T(ˆLl
+
+> MS
+
+) = ( Mtar Lh
+
+> MS
+
+)T(Mtar ˆLh
+
+> MS
+
+)= ( Lh
+
+> MS
+
+)T(Mtar TMtar )( ˆLh
+
+> MS
+
+)= ( Lh
+
+> MS
+
+)T
+
+> r
+
+X
+
+> i=1
+
+ λiqiqT
+
+> i
+
+ ˆLh
+
+> MS
+
+=
+
+> r
+
+X
+
+> i=1
+
+λi(( Lh
+
+> MS
+
+)Tqi)( qT 
+
+> i
+
+ˆLh
+
+> MS
+
+),
+
+(10) where Ll 
+
+> MS
+
+∈ RK and Lh 
+
+> MS
+
+∈ RN denote the target-domain illuminant representation and the high-dimensional illuminant SPD, respectively. The λi and qi are non-zero eigenvalues and corresponding eigenvectors of Mtar TMtar , where the rank r = rank( Mtar TMtar ) = rank( Mtar ) ≤ K. Since 
+
+Mtar TMtar is symmetric positive semi-definite, only these 
+
+r non-zero eigen-directions contribute to the projected-domain inner product. Therefore, when an N -channel high-dimensional spectrum is transformed into a K-channel target representation, at most K spectral eigen-directions contribute to the converted representation. Components of the high-dimensional SPD lying in the null space of Mtar do not affect the transformed low-dimensional representation. Consequently, the transformation can be interpreted as selecting the target-observable spectral directions from the high-dimensional SPD. The non-zero eigen-directions, 
+
+q1, q2, . . . , qr with r ≤ K, determine the converted target-domain representation, whereas the remaining directions, 
+
+qr+1 , . . . , qN , lie in the null space of the target transformation matrix and do not affect the converted result. Thus, the target transformation matrix does not arbitrarily reduce the JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 7
+
+estimated high-dimensional SPD. Instead, it retains the spectral components observable in the target space. A CMF-based matrix retains components relevant to the human visual XYZ space, whereas a CSF-based matrix retains components relevant to a target camera sensor space. This enables training-free trans-formation of the estimated illuminant SPD to different target color or sensor spaces using physically defined transformation matrices. IV. M ULTISPECTRAL IMAGE DATASET 
+
+We propose the Multispectral Image dataset with Lighting Diversity (MILD) dataset, which comprises 15-channel MS images captured under various illumination conditions, ranging from mono-wavelength light sources to indoor illuminants such as D65 and fluorescent lighting. Thus, the MILD dataset can facilitate research on illumination estimation across diverse lighting environments on MS domains. The MILD dataset comprises 66 standard indoor scenes with D65 and fluorescent lighting, as well as 1405 laboratory scenes with diverse artificial lighting containing 42 mono-wavelength illuminants. Fig. 4 shows the sample images of the MILD dataset. In the following sections, we detail the acquisition process for our dataset, including the MS image sensors used, the lighting conditions, and the GT illuminant measurement procedure. Grays  scene with      
+
+> green mono -wavelength illuminant
+> Indoor scene with
+> D65 and Fluorescent illuminant
+
+Fig. 4: Examples of images from MILD dataset. Top: Scenes without references. Bottom: Same scenes with references. 
+
+A. Multispectral Image Sensor 
+
+The MS images are obtained using MS image sensors comprising 16 distinct channels, ranging from 380 nm to 835 
+
+nm . A Fabry-Perot type filter is used as a spectral bandpass filter, the spectral transmission band of which is set by adjusting the reflector and cavity length. This filter replaces the R, G, B color filter on a pixel of a CIS for a smartphone, of which the raw image resolution is 2584 ×1936. Instead of a Bayer array, our spectral filter forms a 4 ×4 filter array. Fig. 5 shows the spectral response curve of each channel according to the location of each channel pixel in the 4 ×4 array. The channels are numbered 0–14 in ascending order of their peak wavelengths, with Channel 15 being a blank channel, which does not have any spectral filter. Since this blank channel does not provide specific spectral information, unlike the other 15 channels, it offers limited value for illumination estimation tasks. Therefore, the MILD dataset utilizes only the first 15 channels for such tasks. The images acquired by the MS image sensor undergo minimal processing, which includes the following steps: First, the black level in the raw data is removed, and the bad pixel is corrected using the median filter in the same spectral channel. Next, the lens shading is corrected using a precalculated gain map, whereafter demosaicing is performed to obtain each channel image by sampling pixels of the same channel across all the 4×4 arrays; hence, each channel image has a resolution of 646 ×484 pixels. Finally, noise reduction is performed on each channel image using a bi-lateral filter [65]. Wavelength 
+
+> Channel 15(blank)
+> Wavelength
+> Channel 14
+> Wavelength
+> Channel 13
+> Wavelength
+> Channel 12
+> Wavelength
+> Channel 11
+> Wavelength
+> Channel 10
+> Wavelength
+> Channel 9
+> Wavelength
+> Channel 8
+> Wavelength
+> Channel 7
+> Wavelength
+> Channel 6
+> Wavelength
+> Channel 5
+> Wavelength
+> Channel 4
+> Wavelength
+> Channel 3
+> Wavelength
+> Channel 2
+> Wavelength
+> Channel 1
+> Wavelength
+> Channel 0
+
+Fig. 5: Normalized spectral response for each channel of MS image sensor, with the spectrum normalized to the range [0,1]. 
+
+B. Lighting Conditions 
+
+The MILD dataset encompasses two distinct indoor lighting conditions. The images contain either multi-color objects or only gray objects subjected to various illuminants. The first lighting condition represents common indoor environments illuminated by standard light sources, such as D65 or fluores-cent lighting. The second lighting condition corresponds to highly controlled scenarios in a lighting booth (LED CUBE) powered by 15 channels of LED used to stimulate of the various illuminants, including mono-wavelength colors. The mono-wavelength illuminants contain red, green, blue, and yellow lighting, which can be considered extreme lighting. Fig. 6 presents an example of the dataset acquisition environment established for various light sources. Our dataset comprises images captured under highly controlled conditions. To prevent any influence of unintended light sources, the images were acquired in a darkroom. The aforementioned extreme mono-wavelength conditions represent corner cases in illumination estimation situations where the illuminant’s SPD is concentrated at a single wave-length; thus, such cases are particularly challenging to handle JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 8
+
+Fig. 6: MILD dataset acquisition environment. for existing benchmark methods. Fig. 7 illustrates the mapping of the illuminants in our MS dataset to the Planckian locus. As shown in Fig. 7 (a), illuminants such as D65 and fluorescent light lie on the Planckian locus, representing standard lighting conditions typical in natural and artificial indoor environments. In contrast, mono-wavelength illuminants (Fig. 7(b)) deviate substantially from this locus. Under such mono-wavelength lighting conditions, properly rendering the intrinsic colors of objects becomes challenging; hence, these cases are particularly difficult for illumination estimation compared with standard lighting conditions. Therefore, the inclusion of monochromatic lighting is crucial for verifying the robustness of illumination estimation algorithms, and it also aligns with the recent trend of color constancy studies related to aesthetic and emotional responses [32]. (b) (a) 
+
+Fig. 7: CIE-xy chromaticity coordinates of illuminants in MILD dataset: (a) Illuminants that are not mono-wavelength. (b) Illuminants with mono-wavelength spectrum. 
+
+C. Acquisition of Ground-Truth Illumination 
+
+Every image in the MILD dataset contains references for GT illumination measurement as the Macbeth Color Checker and the KRISS White Standard along with a gray-patched object. The 3D gray-patched reference has four sides with mid-tone grays (N5–N6) to enable the detection of illuminants from dif-ferent directions. The GT spectrum of each illuminant, reflected from the KRISS White Standard reference, is measured using a spectroradiometer (CS-2000, Minolta) at 1 nm intervals. These illuminant spectra are resampled to 36 channels spanning from 380 nm to 730 nm at 10 nm intervals. Fig. 8 shows the MS sensor used to capture the images, the spectroradiometer used to acquire the GT illuminant spectra, and the KRISS White Standard reference. V. E XPERIMENTAL RESULTS 
+
+We validate our method across complementary evaluation settings, including comprehensive benchmarks and challenging 
+
+Fig. 8: Equipment used for MILD dataset acquisition. Left: MS image sensor. Middle: Spectroradiometer. Right: White reference. scenarios, as follows: (i) Datasets with spectroradiometer-measured illuminant spectra (spectroradiometer GT): Beyon-dRGB (Section V-B ) and MILD (Section V-C ). (ii) Robustness under mono-wavelength illumination using the MILD(m) subset. (iii) Reflectance benchmarks (KAUST/CAVE) evaluated under synthesized illuminants (Section V-D ). (iv) Training-free spectral-domain transformation to MS/XYZ target spaces, demonstrating cross-sensor generalization without retraining (Section V-E ). (v) Ablation studies quantifying the contribution of each component (Section V-G ). (vi) Extensibility to intensity-level and multi-source illumination estimation via physical attenuation modeling (Section V-H ). (vii) White-balancing application demonstrating the practical utility of the estimated illuminant spectra (Section V-I). 
+
+A. Experimental Settings 1) Dataset: We evaluate our proposed method on various spectral datasets. For spectral image evaluation, we employ the BeyondRGB [ 27 ] and MILD datasets, which include both reflectance and illumination information. The BeyondRGB dataset comprises 1680 diverse scenes, including 1208 collected in lab settings and 472 in real-world field environments. Each scene is captured using a 16-channel MS sensor covering 380–730 nm wavelengths, and the GT illuminant spectrum is measured using a spectroradiometer at 10 nm intervals across the same spectral range; thus, an illuminant spectrum vector with 36 channels is produced. The MILD dataset comprises indoor images capturing diverse objects under various lighting conditions, with each image consisting of 15 input MS channels covering 380–835 
+
+nm . The GT illuminant spectrum is measured in the same manner as for BeyondRGB. We also create the MILD(m) dataset, which contains 42 images with only mono-wavelength illumination captured in laboratory settings, selected from among the 1,471 images in the MILD dataset. The mono-wavelength illuminations contain red, green, blue and yellow lights composed of single or double spectral peaks. For spectral reflectance evaluation, we utilize the KAUST [46 ] and CAVE [ 74 ] datasets, which contain only reflectance in-formation without illuminant components. From these datasets, we select 31 spectral channels, spanning wavelengths of 400–700 nm with 10 nm sampling intervals. To simulate realistic illumination conditions, we generate spectral images by multiplying 59 standard illuminants [51 ] with the surface reflectance of each pixel in 409 and 32 reflectance images from the KAUST and CAVE datasets, respectively. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 9
+
+TABLE I: Performance comparison between proposed method and existing methods on real-world MS dataset (BeyondRGB). 
+
+Method Lab Field 
+
+∆A MS ↓ ∆A MS ↓
+
+mean 25% median 75% std mean 25% median 75% std WP w/ FFNN [19] 11.26 6.13 9.39 15.28 6.35 8.86 4.74 8.43 9.91 5.47 GW w/ FFNN [19] 10.08 5.72 8.51 14.90 5.45 8.32 5.08 6.90 9.98 4.60 GE 1st w/ FFNN [19] 10.87 6.50 9.34 14.19 5.81 8.68 5.00 8.43 11.98 4.71 PWIR [58] 9.70 5.57 8.11 12.24 5.84 9.32 5.13 8.72 12.08 4.96 BeyondRGB [27] 5.92 4.04 5.39 8.01 2.92 7.22 3.31 6.14 9.89 5.54 Ours 2.51 1.27 1.88 3.18 1.80 4.92 2.80 4.53 5.70 2.83 
+
+2) Training and Testing: For experimental purposes, we use the data-split protocol from [ 27 ] for BeyondRGB and the protocol from [ 46 ] for KAUST and CAVE. The CAVE dataset is employed exclusively as a testing benchmark to assess model generalization. The input dimensions of the network are determined by the specifications of the camera sensor used to capture the images in each dataset. For BeyondRGB and MILD, while the input channels ( Cin ) correspond to the respectively original image channels, the number of output channels ( Cout ) is increased to 36 to match the GT illuminant spectrum measured by the spectroradiometer. The input and output channels for KAUST and CAVE match the respective dataset’s original image channels. We utilize AE, a widely adopted metric in ISE research, as our evaluation metric. It is calculated using Eq. (7): 
+
+∆A = AE (ˆL, L), (11) where L and ˆL represent the GT and estimated illuminant spectra, respectively. In the following subsections, ∆A MS represents the AE in the MS space. For the BeyondRGB and MILD datasets, since the GT illuminant spectrum is acquired with a 36 dimensional vector, ∆A MS is computed over 36 output channels. For the KAUST and CAVE datasets, it is computed over 31 channels. Additionally, mean-∆A MS and std-∆A MS denote the average and standard deviation of the AEs, respectively. 
+
+B. BeyondRGB Dataset 
+
+The BeyondRGB dataset is composed of “Lab” and “Field” subsets, which respectively include images of various objects with diverse colors and textures in indoor scenes and real-world images captured in outdoor scenes. To evaluate the performance of our method, we compare it with both statistical and learning-based methods. The statistics-based methods include versions of widely adopted illumination estimation algorithms extended to cover MS imaging [35], White Point(WP) [42], GW [11], and first order GE(GE 1st ) [ 67 ] enhanced with a feed-forward neural network [19 ]. Among deep learning-based methods, we employ PWIR [ 58 ] and BeyondRGB [ 27 ] because other approaches require reflectance data for training [46 ] or require the input dimension to match the number of spectral bands in the GT spectra [62, 81]. Table I lists the accuracies of the tested methods, where the 25%, median, and 75% in Table I indicate 25th, 50th, and 75th percentiles of the AE, respectively. The results demonstrate that our proposed method significantly outperforms existing approaches. On the Lab and Field datasets, its AEs are 2.51 and 4.92, and its mean-∆A MS is substantially lower than that of the SOTA method [27 ], specifically by 57.6% and 31.9%, respectively. The proposed method also exhibits a narrow interquartile range (IQR; Lab: 1.27–3.18, Field: 2.80–5.70) and the lowest standard deviation (Lab: 1.80, Field: 2.83), which demonstrates its exceptional consistency. Specifically, for Field images depicting complex real-world scenes with more diverse objects, our method’s IQR (2.80–5.70) compared with the second-best method’s IQR (3.31–9.89) further highlights the superiority of our approach in handling complex real-world scenes. This low error distribution underscores the reliability and robustness of our method. 
+
+C. MILD Dataset 
+
+Table II compares the accuracy of the proposed method with that of the benchmark methods on the MILD dataset. To provide a broader comparison, we include RGB-based and spectral image-based illuminant estimation methods. Since RGB-based methods cannot estimate a 36-channel illuminant SPD, their ∆A M S values are marked as N/A, and all methods are additionally compared in the CIE XYZ space using 
+
+∆A XY Z . Our method exhibits the highest accuracy on the proposed datasets, i.e., both MILD and MILD(m). It achieves average AE of 3.18 ◦ and 7.44 ◦ with standard deviations of 3.69 and 2.95 on MILD and MILD(m), respectively, indicating stable illumination estimation performance. Compared with BeyondRGB, the proposed method reduces the mean ∆A M S 
+
+from 4.96 ◦ to 3.18 ◦ on MILD and from 11.49 ◦ to 7.44 ◦ on MILD(m). In the XYZ-space comparison, our method also achieves the lowest mean ∆A XY Z among both RGB and MS baselines, with 1.34 ◦ on MILD and 5.09 ◦ on MILD(m). The results verify that the proposed method delivers remarkable performance compared with the benchmark methods, not only under ordinary lighting conditions but also in extreme conditions. Fig. 9 compares the estimated illuminant spectrum and the corresponding rendered RGB image from the MILD dataset between the proposed method and the benchmark methods. Based on the curves of the estimated illuminant spectrum for JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 10 
+
+Fig. 9: Qualitative estimations of illuminant compared across methods on MILD dataset. Top row: RGB-rendered input MS image. Bottom row: SPD of estimated illuminant. TABLE II: Performance comparison between proposed method and existing methods on MILD dataset.                                                                                                 
+
+> Dataset Method ∆A MS ↓∆A XYZ ↓
+> mean std mean std MILD FC4 [31] N/A N/A 1.94 2.32 C4 [75] N/A N/A 1.84 2.05 TLCC [63] N/A N/A 3.63 2.59 WP w/ FFNN [19] 15.62 8.25 7.33 5.47 GW w/ FFNN [19] 12.90 6.22 5.28 4.58 GE 1st w/ FFNN [19] 13.68 7.82 5.00 4.38 PWIR [58] 9.56 5.34 7.20 5.33 BeyondRGB [27] 4.96 4.49 2.19 3.10 Ours 3.18 3.69 1.34 1.93
+> MILD(m) FC4 [31] N/A N/A 5.86 5.27 C4 [75] N/A N/A 6.20 3.81 TLCC [63] N/A N/A 5.88 3.28
+> WP w/ FFNN [19] 23.21 12.73 14.07 5.26 GW w/ FFNN [19] 19.15 8.86 8.87 5.36 GE 1st w/ FFNN [19] 21.13 9.85 7.89 5.41 PWIR [58] 13.46 3.16 15.99 8.69 BeyondRGB [27] 11.49 7.26 7.50 8.00 Ours 7.44 2.95 5.09 3.59
+
+the tested methods, our model successfully estimates the GT, even in mono-wavelength image samples. 
+
+D. KAUST and CAVE Datasets 
+
+We comparatively evaluate the proposed method against existing ISE methods, namely the following statistics-based and learning-based methods: GE [ 35 ], LRMF [ 81 ], ISNL [ 62 ], PWIR [58], DUN [46] and BeyondRGB [27]. Table III compares the performance of these methods on the KAUST and CAVE datasets. The proposed method achieves a mean-∆A MS of 4.32 ◦ on the KAUST dataset, showing a 40.8% improvement over the SOTA, BeyondRGB. On the CAVE dataset, the proposed method achieves a mean-∆A MS 
+
+of 4.66 ◦, demonstrating a 29.8% improvement compared with BeyondRGB. Overall, the learning-based methods, such as DUN, BeyondRGB, and ours, which are designed for MS images, outperform the statistics-based models, such as GE, LRMF, and ISNL. Our method also displays stable illuminant estimation performance with standard deviations of 2.17 and 1.95 on the KAUST and CAVE datasets, respectively. Notably, our approach maintains robust performance even on the CAVE reflectance data, which were unseen during the training phase. These results demonstrate that our method not only achieves superior accuracy relative to existing algorithms but also exhibits stable performance on unseen data. TABLE III: Performance comparisons between proposed method and existing methods on KAUST and CAVE datasets.                                  
+
+> Dataset Method mean-∆A MS ↓std-∆A MS ↓
+> KAUST GrayEdge [35] 11.46 8.02 LRMF [81] 24.06 23.49 ISNL [62] 20.05 11.46 PWIR [58] 28.07 21.20 DUN [46] 9.17 6.30 BeyondRGB [27] 7.30 4.45 Ours 4.32 2.17
+> CAVE GrayEdge [35] 18.33 14.89 LRMF [81] 20.05 15.47 ISNL [62] 22.92 16.62 PWIR [58] 34.95 21.20 DUN [46] 16.04 13.75 BeyondRGB [27] 6.64 3.62 Ours 4.66 1.95
+
+E. Spectral-Domain Transformation 
+
+We evaluate the proposed network across various channel configurations, comparing the transformation and end-to-end approaches. The transformation approach involves training a network to produce a high-dimensional illuminant vector and transform it to a low-dimensional sensor space without any retraining. Conversely, in the end-to-end approach, the output illuminant vector is directly produced from the output neurons. To achieve this, we define Cin as the number of channels in the input image, Cout as the number of channels in the output illumination, and Ctarget as the number of channels in the evaluation space. We evaluate cases where the network predicts a higher-dimensional illumination compared with the input image (Cin < C out ) as well as cases where it predicts illumina-tions with as many or fewer dimensions as the input image (Cin ≥ Cout ). This approach allows us to verify the neural network’s ability to learn and estimate higher-dimensional spectral information even from lower-dimensional input. For evaluation domains, designated as Ctarget , we focus on cases where the number of dimensions for the output JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 11 
+
+illumination exceeds or equals that for the target domain (Cout ≥ Ctarget ), to validate the effectiveness of the transfor-mation approach. This technique enables us to examine whether performance is maintained when converting high-dimensional illumination estimations to various spaces. The AE in each domain is calculated as follows: 
+
+∆A l 
+
+> MS
+
+= AE( ˆLl
+
+> MS
+
+, Ll
+
+> MS
+
+),
+
+∆A XYZ = AE( ˆLXYZ , LXYZ ), (12) where ∆A l 
+
+> MS
+
+and ∆A XYZ represent the AE in lower-dimensional MS camera space and the XYZ space, respec-tively. Each illumination in the MS space and XYZ space is transformed as described in Section III-E. For the cross-domain evaluation, we use the proposed model as the backbone network, modifying only the input and output dimensions for different channel configurations, and test it on the BeyondRGB dataset, which includes information on camera spectral sensitivity. Table IV shows the results for the MS camera space as the target space, with Ctarget = 15 . The results show that estimating a 36-channel illuminant and then transforming it to a 15-channel illuminant using CSF matrix yields better results than direct end-to-end estimation of 15-channel illumi-nants; specifically achieving the lower average angular error (transformation: 1.05, end-to-end: 1.13). This suggests that high dimensional illuminant estimation using a deep learning network captures more comprehensive spectral information, which is preserved effectively during transformation to lower-dimensional space. Specifically, once a network is trained on the high-dimensional GT, it can be applied to the MS domain without being retrained. TABLE IV: Results of cross domain evaluation, where the target domain is a 15-channel camera sensor space.              
+
+> Cin Cout Ctarget Transformation mean-∆A l
+> MS ↓
+> 15 36 15 CSF 1.05
+> 15 15 15 End-to-End 1.13
+
+Table V shows the results for the XYZ space as the target space, with Ctarget = 3 . We observe a similar trend, i.e., higher-dimensional illumination estimation captures richer spectral information, which is well-preserved even through transformation. Comparing rows 2 and 3, we observe that the illuminant estimation performance is better when using 15-channel images as input than when using 3-channel images for the same scene. This indicates that utilizing MS images with more spectral information can lead to better illuminant estimation performance, even when estimating illuminants in lower-dimensional spaces. TABLE V: Results of cross domain evaluation, where the target domain is a 3-channel XYZ tristimulus space.                  
+
+> Cin Cout Ctarget Transformation mean-∆A XYZ ↓
+> 15 36 3CMF 1.25
+> 15 33End-to-End 1.29 333End-to-End 1.35
+
+F. Complexity Analysis 
+
+To examine the practical feasibility of the proposed frame-work, we analyze the computational complexity of the pro-posed high-dimensional illuminant SPD estimation. Since our framework estimates a 36-channel illuminant SPD and transforms it to lower-dimensional target spaces using a fixed CSF/CMF-based spectral-domain transformation, we compare two controlled variants: the proposed 15ch →36ch model and a direct 15ch →3ch XYZ prediction model. Both settings use the same 15-channel MS input, SSFE backbone, 3D convolution, and MSSAB modules. Therefore, this comparison directly evaluates the overhead introduced by predicting a 36-channel illuminant SPD instead of a 3-channel target illuminant. The complexity was measured with batch size 1 and 256 × 256 
+
+input resolution on a single NVIDIA RTX A6000 GPU. TABLE VI: Complexity comparison between the proposed high-dimensional SPD estimation setting and direct XYZ prediction setting.             
+
+> Model setting Params MACs Memory Time 15ch →36ch 16.30M 0.542G 126.2MB 3.38ms 15ch →3ch 16.27M 0.542G 126.0MB 3.31ms
+
+As shown in Table VI, the proposed 15ch →36ch setting introduces negligible overhead compared with direct 15ch →3ch XYZ prediction. The proposed model increases the parameter count by only 0.03M, from 16.27M to 16.30M, while the rounded MAC count remains the same at 0.542G. The peak GPU memory changes only from 126.0MB to 126.2MB, and the inference time increases by only 0.07ms. These MAC values correspond to approximately 1.084 GFLOPs when one MAC is counted as two floating-point operations. This small overhead is expected because both settings share the same SSFE backbone and differ mainly in the final regression head. In addition, the CSF/CMF-based spectral-domain transformation is only a fixed matrix-vector multiplication applied to the predicted illuminant vector. These results show that the proposed framework main-tains practical computational complexity while enabling flexible target-domain transformation without additional training. 
+
+G. Ablation Study 
+
+Table VII presents the results of an ablation study conducted to examine the impact of different components of network architecture on the network’s performance. The ablation study was conducted on the BeyondRGB dataset using the combined test samples from both the Lab and Field subsets. The results indicate the effectiveness of the 3D Conv, SABIP, and MSSAB components of the proposed method. When using 3D Conv instead of 2D Conv, we observe an improvement of more than 0.76 ◦ in the MS domain. Adding SABIP reduces the average AE from 3.42 ◦ to 3.23 ◦. When incorporating all three modules, the proposed model achieves the best accuracy, with an average AE of 3.18 ◦ and the lowest standard deviation among all models (2.38). This finding demonstrates that each component contributes to the overall performance and stability of our network architecture. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 12 
+
+TABLE VII: Ablation study on network architecture with different combinations of our modules using BeyondRGB dataset. 
+
+3D Conv SABIP MSSAB ∆A MS ↓
+
+mean std 
+
+✗ ✗ ✗ 4.18 2.86 
+
+✓ ✗ ✗ 3.42 2.50 
+
+✓ ✓ ✗ 3.23 2.48 
+
+✓ ✓ ✓ 3.18 2.38 
+
+To further verify whether the image-derived IP provides useful illumination-related guidance for learning, we conduct an additional controlled ablation study by replacing the IP with input-independent alternatives. Specifically, we compare the original IP with random gaussian noise, a uniform constant vector, and an input-independent learnable spectral vector. The random and constant variants preserve the same number of learnable parameters as the original SABIP, while removing scene-dependent illumination information. The learnable vector variant tests whether an input-independent learnable vector can replace the image-derived IP with minimal additional capacity. TABLE VIII: Ablation study for the illuminant prior in SABIP using BeyondRGB dataset.                      
+
+> Method ∆A M S ↓Additional Params IP mean std SABIP w/o IP (random) 3.40 2.50 0✗
+> SABIP w/o IP (constant) 3.70 2.69 0✗
+> SABIP w/o IP (learnable vector) 3.29 2.49 15 ✗
+> SABIP (ours) 3.18 2.38 -✓
+
+As shown in Table VIII, replacing the input-dependent IP with random noise or a constant vector increases the mean 
+
+∆A M S from 3.18 ◦ to 3.40 ◦ and 3.70 ◦, respectively. Since these variants have the same number of learnable parameters as the original SABIP, the degradation indicates that the image-derived IP provides useful illumination-related information for learning. The input-independent learnable vector also performs slightly worse than the original IP-based SABIP, even though it introduces additional learnable parameters. This confirms that the scene-dependent physical prior provides useful illumination information that cannot be fully replaced by an input-independent learnable vector. In sum, these results indicate that the performance gain of SABIP is not merely due to increased model capacity. 
+
+H. Extensibility to Intensity-Level and Multi-Source Illumina-tion Estimation. 
+
+In this subsection, we conducted experiments demonstrating that our illumination estimation provides a sufficient basis not only for intensity-level modeling but also for multi-source illumination modeling when combined with a physically grounded attenuation model. The measured illuminant SPD at a spatial location (x, y )
+
+can be expressed as: 
+
+Fspd (x, y ) = I(x, y ) · S = A · fa(d, r ) · S, (13) where S ∈ R36 is the estimated scale-invariant spectral shape, 
+
+A is the absolute source intensity (a scalar constant), and 
+
+fa(d, r ) is the energy attenuation function based on the distance from the light source. Specifically, we leverage the point light attenuation model of Yuksel [ 77 ], which formulates spatially varying illumination intensity as 
+
+fa(d, r ) = 2
+
+r2
+
+
+
+1 − d
+
+√d2 + r2
+
+
+
+, (14) where d is the distance from the light source and r is a virtual source radius. In our framework, S is provided by the network output and treated as a scale-invariant spectral shape, since the network is trained using angular error. The absolute spatial intensity variation is therefore fitted separately using the magnitudes of the spectroradiometer-measured reference SPDs. Let F ref 
+
+> i
+
+denote the measured reference SPD at location (xi, y i), and let di = p(xi − xs)2 + ( yi − ys)2 + z2 
+
+> s
+
+be the distance from the estimated light-source position (xs, y s, z s) to the i-th reference point. We estimate (xs, y s, z s) and r by fitting the Yuksel attenuation function to the relative spatial fall-off of the measured SPD magnitudes over directly illuminated reference points V as 
+
+min 
+
+> xs,y s,z s,r
+
+X
+
+> i∈V
+
+ fa(di, r )max k∈V fa(dk, r ) − ∥F ref  
+
+> i
+
+∥2
+
+max k∈V ∥F ref  
+
+> k
+
+∥2
+
+2
+
+. (15) After estimating the source geometry and r, the absolute intensity scale A is computed as 
+
+A =
+
+P 
+
+> i∈V
+
+∥F ref  
+
+> i
+
+∥2
+
+P 
+
+> i∈V
+
+fa(di, r ) . (16) Using the estimated A and r in Eq. (13), the spatially varying illuminant SPD can be recovered without additional network training. For the multi-source case, this extends naturally via super-position 
+
+Fspd (x, y ) = A1 · fa(d1, r 1) · S1 + A2 · fa(d2, r 2) · S2. (17) where S1 and S2 are the spectral shapes of the two sources. In practice, the Yuksel model requires spatially distributed reference measurements or prior knowledge of the source geometry to define the source-to-surface distance. 
+
+1) Single-source illumination intensity validation: To val-idate the physical modeling of illumination attenuation, we adapted the Yuksel model with our multispectral image data. We captured a scene under two independent single-source illuminants — a warm CT2500 source (peak 640 nm) and a cool CT8500 source (peak 450 nm) — and measured per-point absolute illuminant spectra using a spectroradiometer (Konica Minolta CS-2000) at 25 spatially distributed measurement locations. We then verified whether the Yuksel attenuation model can recover the per-point intensity distribution. As shown in Fig. 10, the fitted and measured illumination SPDs show strong agreement in direct illumination regions (indicated by cyan circles), where indirect effects such as cast shadows are excluded. As summarized in Table IX, the fitted illumination SPDs achieve mean AE of 5.57 ◦ for CT2500 and 3.62 ◦ for JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 13 
+
+Fig. 10: Single-source illumination estimation with the Yuksel attenuation model. The cyan circles indicate points directly illuminated by each lighting source, defined as spatially proximal to the source. The top row corresponds to the left-sided warm CT2500 illumination, and the bottom row corresponds to the right-sided cool CT8500 illumination. CT8500 in these regions, closely matching our network’s output (reference source of Yuksel model) accuracy of 5.42 ◦ and 3.62 ◦,respectively. Furthermore, the fitted attenuation model achieves 
+
+R2 > 0.97 against the measured per-point GT illumination intensity in the direct illumination regions, where R2 denotes the coefficient of determination between predicted and mea-sured per-point intensity, confirming that the distance-dependent intensity variation is accurately captured by the physical model. While regions dominated by indirect illumination effects such as inter-reflections and cast shadows exhibit larger errors, as these secondary effects fall outside the scope of the physical attenuation model, the model achieves strong agreement in all directly illuminated regions, confirming its validity where the underlying physical assumptions hold. These results validate that our spectral shape estimates, combined with the Yuksel physical model, can effectively capture intensity levels of light. TABLE IX: Single-source Yuksel model results. Reference (S) denotes the angular error of the network’s estimated illuminant SPD used as the spectral shape input to the Yuksel model, representing the baseline accuracy before attenuation modeling.                     
+
+> Light Source Region #pts mean-∆A MS ↓
+> CT2500 Reference (S) 15.42° Direct 15 5.57° Indirect 10 13.75° All 25 8.84° CT8500 Reference (S) 13.62° Direct 15 3.62° Indirect 10 14.04° All 25 7.79°
+
+2) Multi-source illumination spectral superposition and intensity validation: To further validate the extensibility of our framework to multi-source scenarios, we conducted a mixed-TABLE X: Multi-source Yuksel model results.           
+
+> Light Source Region #pts mean-∆A MS ↓
+> CT2500+CT8500 Both Direct 52.48 ◦
+> Indirect 20 8.54 ◦
+> All 25 7.33 ◦
+
+illuminant experiment where both CT2500 and CT8500 sources were active simultaneously. We first verified the spectral superposition principle, whether the mixed illuminant spectrum at each spatial point can be expressed as a linear combination of the two individually measured single-source spectra as expressed in Eq. (17). Specifically, we compared the measured mixed-illuminant spectrum against the direct sum of per-point single-source spectroradiometer measurements at each of the 25 locations. Across all 25 measurement points, the mean angular error between the measured mixed spectrum and the predicted sum was 0.79 ◦, confirming that spectral superposition holds with high fidelity in this controlled setting. Subsequently, we applied the Yuksel model independently to each source component and verified that the spatial intensity distribution of the multi-source scene can be recovered by superposing the two single-source Yuksel models using only the network-estimated spectral shapes S1 and S2 as reference inputs, as shown in Fig. 11b. As summarized in Table X, in regions where both sources contribute direct illumination (5 points), the multi-source Yuksel model achieves a mean AE of 2.48 ◦, confirming that the mixed illumination estimation of two independently fitted Yuksel models holds with high fidelity. In contrast, points where one source is occluded (20 points) show larger errors (mean AE = 8.54 ◦), consistent with the single-source case, as indirect illumination effects dominate these regions and fall outside the scope of the physical model. Note that in the multi-source case, the AE inherently reflects the accuracy of spatially varying intensity JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 14 
+
+> (a) Verification of the spectral superposition principle of linear combination of the two individually measured single-source spectra.
+> (b) Multi-source illumination estimation with the Yuksel attenuation model. The points indicated by cyan circles in the figures are those directly illuminated by both lighting sources.
+
+Fig. 11: Experimental results for spectral superposition verification and multi-source illumination estimation. ratios between spectrally distinct sources, since the mixed spectral shape at each location is determined by the relative intensity contributions of the two sources with different spectral characteristics. These results collectively demonstrate that our single-dominant illuminant estimation framework provides a physically grounded foundation for extending to more complex intensity and multi-illuminant scenarios. 
+
+I. White-Balancing Result 
+
+We performed white-balancing (WB) on images from the MILD dataset using the estimated illuminants from the network compared in Section V; the GT images are color-corrected with respect to the GT illuminants. As the input images and the estimated illuminants are both in the MS domain, we transform them into the RGB color domain for visualizing the WB results. Therefore, all images are rendered from the MS to the RGB domain. For MILD, we follow the DNG-based rendering pipeline provided with the BeyondRGB dataset, since MILD was captured using the same multispectral sensor configuration. The estimated illuminant SPD is first converted to CIE XYZ using the CIE 1931 color matching functions, and the resulting illuminant XYZ is mapped to the camera reference sensor space, and channel-wise WB gains are computed. The WB-corrected linear RAW image is then rendered to sRGB. The closer the color appearance is to the GT image, the better is the illuminant estimation, thus, the more effective is the WB. Fig. 12 displays WB results on the MILD dataset with the estimated and the GT illuminants. WB results on other datasets can be found in the supplementary material. VI. D ISCUSSION AND FUTURE WORK 
+
+Our framework focuses on estimating the spectral power distribution of a single dominant illuminant from a multispectral image. This addresses the fundamental requirement of illumi-nation estimations, which is to recover the spectral shape of the underlying light source. This is essential for subsequent tasks such as color correction, white balance and spectral rendering. As demonstrated in Section V-H , the estimated spectral shape serves as a sufficient basis for modeling intensity-level variation via physical attenuation models ( R2 > 0.97 for single-source intensity fitting) and for multi-source illumination estimation via spectral superposition (mean AE of 2.48 ◦ in directly illuminated regions). However, the current extension assumes known or estimable source positions, does not account for indirect illumination such as inter-reflections or cast shadows, and has been validated only in controlled indoor settings with neutral reference surfaces. The extension of this approach to unconstrained environments, for instance by integrating neural source detection, learning-based occlusion-aware attenuation, and end-to-end spatially-varying illuminant estimation directly within the learning-based network architecture, is a promising direction for future work. VII. C ONCLUSION 
+
+We developed an efficient deep learning-based illumination estimation model for MS images. The proposed SSFE block uses SABIP and MSSAB, which are designed to exploit rich spectral information effectively. By incorporating spectral attention mechanisms and IP, the proposed method optimally enhances spectral correlation and preserves illuminant-relevant spatial features. To facilitate evaluation, we created the MILD MS dataset captured under diverse lighting conditions, which contains high-dimensional GT illumination spectra measured using spectroradiometer. This dataset can facilitate further research due to its higher spectral resolutions, which is crucial for deep models. While existing methods show limitations under JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 15 Input  GE  PWIR  Ours  GT 
+
+Fig. 12: Results of WB on MILD dataset. From left to right: Original input image (1st); WB images obtained using illuminants estimated by GE (2nd), PWIR (3rd), and proposed model (4th); WB image obtained using GT illuminant (5th). extreme conditions, such as mono-wavelength lighting, the proposed model efficiently overcame such problems. Based on the experimental results, the proposed method outperformed the existing methods, especially under challenging lighting conditions. Furthermore, our approach leverages spectral-domain transformation, the effectiveness of which was validated both mathematically and experimentally. Additionally, we showed that the estimated single-dominant illumination SPD provides a physically grounded basis for extending to intensity-level and multi-source illumination modeling via physical attenuation models. REFERENCES 
+
+[1] Mahmoud Afifi, Brian Price, Scott Cohen, and Michael S Brown. When color constancy goes wrong: Correcting improperly white-balanced images. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 1535–1544, 2019. [2] Dongsheng An, Jinli Suo, Haoqian Wang, and Qionghai Dai. Illumination estimation from specular highlight in a multi-spectral image. Optics Express , 23(13):17008–17023, 2015. [3] Boaz Arad, Radu Timofte, Rony Yahel, Nimrod Morag, Amir Bernat, Yuanhao Cai, Jing Lin, Zudi Lin, Haoqian Wang, Yulun Zhang, et al. Ntire 2022 spectral recovery challenge and data set. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 863–881, 2022. [4] Sameer Aryal, ZhiQiang Chen, and Shimin Tang. Mobile hyperspectral imaging for material surface damage detection. 
+
+Journal of Computing in Civil Engineering , 35(1):04020057, 2021. [5] Koldo Basterretxea, Victoria Mart ´ınez, Javier Echanobe, Jon Guti ´errez-Zaballa, and In ´es Del Campo. Hsi-drive: A dataset for the research of hyperspectral image processing applied to autonomous driving systems. In 2021 IEEE Intelligent Vehicles Symposium (IV) , pages 866–873. IEEE, 2021. [6] Simone Bianco and Raimondo Schettini. Color constancy using faces. In 2012 IEEE Conference on Computer Vision and Pattern Recognition , pages 65–72. IEEE, 2012. [7] Simone Bianco, Gianluigi Ciocca, Claudio Cusano, and Rai-mondo Schettini. Improving color constancy using indoor– outdoor image classification. IEEE Transactions on image processing , 17(12):2381–2392, 2008. [8] Simone Bianco, Claudio Cusano, and Raimondo Schettini. Color constancy using cnns. In Proceedings of the IEEE conference on computer vision and pattern recognition workshops , pages 81–89, 2015. [9] Simone Bianco, Claudio Cusano, and Raimondo Schettini. Single and multiple illuminant estimation using convolutional neural networks. IEEE Transactions on Image Processing , 26(9):4347– 4362, 2017. [10] David H Brainard and William T Freeman. Bayesian color constancy. JOSA A , 14(7):1393–1411, 1997. [11] Gershon Buchsbaum. A spatial processor model for object colour perception. Journal of the Franklin institute , 310(1):1–26, 1980. [12] Marco Buzzelli, Simone Zini, Simone Bianco, Gianluigi Ciocca, Raimondo Schettini, and Mikhail K Tchobanou. Analysis of biases in automatic white balance datasets and methods. Color Research & Application , 48(1):40–62, 2023. [13] Ayan Chakrabarti, Keigo Hirakawa, and Todd Zickler. Color constancy with spatio-spectral statistics. IEEE Transactions on Pattern Analysis and Machine Intelligence , 34(8):1509–1519, 2011. [14] Shi Chen, Lefei Zhang, and Liangpei Zhang. Cyclic cross-modality interaction for hyperspectral and multispectral image fusion. IEEE Transactions on Circuits and Systems for Video Technology , 2024. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 16 
+
+[15] Xiaochuan Chen, Mark S Drew, and Ze-Nian Li. Illumination and reflectance spectra separation of hyperspectral image data under multiple illumination conditions. Electronic Imaging , 29: 194–199, 2017. [16] Dongliang Cheng, Dilip K Prasad, and Michael S Brown. Illuminant estimation for color constancy: why spatial-domain methods work and the role of the color distribution. JOSA A ,31(5):1049–1058, 2014. [17] Florian Ciurea and Brian Funt. A large image database for color constancy research. 2003. [18] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, et al. An image is worth 16x16 words: Transformers for image recognition at scale. arXiv preprint arXiv:2010.11929 , 2020. [19] Ilaria Erba, Marco Buzzelli, and Raimondo Schettini. Rgb color constancy using multispectral pixel information. JOSA A , 41(2): 185–194, 2024. [20] Ilaria Erba, Marco Buzzelli, Jean-Baptiste Thomas, Jon Yngve Hardeberg, and Raimondo Schettini. Improving rgb illuminant estimation exploiting spectral average radiance. JOSA A , 41(3): 516–526, 2024. [21] Egor Ershov, Alexey Savchik, Illya Semenkov, Nikola Bani ´c, Alexander Belokopytov, Daria Senshina, Karlo Ko ˇs ˇcevi ´c, Marko Suba ˇsi ´c, and Sven Lon ˇcari ´c. The cube++ illumination estimation dataset. IEEE Access , 8:227511–227527, 2020. [22] Graham D Finlayson and Elisabetta Trezzi. Shades of gray and colour constancy. In Color and Imaging Conference , pages 37–41. Society for Imaging Science and Technology, 2004. [23] David H Foster, Kinjiro Amano, S ´ergio MC Nascimento, and Michael J Foster. Frequency of metamerism in natural scenes. 
+
+Josa a , 23(10):2359–2372, 2006. [24] David H Foster, Kinjiro Amano, and S ´ergio MC Nascimento. Time-lapse ratios of cone excitations in natural scenes. Vision research , 120:45–60, 2016. [25] Peter Vincent Gehler, Carsten Rother, Andrew Blake, Tom Minka, and Toby Sharp. Bayesian color constancy revisited. In 2008 IEEE Conference on Computer Vision and Pattern Recognition ,pages 1–8. IEEE, 2008. [26] Arjan Gijsenij, Theo Gevers, and Joost Van De Weijer. Com-putational color constancy: Survey and experiments. IEEE transactions on image processing , 20(9):2475–2489, 2011. [27] Ortal Glatt, Yotam Ater, Woo-Shik Kim, Shira Werman, Oded Berby, Yael Zini, Shay Zelinger, Sangyoon Lee, Heejin Choi, and Evgeny Soloveichik. Beyond rgb: A real world dataset for multispectral imaging in mobile devices. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision , pages 4344–4354, 2024. [28] Lin Gu, Cong Phuoc Huynh, and Antonio Robles-Kelly. Seg-mentation and estimation of spatially varying illumination. IEEE transactions on image processing , 23(8):3478–3489, 2014. [29] Jaeduk Han, Soonyoung Hong, and Moon Gi Kang. Canonical illumination decomposition and its applications. IEEE Trans-actions on Circuits and Systems for Video Technology , 30(11): 4158–4170, 2020. [30] Jie Hu, Li Shen, and Gang Sun. Squeeze-and-excitation networks. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 7132–7141, 2018. [31] Yuanming Hu, Baoyuan Wang, and Stephen Lin. Fc4: Fully convolutional color constancy with confidence-weighted pooling. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 4085–4094, 2017. [32] Anya Hurlbert. Challenges to color constancy in a contemporary light. Current Opinion in Behavioral Sciences , 30:186–193, 2019. [33] Shuiwang Ji, Wei Xu, Ming Yang, and Kai Yu. 3d convolutional neural networks for human action recognition. IEEE transactions on pattern analysis and machine intelligence , 35(1):221–231, 2012. [34] Haris Ahmad Khan. Multispectral constancy for illuminant invariant representation of multispectral images . PhD thesis, Universit ´e Bourgogne Franche-Comt ´e; Norwegian University of Science and . . . , 2018. [35] Haris Ahmad Khan, Jean-Baptiste Thomas, Jon Yngve Harde-berg, and Olivier Laligant. Illuminant estimation in multispectral imaging. JOSA A , 34(7):1085–1098, 2017. [36] Haris Ahmad Khan, Jean-Baptiste Thomas, and Jon Yngve Hardeberg. Towards highlight based illuminant estimation in multispectral images. In Image and Signal Processing: 8th International Conference, ICISP 2018, Cherbourg, France, July 2-4, 2018, Proceedings 8 , pages 517–525. Springer, 2018. [37] Dongyoung Kim, Jinwoo Kim, Junsang Yu, and Seon Joo Kim. Attentive illumination decomposition model for multi-illuminant white balancing. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 25512–25521, 2024. [38] Furkan Kınlı, Do ˘ga Yılmaz, Barı s¸ ¨Ozcan, and Furkan Kıra c¸ .Deterministic neural illumination mapping for efficient auto-white balance correction. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 1139–1147, 2023. [39] Soonyang Kwon, Namyoon Kim, Taeyong Jo, and Heui Jae Pahk. Critical dimension measurement of transparent film layers by multispectral imaging. Optics Express , 22(14):17370–17381, 2014. [40] Edmund Y Lam. Robust minimization of lighting variation for real-time defect detection. Real-Time Imaging , 10(6):365–370, 2004. [41] Edwin H Land. The retinex theory of color vision. Scientific american , 237(6):108–129, 1977. [42] Edwin H Land. Recent advances in retinex theory. In Central and Peripheral Mechanisms of Colour Vision: Proceedings of an International Symposium Held at The Wenner-Gren Center Stockholm, June 14–15, 1984 , pages 5–17. Springer, 1985. [43] Jiacheng Li, Chang Chen, Xue Hu, Fenglong Song, Youliang Yan, and Zhiwei Xiong. Multi-spectral image color reproduction. In 
+
+2025 IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) , pages 8400–8409. IEEE, 2025. [44] Miaoyu Li, Ying Fu, and Yulun Zhang. Spatial-spectral transformer for hyperspectral image denoising. In Proceedings of the AAAI Conference on Artificial Intelligence , pages 1368–1376, 2023. [45] Yuqi Li, Chong Wang, Jieyu Zhao, and Qingshu Yuan. Efficient spectral reconstruction using a trichromatic camera via sample optimization. The Visual Computer , 34:1773–1783, 2018. [46] Yuqi Li, Qiang Fu, and Wolfgang Heidrich. Multispectral illumination estimation using deep unrolling network. In 
+
+Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 2672–2681, 2021. [47] Vebjorn Ljosa and Anne E Carpenter. Introduction to the quantitative analysis of two-dimensional fluorescence microscopy images for cell-based screening. PLoS computational biology , 5 (12):e1000603, 2009. [48] Yi-Chen Lo, Chia-Che Chang, Hsuan-Chao Chiu, Yu-Hao Huang, Chia-Ping Chen, Yu-Lin Chang, and Kevin Jou. Clcc: Contrastive learning for color constancy. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 8053–8063, 2021. [49] Zhongyu Lou, Theo Gevers, Ninghang Hu, Marcel P Lucassen, et al. Color constancy by deep learning. In BMVC , pages 76–1, 2015. [50] Chen Ma, Junjun Jiang, Huayi Li, Xiaoguang Mei, and Chengchao Bai. Hyperspectral image classification via spectral pooling and hybrid transformer. Remote Sensing , 14(19):4732, 2022. [51] Thomas Mansencal, Michael Mauderer, Michael Parsons, Nick Shaw, Kevin Wheatley, Sean Cooper, Jean D. Vandenberg, Luke Canavan, Katherine Crowson, Ofek Lev, Katrin Leinweber, JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 17 
+
+Shriramana Sharma, Troy James Sobotka, Dominik Moritz, Matt Pppp, Chinmay Rane, Pavithra Eswaramoorthy, John Mertic, Ben Pearlstine, Manuel Leonhardt, Olli Niemitalo, Marek Szymanski, Maximilian Schambach, Sianyi Huang, Mike Wei, Nishant Joywardhan, Omar Wagih, Pawel Redman, Joseph Goldstone, Stephen Hill, Jedediah Smith, Frederic Savoir, Geetansh Saxena, Saransh Chopra, Ilia Sibiryakov, Tim Gates, Gajendra Pal, Nicolas Tessore, Aur ´elien Pierre, Fran c¸ ois-Xavier Thomas, Sabarish Srinivasan, and Tucker Downs. Colour 0.4.2, 2022. [52] Milan Mosny and Brian Funt. Multispectral colour constancy. In Proc. CIC’14 Fourteenth Color Imaging Conference , pages 309–313. Simon Fraser University, 2006. [53] S ´ergio MC Nascimento, Fl ´avio P Ferreira, and David H Foster. Statistics of spatial cone-excitation ratios in natural scenes. JOSA A, 19(8):1484–1490, 2002. [54] S ´ergio MC Nascimento, Kinjiro Amano, and David H Foster. Spatial distributions of local illumination color in natural scenes. 
+
+Vision research , 120:39–44, 2016. [55] Rang MH Nguyen, Dilip K Prasad, and Michael S Brown. Training-based spectral reconstruction from a single rgb image. In Computer Vision–ECCV 2014: 13th European Conference, Zurich, Switzerland, September 6-12, 2014, Proceedings, Part VII 13 , pages 186–201. Springer, 2014. [56] Tingying Peng, Kurt Thorn, Timm Schroeder, Lichao Wang, Fabian J Theis, Carsten Marr, and Nassir Navab. A basic tool for background and shading correction of optical microscopy images. Nature communications , 8(1):14836, 2017. [57] Yuhao Qing, Wenyi Liu, Liuyan Feng, and Wanjia Gao. Improved transformer net for hyperspectral image classification. Remote Sensing , 13(11):2216, 2021. [58] Antonio Robles-Kelly and Ran Wei. A convolutional neural network for pixelwise illuminant recovery in colour and spectral images. In 2018 24th International Conference on Pattern Recognition (ICPR) , pages 109–114. IEEE, 2018. [59] Swalpa Kumar Roy, Subhrasankar Chatterjee, Siddhartha Bhat-tacharyya, Bidyut B Chaudhuri, and Jan Plato ˇs. Lightweight spectral–spatial squeeze-and-excitation residual bag-of-features learning for hyperspectral classification. IEEE transactions on geoscience and remote sensing , 58(8):5277–5290, 2020. [60] Wu Shi, Chen Change Loy, and Xiaoou Tang. Deep specialized network for illuminant estimation. In Computer Vision–ECCV 2016: 14th European Conference, Amsterdam, The Netherlands, October 11–14, 2016, Proceedings, Part IV 14 , pages 371–387. Springer, 2016. [61] Thomas Smith and John Guild. The cie colorimetric standards and their use. Transactions of the optical society , 33(3):73, 1931. [62] Tong Su, Yu Zhou, Yao Yu, Xun Cao, and Sidan Du. Illumination separation of non-lambertian scenes from a single hyperspectral image. Optics express , 26(20):26167–26178, 2018. [63] Yuxiang Tang, Xuejing Kang, Chunxiao Li, Zhaowen Lin, and Anlong Ming. Transfer learning for color constancy via statistic perspective. In Proceedings of the AAAI Conference on Artificial Intelligence , pages 2361–2369, 2022. [64] Jean-Baptiste Thomas. Illuminant estimation from uncalibrated multispectral images. In 2015 Colour and Visual Computing Symposium (CVCS) , pages 1–6. IEEE, 2015. [65] Carlo Tomasi and Roberto Manduchi. Bilateral filtering for gray and color images. In Sixth international conference on computer vision (IEEE Cat. No. 98CH36271) , pages 839–846. IEEE, 1998. [66] Shoji Tominaga and Brian A Wandell. Standard surface-reflectance model and illuminant estimation. JOSA A , 6(4): 576–584, 1989. [67] Joost Van De Weijer, Theo Gevers, and Arjan Gijsenij. Edge-based color constancy. IEEE Transactions on image processing ,16(9):2207–2214, 2007. [68] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polo-sukhin. Attention is all you need. Advances in neural information processing systems , 30, 2017. [69] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Ł ukasz Kaiser, and Illia Polo-sukhin. Attention is all you need. Advances in neural information processing systems , 30, 2017. [70] Li Wang, Jiangtao Peng, and Weiwei Sun. Spatial–spectral squeeze-and-excitation residual network for hyperspectral image classification. Remote Sensing , 11(7):884, 2019. [71] Jian Wu, Bob Zhang, Yong Xu, and David Zhang. Illuminance compensation and texture enhancement via the hodge decom-position. IEEE Transactions on Circuits and Systems for Video Technology , 31(3):956–971, 2021. [72] Chuan Yan, Xiangsuo Fan, Jinlong Fan, Ling Yu, Nayi Wang, Lin Chen, and Xuyang Li. Hyformer: Hybrid transformer and cnn for pixel-level multispectral image land cover classification. 
+
+International Journal of Environmental Research and Public Health , 20(4):3059, 2023. [73] Fan Yang, Binbin Liang, Wei Li, and Jianwei Zhang. Multi-dimensional fusion network for multispectral object detection. 
+
+IEEE Transactions on Circuits and Systems for Video Technology ,2024. [74] Fumihito Yasuma, Tomoo Mitsunaga, Daisuke Iso, and Shree K Nayar. Generalized assorted pixel camera: postcapture control of resolution, dynamic range, and spectrum. IEEE transactions on image processing , 19(9):2241–2253, 2010. [75] Huanglin Yu, Ke Chen, Kaiqi Wang, Yanlin Qian, Zhaoxiang Zhang, and Kui Jia. Cascading convolutional color constancy. In 
+
+Proceedings of the AAAI Conference on Artificial Intelligence ,pages 12725–12732, 2020. [76] Yue Yuan, Ruoduan Sun, Xufen Xie, XueYan Zhang, Liang Qu, Shining Ma, Juntao Li, Yue Liu, Yongtian Wang, and Weitao Song. Multispectral imaging colorimetric measurement method with illumination-adaptive white calibration. Journal of the Optical Society of America A , 42(7):898–907, 2025. [77] Cem Yuksel. Point light attenuation without singularity. In 
+
+Special Interest Group on Computer Graphics and Interactive Techniques Conference Talks , pages 1–2, 2020. [78] Guoqing Zhang, Zhiyuan Luo, Yuhao Chen, Yuhui Zheng, and Weisi Lin. Illumination unification for person re-identification. 
+
+IEEE Transactions on Circuits and Systems for Video Technology ,32(10):6766–6777, 2022. [79] Wen Zhang, Zhenshan Tan, Li Zhang, and Zhijiang Li. Color decoupling for multi-illumination color constancy. IEEE Trans-actions on Circuits and Systems for Video Technology , 35(5): 4087–4099, 2025. [80] Runxing Zhao, Zhiwen Wang, Wuyuan Guo, and Canlong Zhang. Multi-scene image enhancement based on multi-channel illumination estimation. Expert Systems with Applications , 226: 120271, 2023. [81] Yinqiang Zheng, Imari Sato, and Yoichi Sato. Illumination and reflectance spectra separation of a hyperspectral image meets low-rank matrix factorization. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition , pages 1779–1787, 2015. [82] Zhengjie Zhu, Xiaogang Yang, Ruitao Lu, Tong Shen, Tao Zhang, and Siyu Wang. Ghost imaging in the dark: A multi-illumination estimation network for low-light image enhancement. IEEE Transactions on Circuits and Systems for Video Technology , 35 (2):1576–1590, 2025. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2026 18 
+
+Hyejin Oh received the B.S. degree in electronics engineering from Ewha Womans University, Seoul, South Korea, in 2021, where she is currently pursuing the Ph.D. degree with the Department of Electronic and Electrical Engineering. In 2024, she was a Visiting Student with the Department of Mechanical and Industrial Engineering, University of Toronto, Toronto, ON, Canada, as part of the AI Excellence Global Innovative Leader Education Program. Her research interests include deep learning-based image and video understanding, computational imaging, multispectral image analysis, and immersive media compression. She has also participated in MPEG standardization activities related to immersive media compression. She was a co-recipient of the 2025 Sadaoki Furui Prize Paper Award from APSIPA Transactions on Signal and Information Processing. 
+
+Woo-Shik Kim (Senior Member, IEEE) received the B.Eng. and M.Eng. degrees in electronics engineering from Sogang University, Seoul, South Korea, in 1999 and 2001, respectively, and the Ph.D. degree in electrical engineering from the University of Southern California, Los Angeles, CA, USA, in 2011. He began his research career at the Samsung Advanced Institute of Technology (SAIT). During his doctoral studies, he was a Research Intern with Mitsubishi Electric Research Laboratories, Dolby Laboratories, and Technicolor. Following his Ph.D., he held research positions with the Systems and Applications R&D Center, Texas Instruments, and the Multimedia R&D Group, Qualcomm, where he developed advanced signal processing algorithms for multimedia systems. He subsequently returned to SAIT, Samsung Electronics, where he led research projects on algorithm design for next-generation multimedia and computing devices. He is currently with Telechips, where he serves as an AI Strategist, leading research on AI applications for automotive platforms and physical AI. Dr. Kim holds approximately 140 U.S. patents. His research interests span signal processing and computer vision, efficient and hardware-aware deep learning, and the co-optimization of algorithms and computing systems for automotive and physical AI applications. 
+
+Sangyoon Lee received his Ph.D. degree in Electrical and Electronics Engineering from Yonsei University, Seoul, South Korea, in 2022. Since then, he has been with Samsung Advanced Institute of Technology. His research interests include image processing, noise analysis and modeling, noise removal, and multispectral image demosaicking. 
+
+YungKyung Park , Ph.D. has been Professor at Ewha Womans University since 2012 with researching in color science field. Prior to joining Ewha Womans University, Park was senior engineer for Samsung Electronics (LCD division). During her 2 years at Samsung electronics, Park spent time doing research on Image quality and color appearance. Park received a Ph.D. in color science field from Leeds University, UK and a master degree in color imaging science from the Derby University, UK. Park received her BA and Master Degree in physics from Ewha Womans University, Korea. 
+
+Je-Won Kang received his Ph.D degree in 2012 from the University of Southern California (USC), Los Angeles, USA. From 2011 to 2012, he was a visiting scholar at Tampere University and Nokia research center. From 2012 to 2014, he worked as a senior engineer in the Multimedia RnD and Standards team at Qualcomm, San Diego, USA, contributing significantly to international 2D and 3D video coding standards, including High Efficiency Video Coding (HEVC)/H.265, Screen Content Coding, and 3D HEVC. In 2014, he joined the Department of Elec-tronic and Electrical Engineering at Ewha Womans University, where he now leads the Information Coding and Processing Lab as a full professor. He was honored as Ewha Fellow in 2022. He was a visiting professor in Harvard Medical School and Massachusetts General Hospital in 2021. Dr. Kang has authored over 100 peer-reviewed papers and holds more than 50 standard-essential patents. He was an APSIPA Distinguished Lecturer (2021–2022) and served as an Associate Editor for APSIPA Transactions on Signal and Information Processing. His research interests include learning-based video compression, 3D video processing, computer vision, and multimodal AI.

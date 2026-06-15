@@ -1,0 +1,266 @@
+Title: Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation
+
+URL Source: https://arxiv.org/pdf/2606.13883v1
+
+Published Time: Mon, 15 Jun 2026 00:12:57 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation 
+
+Ivan Valuev Iana Zhura Valerii Serpiva Didar Seyidov Dzmitry Tsetserukou Abstract: Autonomous UAV navigation is conventionally solved by pipelines that separate perception, mapping, and planning into distinct stages, which prop-agates errors, accumulates latency, and requires environment-specific retuning. End-to-end generative models remove these interfaces by mapping raw observa-tions directly to trajectories, but inherit a subtle failure mode: trained on clean data, they cannot recognise when an observation is unreliable, and treat degraded regions such as glass, mirrors, and overexposed surfaces as valid evidence for planning. We present a reliability-aware diffusion planner for 3D UAV naviga-tion. It conditions trajectory generation on the observation together with a scene-level reliability heatmap that marks where perception cannot be trusted, produced by a lightweight network that distils the open-vocabulary reasoning of a vision-language model within the real-time planning budget. To generalise to unseen environments without retraining, we steer the denoising process with a differen-tiable two-stage ESDF cost that treats physical obstacles from depth and virtual obstacles from highly unreliable regions on equal footing. In simulation and on a real quadrotor, our planner produces markedly safer trajectories than a state-of-the-art diffusion baseline, reducing the obstacle-violation rate from 40 .3% to 9.6% 
+
+and raising the mean reliability of traversed regions from 0.588 to 0.925 . Ablating the reliability term alone drops mean reliability from 0.898 to 0.783 , confirming it as the decisive component, while distillation runs the framework up to 2× faster than the full vision-language model. 
+
+Keywords: Diffusion models, Knowledge Distillation, UAV 
+
+# 1 Introduction 
+
+Autonomous aerial navigation in unstructured indoor environments remains a challenging problem in robot learning. A micro aerial vehicle must perceive the scene, infer a feasible collision-free path, and act in real time under tight onboard compute and power budgets. Classical navigation stacks decompose this into a chain of separate modules for perception, mapping, planning, and control. While modular, these pipelines discard information at every hand-designed interface, accumulate latency, and allow early errors to propagate and amplify downstream, degrading reliability in clut-tered real-world settings [1, 2, 3, 4]. End-to-end learned policies mitigate these limitations by mapping raw observations directly to tra-jectories within a single model, preserving the full information content of the input. Diffusion models are well-suited to this setting. In contrast to optimisation-based planners that return a single deterministic solution, they learn a conditional distribution over feasible trajectories [5], allowing the policy to represent the multimodality inherent to navigation rather than collapse it to a point estimate. A further difficulty is that classical pipelines assume the constructed map faithfully represents the en-vironment. This assumption fails in the presence of glass, mirrors, specular reflections, and saturated illumination, where depth sensors return confident yet incorrect measurements that occupancy-based planners cannot detect [6, 7, 8]. Rather than trusting depth uniformly, we estimate the reliability of the depth measurement directly from the RGB image, identifying regions in which perception is 
+
+> arXiv:2606.13883v1 [cs.RO] 11 Jun 2026
+
+likely to be misleading. This reliability estimate is then used as a conditioning signal that guides the diffusion sampling process away from unreliable regions, integrating perceptual reliability into trajectory generation rather than treating it as a separate post-hoc check. Robust reliability estimation across diverse indoor conditions benefits from the semantic priors of Vision-Language Models (VLMs), which can identify glass, mirrors, and reflective surfaces from language-grounded visual cues [9, 10, 11]. Their computational cost, however, is incompatible with onboard inference budgets. We therefore distil the VLM into a compact student model that reproduces its perceptual reliability estimates at a fraction of the cost, and deploy only the student at runtime. In this work, we present an end-to-end diffusion-based framework for safe autonomous UAV nav-igation indoors. The framework conditions trajectory generation jointly on visual observations, geometric context, and an RGB-derived reliability map, and enforces geometric feasibility through guided sampling on a three-dimensional ESDF. Our main contributions can thus be summarized as follows: • End-to-end perception and planning. A single diffusion model that maps raw obser-vations directly to distributions over three-dimensional trajectories, removing the error-compounding interfaces of modular pipelines. • RGB-based reliability detection with diffusion guidance. Estimation of RGBD-sensor reliability from the RGB image, incorporated as a conditioning signal that steers the diffu-sion sampler away from regions where perception is unreliable. • Distillation of vision-language reliability reasoning. A teacher-student scheme in which a VLM supervises reliability estimation during training and is distilled into a compact stu-dent capable of real-time inference. • Training-free obstacle avoidance. A guided sampling procedure that enforces geomet-ric collision constraints using 3D ESDF gradients without environment-specific retraining, supporting generalisation to unseen indoor layouts. 
+
+# 2 Related Work 
+
+2.1 Diffusion-Based Navigation 
+
+Diffusion policies recast navigation as sampling from a learned distribution of trajectories condi-tioned on raw observations, replacing explicit maps and hand-tuned cost functions. Conditioning jointly on images, range data, goals, and recent states supports mapless operation, with training biased toward traversable regions improving path quality on physical robots [12]. The mechanism most relevant to our method is guided sampling: treating the gradient of a differentiable cost as a surrogate for the classifier in classifier guidance [13] steers a pretrained denoiser toward feasible paths and transfers to new scenes without retraining [14]. Related designs unify directed navigation and exploration through goal masking [15] or recover actions from language-conditioned imagined futures [16]. Three limitations of these methods motivate our design. First, the conditioning signal is typically produced by a separate and considerably larger perception backbone, so the deployed system carries the cost of an auxiliary model alongside the denoiser rather than a single compact policy. Second, the iterative denoising chain is slow relative to flight dynamics, and although warm-starting from par-tially noised samples [17] or staging noise levels across planning steps [18] raises replanting rates, real-time onboard operation remains constrained. Third, and most critically, the guidance encodes only geometric feasibility. None of these methods assesses whether the conditioning measurement can be trusted, so failures on glass, mirrors, or overexposed surfaces are absent from the planning objective. Our approach addresses all three: it distills the conditioning model into a compact on-board predictor, keeps the guided sampler lightweight for fast replanning, and injects an explicit 2Figure 1: Overview of the proposed system. (a) Knowledge distillation pipeline for faster infer-ence. (b) Diffusion-based trajectory planner. measurement-reliability term into the guidance so that perceptually hazardous regions are penalized during denoising rather than ignored. 
+
+2.2 Vision-Language Models for Navigation 
+
+Vision-language models supply the open-vocabulary semantics that geometry alone can not provide. Image-language embeddings have been grounded into spatial maps so that language queries resolve to navigable locations without task-specific labels [19], embodiment-agnostic foundation models learn transferable goal-reaching from large heterogeneous datasets [20, 21], and language models act as high-level planners that parse instructions into subgoals [22]. More recent vision-language-action (VLA) models close the loop end to end, mapping observations and instructions directly to motion with strong cross-task generalisation [23]. These models are poorly matched to autonomous aerial navigation. Their parameter counts and latency exceed what embedded flight hardware can sustain at control rate, and they presuppose a human supplying language prompts throughout operation, whereas a UAV must navigate au-tonomously. Like diffusion planners, they also reason about scene content rather than sensing reliability. We retain the semantic competence of vision-language pretraining while removing its runtime cost and prompt dependence by distilling it offline into a compact reliability predictor. 
+
+# 3 Methods 
+
+Our system is a diffusion-based ego-trajectory planner with context of observation, goal point, in-tial speed for dynamics propagation and estimated reliability heatmap to avoid zones of unreliable perception. Its structure is presented in Figure 1 
+
+3.1 Reliability estimation 
+
+Indoor RGBD sensors fail under overexposure, specular reflections, and transparent surfaces, cor-rupting both RGB and depth channels simultaneously. We condition the planner on a dense relia-bility map M ∈ [0 , 1] H×W , where low values indicate perceptually unreliable regions. The map is produced offline by AnyTraverse [11], repurposed to score sensor reliability against indoor failure 3concepts (Table 1): 
+
+M = 1 − AnyTraverse( I; w). (1) Table 1: Perceptual failure concept weights w.
+
+Concept wi
+
+Glass 1.0 Flare / overexposure 1.0 Reflective surface 1.0 Glossy surface 1.0 As AnyTraverse is too heavy for deployment, safety maps are precomputed offline and used to supervise a lightweight MiT-B0 student [24] with depth fusion at all encoder scales. A frozen ViT-Adapter/DINOv2 [25] backbone provides multi-scale feature supervision FT , anchoring the student’s internal scene representation alongside the pixel-level targets MT from AnyTraverse. 
+
+Training objective. Per-level 1×1 adapters align student features to the teacher dimension before computing feature imitation via cosine dissimilarity: 
+
+Lfeat = 1
+
+|S| 
+
+X
+
+> s∈S
+
+E
+
+"
+
+1 − ⟨ ˆF (s) 
+
+> S
+
+, F (s) 
+
+> T
+
+⟩∥ ˆF (s) 
+
+> S
+
+∥ · ∥ F (s) 
+
+> T
+
+∥
+
+#
+
+. (2) Pixel-level regression uses hard-negative weighted L1, with unsafe pixels receiving weight wi =1 + wmax (1 − MT,i ), wmax =4 :
+
+Ltask =
+
+P 
+
+> i
+
+wi |MS,i − MT,i |
+
+P 
+
+> i
+
+wi
+
+. (3) An SSIM term preserves the safe/unsafe boundary structure: 
+
+LSSIM = 1 − SSIM( MS , M T ). (4) The total objective is: 
+
+Ldistill = wfeat Lfeat + wtask 
+
+(1 − wssim ) Ltask + wssim LSSIM 
+
+. (5) 
+
+3.2 Diffusion-Based Trajectory Planner 
+
+We adopt the DDPM formulation [26]. The forward process corrupts a clean trajectory x0 over T
+
+steps: 
+
+xt = √¯αt x0 + √1 − ¯αt ε, ε ∼ N (0 , I) (6) where ¯αt = Qts=1 (1 − βs).A 1D U-Net εθ is trained to predict the added noise: 
+
+Ldiff = E≈,↶⊬,ε 
+
+∥ε − εθ (xt, t, c )∥2. (7) The reverse process iteratively denoises from xT ∼ N (0 , I):
+
+xt−1 = 1
+
+√αt
+
+
+
+xt − βt
+
+√1 − ¯αt
+
+εθ (xt, t, c )
+
+
+
++
+
+q
+
+˜βt z, z ∼ N (0 , I). (8) 
+
+State representation. Two representations are compared: absolute ego-frame waypoints si ∈ R3
+
+and successive displacements ∆si = si+1 − si. Both are normalised channel-wise to [−1, 1] 3 via min-max statistics computed on the training set. 
+
+Conditioning. The denoiser is conditioned on c = {v0, g, F I , F S }. Compact vectors — initial speed v0 and goal g — are injected via FiLM. Spatially structured inputs are injected via two sequen-tial cross-attention blocks at the bottleneck: Image features from student encoder or VLM encoder 
+
+FI provide scene-level context; reliability map patch tokens FS provide reliability context. 4Auxiliary losses. Three auxiliary terms are added to the diffusion loss to enforce trajectory con-straints: 
+
+L = Ldiff + λ1Lsmooth + λ2Lorigin + λ3Lspeed + λ4Lsafe , (9) where Lsmooth penalises squared second-order finite differences (acceleration proxy); Lorigin an-chors the first waypoint at the UAV origin (absolute representation only); Lspeed enforces initial velocity consistency; and Lsafe penalises waypoints projecting onto low-reliability image regions: 
+
+Lsafe = 1
+
+|V| 
+
+X
+
+> i∈V
+
+(1 − τi), (10) where τi ∈ [0 , 1] is the sampled reliability score and V is the set of in-frame waypoints. 
+
+3.3 Guidance 
+
+A trained diffusion model generates samples consistent with its training distribution. To adapt at de-ployment without retraining, we apply training-free guidance [13]: the denoising score is augmented with the gradient of a differentiable cost function, 
+
+˜εθ (xt, t ) = εθ (xt, t, c ) − s ∇xt C, (11) where s is the guidance scale. The total cost decomposes as: 
+
+C = wobs Cobs + wgoal Cgoal + wperc Cperc . (12) 
+
+Obstacle cost. Cobs is the CHOMP cost [4] evaluated over a 3-D ESDF built from the depth point cloud. For each waypoint with signed distance di to the nearest obstacle: 
+
+Goal cost. Cgoal penalizes the distance from the final waypoint to the target position g ∈ R3:
+
+Cgoal = ∥pH − g∥22. (13) 
+
+Reliability cost. Pixels are split into two reliability stages using thresholds τh < τ s and τh = 0 .3,
+
+τs = 0 .6 in our implementation.. Pixels with MS ≤ τh are back-projected along rays at different depths and concatenated with the depth point cloud before ESDF construction, making them hard obstacles absorbed into Cobs . Pixels with τh < M S ≤ τs populate a separate weaker CHOMP cost with activation distance ηperc > η obs , as was done for obstacle avoidance. 
+
+Guidance step: absolute representation. At each step t the noisy trajectory is projected onto the estimated clean manifold [27]: 
+
+ˆx0 = xt − √1 − ¯αt εθ (xt, t, c )
+
+√¯αt
+
+. (14) The cost gradient is computed in metric coordinates, scaled by anisotropy A = [ ax, a y , a z ]. A new noise estimate is derived from the updated ˆx∗ 
+
+> 0
+
+in DDIM style [28]: 
+
+ˆε = xt − √¯αt ˆx∗
+
+> 0
+
+√1 − ¯αt
+
+. (15) The reverse step (8) is then applied with ˆε in place of εθ to obtain xt−1.
+
+Guidance step: delta representation. Waypoint positions are recovered by cumulative summa-tion pk = Pki=0 ∆si. The position gradient is converted to delta space via the transpose of the cumsum operator and applied directly to the denoised state. Unlike the delta variant, model reconstructs the full structure of the trajectory. In this case shifts of guidance destroy inner manifold of the diffusion and resulted trajectory becomes inappropriate. 5Figure 2: Training dataset examples for simulation (top) and the real world (bottom). Left: the RGB-estimated reliability map conditioning the diffusion model (green reliable, red unreliable), flagging glare in the warehouse and the reflective floor in the real scene. Right: the target trajectory (green) from start (yellow diamond) to goal (green circle), with the scene point cloud (grey) and low-reliability regions as virtual obstacles (red). 
+
+# 4 Dataset 
+
+We generate a synthetic dataset of quadrotor trajectories in warehouse environments simulated in Pegasus Simulator [29]. For each scene, a four-stage pipeline performs stereo depth reconstruction, estimates a perceptual reliability map, plans a geometric path, and simulates the corresponding physics-based trajectory, producing the paired observation, reliability map, and target trajectory shown in Fig. 2. 
+
+# 5 Real-World Deployment 
+
+We evaluate our system on a custom quadrotor built around an 8-inch frame. Low-level flight control is handled by ArduPilot, with high-level commands issued through MAVROS. Visual observations are captured with an Intel RealSense D455 depth camera, while trajectory generation is performed off-board on a single NVIDIA RTX 4070 GPU with the memory usage of 500 MB. Replacing the vision-language model with the distilled student network allows the full framework to run up to 2×
+
+faster, bringing reliability estimation within the real-time planning budget. Our evaluation is organized around three questions: 1. Does conditioning trajectory generation on perceptual reliability improve navigation safety relative to a state-of-the-art diffusion planner that relies on visual conditioning alone? 2. How does guided sampling affect the feasibility and quality of the generated trajectories? 3. What are the individual and combined contributions of reliability conditioning and guid-ance? To answer the first question, we compare against NoMaD [15], a strong diffusion-based baseline that, like our method, generates trajectories from visual observations, but has no representation of sensor reliability and therefore cannot distinguish trustworthy regions from perceptually degraded ones. This isolates the effect of reliability awareness while holding the generative formulation fixed. To answer the second and third questions, we ablate our method across the four combinations of reliability conditioning (on or off) and ESDF guidance (on or off), measuring the effect of each component in isolation and their interaction. This design separates the contribution of what the planner is told about the scene from how the denoising process is steered. 65.1 Metrics 
+
+Path efficiency represents how straight the trajectory is: Path Efficiency = straight-line distance (start → end) actual path length Value of 1.0 = perfectly straight line. Less than 1 = detours. Safety is characterized by two main parameters: • Violation. Ratio of collided waypoints of generated trajectory to the whole sample. • Minimal Distance to an Obstacle. Minimal Signed Distance Function(SDF) of waypoints. The reliability map R : Ω → [0 , 1] is predicted by the student model for each image pixel. Each waypoint pt is projected onto the image plane. 
+
+5.2 Ablation Study 
+
+Table 2 compares the two trajectory representations under varying guidance. With guidance dis-abled, both representations yield short and efficient paths, but neither avoids obstacles or unreliable regions. Once guidance is enabled, the two diverge sharply: the ego-path representation retains nearly double the path efficiency ( 0.590 vs. 0.288 ) and ends almost three times closer to the goal (0.710 m vs. 1.959 m) than the delta-path representation, whose relative increments accumulate er-ror under the guidance gradients and drift away from the goal. We therefore adopt the ego-path representation. The increase in trajectory length and reduction in nominal efficiency under guidance reflect the detours required to route around physical obstacles and low-reliability regions, and should be read together with the safety metrics in Table 3 rather than in isolation. Table 2: Ablation Study 
+
+Method Trajectory length, m ( ↓)Path efficiency( ↑)Mean distance to goal point, m ( ↓)
+
+Ours (ego-path) 5.027 ± 0.871 0.590 ± 0.082 0.710 ± 0.317 
+
+Ours (delta-path) 4.724 ± 0.431 0.288 ± 0.105 1.959 ± 0.472 
+
+Ours (ego-path) w/o Reliability 5.180 ± 0.917 0.564 ± 0.079 0.523 ± 0.245 
+
+Ours (delta-path) w/o Reliability 4.654 ± 0.467 0.297 ± 0.098 1.876 ± 0.497 
+
+Ours (ego-path) w/o Guidance 2.869 ± 0.485 0.867 ± 0.014 0.293 ± 0.183 
+
+Ours (delta-path) w/o Guidance 2.664 ± 0.407 0.991 ± 0.009 0.228 ± 0.115 
+
+Adding blocks of guidance steers trajectory to avoid obstacles and reliable zones for safer navigation rather than direct goal reaching. 
+
+5.3 Comparison with a Baseline 
+
+Table 3 reports the safety and perceptual-quality metrics. Our planner substantially outperforms NoMaD [15], a visually-conditioned diffusion baseline without any notion of reliability, across every metric: it increases the minimum distance to obstacles by almost two orders of magnitude ( 0.009 mto 0.562 m), reduces the obstacle-violation rate from 40 .3% to below 10% , and raises the mean reliability of traversed regions from 0.588 to 0.925 . The reliability-guidance term is the dominant driver of this perceptual safety: removing it collapses the mean reliability of the ego-path variant from 0.898 to 0.293 , confirming that the term actively steers trajectories into trustworthy regions rather than merely correlating with them. Although the delta-path variant attains marginally better raw safety scores, it fails to reach the goal reliably (Table 2); the ego-path representation provides 7the best balance of safety, high clearance ( 0.723 m), and goal-directed behaviour, and is our final configuration. Table 3: Quantitative comparison of planning methods. Best results are highlighted in bold .
+
+Method Min. Distance to an Obstacle, m ( ↑)Clearance, m (↑)Obstacle Violation, % ( ↓)Mean Reliability ( ↑)
+
+NoMaD [15] 0.009 ± 0.126 0.154 ± 0.193 40 .3 ± 10 .283 0.588 ± 0.145 
+
+Ours (ego-path) 0.532 ± 0.259 0.723 ± 0.188 9.6 ± 17 .4 0.898 ± 0.194 
+
+Ours (delta-path) 0.562 ± 0.227 0.588 ± 0.145 9.5 ± 8.0 0.925 ± 0.120 
+
+Ours (ego-path) w/o Reliability 0.368 ± 0.255 0.615 ± 0.147 9.0 ± 0.133 0.783 ± 0.183 
+
+Ours (delta-path) w/o Reliability 0.519 ± 0.207 0.434 ± 0.099 10 .6 ± 9.6 0.912 ± 0.204 
+
+Guidance make generator safer in terms of obstacle avoidance and steering to reliable regions. Usage only of visual scene understanding is not enough to navigate in suddenly degrated unknown area. 
+
+# 6 Conclusion and Discussion 
+
+We presented a reliability-aware diffusion planner for autonomous 3D UAV navigation in unstruc-tured indoor environments. End-to-end generative planners trained on clean observations lack any explicit mechanism to recognise when perception is unreliable and treat degraded regions as valid evidence for planning. Our central idea is to make sensing reliability a first-class input to trajec-tory generation. To this end we (i) formulate navigation as an end-to-end diffusion policy mapping raw observations to 3D trajectory distributions, (ii) condition generation on a scene-level reliability heatmap that flags regions where depth cannot be trusted, (iii) distil this open-vocabulary reasoning from a vision-language model into a lightweight network that runs within the planning budget, and (iv) steer sampling with a training-free two-stage ESDF cost over physical and reliability-induced virtual obstacles. Reliability awareness is the decisive contribution. Against NoMaD [15], a visually-conditioned diffusion baseline without it, our planner raises the minimum distance to obstacles from 0.009 m to 
+
+0.562 m, lowers the obstacle-violation rate from 40 .3% to 9.6% , and increases the mean reliability of traversed regions from 0.588 to 0.925 . Ablating the reliability-guidance term alone collapses mean reliability from 0.898 to 0.783 , confirming that it actively routes trajectories through trustworthy regions rather than merely correlating with safer paths. The approach has limitations. The reliability heatmap is bounded by the teacher model and the residual distillation gap, remains scene-level rather than pixel-calibrated, and the per-step guidance cost scales with the number of denoising steps and ESDF queries. These motivate two directions for future work: generalisation targeting, extending the reliability estimator to outdoor, dynamic, and adversarially lit conditions with domain adaptation that narrows the teacher-student gap and supports cross-embodiment transfer; and further onboard optimisation of guidance through amor-tised or learned guidance, fewer-step samplers, and efficient on-device ESDF queries to raise the achievable replanning rate on embedded hardware. 
+
+# References 
+
+[1] P. E. Hart, N. J. Nilsson, and B. Raphael. A formal basis for the heuristic determination of minimum cost paths. IEEE Transactions on Systems Science and Cybernetics , 4(2):100–107, 1968. [2] S. Karaman and E. Frazzoli. Sampling-based algorithms for optimal motion planning. Inter-national Journal of Robotics Research , 30(7):846–894, 2011. 8[3] G. Williams, N. Wagener, B. Goldfain, P. Drews, J. M. Rehg, B. Boots, and E. A. Theodorou. Information theoretic MPC for model-based reinforcement learning. In ICRA , pages 1714– 1721, 2017. [4] N. Ratliff, M. Zucker, J. A. Bagnell, and S. Srinivasa. CHOMP: Gradient optimization tech-niques for efficient motion planning. In ICRA , 2009. [5] I. Zhura, S. Karaf, F. Batool, N. D. W. Mudalige, V. Serpiva, A. A. Abdulkarim, A. Fedoseev, D. Seyidov, H. Amjad, and D. Tsetserukou. Swarmdiffusion: End-to-end traversability-guided diffusion for embodiment-agnostic navigation of heterogeneous robots. arXiv preprint arXiv:2512.02851 , 2025. [6] H. Oleynikova, Z. Taylor, M. Fehr, R. Siegwart, and J. Nieto. Voxblox: Incremental 3D eu-clidean signed distance fields for on-board MAV planning. In IROS , 2017. [7] X. Zhou, Z. Wang, H. Ye, C. Xu, and F. Gao. EGO-Planner: An ESDF-free gradient-based local planner for quadrotors. IEEE Robotics and Automation Letters , 6(2):478–485, 2021. [8] A. D. Ames, S. Coogan, M. Egerstedt, G. Notomista, K. Sreenath, and P. Tabuada. Control barrier functions: Theory and applications. In ECC , 2019. [9] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, G. Krueger, and I. Sutskever. Learning transferable visual models from natural language supervision. In ICML , 2021. [10] T. L¨ uddecke and A. Ecker. Image segmentation using text and image prompts. In CVPR , 2022. [11] S. Sahu, A. Singh, K. Nambiar, S. Saripalli, and P. Sujit. AnyTraverse: An off-road traversabil-ity framework with VLM and human operator in the loop. arXiv:2506.16826 , 2025. [12] J. Liang, A. Payandeh, D. Song, X. Xiao, and D. Manocha. DTG: Diffusion-based trajectory generation for mapless global navigation. arXiv:2403.09900 , 2024. [13] P. Dhariwal and A. Q. Nichol. Diffusion models beat GANs on image synthesis. In Advances in Neural Information Processing Systems , volume 34, pages 8780–8794. Curran Associates, Inc., 2021. [14] Y. Zeng, H. Ren, S. Wang, J. Huang, and H. Cheng. Navidiffusor: Cost-guided diffusion model for visual navigation. arXiv:2504.10003 , 2025. [15] A. Sridhar, D. Shah, C. Glossop, and S. Levine. NoMaD: Goal masked diffusion policies for navigation and exploration. arXiv:2310.07896 , 2023. [16] Y. Du, M. Yang, B. Dai, H. Dai, O. Nachum, J. B. Tenenbaum, D. Schuurmans, and P. Abbeel. Learning universal policies via text-guided video generation. In NeurIPS , 2023. [17] H. Ma, S. Bodmer, A. Carron, M. Zeilinger, and M. Muehlebach. CoDiG: Constraint-aware diffusion guidance for robotics: Real-time obstacle avoidance for autonomous racing. 
+
+arXiv:2505.13131 , 2025. [18] X. Ye, R. Yang, J. Jin, Y. Li, and A. Rasouli. RA-DP: Rapid adaptive diffusion policy for training-free high-frequency robotics replanning. arXiv:2503.04051 , 2025. [19] C. Huang, O. Mees, A. Zeng, and W. Burgard. Visual language maps for robot navigation. In 
+
+2023 IEEE International Conference on Robotics and Automation (ICRA) , pages 6218–6225. IEEE, 2023. [20] D. Shah, A. Sridhar, N. Dashora, K. Stachowicz, K. Black, N. Hirose, and S. Levine. Vint: A foundation model for visual navigation. In Proceedings of the 7th Conference on Robot Learning (CoRL) , 2023. 9[21] D. Shah, A. Sridhar, A. Bhorkar, N. Hirose, and S. Levine. Gnm: A general navigation model to drive any robot. arXiv preprint arXiv:2210.03370 , 2022. [22] D. Shah, B. Osi´ nski, B. Ichter, and S. Levine. Lm-nav: Robotic navigation with large pre-trained models of language, vision, and action. In Proceedings of the 6th Conference on Robot Learning (CoRL) , volume 205, pages 492–504. PMLR, 2023. [23] J. Zhang, K. Wang, and H. Wang. Navid: Video-based vlm plans the next step for vision-and-language navigation. arXiv preprint arXiv:2405.14856 , 2024. [24] E. Xie, W. Wang, Z. Yu, A. Anandkumar, J. M. Alvarez, and P. Luo. SegFormer: Simple and efficient design for semantic segmentation with transformers. In NeurIPS , 2021. [25] M. Oquab, T. Darcet, T. Moutakanni, H. Vo, M. Szafraniec, V. Khalidov, P. Fernandez, D. Haz-iza, F. Massa, A. El-Nouby, M. Assran, N. Ballas, W. Galuba, R. Howes, P.-Y. Huang, S.-W. Li, I. Misra, M. Rabbat, V. Sharma, G. Synnaeve, H. Xu, H. Jegou, J. Mairal, P. Labatut, A. Joulin, and P. Bojanowski. DINOv2: Learning robust visual features without supervision. 
+
+Transactions on Machine Learning Research , Jan. 2024. ISSN 2835-8856. [26] J. Ho, A. Jain, and P. Abbeel. Denoising diffusion probabilistic models. NeurIPS , 2020. [27] Y. Wang, C. Tang, L. Sun, S. Rossi, Y. Xie, C. Peng, T. Hannagan, S. Sabatini, N. Poerio, M. Tomizuka, and W. Zhan. Optimizing diffusion models for joint trajectory prediction and controllable generation. In arXiv preprint arXiv:2408.00766 , 2024. [28] J. Song, C. Meng, and S. Ermon. Denoising diffusion implicit models. ICLR , 2021. [29] M. Jacinto, J. Pinto, J. Patrikar, J. Keller, R. Cunha, S. Scherer, and A. Pascoal. Pegasus sim-ulator: An isaac sim framework for multiple aerial vehicles simulation. In 2024 International Conference on Unmanned Aircraft Systems (ICUAS) , pages 917–922, 2024. 10

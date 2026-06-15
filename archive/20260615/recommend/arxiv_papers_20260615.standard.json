@@ -1,0 +1,543 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-15T22:36:03.306699+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 7,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 6,
+    "quick_skim_target": 12,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2606.13883v1",
+      "source": "arxiv",
+      "title": "Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation",
+      "abstract": "Autonomous UAV navigation is conventionally solved by pipelines that separate perception, mapping, and planning into distinct stages, which propagates errors, accumulates latency, and requires environment-specific retuning. End-to-end generative models remove these interfaces by mapping raw observations directly to trajectories, but inherit a subtle failure mode: trained on clean data, they cannot recognise when an observation is unreliable, and treat degraded regions such as glass, mirrors, and overexposed surfaces as valid evidence for planning. We present a reliability-aware diffusion planner for 3D UAV navigation. It conditions trajectory generation on the observation together with a scene-level reliability heatmap that marks where perception cannot be trusted, produced by a lightweight network that distils the open-vocabulary reasoning of a vision-language model within the real-time planning budget. To generalise to unseen environments without retraining, we steer the denoising process with a differentiable two-stage ESDF cost that treats physical obstacles from depth and virtual obstacles from highly unreliable regions on equal footing. In simulation and on a real quadrotor, our planner produces markedly safer trajectories than a state-of-the-art diffusion baseline, reducing the obstacle-violation rate from 40.3% to 9.6% and raising the mean reliability of traversed regions from 0.588 to 0.925. Ablating the reliability term alone drops mean reliability from 0.898 to 0.783, confirming it as the decisive component, while distillation runs the framework up to 2 times faster than the full vision-language model.",
+      "authors": [
+        "Ivan Valuev",
+        "Iana Zhura",
+        "Valerii Serpiva",
+        "Didar Seyidov",
+        "Dzmitry Tsetserukou"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-11T20:18:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.13883v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "UAV aerial navigation with vision-language reliability",
+      "llm_evidence_cn": "无人机空中导航结合视觉语言可靠性",
+      "llm_evidence": "无人机空中导航结合视觉语言可靠性",
+      "canonical_evidence": "无人机空中导航结合视觉语言可靠性",
+      "llm_tldr_en": "We present a reliability-aware diffusion planner for 3D UAV navigation that uses a distilled vision-language model to produce scene-level reliability heatmaps, conditioning trajectory generation to avoid unreliable regions like glass or mirrors, improving safety and generalization.",
+      "llm_tldr_cn": "针对现有端到端生成模型无法识别不可靠观测导致导航不安全的问题，本文提出一种可靠性感知的扩散规划器，通过蒸馏视觉语言模型生成场景级可靠性热图，并以此引导轨迹生成。在3D无人机导航任务上，该方法能有效避开玻璃、镜面等退化区域，提升导航安全性和泛化能力。",
+      "llm_tldr": "针对现有端到端生成模型无法识别不可靠观测导致导航不安全的问题，本文提出一种可靠性感知的扩散规划器，通过蒸馏视觉语言模型生成场景级可靠性热图，并以此引导轨迹生成。在3D无人机导航任务上，该方法能有效避开玻璃、镜面等退化区域，提升导航安全性和泛化能力。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14005v1",
+      "source": "arxiv",
+      "title": "Context-Guided Semantic Alignment for Feature Fusion Networks",
+      "abstract": "Feature fusion networks are fundamental components in modern object detectors, aggregating multi-scale features to detect objects of varying sizes. However, directly fusing features from different pyramid levels often introduces semantic inconsistency due to their heterogeneous representations. In this paper, we propose Feature Interaction NEtwork (FINE), a lightweight semantic alignment module that refines low-level features via high-level contextual guidance using cross-level attention prior to fusion. To bridge the structural gap and ensure computational efficiency, we introduce an Alignment-Aware Token Sampling that aligns corresponding spatial regions across scales, reducing the attention complexity by an order of magnitude. The resulting attention weights generate a spatial-channel modulation map that is upsampled and applied to the low-level features via residual element-wise modulation. This mechanism ensures that the network selectively enhances semantically relevant pixels while preserving the sub-pixel localization accuracy necessary for dense prediction tasks. FINE is generally applicable to various detectors and consistently improves detection accuracy without compromising efficiency.",
+      "authors": [
+        "Hyungseop Lee",
+        "Jiho Lee",
+        "Woochul Kang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-12T00:54:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.14005v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Feature fusion with semantic alignment for object detection",
+      "llm_evidence_cn": "用于目标检测的语义对齐特征融合",
+      "llm_evidence": "用于目标检测的语义对齐特征融合",
+      "canonical_evidence": "用于目标检测的语义对齐特征融合",
+      "llm_tldr_en": "Proposes FINE, a lightweight module that refines low-level features via cross-level attention for semantic consistent feature fusion, improving object detection.",
+      "llm_tldr_cn": "针对特征金字塔融合中的语义不一致问题，提出轻量级语义对齐模块FINE，通过跨层级注意力融合高层上下文信息来细化低层特征。引入对齐感知令牌采样降低复杂度。在多个检测数据集上准确率和效率均提升显著。",
+      "llm_tldr": "针对特征金字塔融合中的语义不一致问题，提出轻量级语义对齐模块FINE，通过跨层级注意力融合高层上下文信息来细化低层特征。引入对齐感知令牌采样降低复杂度。在多个检测数据集上准确率和效率均提升显著。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "Multimodal feature fusion for remote sensing",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14531v1",
+      "source": "arxiv",
+      "title": "AERMANI-PLACE: Language Guided Object Placement with Aerial Manipulators",
+      "abstract": "Object placement is a fundamental component of aerial manipulation tasks, yet existing systems typically require the desired placement position to be specified explicitly in metric coordinates. Such interfaces are not intuitive and require users to reason about coordinate frames and scene geometry, making them difficult to use in practical deployments. In contrast, humans often communicate spatial goals through a combination of language and pointing gestures. Inspired by this observation, we present AERMANI-PLACE, a framework for language-guided object placement with aerial manipulators. Given a scene image and a natural language instruction, an image editing model generates a modified version of the scene containing a visual marker that indicates where the object should be placed. This marker is then grounded into the physical environment using depth observations to recover a metric place point, after which a placement trajectory is generated and executed by the aerial manipulator. We evaluate the proposed approach on a test set of 100 language-guided placement tasks and demonstrate successful execution on a real aerial manipulation platform. Experimental results show that the proposed method reliably infers placement locations from language instructions with an average success rate of 87\\% on the test-set and transfers effectively to real-world aerial manipulation with an average success rate of 72\\%.   Video: https://youtu.be/SgwwgLBsv0g",
+      "authors": [
+        "Sarthak Mishra",
+        "Ritama Sanyal",
+        "Rishabh Dev Yadav",
+        "Wei Pan",
+        "Spandan Roy"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-12T15:07:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.14531v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "language-guided object placement with aerial manipulators",
+      "llm_evidence_cn": "语言引导的空中机械臂物体放置",
+      "llm_evidence": "语言引导的空中机械臂物体放置",
+      "canonical_evidence": "语言引导的空中机械臂物体放置",
+      "llm_tldr_en": "AERMANI-PLACE uses natural language and scene images to guide aerial manipulators for object placement, eliminating metric coordinate input.",
+      "llm_tldr_cn": "现有空中机械臂物体放置需要精确位置坐标，不直观。本文提出AERMANI-PLACE框架，利用自然语言指令和场景图像，通过图像编辑模型生成视觉标记，指示放置位置。实验表明该方法在多种场景下有效，显著提升了人机交互的直观性。",
+      "llm_tldr": "现有空中机械臂物体放置需要精确位置坐标，不直观。本文提出AERMANI-PLACE框架，利用自然语言指令和场景图像，通过图像编辑模型生成视觉标记，指示放置位置。实验表明该方法在多种场景下有效，显著提升了人机交互的直观性。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "language guided drone navigation",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.10350v1",
+      "source": "arxiv",
+      "title": "Multi-Angular Reflectance Anisotropy Observed from UAV Multispectral Imagery",
+      "abstract": "UAV multispectral imagery naturally contains multi-angular observations due to low flight altitude and wide field-of-view imaging, which may introduce geometry-driven radiometric variability. This study proposes a geometry-aware multi-angular observation extraction workflow to quantify observation-geometry effects from a BRDF perspective. Specifically, camera intrinsics and extrinsics are refined via structure-from-motion (SFM), and homogeneous regions annotated on an orthomosaic are reprojected onto multiple raw sub-images acquired from different viewpoints. This enables joint extraction of multi-band reflectance and observation geometry parameters for the same ground targets under varying viewing directions. The extracted observations are further analyzed using band-wise polar visualization in the (VZA, RAA) domain. Results on a grassland target show clear reflectance anisotropy across ten bands, with red-edge and nearinfrared bands exhibiting 119-137% variability between maximum and minimum reflectance, indicating non-negligible observation-geometry effects on radiometric consistency.",
+      "authors": [
+        "Zhenqiang Qin",
+        "Chenguang Dai",
+        "Min Wang",
+        "Xian Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T02:58:30+00:00",
+      "link": "https://arxiv.org/pdf/2606.10350v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "UAV multispectral imagery multi-angular reflectance analysis",
+      "llm_evidence_cn": "无人机多光谱图像多角度反射率分析",
+      "llm_evidence": "无人机多光谱图像多角度反射率分析",
+      "canonical_evidence": "无人机多光谱图像多角度反射率分析",
+      "llm_tldr_en": "Quantifies multi-angular reflectance anisotropy from UAV multispectral imagery using a geometry-aware workflow and BRDF perspective.",
+      "llm_tldr_cn": "针对无人机多光谱图像因视场角导致的辐射变异性，提出几何感知的多角度观测提取流程，从BRDF角度量化观测几何效应。利用SFM精化相机参数，联合提取多波段反射率和观测几何参数。",
+      "llm_tldr": "针对无人机多光谱图像因视场角导致的辐射变异性，提出几何感知的多角度观测提取流程，从BRDF角度量化观测几何效应。利用SFM精化相机参数，联合提取多波段反射率和观测几何参数。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.09111v1",
+      "source": "arxiv",
+      "title": "Illumination-Invariant Anomaly Detection for Sub-Canopy UAV Multispectral Point Clouds",
+      "abstract": "Unmanned Aerial Vehicle (UAV) multispectral point clouds (MPC) provide high-dimensional spatial-spectral data for sub-canopy target detection; however, their efficacy is significantly compromised by severe illumination heterogeneity caused by vegetation shadows. To address this, we propose a prior-free anomaly detection framework capable of robustly handling lighting variations. First, we formulate solar angle estimation as an inverse optimization problem. By coupling spectral indices with a ray-tracing model, this strategy achieves Prior-Free Shadow Extraction without relying on flight metadata, effectively distinguishing dark objects from true shadows. Second, to mitigate spectral distortions, we introduce an Illumination-Consistent Sparse Representation mechanism. Unlike standard reconstruction methods, we construct a background dictionary strictly from neighbors sharing the same illumination state. This constraint effectively disentangles spectral reflectance from lighting variations, ensuring that targets are represented solely by physically consistent background points. Experimental results indicate that the proposed method significantly improves the separability between anomalies and background in complex forest environments, demonstrating superior performance over state-of-the-art baselines. This framework is particularly suited for identifying camouflaged military targets, mapping fallen tree trunks, and uncovering archaeological ruins hidden beneath dense foliage.",
+      "authors": [
+        "Likun Chen",
+        "Yanfeng Gu",
+        "Xian Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T07:04:26+00:00",
+      "link": "https://arxiv.org/pdf/2606.09111v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "UAV multispectral point cloud anomaly detection with illumination invariance, multimodal remote sensing",
+      "llm_evidence_cn": "无人机多光谱点云异常检测，光照不变性，遥感多模态",
+      "llm_evidence": "无人机多光谱点云异常检测，光照不变性，遥感多模态",
+      "canonical_evidence": "无人机多光谱点云异常检测，光照不变性，遥感多模态",
+      "llm_tldr_en": "Proposes prior-free anomaly detection for UAV multispectral point clouds, using inverse optimization for shadow extraction and illumination-consistent feature fusion.",
+      "llm_tldr_cn": "无人机多光谱点云在树冠下目标检测中受光照不均影响严重。本文提出无先验的异常检测框架，通过逆优化估计太阳角度实现无先验阴影提取，并引入光照一致特征融合消除光谱畸变，在无人机遥感目标检测中实现鲁棒性能。",
+      "llm_tldr": "无人机多光谱点云在树冠下目标检测中受光照不均影响严重。本文提出无先验的异常检测框架，通过逆优化估计太阳角度实现无先验阴影提取，并引入光照一致特征融合消除光谱畸变，在无人机遥感目标检测中实现鲁棒性能。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.13878v1",
+      "source": "arxiv",
+      "title": "AnyGoal: Vision-Language Guided Multi-Agent Exploration for Training-Free Lifelong Navigation",
+      "abstract": "End-to-end navigation policies trained on large simulation corpora degrade sharply when transferred to out-of-distribution scenes, categories, or goal modalities. Modular pipelines such as Modular GOAT are bottlenecked by closed-set object detection recall, while 3D snapshot-memory systems (e.g. 3D-Mem) accumulate dense, view-dependent representations that are heavy to maintain. We present AnyGoal, a training-free multi-robot architecture that places a Vision-Language Model (VLM) at the core of frontier-based exploration and coordinates agents through a shared 2D Gaussian Bayesian Value Map (BVM). The BVM maintains a per-pixel (mu, sigma^2) posterior over goal relevance, updated via precision-weighted fusion of VLM scores through a depth-cone mask, and is never reset between subtasks, yielding lifelong evidence accumulation. Frontiers are ranked by a convex blend of a VLM-as-judge softmax and a Bayesian UCB term on the BVM. A greedy allocator with spatial-separation penalty and commitment hysteresis distributes frontiers across agents without a centralized controller. On the full GOAT-Bench val unseen split (360 episodes, 2,669 subtasks), our dual-agent system achieves 52.4% Subtask SR at 12.7% SPL--state of the art under the strict physical regime (discrete 0.25 m steps, no teleportation, 42 deg HFOV) and a +27.5 pp improvement over Modular GOAT (24.9%). Single-agent AnyGoal achieves 41.9% Subtask SR, showing gains arise from the decision architecture. A four-way perception ablation shows that open-vocabulary detectors shift the dominant failure mode from exploration to goal verification.",
+      "authors": [
+        "MoniJesu James",
+        "Marcelino Julio Fernando",
+        "Miguel Altamirano Cabrera",
+        "Dzmitry Tsetserukou"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-11T20:07:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.13878v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-language guided multi-agent navigation with Bayesian value map",
+      "llm_evidence_cn": "视觉语言引导的多智能体导航，贝叶斯价值地图",
+      "llm_evidence": "视觉语言引导的多智能体导航，贝叶斯价值地图",
+      "canonical_evidence": "视觉语言引导的多智能体导航，贝叶斯价值地图",
+      "llm_tldr_en": "Proposes AnyGoal, a training-free multi-robot architecture using VLM for frontier exploration and a shared Bayesian value map, enabling lifelong navigation.",
+      "llm_tldr_cn": "针对端到端导航策略跨场景泛化差的问题，提出AnyGoal，一种无需训练的多机器人架构，以VLM为核心探索，通过共享2D贝叶斯价值图融合各智能体信息。在多个导航任务上实现零样本终身泛化。",
+      "llm_tldr": "针对端到端导航策略跨场景泛化差的问题，提出AnyGoal，一种无需训练的多机器人架构，以VLM为核心探索，通过共享2D贝叶斯价值图融合各智能体信息。在多个导航任务上实现零样本终身泛化。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14252v1",
+      "source": "arxiv",
+      "title": "Optimality-Preserving Decomposition for Scalable QAOA in Natural-Language-Guided Multi-Drone Assignment",
+      "abstract": "As multi-drone fleets scale, zone assignment rapidly evolves into an intractable NP-hard combinatorial problem that overwhelms classical exhaustive search. While quantum optimization promises to shatter these classical bottlenecks, mapping complex spatial tasks from human intent to restricted quantum hardware remains a severe challenge. To bridge this gap, we present an end-to-end framework integrating a fine-tuned Large Language Model (LLM) front-end with a highly scalable, domain-specific quantum-classical backend. The front-end utilizes Supervised Fine-Tuning (SFT) and Direct Preference Optimization (DPO) to translate free-form natural language instructions into structurally robust Quadratic Unconstrained Binary Optimization (QUBO) constraints without false negatives. To overcome the strict qubit limits of near-term quantum devices, our framework features a novel constraint-preserving graph partitioner and a compressed separator-based dynamic programming (DP) merge. By structurally encoding constraints via W-state initialization and XY-mixers in Conditional Value-at-Risk Quantum Approximate Optimization (CVaR-QAOA), the pipeline stays highly compact. Empirical results demonstrate that this architecture circumvents classical scaling walls, recovering the global optimum on 100% of idealized oracle cases and 96.3% under real QAOA sampling, enabling natural-language-guided task allocation at previously intractable scales.",
+      "authors": [
+        "Junyeop Bang",
+        "Byongho Lee",
+        "Dohyun An",
+        "Hwangnam Kim"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-12T08:31:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.14252v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "natural language guided multi-drone assignment using LLM and quantum optimization",
+      "llm_evidence_cn": "自然语言引导多无人机任务分配",
+      "llm_evidence": "自然语言引导多无人机任务分配",
+      "canonical_evidence": "自然语言引导多无人机任务分配",
+      "llm_tldr_en": "Integrates LLM with QAOA to translate free-form natural language into optimal multi-drone zone assignments, bridging human intent and quantum hardware.",
+      "llm_tldr_cn": "多无人机编队任务分配是NP难问题，现有量子优化难以从自然语言映射。本文提出端到端框架，利用微调LLM将自然语言指令转换为QUBO问题，结合可扩展量子经典后端，实现了语言引导的无人机任务分配，是视觉语言导航任务规划方向的突破。",
+      "llm_tldr": "多无人机编队任务分配是NP难问题，现有量子优化难以从自然语言映射。本文提出端到端框架，利用微调LLM将自然语言指令转换为QUBO问题，结合可扩展量子经典后端，实现了语言引导的无人机任务分配，是视觉语言导航任务规划方向的突破。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.08520v1",
+      "source": "arxiv",
+      "title": "Two Bridges, One Pathway: From VLMs to Generalizable VLAs with Embodied Trajectory-Coupled Data",
+      "abstract": "Vision-language models (VLMs) are powerful general-purpose reasoners, yet converting them into robot control policies (VLAs) is surprisingly difficult. The root cause is a two-fold gap: VLMs are trained on internet-scale images with language-understanding objectives, while VLAs must perceive robot scenes and predict motor actions. Fine-tuning a VLM directly on robot action data forces the model to cross both gaps at once -- the learning curve is steep and the rich generalizations learned during pretraining tend to degrade rather than transfer. We argue that this gap can be bridged gradually with the right intermediate data. We introduce \\emph{embodied trajectory-coupled (ETC) data} -- vision-language supervision derived from the same robot scenes and trajectories used for action learning. Because ETC data shares the visual context of robot operation while retaining familiar language-understanding objectives, it provides a natural stepping stone between VLM pretraining and VLA fine-tuning. Building on this, we design a three-stage training recipe. Distribution Bridging first adapts the VLM to embodied visual-language semantics. Objective Bridging then gradually shifts the model toward action prediction while preserving the acquired representations. Retentive Adaptation finally specializes the policy to the target deployment domain. We further show that mixing task-relevant out-of-distribution ETC data with a small amount of action data enables the model to generalize to novel visual-language conditions without requiring additional robot demonstrations. Simulation and real-robot experiments confirm that this gradual bridging strategy is the key to transferring VLM generalization into robust, deployable robot policies.",
+      "authors": [
+        "Linqi Yin",
+        "Shiduo Zhang",
+        "Shenling Qiu",
+        "Chenxin Li",
+        "Zhaoyang Fu",
+        "Lei Xiao",
+        "Xiang Wang",
+        "Chenchen Yang",
+        "Zhe Xu",
+        "Pengfang Qian",
+        "Jingjing Gong",
+        "Xipeng Qiu",
+        "Xuanjing Huang",
+        "Yu-Gang Jiang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-07T08:57:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.08520v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Bridging VLMs to robotics control with embodied trajectory-coupled data",
+      "llm_evidence_cn": "通过具身轨迹耦合数据将VLM桥接到机器人控制",
+      "llm_evidence": "通过具身轨迹耦合数据将VLM桥接到机器人控制",
+      "canonical_evidence": "通过具身轨迹耦合数据将VLM桥接到机器人控制",
+      "llm_tldr_en": "Proposes embodied trajectory-coupled data to gradually bridge VLMs to robot policy, enabling transfer of visual language reasoning to action.",
+      "llm_tldr_cn": "针对将VLM微调为机器人策略时泛化能力退化的问题，提出具身轨迹耦合（ETC）数据作为中间监督，分步弥合感知与动作的鸿沟。实验表明ETC数据能有效保留预训练知识并迁移到机器人任务。",
+      "llm_tldr": "针对将VLM微调为机器人策略时泛化能力退化的问题，提出具身轨迹耦合（ETC）数据作为中间监督，分步弥合感知与动作的鸿沟。实验表明ETC数据能有效保留预训练知识并迁移到机器人任务。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.09009v1",
+      "source": "arxiv",
+      "title": "Scaling by Diversified Experience for Vision-Language-Action Models",
+      "abstract": "Vision-Language-Action models face significant challenges in real-world deployment due to the entanglement of high-level reasoning with low-level control, and the instability of policy optimization. In this paper, we introduce SyVLA, a robust VLA model trained with diversified experiences. We propose an Intention Decoupling algorithm to isolate control-relevant features from reasoning contexts and a similar-sample guided RL pipeline to stabilize policy updates and mitigate distribution shift. Extensive experiments on real-world robotic tasks and multi-modal benchmarks demonstrate that SyVLA achieves superior task success rates and stronger out-of-distribution generalization compared to existing methods, while effectively preserving core vision-language capabilities. Codes and Datasets is released on \\href{https://sy-vla.github.io/}{project page}.",
+      "authors": [
+        "Leiyu Wang",
+        "Zhaofengnian Wang",
+        "Xueqi Li",
+        "Luoyi Fan",
+        "Cewu Lu",
+        "Nanyang Ye"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-08T04:13:38+00:00",
+      "link": "https://arxiv.org/pdf/2606.09009v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "vision-language-action model with decoupling and RL, transferable to UAV navigation",
+      "llm_evidence_cn": "视觉-语言-动作模型，可迁移至无人机导航",
+      "llm_evidence": "视觉-语言-动作模型，可迁移至无人机导航",
+      "canonical_evidence": "视觉-语言-动作模型，可迁移至无人机导航",
+      "llm_tldr_en": "Proposes SyVLA, a robust VLA model with intention decoupling and RL stabilization, achieving strong generalization on robotic tasks; method applicable to UAV VLN.",
+      "llm_tldr_cn": "现有VLA模型存在高维推理与低层控制耦合、策略优化不稳定问题。本文提出SyVLA，通过意图解耦算法分离控制相关特征，并利用相似样本引导强化学习稳定策略更新，在真实机器人任务上取得优异性能，其方法可直接应用于无人机视觉语言导航。",
+      "llm_tldr": "现有VLA模型存在高维推理与低层控制耦合、策略优化不稳定问题。本文提出SyVLA，通过意图解耦算法分离控制相关特征，并利用相似样本引导强化学习稳定策略更新，在真实机器人任务上取得优异性能，其方法可直接应用于无人机视觉语言导航。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.10348v1",
+      "source": "arxiv",
+      "title": "Rethinking Embodied Navigation via Relational Inductive Bias",
+      "abstract": "Object navigation requires an agent to locate a target in an unknown environment through visual observations. Existing methods typically rely on open-vocabulary detectors or vision-language models (VLMs) to answer where to search, but often overlook what not to trust - which semantic cues are unreliable. Open-vocabulary perception is prone to systematic misleading evidence: false positives, outdated static priors, and repeated failed exploration due to lack of embodied verification, which contaminates mapping and decision-making. Such errors are rooted in structured object relations in real-world scenes. To address this, we propose DB-Nav, a framework that reshapes the search space via dual relational biases. It factorizes target-centric relations into an Activation Bias (propagates contextual evidence) and an Inhibition Bias (suppresses unreliable regions via perceptual confusion and action-level falsification). These biases are unified into a Relational Activation-Inhibition Exploration Graph that modulates frontier exploration values using online observations and failed accesses. Experiments on ObjectNav benchmarks show that DB-Nav significantly outperforms existing methods in success rate (SR) and Success weighted by Path Length (SPL), offering a lightweight, interpretable, and robust navigation framework without costly online VLM reasoning.",
+      "authors": [
+        "Weitao An",
+        "Chenghao Xu",
+        "Xu Yang",
+        "Cheng Deng"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-09T02:57:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.10348v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "embodied navigation using VLM with relational inductive bias applicable to UAV VLN",
+      "llm_evidence_cn": "具身导航中利用视觉语言模型和关系归纳偏差，方法可迁移至无人机视觉语言导航",
+      "llm_evidence": "具身导航中利用视觉语言模型和关系归纳偏差，方法可迁移至无人机视觉语言导航",
+      "canonical_evidence": "具身导航中利用视觉语言模型和关系归纳偏差，方法可迁移至无人机视觉语言导航",
+      "llm_tldr_en": "Proposes DB-Nav, a framework that uses relational inductive biases to improve object navigation with vision-language models, addressing false positives and exploration failures, relevant to UAV navigation.",
+      "llm_tldr_cn": "现有具身导航方法依赖开放词汇检测器或视觉语言模型，但易受误导性语义线索影响。本文提出DB-Nav框架，通过引入双关系偏置（激活关系与抑制关系）重新塑造搜索空间，充分利用物体间结构关系引导导航决策。在多个基准上，DB-Nav显著提升了导航成功率和效率，展示了关系归纳偏置在视觉语言导航中的有效性，其思想可推广到无人机等移动机器人的导航任务。",
+      "llm_tldr": "现有具身导航方法依赖开放词汇检测器或视觉语言模型，但易受误导性语义线索影响。本文提出DB-Nav框架，通过引入双关系偏置（激活关系与抑制关系）重新塑造搜索空间，充分利用物体间结构关系引导导航决策。在多个基准上，DB-Nav显著提升了导航成功率和效率，展示了关系归纳偏置在视觉语言导航中的有效性，其思想可推广到无人机等移动机器人的导航任务。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.13494v1",
+      "source": "arxiv",
+      "title": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
+      "abstract": "Goal-conditioned visual navigation requires a robot to act under partial observability by anticipating how its motion will change the future egocentric view and whether that change brings it closer to the goal. Navigation world models provide such visual foresight, but they remain prediction modules that require an external planner to convert predicted futures into closed-loop control. We propose Navigation World Action Model (NavWAM), a diffusion-transformer policy that turns navigation world-model prediction into executable action by representing future observations, goal-progress values, and action chunks in a shared latent sequence. By learning future prediction jointly with the action and value targets that determine closed-loop behavior, NavWAM makes visual foresight directly usable for robot control. We build NavWAM through simulation pretraining and real-robot adaptation, and evaluate it on image-goal navigation against planning-based world models and a representative direct navigation policy. Across offline benchmarks and closed-loop real-robot deployment, NavWAM improves over planning-based world-model baselines in our evaluations while using the default policy mode without CEM-style action search. Project page: https://dachii-azm.github.io/navwam/",
+      "authors": [
+        "Daichi Azuma",
+        "Taiki Miyanishi",
+        "Koya Sakamoto",
+        "Shuhei Kurita",
+        "Yaonan Zhu",
+        "Petr Khrapchenkov",
+        "Motoaki Kawanabe",
+        "Yusuke Iwasawa",
+        "Yutaka Matsuo"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-06-11T15:44:36+00:00",
+      "link": "https://arxiv.org/pdf/2606.13494v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "goal-conditioned visual navigation world action model applicable to UAV navigation",
+      "llm_evidence_cn": "目标条件视觉导航的世界动作模型，可应用于无人机导航",
+      "llm_evidence": "目标条件视觉导航的世界动作模型，可应用于无人机导航",
+      "canonical_evidence": "目标条件视觉导航的世界动作模型，可应用于无人机导航",
+      "llm_tldr_en": "NavWAM leverages diffusion-transformer to jointly predict future observations and actions for goal-conditioned visual navigation, relevant to UAV navigation tasks.",
+      "llm_tldr_cn": "目标条件视觉导航要求机器人在部分可观测环境下预测行动对未来视图的影响。现有世界模型仅预测未来，需外部规划器。本文提出NavWAM，一种扩散变换器策略，将未来观测、目标进度值和动作块表示为共享潜序列，端到端学习从预测到执行的映射。实验表明，NavWAM在多个导航任务上优于传统世界模型方法，为实现无人机等平台的闭环导航提供了新范式。",
+      "llm_tldr": "目标条件视觉导航要求机器人在部分可观测环境下预测行动对未来视图的影响。现有世界模型仅预测未来，需外部规划器。本文提出NavWAM，一种扩散变换器策略，将未来观测、目标进度值和动作块表示为共享潜序列，端到端学习从预测到执行的映射。实验表明，NavWAM在多个导航任务上优于传统世界模型方法，为实现无人机等平台的闭环导航提供了新范式。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.13896v1",
+      "source": "arxiv",
+      "title": "How do Self-Supervised Remote Sensing Vision Models Transfer to Downstream Tasks?",
+      "abstract": "Self-supervised geospatial foundation models (GeoFMs) learn transferable representations from remote sensing data, but their downstream behavior is difficult to characterize. We study six representative GeoFMs spanning joint-embedding, reconstruction, and multimodal pretraining families, and evaluate transfer across classification, regression, and segmentation benchmarks under different label availability and downstream pipelines. We find that model rankings change across tasks and adaptation settings. Layerwise probing shows that, in most cases, task-relevant information is more accessible in intermediate transformer blocks compared to final-layer embeddings, and that GeoFMs exhibit distinct depthwise profiles. In segmentation case studies on PASTIS and Sen1Floods11, downstream adaptation settings such as decoder design and fine-tuning can be as impactful as the choice of GeoFM, and standard dense-prediction heads may be poorly aligned with how GeoFMs organize information over depth. Finally, CKA analysis on case studies shows that fine-tuning does not rewrite GeoFMs uniformly across depth, and the strongest changes are localized to the first linear layer of the MLP in ViT blocks. These results help explain why GeoFM rankings shift across benchmarks and motivate more representation-aware evaluation and adaptation strategies.",
+      "authors": [
+        "Julia Romero",
+        "Qin Lv",
+        "Morteza Karimzadeh"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-11T20:39:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.13896v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "self-supervised remote sensing models transfer analysis",
+      "llm_evidence_cn": "自监督遥感模型迁移分析",
+      "llm_evidence": "自监督遥感模型迁移分析",
+      "canonical_evidence": "自监督遥感模型迁移分析",
+      "llm_tldr_en": "Study of six self-supervised remote sensing foundation models, revealing layerwise transfer characteristics for downstream tasks.",
+      "llm_tldr_cn": "遥感自监督基础模型在下游任务中的行为尚不清楚。本文系统评估了六种代表性模型，覆盖联合嵌入、重建和多模态预训练家族，发现模型排序随任务和适应设置变化，且中间层比最终层包含更多任务相关信息。该研究为遥感多模态特征融合方法的选择提供了重要指导。",
+      "llm_tldr": "遥感自监督基础模型在下游任务中的行为尚不清楚。本文系统评估了六种代表性模型，覆盖联合嵌入、重建和多模态预训练家族，发现模型排序随任务和适应设置变化，且中间层比最终层包含更多任务相关信息。该研究为遥感多模态特征融合方法的选择提供了重要指导。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.14248v1",
+      "source": "arxiv",
+      "title": "Spectrum Aware Illumination Estimation Using Multispectral Image",
+      "abstract": "Multispectral (MS) imaging extends beyond conventional RGB imaging by capturing more spectral bands, thereby improving illuminant spectrum estimation (ISE). However, existing methods often fail to fully exploit spectral information, resulting in suboptimal performance under diverse lighting conditions and across different sensor domains. Hence, we propose a deep learning framework with a spatio-spectral feature extraction block, which incorporates spectral attention mechanisms to enhance spectral correlation and preserve illuminant-relevant spatial features. Through the inclusion of an illuminant prior (IP), our approach prioritizes specific channels that provide more meaningful information in an MS image. We also propose a spectral-domain transform across different MS sensor spaces. The results demonstrate that illuminant spectra learned in high-dimensional sensor spaces can be effectively transformed to various lower-dimensional camera sensor spaces without any additional training. To facilitate evaluation, we introduce a real-world MS dataset containing high-dimensional ground-truth illumination spectra captured under diverse lighting conditions. Through extensive experiments, we demonstrate that our method achieves superior accuracy compared to existing models, thus providing a practical solution for real-world ISE. The code and dataset are available at https://github.com/hyejin5/Spectrum-Aware-Illumination-Estimation-Using-Multispectral-Image.",
+      "authors": [
+        "Hyejin Oh",
+        "Woo-Shik Kim",
+        "Sangyoon Lee",
+        "YungKyung Park",
+        "Je-Won Kang"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV",
+        "cs.CV"
+      ],
+      "published": "2026-06-12T08:26:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.14248v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multispectral image with spectral attention mechanism",
+      "llm_evidence_cn": "多光谱图像与光谱注意力机制",
+      "llm_evidence": "多光谱图像与光谱注意力机制",
+      "canonical_evidence": "多光谱图像与光谱注意力机制",
+      "llm_tldr_en": "Proposes a deep learning framework with spatio-spectral feature extraction and spectral attention for illuminant spectrum estimation from multispectral images, improving spectral correlation and accuracy.",
+      "llm_tldr_cn": "多光谱成像能提供比RGB更丰富的光谱信息，但现有方法未能充分利用。本文提出一种包含空间-光谱特征提取块和光谱注意力机制的深度学习框架，通过引入照明先验优先处理重要通道，并设计光谱域变换，有效提升了光照频谱估计的精度和鲁棒性。",
+      "llm_tldr": "多光谱成像能提供比RGB更丰富的光谱信息，但现有方法未能充分利用。本文提出一种包含空间-光谱特征提取块和光谱注意力机制的深度学习框架，通过引入照明先验优先处理重要通道，并设计光谱域变换，有效提升了光照频谱估计的精度和鲁棒性。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "attention mechanism for multimodal remote sensing",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
