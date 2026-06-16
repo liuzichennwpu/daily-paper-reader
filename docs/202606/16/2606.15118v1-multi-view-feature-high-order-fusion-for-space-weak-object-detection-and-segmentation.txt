@@ -1,0 +1,602 @@
+Title: Multi-view feature High-order Fusion for Space Weak Object Detection and Segmentation
+
+URL Source: https://arxiv.org/pdf/2606.15118v1
+
+Published Time: Tue, 16 Jun 2026 00:27:36 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 1
+
+# Multi-view feature High-order Fusion for Space Weak Object Detection and Segmentation 
+
+Weilong Guo ∗ , Yuhan Sun ∗ and Shengyang Li 
+
+Abstract —Weak objects are common in images and videos of space applications. However, it is hard to learn proper repre-sentations from their limited appearance information. Inspired by multi-view learning, we develop simple multi-view attentions, treating their outputs as multi-view features. We also propose a multi-view feature high-order fusion method (MHF) to aggregate more accurate and richer features of weak objects. Our MHF extends the commonly used low-order feature fusion method to higher orders. It enhances the model’s capacity to capture relevant and complementary information about weak objects. This is achieved by introducing high-order multi-view features perception and a recursive task-contribution gated selection of multi-view features. The new operation is highly flexible and customizable. It is compatible with various variants of multi-view feature representations. We conduct extensive exper-iments on two newly constructed space science datasets and an open, large-scale satellite video dataset. Our MHF serves as a plug-and-play module and significantly improves various vision transformers and convolution-based detection and segmentation models. We achieve all state-of-the-art accuracies on both tasks across three datasets. Our MHF can be a new basic module for visual modeling that effectively represents weak objects in terms of multi-view learning. The code will be available at https://github.com/Kingdroper/MHF. 
+
+Index Terms —object detection, object segmentation, remote sensing, multi-view feature fusion, space science, weak object. 
+
+I. I NTRODUCTION 
+
+# BENEFITING from the rapid development of multi-media techniques, the same object/image can usually be rep-resented in multiple ways [1]. For example, the process of a scientific experiment in a space station can be represented using optical images, infrared images, density images, etc. [2]; a person can be identified by his/her face, fingerprints, and palmprint images [3], [4], and a single image can also be described by different types of features. In general, these data are referred to as multi-view data [5]–[8], which has attracted significant attention in a wide range of applications [9], e.g., surveillance [10], autonomous driving [11], and scientific research. In contrast to conventional single-view-based meth-ods, multi-view learning enjoys the capability of extracting 
+
+This work was funded by the “Space Science and Application of China Manned Space Engineering DataBase” in the National Basic Science Data Center, Grant NO.NBSDC-DB-17. ( Corresponding author: Shengyang Li. ∗:Equal contribution )Weilong Guo, Yuhan Sun and Shengyang Li are with the Technol-ogy and Engineering Center for Space Utilization, Chinese Academy of Sciences, Beijing 100094, China and Key Laboratory of Space Utiliza-tion, Chinese Academy of Sciences, Beijing 100094, China. Shengyang Li and Yuhan Sun are also with the University of Chinese Academy of Sciences, Beijing 100049, China (e-mail: guoweilong19@mails.ucas.ac.cn; sunyuhan21@csu.ac.cn;shyli@csu.ac.cn). 
+
+correlation and complementary information, contributing to performance improvement in many fields [1]. Limited by the space environment, weak objects are com-mon in many space science and earth observation applications. Some examples are shown in Figure 1. Acquiring aligned multi-view data can be challenging. In this study, we con-centrate on fusing the multi-view features of a single-modal image, with the image being acquired under a single-view condition. We consider different features of the same image as multi-view information and aim to design a multi-view feature fusion method to obtain more accurate and richer features of weak objects and to improve the detection and segmentation accuracy. Some methods use different prior features, such as HoG, SIFT, and LBP as a multi-view representation [12], [13], but they are heavily influenced by prior knowledge and are not applicable to weak objects. We note that attention is a widely used feature representation mechanism in computer vision with high generality. The same attention design is applicable to processing data across different domains and can be easily integrated into various downstream models [14]. It has already delivered strong performance in multiple fields, including earth observation [15]–[17], bioinformatics [18], medical science [19], [20], and smart cities [21], [22]. Existing attention can be broadly classified into spatial attention, channel attention, temporal attention, frequency at-tention, and transformer-like attention [23]. They are biased toward feature representations from different perspectives, re-spectively. For example, spatial attention and channel attention are biased towards contextual and semantic information, but successive convolution and pooling tend to lead to the loss of high-frequency details [24]. Frequency attention, however, effectively preserves high-frequency details, especially edge and boundary information [25], [26]. Different types of atten-tion can be seen as features of distinct perspectives on the same object. Some studies have demonstrated that combin-ing different attentions can achieve better performance [27]– [31]. Most of the existing methods develop various simple fusion strategies [32], such as the weighted average [33]–[35], summation [36], [37], and concatenation [38], [39]. Straight-forward feature fusion lacks the explicit fusion principle to preserve the typical view feature [32]. Methods based on summation and concatenation are prone to feature redundancy, leading to model learning bias on redundant features and weak robustness. There is still a lack of a general and effective fusion strategy exploring the collaboration between multi-view attentions to further improve the accuracy of weak object detection and segmentation.      
+
+> arXiv:2606.15118v1 [cs.CV] 13 Jun 2026 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 2flower
+> stem
+> leaf
+> leaf
+> Small Scale
+> Weak
+> Appearance
+> rice
+> Low-Contrast Speed
+> Boat
+> (a) (b) (c)
+> Fig. 1. Examples of weak objects in space applications. (a) and (b) are images of plant (Arabidopsis and rice) growth experiments in the Chinese space station and TianGong2 space laboratory. (c) is a video of the Jilin-03 satellite.
+
+Although many fusion strategies have been explored in tasks such as multi-view learning [40] and multi-modality image fusion [41], [42]. But they either require multi-modality data or did not have a fusion strategy that is detailed enough for weak objects. Weak object detection and segmentation require accurate, relevant, and complementary information selection and fusion to the target task. In this paper, we propose a plug-and-play module named multi-view feature high-order fusion (MHF) for weak object detection and segmentation in space applications. Specifically, we develop simple and effective spatial attention, channel attention, and frequency attention, and treat their outputs as multi-view features. Our MHF captures relevant and com-plementary information about weak objects by introducing high-order multi-view features perception and recursive task-contribution gated selection of multi-view features (CGS-n). To avoid feature redundancy in the fusion stage, it learns the contribution of multi-view features to the detection and segmentation task in the normalized space and selects the task-relevant and complementary information among them. It also increases the correlation between the learned features and the detection and segmentation task. Theoretically, other types of multi-view features or combinations of different attention mechanisms can be fused using our MHF in a higher-order manner. The new operation offers high flexibility and customizability, and it remains compatible with various variants of multi-view feature representations. To evaluate our MHF, we constructed the M3SSE-ara and TianGong2-rice space science datasets using data from the Chinese Space Station and the TianGong2 space laboratory, respectively. Both of them include object detection and seg-mentation tasks. Small-scale, low-contrast, weak-looking ob-jects are common. We perform extensive experiments on them and an open, large-scale satellite video dataset. Our MHF serves as a plug-and-play module and significantly improves 21 vision transformers and convolution-based detection and segmentation models. Without considering the cost of multi-view attentions, our MHF only costs less than 2M additional parameters. All state-of-the-art accuracies are achieved on both tasks of the three datasets. The high-order fusion manner makes our MHF easily adaptable to different application scenarios, and we only need to fine-tune the order according to the data distribution. These results clearly demonstrate the effectiveness and generality of our designs. Our MHF can be a new basic module for visual modeling that effectively represents weak objects in terms of multi-view learning. Our main contributions are summarized as: 1) We propose a new plug-and-play multi-view features high-order fusion method to aggregate more accurate and rich features of weak objects, extending the com-monly used one-order/two-order feature fusion manner to high-order. 2) We design a recursive task-contribution gated selection of multi-view features, which can effectively avoid the common feature redundancy problem in feature fusion. It learns the contribution of multi-view features to weak object detection and segmentation in the normalized space and selects task-relevant and complementary in-formation from coarse to fine in multiple steps. 3) We constructed two space science datasets using data from the Chinese Space Station and the TianGong2 space laboratory, conducting extensive experiments on them and an open large-scale satellite video dataset where weak objects are common. Our MHF serves as a plug-and-play module and significantly improves 21 vision transformers and convolution-based detection and segmentation models without bells and whistles. The methods most similar to our MHF are high-order atten-tion (HA) [43] and HorNet [44]. For the input X, HA obtains Q, K, V, and an attention map in a self-attention way. Then it uses a threshold to force the values in the attention map to 0 and 1 as B1. And the n power of B1 is Bn. It is multiplied by the V to obtain features of different orders. Then they are fused by weighted addition. However, the features of different stages obtained in this way have high similarity and easily lead to feature redundancy. HorNet presents the gnConv that performs high-order spatial interactions with gated convolutions. It extends the two-order interactions in self-attention to arbitrary orders without introducing significant extra computation. It utilizes convolutions to lightly implement high-order spatial interactions like transformers. Our MHF has the capability of high-order multi-view feature interaction, and we mainly focus on the high-order selection and fusion of multi-view features. We aim to fuse the JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 3
+
+information that is relevant and complementary to the weak object detection and segmentation task from the multi-view features to improve the performance in space applications. To the best of our knowledge, our MHF is the first lightweight method that enables arbitrarily high-order multi-view feature fusion. II. R ELATED WORKS 
+
+In space applications, most models are derived from generic detection and segmentation methods. In this section, we first review the general detection and segmentation methods, then summarize the commonly used strategies in weak object de-tection and segmentation, and finally summarize the methods of attention. 
+
+A. General object detection and segmentation 
+
+Object detection and segmentation aim to obtain the accu-rate locations and category information of objects of interest from images and videos. This information for object detection is object-level, while that for segmentation is pixel-level. The pipelines of existing methods can be uniformly divided into one-stage and two-stage. The one-stage methods usually directly generate the object-level or pixel-level information of objects, such as RetinaNet [45], FCOS [46], RepPoints [47], and YOLACT [48], etc. The two-stage methods first generate candidate regions where the objects may exist, and then predict accurate object-level or pixel-level information based on the candidates, such as RCNN families [49]–[56], Hybrid Task Cascade (HTC) [57], PointRend [58], etc. Normally, two-stage methods have higher detection and segmentation accuracies, but their inference speeds are slower. Benefiting from the development of transformers recently, some transformer-based detection and segmentation methods, such as DETR [59], DINO [60], and Mask DINO [61], etc. have emerged, reporting SOTA results on some mainstream benchmarks. 
+
+B. Weak object detection and segmentation 
+
+Weak objects are usually small-scale, low-contrast, or have a distorted appearance. It is hard to learn a discrim-inative representation from the limited information about them. Existing methods to address these problems include resolution-improvement-based methods and context-modeling-based methods. The resolution-improvement-based methods aim at restoring the distorted structures of weak objects. Commonly used meth-ods include deconvolutions, super-pixel convolutions [62], self-supervision learning paradigms [63], GANs [64]–[67], etc. These methods reconstruct high-resolution weak objects to obtain more abundant and detailed information to improve object detection and segmentation accuracy. The context-modeling-based methods are dedicated to ex-ploring and integrating contextual cues of weak objects to model discriminative features. The most used contexts include multi-scale features from different layers of a CNN model, convolution features of different kernels [68], [69], features of dilated convolutions [70], and features of different pool-ing [71], etc. The current researches mainly focus on issues like the selection of context regions, encoding of context fea-tures, and the relationship between weak objects and contexts. However, there is no unified consensus on how to select local or global contexts for weak objects, and it is still in a heuristic and empirical fashion [72]. 
+
+C. Attention mechanism 
+
+Methods for diverting attention to the most important re-gions of an image and disregarding irrelevant parts are called attention mechanisms [23]. In a vision system, an attention mechanism can be treated as a dynamic selection process that is realized by adaptively weighting features according to the importance of the input. The popular attention currently available mainly includes channel attention and spatial atten-tion [14], [23]. In deep neural networks, different channels in different fea-tures usually represent different objects [73]. Channel attention adaptively recalibrates the weight of each channel and can be viewed as an object selection process [23]. Hu et al. [74] first proposed the concept of channel attention and presented SENet for this purpose. It plays the role of emphasizing important channels while suppressing noise. SE blocks have shortcomings in the squeeze and excitation modules. Later channel attentions attempt to improve the outputs of the squeeze module [75], reduce the complexity [76], or improve both the squeeze module and the excitation module [77]. Spatial attention can be seen as an adaptive spatial region selection mechanism. RAM [78], STN [79], GENet [80], and Non-local [81] are representative of different kinds of spatial attention methods. RAM represents RNN-based methods. STN represents those who use a subnetwork to explicitly predict relevant regions. GENet represents those that use a subnetwork implicitly to predict a soft mask to select important regions. Non-local represents self-attention-related methods. Most existing work focuses on the design of attention structures. Although some existing works try to combine the advantages of channel attention and spatial attention, their fusion is mostly one- or two-order, neglecting the exploitation of high-order information. Our MHF treats different attention as multi-view features and focuses on the high-order fusion of them to obtain better accuracy on weak object detection and segmentation. III. M ETHOD 
+
+In this section, we will present MHF, a lightweight plug-and-play module to achieve high-order fusion of multi-view attention features in a coarse-to-fine manner. Our MHF is built with standard convolutions, linear projections, and element-wise multiplications, but has a function of multi-view feature adaptive mixing. It outputs the feature y that has the same size as the input feature x. As a result, it can be inserted between any two convolution layers. The overall pipeline is shown in Figure 2. 
+
+A. Multi-view attentions. 
+
+Attention has been an important research field in the last few years, thriving in many different machine learning and JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 4⨂
+
+> ⨂
+> ⨂
+> ⨂
+> ⨂
+> ⨂
+> CGS, Order=2
+
+... 
+
+... 
+
+...               
+
+> CGS, Order=n
+> fu
+> ⨂
+> ⨂
+> ⨂
+> xy
+> spatial-view
+> channel-view
+> frequency-view
+> H×W×CH×W×C
+> Input
+> Future
+> Output
+> Future
+> in
+> ()
+> ()
+> CGS
+> Order=1
+> c
+> ()
+> conv ⊕
+> conv
+> K+1
+> conv
+> K+1
+> conv
+> K+1
+> ⨂
+> ⨂
+> ⨂
+> conv
+> conv
+> conv
+> Contribution gated selection of multi-view feature (CGS)
+> in linear projection
+> ()spatial attention
+> ()channel attention
+> ()frequency attention
+> ⨂elementwise multiplication
+> : channel number
+> fufeature fusion
+> : sigmoid function
+
+Fig. 2. The detailed structure of our MHF. 
+
+vision applications [14], such as object detection [16], [17], segmentation [25], and so on. In this section, we develop simple and effective spatial attention, channel attention, and frequency attention, treating their outputs as multi-view features. Theoretically, we can use any of the existing attentions as multi-view features. All we need to do is just ensure that the attention used can represent the features of the image from different perspectives. Since designing new attention is not the focus of this paper, we only use simple attention representations, and some designs refer to existing methods. (a) spatial attention (b) channel attention                      
+
+> ⊕⨂
+> ∈ℝ××
+> LN
+> DWConv
+> Pooling-S
+> Conv1
+> ReLU
+> ∈ℝ××
+> ⊕
+> ∈ℝ××
+> LN
+> DWConv
+> Pooling-C
+> ∈ℝ××
+> LN
+> DWConv FFT
+> IFFT
+> [1][2]
+> ∈ℝ××
+> Cat
+> ∈ℝ××
+> (c) frequency attention
+
+Fig. 3. The detailed structure of our multi-view attentions. LN is the layer normalization. DWConv is a depth-wise convolution layer and the kernel size is 3 × 3. Pooling-S and Pooling-C are average pooling of spatial and channel dimensions. Conv1 is a 1×1 convolution layer. ReLU is an activation function. Cat denotes the operation of stacking features along the channel dimension. FFT and IFFT mean the fast Fourier transform and inverse fast Fourier transform, respectively. 
+
+The detailed structures of our multi-view attention are shown in Figure 3. For different attention, our design fol-lows different principles. For spatial attention and channel attention, the kernel idea is to endow each region of the input feature with global and learnable information in spatial and channel dimensions, respectively. The input feature x
+
+is first regularized by layer normalization. Then we use a depth-wise convolution layer to assign learnable weights to each position of the feature while capturing local information. The kernel size is 3 × 3. The main difference between our spatial and channel attention is the capture of global information. For their lightness, we use the average pooling of spatial and channel dimensions as the global information, respectively. The results are added to the input feature x
+
+through the residual connection, respectively. This gives them a computational complexity of O(n). Most of the background information in the image is distracting to weak objects, so in our spatial attention, we further adaptively suppress it using a 1 × 1 convolution with a ReLU activation function. The semantic information of weak objects is very limited, and the information represented by each channel may be useful for subsequent weak object detection and segmentation. Unlike the existing channel attention, we do not further select the channels. For frequency attention, representing image information in the frequency domain is as important as aligning features. Similarly, we first regularise the input feature x using layer normalization. We then divide the regularised features equally along the channel dimension into features x[1] and x[2] . The 
+
+x[1] is fed into the depth-wise convolution for obtaining local context with a kernel size of 3×3. A 2D fast Fourier transform JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 5
+
+(FFT) is performed on x[2] to convert it to the frequency domain. And a global learnable weight wr is used to learn frequency-view features who has the same size as x[2] . The wr
+
+is essentially a learnable complex tensor. Interaction and fusion with features from spatial and channel attention are required in subsequent multi-view feature selection and fusion. The features from frequency attention should be spatially aligned. Therefore, the output is converted back to the spatial domain by inverse fast Fourier transform (IFFT). The outputs of the two branches are stacked along the channel dimension to obtain spatially aligned frequency features. 
+
+B. Contribution gated selection of multi-view feature (CGS) 
+
+Our CGS aims to select relevant and complementary infor-mation of weak objects from multi-view features by sensing their contribution to the target task. It mainly includes the perception and selection of multi-view features. The recent success of visual transformers and transformer-like attentions relies heavily on the proper modeling of spatial interactions in visual data. However, the O(n2) complexity of the kernel multi-head self-attention hinders application in downstream tasks, especially object detection and segmentation where high-resolution feature maps are required. Recent work like HorNet [44] demonstrates that global spatial interactions can be efficiently implemented using CNNs. Inspired by this, we extend such spatial interactions to arbitrary multi-view features. While different from HorNet, our CGS can collab-oratively achieve multi-view feature perception and selection according to the target task. Let x ∈ RHW ×C be the input feature, the output of multi-view feature perception can be written as: 
+
+[p0 ∈ RHW ×C , q 0 ∈ RHW ×C ] = ϕin (x) ∈ RHW ×C (1) 
+
+v∗ 
+
+> 0
+
+= f ∗(q0) ⊗ p0 ∈ RHW ×C (2) where ϕin is the linear projection layer to perform channel mixing and f ∗ is our multi-view attentions. ∗ ∈ { s, c, r }.
+
+f s, f c, and f r are spatial attention, channel attention, and frequency attention, respectively. v∗ 
+
+> 0
+
+is the multi-view per-ception feature. v∗,(i,c )0 = P 
+
+> j∈Ωi
+
+f ∗(q0)(j,c )p(i,c )0 . Ωi is the perception window at i for multi-view attention features. The above equation shows the interaction between pi 
+
+> 0
+
+and the multi-view attention feature f ∗(q0)j through element-wise multiplication ⊗. i and j denote the location index of the feature and c denotes the channel index of the feature. Each position of our multi-view attention encodes a global-local context. Then the feature interaction can adaptively capture the information related to p0 in the multi-view features. Our CGS then learns the contribution of v∗ 
+
+> 0
+
+to the weak object detection and segmentation task, and based on this selects complementary information of weak objects from multi-view features. 
+
+ctr s
+
+> 0
+
+, ctr c
+
+> 0
+
+, ctr r 
+
+> 0
+
+= ϕc(vs
+
+> 0
+
+, v c
+
+> 0
+
+, v r 
+
+> 0
+
+) (3) 
+
+p∗ 
+
+> 1
+
+= ϕout (ctr ∗ 
+
+> 0
+
+⊗ f ∗(q0) ∈ RHW ×C (4) 
+
+ϕc is the task contribution learning network. It is built with convolutions, activation functions, and element-wise multipli-cations. Object detection and segmentation aim to determine the probability that each feature value belongs to the different objects, (K + 1) . K denotes the number of categories, and 1 refers to the background. As shown in Figure 2, our CGS first projects v∗ 
+
+> 0
+
+to this probability space separately through convolution layers with the sigmoid activation function. Then it collects and stacks the results along the channels and feeds them to a convolution with an activation function to generate the contributions ctr ∗ 
+
+> 0
+
+to weak object detection and segmentation. Finally, it performs multi-view feature selection by element-wise multiplications with f ∗(q0). ϕout is the linear projection layer to perform channel mixing. We consider the selection of multi-view feature in CGS as 1-order as p0 has interacted with f ∗(q0) once and performed a feature selection based on the contribution to the weak object detection and segmentation task. 
+
+C. High-order contribution gated selection of multi-view fea-ture (CGS-n) 
+
+After achieving 1-order multi-view feature selection CGS, we then design CGS-n, a recursive task-contribution gated multi-view feature selection module, which is the kernel of our MHF. It further enhances the model’s capacity to capture relevant and complementary information about weak objects by introducing high-order multi-view features perception and recursive task-contribution gated selection of multi-view fea-tures. Formally, We use ϕin to obtain projection features 
+
+p0 ∈ RHW ×C0 and q ∈ RHW ×P  
+
+> 0≤k≤n−1Ck
+
+. We take q as input to obtain multi-view attention features and split them into a set of features {q∗
+
+> k
+
+}n−1 
+
+> k=0
+
+along the channel dimension. 
+
+∗ ∈ {s, c, r } denotes the spatial view, channel view, and frequency view, respectively. 
+
+[q∗ 
+
+> 0
+
+∈ RHW ×C0 , · · · , q ∗ 
+
+> n−1
+
+∈ RHW ×Cn−1 ]= f ∗(q) ∈ RHW ×P  
+
+> 0≤k≤n−1Ck
+
+(5) We then perform multi-view feature perception and selection recursively by 
+
+v∗ 
+
+> k
+
+= q∗ 
+
+> k
+
+⊗ p∗ 
+
+> k
+
+∈ RHW ×Ck (6) 
+
+ctr sk, ctr ck, ctr rk = ϕc(vsk, v ck, v rk) (7) 
+
+p∗ 
+
+> k+1
+
+= ϕkout (ctr ∗ 
+
+> k
+
+⊗ q∗
+
+> k
+
+) ∈ RHW ×Ck+1 (8) 
+
+ϕkout =
+
+(
+
+N one, k = 0 
+
+Linear (Ck, C k+1 ), 1 ≤ k ≤ n − 1 (9) 
+
+ϕkout is a linear projection layer to perform channel mixing and match the dimensions in different orders. From the above recursive formula equations, it is easy to show that the multi-view feature perception and selection order will be increased by 1 after each step. As a result, we can see that the CGS-n achieves n-order multi-view feature perception and selection with contribution gating. It is also worth noting that we need only a single f ∗ to perform multi-view attention and a single 
+
+ϕc to perform task contribution sensing instead of comput-ing/building them in each recursive step as in equation 6-8, which can further simplify the implementation and improve the efficiency on GPUs. To ensure that the high-order multi-view feature perception and selection do not introduce too JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 6
+
+much computational overhead, we set the channel dimension in each order as: 
+
+Ck = C
+
+2n−k−1 , 0 ≤ k ≤ n − 1 (10) Besides, the channel dimension of ϕin (x) is exactly 2C,and the total FLOPs can be strictly bounded even with n
+
+increasing. This design indicates that we perform the multi-view feature selection in a coarse-to-fine manner, where lower orders are computed with fewer channels. 
+
+D. Feature Fusion 
+
+After high-order multi-view feature perception and selec-tion, we obtain weak object-related and complementary multi-view information p∗
+
+> n
+
+. Our CSG-n is designed to meticulously extract the complementary multi-view features of weak objects and effectively avoid feature redundancy. Therefore, no com-plex design is required in the final fusion part. We simply sum 
+
+p∗
+
+> n
+
+, ∗ ∈ { s, c, r } and pass the result through a ReLU activation function as the final output. 
+
+E. Plug-and-play 
+
+Our MHF outputs the feature y with the same size as the input feature x. As a result, it can be inserted between any two convolution layers. The structure of currently existing object detection and segmentation methods includes: (1) A feature extraction module including a backbone network such as ResNet [82], DarkNet [83], and a multi-scale feature utilization network (neck) such as FPN [84], and YOLO-Neck [85]. (2) Dense prediction heads such as classification head, regression head, and segmentation head. To validate the effectiveness of MHF, we insert it after the feature extraction module of current state-of-the-art object detection and segmen-tation methods and apply it to the output multi-scale features, respectively. IV. E XPERIMENTS 
+
+In this section, we conduct extensive experiments to verify the effectiveness of our method. We present the main re-sults on two constructed space science datasets, M3SSE-ara and TianGong2-rice, and an open large-scale satellite video dataset, SAT-MTB [86], where weak objects are common, and make comparisons with various advanced object detection and segmentation methods. Lastly, we provide ablation studies of our designs and analyze the effectiveness of our MHF on a wide range of models. 
+
+A. Datasets 
+
+M3SSE-ara and TianGong2-rice are space science datasets. Scientists aim to explore the effects of microgravity environ-ments on plant growth and place cameras on the space station to film Arabidopsis and rice growing. It is important for cul-tivating plants with new characteristics in the future. To help scientists analyze plant growth, we constructed the M3SSE-ara and TianGong2-rice datasets using data from the Chinese Space Station and the TianGong2 space laboratory, respec-tively. Both of them include object detection and segmentation tasks, and small-scale, low-contrast, weak-looking objects are common. The filming period of M3SSE-ara is from July 2022 to November 2022. It requires detecting and segmenting the flowers, stems, and leaves of the Arabidopsis in each image. It includes a total of 3720 images, where 2980 images are used for training and 740 images are used for testing. The image sizes are all 1300 × 1160 after preprocessing. TianGong2-rice is a rice leaf detection and segmentation dataset. It requires detecting and segmenting each leaf of the rice in the images. Its images are captured during the rice growth experiments from September 2016 to March 2017. It includes a total of 800 images, where 640 images are used for training and 160 images are used for testing. The image sizes are all 1000 ×400 .Its challenge is mainly that the contrast between the leaves of the rice and the background is so low that it is difficult to detect and segment them. In the future, these two datasets will be made publicly available in our Multi-field, Multi-modal, and Multi-task benchmark for Space Science Experiments (M3SSE) open project 1.To further validate the effectiveness of our method, we perform experiments on the open-source large-scale satellite video dataset, SAT-MTB [86], as well. It is currently the largest multi-task benchmark for satellite video, including ob-ject detection, segmentation, and tracking. A large amount of the objects are small-scale, faint-appearing objects. Its videos are from the Jilin-03 satellite. We verify the effectiveness of our MHF on the object detection and segmentation tasks of the dataset. It includes a total of 144 videos, 33228 frame images, and 308204 objects. It requires detecting and segmenting objects of 12 fine-grained classes including Freighter (FH), Rear engine aircraft (RA), Train (TN), Naval vessels (NV), Yacht (YC), Narrow-body aircraft (NA), Cruise (CS), Four engine aircraft (FA), Wide body aircraft (WA), Speed boat (SB), Corporate aircraft (CA), and Other ship (OS). The frame image size of SAT-MTB ranges from 500 ×600 to 1500 ×3000 .
+
+B. Evaluation Metrics and Comparison Methods 
+
+We use the mainstream COCO evaluation metrics [87] to evaluate object detection and segmentation performance of different methods on M3SSE-ara and TianGong2-rice datasets, including mAP, mAP 50 , mAP 75 , AP s, AP m, and AP l. The mAP is the mean of average precision under different IoU thresholds, 0.5:0.95:0.05. The mAP 50 and mAP 75 are the means of average precision when the IoU thresholds are 0.5 and 0.75, respectively. The AP s, AP m, and AP l metrics are used to evaluate the detection and segmentation accuracy of small, medium, and large objects, respectively. In this paper, we focus on mAP, mAP 50 , and AP s associated with weak objects. On the SAT-MTB dataset, we follow the benchmark settings [86] and use mAP 50 to evaluate the overall detection and segmentation accuracy of different methods. The AP 50 is used to evaluate the fine-grained detection and segmentation accuracy of each category. We mainly compare with the current advanced object de-tection and segmentation methods on the above three datasets. It includes one- and two-stage methods [45], [46], [49], [50], 
+
+> 1http://www.csu.cas.cn/gb/kybm/sjlyzx/gcxx sjj/sjj tgxl
+
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 7
+
+TABLE I COMPARISONS WITH STATE -OF -THE -ART OBJECT DETECTION AND SEGMENTATION METHODS ON THE M3SSE-ARA DATASET .
+
+Method Accepted Feature Epoch/ MHF mAP mAP 50 mAP 75 AP s AP m AP l
+
+AP of Classes 
+
+by Extraction steps (ours) leaf stem flower 
+
+Object Detection 
+
+Faster RCNN [49] TPAMI2017 ResNet101+FPN 84 66.8 95.9 78.2 64.4 75.8 75 69.9 69.3 61.1 CornerNet [88] ECCV2018 HourglassNet104 210 36.4 59.4 38.6 37.4 51.8 42.8 34 33.6 41.5 FCOS [46] ICCV2019 ResNet101+FPN 84 52.7 88.5 59.7 47.8 68.8 62.8 56.7 48.3 53 CenterNet [89] ArXiv2019 ResNet18+FPN 84 11.1 30.7 6.1 6.1 25.4 37.1 16.3 8 9Empirical Attn.(0010) [90] ICCV2019 ResNet50+FPN 84 64 95.4 74.8 61.5 71.6 74.8 66.5 64.2 61.2 ResNet50+FPN+DCN 84 64.3 95.4 75.8 61.5 72.7 74.9 68.1 63.2 61.5 Empirical Attn.(1111) [90] ICCV2019 ResNet50+FPN 84 65.0 95.4 77.2 62.6 72.4 76.6 68.3 64.9 61.7 CentripetalNet [91] CVPR2020 HourglassNet104 210 61.3 91.9 70.7 54.6 79.2 84.6 66 57.1 60.9 YOLOv3 [83] ICCV2018 DarkNet53 273 63 94.3 72 58.9 73.8 74 66.3 62.6 60.2 273 ✓ 65.8 94.7 76.7 61.8 77.3 76.3 67.7 65.7 64.1 FSAF [92] CVPR2019 ResNet101+FPN 84 62.8 89.0 73.2 57.3 75.7 78.3 68.0 56.7 63.7 84 ✓ 68.8 90.3 77.1 64.2 81.1 84.0 72.6 65.2 68.6 ATSS [93] CVPR2020 ResNet101+FPN 84 60.3 87.6 68.3 52.9 80.3 78.9 63.4 57.2 60.5 84 ✓ 67.8 88.5 75.2 61.4 85.1 82.5 71.0 66.6 65.9 Dynamic RCNN [55] ECCV2020 ResNet101+FPN 84 62.0 88.9 71.7 59.0 71.4 76.8 65 64.3 56.7 84 ✓ 71.8 93.8 83.2 69.3 79.7 78.5 72.5 73.7 69.3 FoveaBox [94] TIP2020 ResNet101+FPN 84 52 71.8 58.4 43.5 78.2 76.0 56.6 48.9 50.5 84 ✓ 54.4 70.8 60.8 45.7 81.4 82.3 58.4 53.5 51.3 Cascade RCNN [50] TPAMI2021 ResNet101+FPN 84 51 65.9 57.7 40.9 82.8 83.2 54.1 49.9 49.2 84 ✓ 52 64.5 58.2 42.2 82.9 83.3 56.6 52.9 46.6 DINO [60] ICLR2023 ResNet101+FPN 84 74.8 95.2 84.1 72.2 83.7 83.9 74.9 74.1 70.4 84 ✓ 76.3 95.0 84.8 74.2 85.6 83.8 77.1 81.4 70.8 
+
+Segmentation 
+
+HTC [57] CVPR2019 ResNet101+FPN 84 33.7 50.9 37.3 25.3 59.5 43.0 31.3 27.1 42.8 YOLACT [48] ICCV2019 ResNet101+FPN 84 14.5 37.5 8 9.1 33.5 38.8 20.2 4.3 19.1 SCNet [95] AAAI2021 ResNet101+FPN 84 41.8 53.2 47.3 31.9 69.4 76.5 33.9 43.7 47.7 Mask RCNN [51] ICCV2017 ResNet101+FPN 84 53.7 90.0 57.2 52.3 60.3 42.0 61.2 40.9 59.1 84 ✓ 57.6 91.1 63.0 57.1 64.6 44.4 65.4 47.4 60.1 MaskScoring RCNN [96] CVPR2019 ResNet101+FPN 84 55.5 90.2 61 55.1 60.6 44.1 61.4 44.7 60.3 84 ✓ 62.5 91.6 70.1 62.6 67.4 45.1 68.5 53.3 65.7 PointRend [58] CVPR2020 ResNet101+FPN 84 56.6 92.2 61.4 54.8 64.1 48.2 61.4 45.1 63.3 84 ✓ 59.3 92.3 65.6 57.9 67.9 48.9 64.7 49.4 63.8 QueryInst [97] ICCV2021 ResNet101+FPN 84 43.9 78.3 45.7 38.6 60.4 49.7 45.8 40.5 45.3 84 ✓ 62.3 93.2 70.0 60.1 71.2 57.4 67.2 60.0 59.8 Cascade Mask RCNN [50] TPAMI2021 ResNet101+FPN 84 36.0 62.2 36.2 28.4 62.5 43.6 44.5 23.7 39.9 84 ✓ 41.4 62.1 45.5 33.5 71.5 45.4 51.4 29.9 43.0 SparseInst [98] ICLR2023 ResNet101+FPN 27K 34.4 65.7 33.6 30.6 52.0 42.5 49.1 0.8 46.2 27K ✓ 35.1 64.9 35.4 31.1 56.4 42.1 49.5 6.6 49.1 
+
+transformer-based methods [59]–[61], and video-based meth-ods. Their codes come from the open-source mmdetection 2
+
+and mmtracking 3 framework. 
+
+C. Implement Details and Setups 
+
+All comparison experiments and ablation studies are con-ducted on an Nvidia Tesla V100 GPU, whose memory is 32 GB. The code of our MHF is implemented on the PyTorch framework. On the M3SSE-ara and TianGong2-rice datasets, to preserve as much information about the weak objects as possible, we use the original size of the image as input. And we initialize all methods using the pre-trained models on the COCO dataset [87]. Method settings, such as learning rate, data enhancement process, etc. follow the default settings of mmdetection if not specified. On the M3SSE-ara dataset, we train 84 epochs for methods using the SGD optimizer and use ResNet101 to extract features for most methods using ResNet as the backbone network. For methods using the Adam 
+
+> 2
+
+https://github.com/open-mmlab/mmdetection 
+
+> 3
+
+https://github.com/open-mmlab/mmtracking 
+
+or AdamW optimizers, and methods using other backbone networks, we follow their default settings. On the TianGong2-rice dataset, since most of the objects are small-scale and low-contrast, we train 120 epochs for all methods and use ResNet50+FPN to extract multi-scale features. On the SAT-MTB dataset, we follow the settings on its object detection and segmentation benchmarks [86]. Except for the latest DINO detection method, which is trained for 270k steps, we train all other detection methods for 20 epochs, and segmentation methods for 12 epochs. In each step, we randomly crop 512 × 512 regions from input images for training. When different methods are equipped with our MHF, it is trained together with other parameters of the model. Our MHF has a hyperparameter, order. When our MHF is applied to different methods, the order is uniformly set to 2 on the M3SSE-ara and TianGong2-Rice datasets, and 6 on the SAT-MTB dataset. In the ablation studies, we further explore the impact of different orders on the accuracy of different methods and datasets. 
+
+D. Comparisons with State-of-the-art Methods 
+
+Results on M3SSE-ara and TianGong2-rice Dataset .These two datasets include image sequences of Arabidopsis JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 8                                                                                                                                                                                                                                                        
+
+> TABLE II COMPARISONS WITH STATE -OF -THE -ART OBJECT DETECTION AND SEGMENTATION METHODS ON THE TIAN GONG 2-RICE DATASET .
+> Method Accepted Feature MHF mAP mAP 50 mAP 75 mAP smAP mmAP l
+> By Extraction (ours) Object Detection
+> Dynamic RCNN [55] ECCV2020 ResNet50+FPN 52.1 80.4 55.6 59.3 55.5 4.8 GFL [99] NeurIPS2020 28.5 61.4 25.3 30.8 41.7 4.6 DyHead [100] CVPR2021 3.0 11.3 0.6 7.1 22.1 0.1 DAB-DETR [101] ICLR2022 12.5 38.4 6.1 13.5 20.5 0.1 Faster RCNN [49] TPAMI2017 49.1 77.6 53.4 56.4 51.5 6.8
+> ✓51.8 77.6 56.4 61.7 54.4 9.6 FCOS [46] ICCV2019 9.1 37.1 0.8 23.5 15.3 1.2
+> ✓18.0 53.3 6.4 33.1 23.4 0.5 FSAF [92] CVPR2019 44.9 77.0 43.2 54.4 48.1 1.3
+> ✓53.1 80.3 55.2 61.6 56.4 1.9 DoubleHead [54] CVPR2020 48.6 77.5 51.8 55.3 50.0 5.8
+> ✓51.9 75.0 59.4 62.9 53.0 9.0 ATSS [93] CVPR2020 54.9 82.1 59.5 63.9 58.4 6.7
+> ✓55.7 78.5 59.0 64.5 58.9 2.9 FoveaBox [94] TIP2020 43.4 74.9 44.3 59.7 46.3 1.9
+> ✓47.8 74.8 50.5 60.6 51.7 6.4 RetinaNet [45] TPAMI2021 23.2 63.0 9.8 47.2 28.2 0.3
+> ✓41.5 80.1 35.9 55.1 47.9 2.0 Libra RCNN [53] IJCV2021 53.4 76.4 58.9 62.5 55.1 6.2
+> ✓55.4 79.7 60.3 63.3 56.5 11.1 DINO [60] ICLR2023 57.3 80.0 62.2 64.7 63.7 10.0
+> ✓62.9 82.5 68.3 64.9 69.3 14.1
+> Segmentation
+> HTC [57] CVPR2019 ResNet50+FPN 6.9 17.7 3.1 15.1 5.3 6.7 Cascade Mask RCNN [50] TPAMI2021 9.8 27.0 4.6 25.3 7.4 6.6 SCNet [95] AAAI2021 9.3 22.2 4.7 19.8 6.9 3.4 DetectorRS [92] CVPR2021 7.7 18.4 3.4 16.7 5.8 3.4 Mask RCNN [51] ICCV2017 16.3 42.3 7.7 32.0 13.1 23.4
+> ✓17.6 43.9 10.4 35.1 14.5 16.8 PointRend [58] CVPR2020 14.3 41.9 4.8 30.2 11.3 20.1
+> ✓18.4 45.8 11.7 35.0 14.8 16.8 MaskScoring RCNN [96] IJCV2021 19.4 45.2 13.2 36.9 15.6 10.1
+> ✓23.3 51.1 18.0 39.9 19.8 13.5 QueryInst [97] ICCV2021 20.8 56.9 8.7 26.5 20.4 16.8
+> ✓25.6 62.6 12.6 27.5 25.7 20.1 SparseInst [98] ICLR2023 29.4 60.7 26.3 30.8 29.5 0.0
+> ✓32.0 64.5 31.0 32.1 32.3 10.1
+
+and rice growth taken inside the Chinese space station and the TianGong2 space laboratory. It reflects the appearance changes throughout the growth cycle. However, it is difficult to distinguish the parts of most plants, such as flowers, stems, and leaves, due to the effects of the space environment and growth stages, such as light. We use these two datasets on the one hand to validate the effectiveness of our method and on the other hand to promote new scientific discoveries in space science applications. We adopt different advanced methods to perform object detection and segmentation using our MHF to evaluate its effectiveness. We insert our MHF after the feature extraction module of existing methods and apply it to the output multi-scale features, respectively. We use the original image as input without scaling and follow the default data pipeline and hyperparameters of different methods. All models are retrained on the training set and tested on the test set. The results on M3SSE-ara and TianGong2-rice datasets are summarized in table I and II respectively. When our MHF is applied to vari-ous object detection and segmentation methods with different structures, including one-stage, two-stage, and transformer-based methods, their accuracies significantly improve under the same conditions. DINO with our MHF achieves the best detection accuracies, 76 .3% and 62 .9% mAP, on both datasets. Mask Scoring RCNN and SparseInst with our MHF achieves the best segmentation accuracies, 62 .5% and 32 .0% mAP, on two datasets, respectively. Our MHF also significantly improves the AP s of various methods. These results clearly demonstrate the effectiveness and generality of our designs. 
+
+Results on SAT-MTB Dataset . To evaluate the effective-ness and robustness of our method in complex scenarios, we also test our models on the SAT-MTB dataset. It is the largest open satellite video multi-task benchmark. All model settings follow the benchmark. We apply our MHF to the top object detection and segmentation methods of the benchmark and report the overall accuracy, mAP 50 , and the accuracy, AP 50 , of each fine-grained category. The results are shown in Table III. YOLOv3 uses the DarkNet53 as the backbone, MTTR uses the Swin Transformer [99] as the backbone, and the other methods use the ResNet50 as the backbone. For object detection, most image-based detection methods have a higher 
+
+mAP 50 than that of video-based methods such as Temporary RoI Align, SELSA, FGFA, DFF, etc. Most two-stage detection methods (e.g., Faster RCNN, Libra RCNN, and Cascade RCNN) have a higher mAP 50 than that of one-stage meth-ods (e.g., ATSS, FCOS, RetinaNet). The transformer-based JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 9
+
+TABLE III COMPARISONS WITH STATE -OF -THE -ART OBJECT DETECTION AND SEGMENTATION METHODS ON THE SAT-MTB DATASET .
+
+Method Accepted By Feature MHF AP 50 of Classes mAP 50 
+
+By Extraction (ours) FH RA TN NV YC NA CS FA WA SB CA OS 
+
+Object Detection 
+
+FGFA [102] ICCV2017 ResNet50+FPN 12.6 69.3 34.5 2.2 5.1 42.1 1.3 42.0 68.7 0.0 0.7 15.9 24.5 DFF [103] CVPR2017 21.2 67.1 23.8 0.0 6.7 36.4 3.1 41.6 65.4 0.0 0.7 28.9 24.6 SELSA [104] ICCV2019 19.9 65.1 34.3 0.2 7.3 52.3 0.6 46.5 71.0 0.0 1.6 17.3 26.3 Temporal RoI Align [105] AAAI2021 6.3 44.3 22.6 0.1 3.4 35.4 4.6 33.4 55.3 0.1 0.0 3.1 17.4 Grid RCNN [52] CVPR2019 10.4 80.5 61.5 0 39.7 46.3 0 28.4 56.3 1.3 34.1 10.2 30.7 TridentNet [106] ICCV2019 0 66.8 52.3 0 19.1 54.4 0 44.6 61.2 2.6 33.4 0 27.9 DETR [59] ECCV2020 43.2 63.9 48.9 0.0 36.9 54.5 0.1 47.9 50.8 6.6 37.2 11.9 33.5 Libra RCNN [53] IJCV2021 32.7 47.9 52.4 0.2 33.6 43.0 0.0 29.9 47.9 0.1 13.8 8.9 25.8 RetinaNet [45] TPAMI2021 9.1 58.1 42.0 0.0 24.0 49.2 0.0 23.3 48.8 8.5 10.5 0.3 22.8 Groie [107] ICPR2021 3.3 72.8 59.2 0 42.6 50.7 0.1 36.9 59 8.1 24.6 13.8 30.9 Faster RCNN [49] TPAMI2017 9.8 64.9 42.8 0.0 32.1 62.0 0.0 36.6 52.2 0.7 20.8 2.2 27.0 
+
+✓ 19.0 74.3 54.9 0.0 50.9 53.5 0.0 39.6 60.3 17.2 29.8 11.4 34.2 YOLOv3 [83] ICCV2018 DarkNet53 5.5 60.7 44.2 0.0 29.4 48.8 0.4 49.7 50.5 8.8 30.2 65.7 32.8 
+
+✓ 0.8 64.6 51.5 0.0 40.1 60.5 0.0 41.4 65.5 6.4 43.0 30.5 33.7 FCOS [46] ICCV2019 ResNet50+FPN 9.6 37.6 36.8 0.0 27.6 43.3 0.0 25.6 52.7 5.9 12.5 11.8 21.9 
+
+✓ 5.1 77.8 52.7 0.0 46.2 51.9 0.0 41.6 66.7 8.2 29.1 70.8 37.5 ATSS [93] CVPR2020 31.7 54.6 37.7 0.0 33.0 56.0 0.0 30.1 57.2 3.4 18.1 32.3 29.5 
+
+✓ 10.2 66.9 44.0 0.0 40.6 48.4 5.5 40.5 68.3 7.9 29.4 65.5 35.6 Cascade RCNN [50] TPAMI2021 24.8 61.6 55.1 0.0 28.3 58.7 0.0 26.4 51.5 0.4 21.7 1.5 27.5 
+
+✓ 18.7 65.8 51.5 0.0 41.7 57.2 0.0 38.8 66.6 2.1 44.5 75.2 38.5 DINO [60] ICLR2023 13.2 59.0 64.1 0.0 33.8 59.0 0.8 28.4 51.4 7.7 2.5 39.8 30.0 
+
+✓ 12.0 57.3 64.3 0.0 35.6 59.1 0.2 33.5 53.4 7.2 2.3 56.9 31.8 
+
+Segmentation 
+
+MaskScoring RCNN [96] CVPR2019 ResNet50+FPN 3.6 73.8 3.2 8.3 41.1 48.4 0.0 39.8 71.5 0.2 1.8 24.5 27.7 YOLACT [48] ICCV2019 0.0 19.5 0.0 0.0 26.4 11.3 0.0 37.4 42.6 0.6 4.9 21.0 13.6 QueryInst [97] ICCV2021 0.5 54.2 0.0 0.3 14.5 22.5 0.0 11.3 16.3 1.4 10.5 23.1 12.9 DetectorRS [108] CVPR2021 11.5 83.5 3.5 10.8 33.8 52.9 0.0 55.4 76.7 0.9 23.9 24.5 31.4 SeqFormer [109] ECCV2022 ResNet50 0.0 29.8 0.6 3.8 0.6 12.7 0.0 21.1 16.2 0.0 1.6 20.9 10.3 IDOL [110] ECCV2022 0.0 24.6 1.3 2.8 10.2 2.8 0.0 16.5 13.0 0.0 0.2 12.6 10.5 Mask Transfiner [111] CVPR2022 0.9 48.5 4.6 1.6 13.5 24.8 0.0 13.4 41.6 0.0 7.6 15.4 17.6 MTTR [112] CVPR2022 Swin Transformer 1.2 53.1 7.6 3.6 21.6 31.8 0.0 26.5 23.1 0.2 9.4 19.8 19.4 Mask RCNN [51] ICCV2017 ResNet50+FPN 4.8 60.5 1.6 15.5 36.9 52.7 0.0 40.8 66.9 0.0 24.8 14.1 26.6 
+
+✓ 0.0 64.5 3.7 36.8 45.2 56.3 0.0 31.9 61.3 4.1 45.9 24.2 31.2 HTC [57] CVPR2019 16.1 76.1 5.7 26.4 36.4 51.2 0.0 40.4 71.1 0.1 30.5 30.5 32.0 
+
+✓ 5.7 80.2 1.3 38.5 36.5 62.2 0.0 43.9 72.1 0.0 30.5 28.6 33.3 PointRend [58] CVPR2020 9.8 61.6 26.6 2.7 31.8 55.3 0.0 37.8 64.1 0.0 23.4 20.4 27.8 
+
+✓ 2.1 67.1 11.8 54.6 45.9 57.4 0.0 35.0 70.3 6.9 47.5 32.5 35.9 Cascade Mask RCNN [50] TPAMI2021 4.3 70.0 0.8 30.6 38.8 53.0 0.0 37.4 60.1 0.2 24.0 32.6 29.3 
+
+✓ 22.9 77.8 0.2 64.3 32.7 55.4 0.0 26.9 53.1 0.0 26.3 21.8 31.8 SCNet [95] AAAI2021 9.0 89.3 1.5 0.3 38.7 66.3 0.0 55.1 74.5 0.1 28.8 11.0 31.2 
+
+✓ 18.6 85.1 2.0 66.3 38.5 56.2 0.0 40.2 73.2 0.0 22.5 28.3 35.9 
+
+method, DETR, achieves the highest detection accuracy of 
+
+mAP 50 , which is 33 .5% , among comparison methods. While the two-stage method, HTC, achieves the highest segmentation accuracy of mAP 50 , which is 32 .0% .When applying our MHF to different detection methods, including Faster RCNN, YOLOv3, ATSS, FCOS, and Cascade RCNN, their overall accuracy, mAP 50 , significantly improves. The improvement for FCOS is the most significant, and the 
+
+mAP 50 increases from 21 .9% to 37 .5% (↑ 15 .6% ). The Cascade RCNN with our MHF achieves the highest mAP 50 
+
+accuracy of 38 .5% among all detection methods. When our MHF is applied to different segmentation methods, includ-ing HTC, Mask RCNN, Cascade Mask RCNN, SCNet, and PointRend, the improvement of mAP 50 accuracy is obvious. The PointRend method has the most visible improvement when equipped with our MHF, and the mAP 50 accuracy increases from 27 .8% to 35 .9% (↑ 8.1% ). The PointRend and SCNet with our MHF conclude the highest mAP 50 accuracy, which is 35 .9% . These results show that our MHF significantly improves the fine-grained detection and segmentation accuracy of weak objects on satellite videos, where weak objects are common. It demonstrates the effectiveness and robustness of our method. 
+
+E. Ablation Studies 
+
+We provide detailed ablation studies of our MHF in table IV and use the typical Mask RCNN as the baseline to study its designs. The backbone network is ResNet50. We first study the multi-view attentions and compare our MHF with existing fusion strategies on the M3SSE-ara dataset. Then, we explore the influences of different order settings of our MHF for different methods on different datasets. To further under-stand the superiority of our MHF in learning discriminative representations of weak objects, we compare it with the 11 latest and excellent attention models under fair conditions on the M3SSE-Ara dataset. These results clearly show that our MHF is an efficient and extendable operation that can better capture related complementary information of weak objects from multi-view features. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 10 
+
+TABLE IV ABLATION STUDY AND RESULTS OF EQUIPPING WITH DIFFERENT COMPONENTS ON THE M3SSE-ARA DATASET . T HE BASELINE METHOD IS MASK 
+
+RCNN WITH THE RES NET 50 AS THE BACKBONE . T HE TRAINING EPOCHS ARE 84. f s , f c , AND f r ARE OUR SPATIAL ATTENTION , CHANNEL ATTENTION , AND FREQUENCY ATTENTION RESPECTIVELY . T HE ”S UM ” MEANS ELEMENT -WISE SUMMATION OPERATION FOR FEATURE FUSION . T HE 
+
+”C AT ” INDICATES THAT THE FEATURES ARE FUSED BY STACKING THEM ALONG THE CHANNEL DIMENSION .
+
+f s f c f r Fusion Strategies mAP mAP 50 mAP 75 AP s AP m AP l
+
+AP of Classes Sum Cat CGS-n(Ours) leaf stem flower 51.6 89.8 52.0 49.6 58.8 42.1 58.3 38.3 58.0 
+
+✓ 54.3 90.7 58.4 53.3 59.3 42.3 61.8 40.4 60.7 
+
+✓ 54.7 90.5 59.3 53.3 61.5 43.6 62.2 40.6 61.4 
+
+✓ 55.0 89.7 60.1 54.1 61.0 42.9 62.4 42.1 60.5 
+
+✓ ✓ ✓ ✓ 52.2 90.8 54.8 51.3 57.6 40.8 58.4 40.5 57.7 
+
+✓ ✓ ✓ ✓ 52.1 89.8 55.8 50.8 58.3 42 59.2 39.4 57.7 
+
+✓ ✓ ✓ ✓ 57.3 90.8 63.8 56.4 65.7 45.6 63.3 47.3 61.3 25                         
+
+> 27
+> 29
+> 31
+> 33
+> 35
+> 37
+> 39
+> 41
+> 4567
+> mAP 50  (%)
+> orders
+> Mask RCNN Cascade Mask RCNN PointRend
+> 10
+> 12
+> 14
+> 16
+> 18
+> 20
+> 22
+> 24
+> 26
+> 28
+> 30
+> 12345678
+> mAP (%)
+> orders
+> Mask RCNN QueryInst MaskScoring RCNN
+> 16
+> 17
+> 18
+> 19
+> 20
+> 21
+> 22
+> 23
+> 24
+> 25
+> 123456
+> mAP (%)
+> orders
+> Mask RCNN (a)SAT -MTB (b)TianGong 2-rice (c)M3SSE -ara
+
+Fig. 4. Object segmentation results of Mask RCNN equipped with our MHF with different order settings on the different dataset. 
+
+Effectiveness of components . As shown in table IV, the ”Sum” means element-wise summation for feature fusion, and the ”Cat” indicates that the features are fused by stacking them along the channel dimension. The training epochs are all 84. These results demonstrate the effectiveness of multi-view attentions and that different attentions are good at improving different segmentation metrics. It shows the complementar-ity of multi-view attention. Directly fusing them by either element-wise summation or stacking them leads to a decrease in mAP accuracy. The main reason is that straightforward feature fusion lacks the explicit fusion principle to preserve the typical view feature of weak objects. Our MHF achieves the best mAP and AP s accuracies, which shows its effectiveness in representing weak objects using multi-view features. 
+
+Impacts of orders . We also explore the impact of order settings for different methods on different datasets. The results are shown in Figure 4. We report their segmentation results of 
+
+mAP 50 on the SAT-MTB dataset and mAP on the M3SSE-ara and TianGong2-rice datasets. We train different models for 12 epochs on the SAT-MTB and M3SSE-ara datasets and 120 epochs on the TianGong2-rice dataset. These results show that as the order values gradually increase, the overall accuracies increase first and then decrease. The order values of peak accuracies vary with different methods. The best order value of the same method is different on different datasets. But the value of the best order usually lies in a limited range. We can dynamically adjust it to get better performance in weak object detection and segmentation according to different applications. 
+
+Comparisons with Advanced Attentions . We compare our MHF with 11 latest and advanced attentions on the M3SSE-Ara dataset, using the Mask RCNN as the baseline. The backbone is ResNet50. The training epochs are 84. The insert location of different attentions are same as our MHF, which is after the feature extraction module. The attentions include SE [74], SG [113], SK [114], CBAM [28], ECA [76], SF [115], ACmix [116], P-Self [117], CoT [118], TPT [30], and PNT [119]. We report their segmentation results in Ta-ble V. We can see that not all attentions help improve the weak object segmentation accuracy on the M3SSE-ara dataset, such as ACmix and P-Self. And SG, SK, and ECA are top-3 attention on advancing the mAP accuracy of weak object segmentation. However, when we use the commonly used element-wise summation (Sum) and the channel stacking (Cat) to fuse them, the mAP accuracy decreases. Our MHF shows significant superiority in learning accurate and discriminative representations of weak objects. V. C ONCLUSION 
+
+Weak objects are common in images and videos of space science and earth observation applications. Extracting accurate information about them through object detection and seg-mentation has significant value in promoting novel scientific discovery and advancing technological innovation. However, it is hard to learn proper representation from the limited and distorted appearance information of weak objects. Inspired by multi-view / multi-modality learning, we attempt to efficiently select information that is relevant and complementary to weak objects to enrich them from the multi-view features of images. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 11 
+
+TABLE V OBJECT SEGMENTATION RESULTS OF MASK RCNN WITH DIFFERENT ATTENTIONS ON THE M3SSE-ARA DATASET . T HE ”S UM ” MEANS ELEMENT -WISE SUMMATION OPERATION FOR FEATURE FUSION . T HE ”C AT ” INDICATES THAT THE FEATURES ARE FUSED BY STACKING THEM ALONG THE CHANNEL DIMENSION .f s , f c , AND f r ARE OUR SPATIAL ATTENTION , CHANNEL ATTENTION , AND FREQUENCY ATTENTION RESPECTIVELY .
+
+Method mAP Params(M) FLOPs(G) FPS 
+
+Baseline 51.6 43.76 389.46 14.3 SE [74] 53.2 43.82 389.5 13.6 SG [113] 53.8 43.76 389.5 14.3 SK [114] 54.2 65.96 1176.63 8.5 CBAM [28] 51.7 43.79 389.54 12.6 ECA [76] 53.6 43.76 389.5 14.2 SF [115] 51.7 43.76 389.52 13.8 ACmix [116] 51.4 44.63 421.64 5P-Self [117] 51.3 44.29 403.62 13.5 CoT [118] 52.5 46.06 471.97 12 TPT [30] 52.2 43.76 389.51 12.8 PNT [119] 51.8 46.65 483.36 12.5 Sum(SG,SK,ECA) 52.2 65.96 1176.71 8.3 CAT(SG,SK,ECA) 51.5 66.74 1204.84 8.1 
+
+f s 54.3 44.03 399.27 13.8 
+
+f c 54.7 43.77 389.83 13.6 
+
+f r 55.0 51.84 389.63 13.3 MHF(ours) 57.3 54.53 454.6 9.8 
+
+We develop simple and effective spatial attention, channel attention, and frequency attention, treating their outputs as multi-view features. We propose a lightweight and plug-and-play method for multi-view features high-order fusion (MHF). It enhances the model’s capacity to capture relevant and complementary information about weak objects by introducing high-order multi-view feature perception and task contribution sensing. Theoretically, other multi-view features or combina-tions of attention can be fused using our MHF in a higher-order manner. Without considering the cost of multi-view attentions, our MHF only costs less than 2M additional parameters. We perform extensive experiments on two space science datasets and a large-scale satellite video dataset, and apply our MHF to 21 advanced methods. Their detection and segmentation accuracies are significantly improved. These results clearly demonstrate the effectiveness and generality of our designs. In the future, we will further explore novel designs of multi-view features, feature selection, and feature fusion to advance the detection and segmentation accuracies of weak objects in space applications. ACKNOWLEDGMENTS 
+
+Thanks for the scientific data from the National Basic Science Data Center ”Space Science and Application of China Manned Space Engineering DataBase”. REFERENCES [1] J. Li, C. Zhou, X. Ji, M. Li, G. Lu, Y. Xu, and D. Zhang, “Multi-view instance attention fusion network for classification,” Information Fusion , vol. 101, p. 101974, 2024. [2] J. Yang, K. Liu, M. Zhao, and S. Li, “Video process detection for space electrostatic suspension material experiment in china’s space station,” 
+
+Engineering Applications of Artificial Intelligence , vol. 131, p. 107804, 2024. [3] H. Shao, D. Zhong, and X. Du, “Efficient deep palmprint recognition via distilled hashing coding,” in 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW) . IEEE Computer Society, 2019, pp. 714–723. [4] S. Zhao, J. Wu, L. Fei, B. Zhang, and P. Zhao, “Double-cohesion learning based multiview and discriminant palmprint recognition,” 
+
+Information Fusion , vol. 83, pp. 96–109, 2022. [5] J. Li, H. Yong, B. Zhang, M. Li, L. Zhang, and D. Zhang, “A probabilis-tic hierarchical model for multi-view and multi-feature classification,” in 32nd AAAI Conference on Artificial Intelligence, AAAI 2018 . AAAI press, 2018, pp. 3498–3505. [6] J. Li, B. Zhang, and D. Zhang, “Shared autoencoder gaussian process latent variable model for visual classification,” IEEE transactions on neural networks and learning systems , vol. 29, no. 9, pp. 4272–4286, 2017. [7] J. Li, B. Zhang, G. Lu, and D. Zhang, “Generative multi-view and multi-feature learning for classification,” Information Fusion , vol. 45, pp. 215–226, 2019. [8] Q. Zheng, J. Zhu, Z. Li, Z. Tian, and C. Li, “Comprehensive multi-view representation learning,” Information Fusion , vol. 89, pp. 198– 209, 2023. [9] J. Liu, X. Fan, Z. Huang, G. Wu, R. Liu, W. Zhong, and Z. Luo, “Target-aware dual adversarial learning and a multi-scenario multi-modality benchmark to fuse infrared and visible for object detection,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2022, pp. 5802–5811. [10] N. Paramanandham and K. Rajendiran, “Infrared and visible image fusion using discrete cosine transform and swarm intelligence for surveillance applications,” Infrared Physics & Technology , vol. 88, pp. 13–22, 2018. [11] H. Gao, B. Cheng, J. Wang, K. Li, J. Zhao, and D. Li, “Object classification using cnn-based fusion of vision and lidar in autonomous vehicle environment,” IEEE Transactions on Industrial Informatics ,vol. 14, no. 9, pp. 4224–4231, 2018. [12] Z. Cai, L. Wang, X. Peng, and Y. Qiao, “Multi-view super vector for action recognition,” in Proceedings of the IEEE conference on Computer Vision and Pattern Recognition , 2014, pp. 596–603. [13] S. Zheng, X. Cai, C. Ding, F. Nie, and H. Huang, “A closed form solution to multi-view low-rank regression,” in Proceedings of the Twenty-Ninth AAAI Conference on Artificial Intelligence , 2015, pp. 1973–1979. [14] M. Hassanin, S. Anwar, I. Radwan, F. S. Khan, and A. Mian, “Visual attention methods in deep learning: An in-depth survey,” Information Fusion , vol. 108, p. 102417, 2024. [15] W. Guo, S. Li, F. Chen, Y. Sun, and Y. Gu, “Satellite video multi-label scene classification with spatial and temporal feature cooperative encoding: A benchmark dataset and method,” IEEE Transactions on Image Processing , vol. 33, pp. 2238–2251, 2024. [16] W. Guo, X. Li, and S. Li, “Rotation-lossless non-local attention and fine-grained feature enhancement based fine-grained oriented object detection in remote sensing images,” in 2023 5th International Con-ference on Control and Robotics (ICCR) . IEEE, 2023, pp. 277–286. [17] Z. Zhou, S. Li, W. Guo, and Y. Gu, “Few-shot aircraft detection in satellite videos based on feature scale selection pyramid and proposal contrastive learning,” Remote Sensing , vol. 14, no. 18, p. 4581, 2022. [18] Y. Zhang, C. Liu, M. Liu, T. Liu, H. Lin, C.-B. Huang, and L. Ning, JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 12 
+
+“Attention is all you need: utilizing attention in ai-enabled drug discovery,” Briefings in Bioinformatics , vol. 25, no. 1, pp. 1–22, 2024. [19] M. M. Rahman and R. Marculescu, “Medical image segmentation via cascaded attention decoding,” in Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision , 2023, pp. 6222–6231. [20] J. M. J. Valanarasu, P. Oza, I. Hacihaliloglu, and V. M. Patel, “Medical transformer: Gated axial-attention for medical image segmentation,” in 
+
+International Conference on Medical Image Computing and Computer-Assisted Intervention , 2021, pp. 36–46. [21] X. Guo, K. Song, M. Gao, W. Zhai, Q. Li, and G. Jeon, “Crowd count-ing in smart city via lightweight ghost attention pyramid network,” 
+
+Future Generation Computer Systems , vol. 147, pp. 328–338, 2023. [22] T. Hussain, H. Dai, W. Gueaieb, M. Sicklinger, and G. De Masi, “Uav-based multi-scale features fusion attention for fire detection in smart city ecosystems,” in 2022 IEEE International Smart Cities Conference (ISC2) . IEEE, 2022, pp. 1–4. [23] M.-H. Guo, T.-X. Xu, J.-J. Liu, Z.-N. Liu, P.-T. Jiang, T.-J. Mu, S.-H. Zhang, R. R. Martin, M.-M. Cheng, and S.-M. Hu, “Attention mechanisms in computer vision: A survey,” Computational visual media , vol. 8, no. 3, pp. 331–368, 2022. [24] R. Yang, C. Zheng, L. Wang, Y. Zhao, Z. Fu, and Q. Dai, “Mae-bg: dual-stream boundary optimization for remote sensing image semantic segmentation,” Geocarto International , vol. 38, no. 1, p. 2190622, 2023. [25] X. Xu, W. Lv, W. Wang, Y. Zhang, and J. Chen, “Empowering seman-tic segmentation with selective frequency enhancement and attention mechanism for tampering detection,” IEEE Transactions on Artificial Intelligence , vol. 1, no. 01, pp. 1–14, 2023. [26] N.-T. Bui, D.-H. Hoang, Q.-T. Nguyen, M.-T. Tran, and N. Le, “Meganet: Multi-scale edge-guided attention network for weak bound-ary polyp segmentation,” in Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision , 2024, pp. 7985–7994. [27] F. Wang, M. Jiang, C. Qian, S. Yang, C. Li, H. Zhang, X. Wang, and X. Tang, “Residual attention network for image classification,” in 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , 2017, pp. 3156–3164. [28] S. Woo, J. Park, J.-Y. Lee, and I. S. Kweon, “Cbam: Convolutional block attention module,” in Proceedings of the European conference on computer vision (ECCV) , 2018, pp. 3–19. [29] A. G. Roy, N. Navab, and C. Wachinger, “Recalibrating fully convo-lutional networks with spatial and channel “squeeze and excitation” blocks,” IEEE transactions on medical imaging , vol. 38, no. 2, pp. 540–549, 2018. [30] D. Misra, T. Nalamada, A. U. Arasanipalai, and Q. Hou, “Rotate to attend: Convolutional triplet attention module,” in Proceedings of the IEEE/CVF winter conference on applications of computer vision , 2021, pp. 3139–3148. [31] J. Fu, J. Liu, H. Tian, Y. Li, Y. Bao, Z. Fang, and H. Lu, “Dual attention network for scene segmentation,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2019, pp. 3146–3154. [32] J. Liu, Z. Liu, G. Wu, L. Ma, R. Liu, W. Zhong, Z. Luo, and X. Fan, “Multi-interactive feature learning and a full-time multi-modality benchmark for image fusion and segmentation,” in Proceed-ings of the IEEE/CVF international conference on computer vision ,2023, pp. 8115–8124. [33] D. Guan, Y. Cao, J. Yang, Y. Cao, and M. Y. Yang, “Fusion of multispectral data through illumination-aware deep neural networks for pedestrian detection,” Information Fusion , vol. 50, pp. 148–157, 2019. [34] Q. Zhang, T. Xiao, N. Huang, D. Zhang, and J. Han, “Revisiting feature fusion for rgb-t salient object detection,” IEEE Transactions on Circuits and Systems for Video Technology , vol. 31, no. 5, pp. 1804–1818, 2020. [35] R. Liu, Z. Liu, J. Liu, X. Fan, and Z. Luo, “A task-guided, implicitly-searched and metainitialized deep model for image fusion,” IEEE Transactions on Pattern Analysis and Machine Intelligence , pp. 1–16, 2024. [36] Y. Sun, W. Zuo, and M. Liu, “Rtfnet: Rgb-thermal fusion network for semantic segmentation of urban scenes,” IEEE Robotics and Automa-tion Letters , vol. 4, no. 3, pp. 2576–2583, 2019. [37] M. Zhou, J. Huang, X. Fu, F. Zhao, and D. Hong, “Effective pan-sharpening by multiscale invertible neural network and heterogeneous task distilling,” IEEE Transactions on Geoscience and Remote Sensing ,vol. 60, pp. 1–14, 2022. [38] Q. Ha, K. Watanabe, T. Karasawa, Y. Ushiku, and T. Harada, “Mfnet: Towards real-time semantic segmentation for autonomous vehicles with multi-spectral scenes,” in 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) . IEEE, 2017, pp. 5108–5115. [39] S. S. Shivakumar, N. Rodrigues, A. Zhou, I. D. Miller, V. Kumar, and C. J. Taylor, “Pst900: Rgb-thermal calibration, dataset and segmenta-tion network,” in 2020 IEEE international conference on robotics and automation (ICRA) . IEEE, 2020, pp. 9441–9447. [40] Z. Xie, Y. Yang, Y. Zhang, J. Wang, and S. Du, “Deep learning on multi-view sequential data: a survey,” Artificial Intelligence Review ,vol. 56, no. 7, pp. 6661–6704, 2023. [41] H. Li and X.-J. Wu, “Crossfuse: A novel cross attention mechanism based infrared and visible image fusion approach,” Information Fusion ,vol. 103, p. 102147, 2024. [42] K. Xiao, X. Kang, H. Liu, and P. Duan, “Mofa: A novel dataset for multi-modal image fusion applications,” Information Fusion , vol. 96, pp. 144–155, 2023. [43] F. Ding, G. Yang, J. Wu, D. Ding, J. Xv, G. Cheng, and X. Li, “High-order attention networks for medical image segmentation,” in 
+
+International Conference on Medical Image Computing and Computer-Assisted Intervention . Springer, 2020, pp. 253–262. [44] Y. Rao, W. Zhao, Y. Tang, J. Zhou, S. N. Lim, and J. Lu, “Hornet: Efficient high-order spatial interactions with recursive gated convolu-tions,” Advances in Neural Information Processing Systems , vol. 35, pp. 10 353–10 366, 2022. [45] T.-Y. Lin, P. Goyal, R. Girshick, K. He, and P. Dollar, “Focal loss for dense object detection,” IEEE Transactions on Pattern Analysis & Machine Intelligence , vol. 42, no. 02, pp. 318–327, 2020. [46] Z. Tian, C. Shen, H. Chen, and T. He, “Fcos: Fully convolutional one-stage object detection,” in 2019 IEEE/CVF International Conference on Computer Vision (ICCV) , 2019, pp. 9626–9635. [47] Z. Yang, S. Liu, H. Hu, L. Wang, and S. Lin, “Reppoints: Point set representation for object detection,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 9657–9666. [48] D. Bolya, C. Zhou, F. Xiao, and Y. J. Lee, “Yolact: Real-time instance segmentation,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 9157–9166. [49] S. Ren, K. He, R. Girshick, and J. Sun, “Faster r-cnn: Towards real-time object detection with region proposal networks,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 39, no. 6, pp. 1137– 1149, 2017. [50] Z. Cai and N. Vasconcelos, “Cascade r-cnn: Delving into high quality object detection,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 6154–6162. [51] K. He, G. Gkioxari, P. Doll´ ar, and R. Girshick, “Mask r-cnn,” in 
+
+Proceedings of the IEEE international conference on computer vision ,2017, pp. 2961–2969. [52] X. Lu, B. Li, Y. Yue, Q. Li, and J. Yan, “Grid r-cnn,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition ,2019, pp. 7363–7372. [53] J. Pang, K. Chen, J. Shi, H. Feng, W. Ouyang, and D. Lin, “Libra r-cnn: Towards balanced learning for object detection,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition ,2019, pp. 821–830. [54] Y. Wu, Y. Chen, L. Yuan, Z. Liu, L. Wang, H. Li, and Y. Fu, “Rethinking classification and localization for object detection,” in 
+
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2020, pp. 10 186–10 195. [55] H. Zhang, H. Chang, B. Ma, N. Wang, and X. Chen, “Dynamic r-cnn: Towards high quality object detection via dynamic training,” in 
+
+Computer Vision–ECCV 2020: 16th European Conference, Glasgow, UK, August 23–28, 2020, Proceedings, Part XV 16 . Springer, 2020, pp. 260–275. [56] P. Sun, R. Zhang, Y. Jiang, T. Kong, C. Xu, W. Zhan, M. Tomizuka, L. Li, Z. Yuan, C. Wang et al. , “Sparse r-cnn: End-to-end object detection with learnable proposals,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2021, pp. 14 454–14 463. [57] K. Chen, J. Pang, J. Wang, Y. Xiong, X. Li, S. Sun, W. Feng, Z. Liu, J. Shi, W. Ouyang et al. , “Hybrid task cascade for instance segmenta-tion,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2019, pp. 4974–4983. [58] A. Kirillov, Y. Wu, K. He, and R. Girshick, “Pointrend: Image seg-mentation as rendering,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2020, pp. 9799–9808. [59] N. Carion, F. Massa, G. Synnaeve, N. Usunier, A. Kirillov, and S. Zagoruyko, “End-to-end object detection with transformers,” in 
+
+European conference on computer vision . Springer, 2020, pp. 213– 229. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 13 
+
+[60] H. Zhang, F. Li, S. Liu, L. Zhang, H. Su, J. Zhu, L. M. Ni, and H.-Y. Shum, “Dino: Detr with improved denoising anchor boxes for end-to-end object detection,” arXiv preprint arXiv:2203.03605 , 2022. [61] Z. Zou, K. Chen, Z. Shi, Y. Guo, and J. Ye, “Object detection in 20 years: A survey,” Proceedings of the IEEE , vol. 111, no. 3, pp. 257– 276, 2023. [62] W. Shi, J. Caballero, F. Husz´ ar, J. Totz, A. P. Aitken, R. Bishop, D. Rueckert, and Z. Wang, “Real-time single image and video super-resolution using an efficient sub-pixel convolutional neural network,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2016, pp. 1874–1883. [63] X. Pan, F. Tang, W. Dong, Y. Gu, Z. Song, Y. Meng, P. Xu, O. Deussen, and C. Xu, “Self-supervised feature augmentation for large image object detection,” IEEE Transactions on Image Processing , vol. 29, pp. 6745–6758, 2020. [64] A. Creswell, T. White, V. Dumoulin, K. Arulkumaran, B. Sengupta, and A. A. Bharath, “Generative adversarial networks: An overview,” 
+
+IEEE signal processing magazine , vol. 35, no. 1, pp. 53–65, 2018. [65] J. Rabbi, N. Ray, M. Schubert, S. Chowdhury, and D. Chao, “Small-object detection in remote sensing images with end-to-end edge-enhanced gan and object detector network,” Remote Sensing , vol. 12, no. 9, p. 1432, 2020. [66] S. M. A. Bashir and Y. Wang, “Small object detection in remote sensing images with residual feature aggregation-based super-resolution and object detector network,” Remote Sensing , vol. 13, no. 9, p. 1854, 2021. [67] Y. Bai, Y. Zhang, M. Ding, and B. Ghanem, “Sod-mtgan: Small object detection via multi-task generative adversarial network,” in Proceedings of the European conference on computer vision (ECCV) , 2018, pp. 206–221. [68] K. Li, G. Wan, G. Cheng, L. Meng, and J. Han, “Object detection in optical remote sensing images: A survey and a new benchmark,” ISPRS journal of photogrammetry and remote sensing , vol. 159, pp. 296–307, 2020. [69] Z. Liu, H. Wang, L. Weng, and Y. Yang, “Ship rotated bounding box space for ship extraction from high-resolution optical satellite images with complex backgrounds,” IEEE geoscience and remote sensing letters , vol. 13, no. 8, pp. 1074–1078, 2016. [70] G. Cheng, C. Lang, M. Wu, X. Xie, X. Yao, and J. Han, “Feature enhancement network for object detection in optical remote sensing images,” Journal of Remote Sensing , vol. 2021, p. 9805389, 2021. [71] L. Hou, K. Lu, J. Xue, and L. Hao, “Cascade detector with feature fusion for arbitrary-oriented objects in remote sensing images,” in 
+
+2020 IEEE International Conference on Multimedia and Expo (ICME) .IEEE, 2020, pp. 1–6. [72] G. Cheng, X. Yuan, X. Yao, K. Yan, Q. Zeng, X. Xie, and J. Han, “Towards large-scale small object detection: Survey and benchmarks,” 
+
+IEEE Transactions on Pattern Analysis & Machine Intelligence , vol. 45, no. 11, pp. 13 467–13 488, 2023. [73] L. Chen, H. Zhang, J. Xiao, L. Nie, J. Shao, W. Liu, and T.-S. Chua, “Sca-cnn: Spatial and channel-wise attention in convolutional networks for image captioning,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2017, pp. 5659–5667. [74] J. Hu, L. Shen, and G. Sun, “Squeeze-and-excitation networks,” in 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 7132–7141. [75] Z. Gao, J. Xie, Q. Wang, and P. Li, “Global second-order pooling convolutional networks,” in Proceedings of the IEEE/CVF Conference on computer vision and pattern recognition , 2019, pp. 3024–3033. [76] Q. Wang, B. Wu, P. Zhu, P. Li, W. Zuo, and Q. Hu, “Eca-net: Efficient channel attention for deep convolutional neural networks,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2020, pp. 11 534–11 542. [77] H. Lee, H.-E. Kim, and H. Nam, “Srm: A style-based recalibration module for convolutional neural networks,” in Proceedings of the IEEE/CVF International conference on computer vision , 2019, pp. 1854–1862. [78] V. Mnih, N. Heess, A. Graves, and K. Kavukcuoglu, “Recurrent models of visual attention,” in Proceedings of the 27th International Conference on Neural Information Processing Systems-Volume 2 , 2014, pp. 2204–2212. [79] M. Jaderberg, K. Simonyan, A. Zisserman, and K. Kavukcuoglu, “Spa-tial transformer networks,” in Proceedings of the 28th International Conference on Neural Information Processing Systems-Volume 2 , 2015, pp. 2017–2025. [80] J. Hu, L. Shen, S. Albanie, G. Sun, and A. Vedaldi, “Gather-excite: exploiting feature context in convolutional neural networks,” in Pro-ceedings of the 32nd International Conference on Neural Information Processing Systems , 2018, pp. 9423–9433. [81] X. Wang, R. Girshick, A. Gupta, and K. He, “Non-local neural networks,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 7794–7803. [82] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image recognition,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2016, pp. 770–778. [83] A. Farhadi and J. Redmon, “Yolov3: An incremental improvement,” in Computer vision and pattern recognition , vol. 1804. Springer Berlin/Heidelberg, Germany, 2018, pp. 1–6. [84] T.-Y. Lin, P. Doll´ ar, R. Girshick, K. He, B. Hariharan, and S. Belongie, “Feature pyramid networks for object detection,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2017, pp. 2117–2125. [85] J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, “You only look once: Unified, real-time object detection,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2016, pp. 779– 788. [86] S. Li, Z. Zhou, M. Zhao, J. Yang, W. Guo, Y. Lv, L. Kou, H. Wang, and Y. Gu, “A multitask benchmark dataset for satellite video: Object de-tection, tracking, and segmentation,” IEEE Transactions on Geoscience and Remote Sensing , vol. 61, p. 3278075, 2023. [87] T.-Y. Lin, M. Maire, S. Belongie, J. Hays, P. Perona, D. Ramanan, P. Doll´ ar, and C. L. Zitnick, “Microsoft coco: Common objects in context,” in Computer Vision–ECCV 2014: 13th European Conference, Zurich, Switzerland, September 6-12, 2014, Proceedings, Part V 13 .Springer, 2014, pp. 740–755. [88] H. Law and J. Deng, “Cornernet: Detecting objects as paired key-points,” in Proceedings of the European conference on computer vision (ECCV) , 2018, pp. 734–750. [89] X. Zhou, D. Wang, and P. Kr¨ ahenb¨ uhl, “Objects as points,” arXiv preprint arXiv:1904.07850 , 2019. [90] X. Zhu, D. Cheng, Z. Zhang, S. Lin, and J. Dai, “An empirical study of spatial attention mechanisms in deep networks,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 6688–6697. [91] Z. Dong, G. Li, Y. Liao, F. Wang, P. Ren, and C. Qian, “Centripetalnet: Pursuing high-quality keypoint pairs for object detection,” in Proceed-ings of the IEEE/CVF conference on computer vision and pattern recognition , 2020, pp. 10 519–10 528. [92] C. Zhu, Y. He, and M. Savvides, “Feature selective anchor-free module for single-shot object detection,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2019, pp. 840– 849. [93] S. Zhang, C. Chi, Y. Yao, Z. Lei, and S. Z. Li, “Bridging the gap between anchor-based and anchor-free detection via adaptive training sample selection,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2020, pp. 9759–9768. [94] T. Kong, F. Sun, H. Liu, Y. Jiang, L. Li, and J. Shi, “Foveabox: Beyound anchor-based object detection,” IEEE Transactions on Image Processing , vol. 29, pp. 7389–7398, 2020. [95] T. Vu, H. Kang, and C. D. Yoo, “Scnet: Training inference sample consistency for instance segmentation,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 35, no. 3, 2021, pp. 2701– 2709. [96] Z. Huang, L. Huang, Y. Gong, C. Huang, and X. Wang, “Mask scoring r-cnn,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2019, pp. 6409–6418. [97] Y. Fang, S. Yang, X. Wang, Y. Li, C. Fang, Y. Shan, B. Feng, and W. Liu, “Instances as queries,” in Proceedings of the IEEE/CVF international conference on computer vision , 2021, pp. 6910–6919. [98] T. Cheng, X. Wang, S. Chen, W. Zhang, Q. Zhang, C. Huang, Z. Zhang, and W. Liu, “Sparse instance activation for real-time instance segmenta-tion,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2022, pp. 4433–4442. [99] X. Li, W. Wang, L. Wu, S. Chen, X. Hu, J. Li, J. Tang, and J. Yang, “Generalized focal loss: Learning qualified and distributed bounding boxes for dense object detection,” Advances in Neural Information Processing Systems , vol. 33, pp. 21 002–21 012, 2020. [100] X. Dai, Y. Chen, B. Xiao, D. Chen, M. Liu, L. Yuan, and L. Zhang, “Dynamic head: Unifying object detection heads with attentions,” in 
+
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2021, pp. 7373–7382. [101] S. Liu, F. Li, H. Zhang, X. Yang, X. Qi, H. Su, J. Zhu, and L. Zhang, “Dab-detr: Dynamic anchor boxes are better queries for detr,” arXiv preprint arXiv:2201.12329 , 2022. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 14 
+
+[102] X. Zhu, Y. Wang, J. Dai, L. Yuan, and Y. Wei, “Flow-guided feature aggregation for video object detection,” in Proceedings of the IEEE international conference on computer vision , 2017, pp. 408–417. [103] X. Zhu, Y. Xiong, J. Dai, L. Yuan, and Y. Wei, “Deep feature flow for video recognition,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2017, pp. 2349–2358. [104] H. Wu, Y. Chen, N. Wang, and Z. Zhang, “Sequence level semantics ag-gregation for video object detection,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 9217–9225. [105] T. Gong, K. Chen, X. Wang, Q. Chu, F. Zhu, D. Lin, N. Yu, and H. Feng, “Temporal roi align for video object recognition,” in 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , vol. 35, no. 2, 2021, pp. 1442–1450. [106] Y. Li, Y. Chen, N. Wang, and Z. Zhang, “Scale-aware trident networks for object detection,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 6054–6063. [107] L. Rossi, A. Karimi, and A. Prati, “A novel region of interest extraction layer for instance segmentation,” in 2020 25th international conference on pattern recognition (ICPR) . IEEE, 2021, pp. 2203–2209. [108] S. Qiao, L.-C. Chen, and A. Yuille, “Detectors: Detecting objects with recursive feature pyramid and switchable atrous convolution,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2021, pp. 10 213–10 224. [109] J. Wu, Y. Jiang, S. Bai, W. Zhang, and X. Bai, “Seqformer: Sequential transformer for video instance segmentation,” in European Conference on Computer Vision . Springer, 2022, pp. 553–569. [110] J. Wu, Q. Liu, Y. Jiang, S. Bai, A. Yuille, and X. Bai, “In defense of on-line models for video instance segmentation,” in European Conference on Computer Vision . Springer, 2022, pp. 588–605. [111] L. Ke, M. Danelljan, X. Li, Y.-W. Tai, C.-K. Tang, and F. Yu, “Mask transfiner for high-quality instance segmentation,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2022, pp. 4412–4421. [112] A. Botach, E. Zheltonozhskii, and C. Baskin, “End-to-end referring video object segmentation with multimodal transformers,” in Proceed-ings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2022, pp. 4985–4995. [113] Y. Li, X. Li, and J. Yang, “Spatial group-wise enhance: Enhancing se-mantic feature learning in cnn,” in Proceedings of the Asian Conference on Computer Vision , 2022, pp. 687–702. [114] X. Li, W. Wang, X. Hu, and J. Yang, “Selective kernel networks,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2019, pp. 510–519. [115] Q.-L. Zhang and Y.-B. Yang, “Sa-net: Shuffle attention for deep con-volutional neural networks,” in ICASSP 2021-2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) .IEEE, 2021, pp. 2235–2239. [116] X. Pan, C. Ge, R. Lu, S. Song, G. Chen, Z. Huang, and G. Huang, “On the integration of self-attention and convolution,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition ,2022, pp. 815–825. [117] H. Liu, F. Liu, X. Fan, and D. Huang, “Polarized self-attention: Towards high-quality pixel-wise mapping,” Neurocomputing , vol. 506, pp. 158– 167, 2022. [118] Y. Li, T. Yao, Y. Pan, and T. Mei, “Contextual transformer networks for visual recognition,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 45, no. 2, pp. 1489–1500, 2022. [119] A. Goyal, A. Bochkovskiy, J. Deng, and V. Koltun, “Non-deep net-works,” Advances in neural information processing systems , vol. 35, pp. 6789–6801, 2022. 
+
+Weilong Guo earned his B.Eng. degree in software engineering from Jilin University, Jilin, China, in 2018, and subsequently, his M.Eng. degree in com-puter applied technology from the School of Artifi-cial Intelligence, University of Chinese Academy of Sciences, Beijing, China, in 2022. Currently serving as an Engineer at the Technol-ogy and Engineering Center for Space Utilization, Chinese Academy of Sciences, Beijing, China, he is deeply engaged in research focused on the intelligent analysis and understanding of images and videos. 
+
+Yuhan Sun received the B.S. degree in Automation and Computer Science and Technology from Xi’an Jiaotong University, Xi’an, Shannxi, China, in 2021. She is currently pursing the Ph.D. degree in Computer-applied Technology with the Technology and Engineering Center for Space Utilization, Chi-nese Academy of Sciences (CAS), Beijing. Her research interests include satellite video and con-ventional video analysis, with a focus on object detection and segmentation. 
+
+Shengyang Li received the Ph.D. degree from the Institute of Remote Sensing Applications, Chinese Academy of Sciences, Beijing, China, in 2006. He is currently a Professor with the Technology and Engineering Center for Space Utilization, Chi-nese Academy of Sciences. His research activities are machine learning in remote sensing image inter-pretation, deep learning in satellite videos processing and analysis, intelligent image processing, analysis and understanding for space utilization, and space scientific big data modeling and analysis.

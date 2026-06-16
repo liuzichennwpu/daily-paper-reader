@@ -6,59 +6,64 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-15
-- 运行时间：2026-06-15 22:42:03 UTC
+- 最新运行日期：2026-06-16
+- 运行时间：2026-06-16 23:20:04 UTC
 - 运行状态：成功
-- 本次总论文数：13
+- 本次总论文数：14
 - 精读区：7
-- 速读区：6
+- 速读区：7
 
 ### 今日简报（AI）
-今日推荐13篇论文，精读7篇，聚焦航拍导航与特征融合两大高分方向。最值得关注的是《Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation》和《Context-Guided Semantic Alignment for Feature Fusion Networks》，均获9.0/10高分。普通读者可优先精读这两篇，深入理解基于扩散模型的视觉语言导航对齐与上下文引导的特征融合机制。
-- 详情：[/202606/15/README](/202606/15/README)
+1) 今日精选14篇论文，聚焦无人机自主感知与遥感灾害评估两大高分方向。  
+2) 精读推荐《ScoutVLA》开创双专家VLA模型实现开放世界具身问答，以及《Multi-Modal Attention》利用多模态深度学习提升灾损评估精度，均获9.0分。  
+3) 建议优先精读这两篇论文，其中ScoutVLA的主动感知框架或将对无人机巡检、自动驾驶具身问答产生重要启发。
+- 详情：[/202606/16/README](/202606/16/README)
 
 ### 精读区论文标签
-1. [Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation](/202606/15/2606.13883v1-guided-diffusion-with-distilled-vision-language-reliability-for-aerial-navigation)  
+1. [ScoutVLA: UAV-Centric Active Perception via a Dual-Expert VLA Model for Open-World Embodied Question Answering](/202606/16/2606.14772v1-scoutvla-uav-centric-active-perception-via-a-dual-expert-vla-model-for-open-world-embodied-question-answering)  
    标签：评分：9.0/10、query:uav-vln
-   evidence：无人机空中导航结合视觉语言可靠性
-2. [Context-Guided Semantic Alignment for Feature Fusion Networks](/202606/15/2606.14005v1-context-guided-semantic-alignment-for-feature-fusion-networks)  
+   evidence：以无人机为中心的主动感知，结合视觉-语言-动作模型用于具身问答
+2. [Multi-Modal Attention for Automated Disaster Damage Assessment Using Remote Sensing Imagery and Deep Learning](/202606/16/2606.14963v1-multi-modal-attention-for-automated-disaster-damage-assessment-using-remote-sensing-imagery-and-deep-learning)  
    标签：评分：9.0/10、query:rs-fusion
-   evidence：用于目标检测的语义对齐特征融合
-3. [AERMANI-PLACE: Language Guided Object Placement with Aerial Manipulators](/202606/15/2606.14531v1-aermani-place-language-guided-object-placement-with-aerial-manipulators)  
-   标签：评分：9.0/10、query:uav-vln
-   evidence：语言引导的空中机械臂物体放置
-4. [Illumination-Invariant Anomaly Detection for Sub-Canopy UAV Multispectral Point Clouds](/202606/15/2606.09111v1-illumination-invariant-anomaly-detection-for-sub-canopy-uav-multispectral-point-clouds)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：无人机多光谱点云异常检测，光照不变性，遥感多模态
-5. [Multi-Angular Reflectance Anisotropy Observed from UAV Multispectral Imagery](/202606/15/2606.10350v1-multi-angular-reflectance-anisotropy-observed-from-uav-multispectral-imagery)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：无人机多光谱图像多角度反射率分析
-6. [AnyGoal: Vision-Language Guided Multi-Agent Exploration for Training-Free Lifelong Navigation](/202606/15/2606.13878v1-anygoal-vision-language-guided-multi-agent-exploration-for-training-free-lifelong-navigation)  
+   evidence：多模态注意力机制融合双时相遥感影像进行灾害损失评估
+3. [FusionRS: A Large-Scale RGB-Infrared Remote Sensing Dataset for Dual-Modal Vision-Language Foundation Models](/202606/16/2606.17020v1-fusionrs-a-large-scale-rgb-infrared-remote-sensing-dataset-for-dual-modal-vision-language-foundation-models)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：用于融合的遥感双模态视觉语言数据集
+4. [Rethinking Embodied Navigation via Relational Inductive Bias](/202606/16/2606.10348v1-rethinking-embodied-navigation-via-relational-inductive-bias)  
    标签：评分：8.0/10、query:uav-vln
-   evidence：视觉语言引导的多智能体导航，贝叶斯价值地图
-7. [Optimality-Preserving Decomposition for Scalable QAOA in Natural-Language-Guided Multi-Drone Assignment](/202606/15/2606.14252v1-optimality-preserving-decomposition-for-scalable-qaoa-in-natural-language-guided-multi-drone-assignment)  
-   标签：评分：8.0/10、query:uav-vln
-   evidence：自然语言引导多无人机任务分配
+   evidence：使用关系归纳偏置的视觉语言导航
+5. [Learn Temporal Consistency For Robust Satellite Video Detector](/202606/16/2606.15112v1-learn-temporal-consistency-for-robust-satellite-video-detector)  
+   标签：评分：8.0/10、query:rs-fusion
+   evidence：卫星视频目标检测与时序一致性学习
+6. [Training-Free Open-Vocabulary Visual Grounding for Remote Sensing Images and Videos](/202606/16/2606.16124v1-training-free-open-vocabulary-visual-grounding-for-remote-sensing-images-and-videos)  
+   标签：评分：8.0/10、query:rs-fusion
+   evidence：遥感图像的开放词汇视觉定位
+7. [Hierarchical Fine-Grained Aerial Object Detection](/202606/16/2606.16448v1-hierarchical-fine-grained-aerial-object-detection)  
+   标签：评分：8.0/10、query:rs-fusion
+   evidence：遥感中的细粒度航空目标检测
 
 ### 速读区论文标签
-1. [Two Bridges, One Pathway: From VLMs to Generalizable VLAs with Embodied Trajectory-Coupled Data](/202606/15/2606.08520v1-two-bridges-one-pathway-from-vlms-to-generalizable-vlas-with-embodied-trajectory-coupled-data)  
+1. [Text-Driven Fusion for Infrared and Visible Images: Achieving Image Scene Adaptation on Hyperbolic Space](/202606/16/2606.15104v1-text-driven-fusion-for-infrared-and-visible-images-achieving-image-scene-adaptation-on-hyperbolic-space)  
+   标签：评分：7.0/10、query:rs-fusion
+   evidence：文本驱动的红外与可见光图像融合，采用双曲嵌入
+2. [Multi-view feature High-order Fusion for Space Weak Object Detection and Segmentation](/202606/16/2606.15118v1-multi-view-feature-high-order-fusion-for-space-weak-object-detection-and-segmentation)  
+   标签：评分：7.0/10、query:rs-fusion
+   evidence：多视图特征高阶融合用于空间弱目标检测，与遥感目标检测相关
+3. [Metis: A Generalizable and Efficient World-Action Model for Autonomous Driving and Urban Navigation](/202606/16/2606.15869v1-metis-a-generalizable-and-efficient-world-action-model-for-autonomous-driving-and-urban-navigation)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：自动驾驶的视觉-语言-动作模型，可迁移到无人机导航
+4. [Optimality-Preserving Decomposition for Scalable QAOA in Natural-Language-Guided Multi-Drone Assignment](/202606/16/2606.14252v1-optimality-preserving-decomposition-for-scalable-qaoa-in-natural-language-guided-multi-drone-assignment)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：通过具身轨迹耦合数据将VLM桥接到机器人控制
-2. [Scaling by Diversified Experience for Vision-Language-Action Models](/202606/15/2606.09009v1-scaling-by-diversified-experience-for-vision-language-action-models)  
+   evidence：利用大语言模型和量子优化实现自然语言引导的多无人机任务分配，与语言引导无人机相关
+5. [Synthetic-to-Real Pipeline for Safe Landing Zone Detection](/202606/16/2606.14767v1-synthetic-to-real-pipeline-for-safe-landing-zone-detection)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：视觉-语言-动作模型，可迁移至无人机导航
-3. [Rethinking Embodied Navigation via Relational Inductive Bias](/202606/15/2606.10348v1-rethinking-embodied-navigation-via-relational-inductive-bias)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：具身导航中利用视觉语言模型和关系归纳偏差，方法可迁移至无人机视觉语言导航
-4. [NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation](/202606/15/2606.13494v1-navwam-a-navigation-world-action-model-for-goal-conditioned-visual-navigation)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：目标条件视觉导航的世界动作模型，可应用于无人机导航
-5. [How do Self-Supervised Remote Sensing Vision Models Transfer to Downstream Tasks?](/202606/15/2606.13896v1-how-do-self-supervised-remote-sensing-vision-models-transfer-to-downstream-tasks)  
+   evidence：无人机安全着陆区检测的仿真到真实流水线，与无人机视觉导航相关
+6. [Fusion is not one-size-fits-all: Cross-Modal Representation Alignment for Time-to-Event Modeling](/202606/16/2606.15038v1-fusion-is-not-one-size-fits-all-cross-modal-representation-alignment-for-time-to-event-modeling)  
    标签：评分：6.0/10、query:rs-fusion
-   evidence：自监督遥感模型迁移分析
-6. [Spectrum Aware Illumination Estimation Using Multispectral Image](/202606/15/2606.14248v1-spectrum-aware-illumination-estimation-using-multispectral-image)  
-   标签：评分：6.0/10、query:rs-fusion
-   evidence：多光谱图像与光谱注意力机制
+   evidence：针对CT和EHR数据的多模态融合技术
+7. [CrossMaps: Confidence-Aware Open-Vocabulary Semantic Mapping for Rover Navigation](/202606/16/2606.16935v1-crossmaps-confidence-aware-open-vocabulary-semantic-mapping-for-rover-navigation)  
+   标签：评分：6.0/10、query:uav-vln
+   evidence：开放词汇语义地图用于漫游车导航，其方法可迁移至无人机视觉语言导航
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,455 @@
+Title: ScoutVLA: UAV-Centric Active Perception via a Dual-Expert VLA Model for Open-World Embodied Question Answering
+
+URL Source: https://arxiv.org/pdf/2606.14772v1
+
+Published Time: Tue, 16 Jun 2026 00:05:18 GMT
+
+Number of Pages: 30
+
+Markdown Content:
+# ScoutVLA: UAV-Centric Active Perception via a Dual-Expert VLA Model for Open-World Embodied Question Answering 
+
+Wenhao Lu 1, Zhengqiu Zhu 1, Xiaofeng Wang 2,Xiaoran Zhang 1, Yatai Ji 1, Yong Zhao 1,
+
+Yue Hu 1, Yingzhen Nie 1, Jinlong Zhu 1, Zheng Zhu 21National Key Laboratory of Digital Intelligent Modeling and Simulation, National University of Defense Technology 
+
+> 2
+
+GigaAI 
+
+{luwenhao20, zhuzhengqiu12 }@nudt.edu.cn 
+
+Abstract: Aerial Embodied Question Answering (EQA) requires Unmanned Aerial Vehicles (UAVs) to actively perceive the environment and answer natu-ral language questions. Existing outdoor EQA systems usually stop once the target enters the UAV’s field of view, leaving the fine-grained viewpoint adjust-ment needed for evidence-seeking questions largely unresolved. To address this issue, we introduce FG-EQA, a fine-grained active perception EQA benchmark with more than 40K simulated trajectories and 1K real-world trajectories. Draw-ing inspiration from the “waggle dance” of scout bees, which iteratively adjust their flight paths to verify target information, we propose ScoutVLA, an evidence-driven Vision-Language-Action model for outdoor EQA. To emulate this active exploration behavior, ScoutVLA features a decoupled dual-expert architecture: a vision-language expert infers the semantic intent to identify missing evidence, while an independent action expert employs high-DoF flow matching to generate continuous viewpoint-refinement trajectories. To balance the competing demands of continuous control and semantic reasoning, we devise a decoupled training strategy with a knowledge insulation mechanism that prevents the action gradi-ents from erasing the model’s multimodal reasoning ability. Extensive simulated experiments and a qualitative real-world field study both verify the superiority of ScoutVLA over the state-of-the-art baselines, demonstrating a 10.48 × higher average strict success rate and a 7.72 × higher average QA correctness. 
+
+Keywords: Embodied Question Answering, Active Perception, Bio-inspired, Vision-Language-Action Model 
+
+## 1 Introduction 
+
+Unmanned Aerial Vehicles (UAVs) have emerged as flexible mobile sensors for urban monitoring and scene understanding. A compelling advancement in this domain is aerial Embodied Question Answering (EQA), where a UAV explores an environment to gather visual evidence for answering natural language questions. However, current outdoor EQA pipelines typically adopt a decoupled navigate-then-answer paradigm [1, 2], in which a UAV agent halts when the target enters the field of view or is in close proximity. Unfortunately, this premature termination leaves the UAV at poor viewing angles and distances, obscuring key visual evidence needed for accurate QA generation. The inherent limitations of this paradigm are illustrated in Figure 1. In the initial view, a white truck is already clearly visible on the road. When tasked to read its license plate, standard baselines falter in varied ways: a passive pure vision-language model (e.g., Qwen3-VL) strug-
+
+> arXiv:2606.14772v1 [cs.CV] 9 Jun 2026
+
+gles due to the extreme distance, while a conventional EQA agent (e.g., CityEQA) might suc-cessfully fly closer but arbitrarily halt alongside the truck’s flank, completely missing the rear-mounted plate. Moreover, the navigation model (e.g., TravelUAV) gets lost and completely de-viates from the target direction. Acquiring precise, localized evidence requires the UAV to inter-pret the question’s semantic intent and execute continuous spatial maneuvers to align with spe-cific locations like the rear bumper. Recognizing this critical deficit in current studies, we for-malize this neglected late-stage EQA phase as question-conditioned fine-grained active perception .
+
+Figure 1: Task illustration of question-conditioned fine-grained ac-tive perception. 
+
+Addressing this active per-ception task presents three formidable challenges. 
+
+First, open-world visual evidence is exceptionally viewpoint-sensitive. Afractional deviation in spatial position and camera pose dictates whether a tiny, angle-dependent feature is legible. Second, establishing a semantic-to-physical mapping is inherently difficult. The agent must bridge a vast cross-modal gap, translat-ing highly abstract linguistic intents directly into concrete 3D geometric search strategies. Third, high-DoF continuous control is difficult. Active perception requires continuous adjustment of position and pose to align with obscured target regions, while existing methods often rely on fixed multi-view camera arrays or low-dimensional discrete action spaces, thus failing to support the precise viewpoint refinement required for reliable evidence acquisition. To systematically address this problem, we introduce FG-EQA , the first benchmark dedicated to fine-grained perception in aerial EQA. Unlike long-horizon navigation datasets, each episode in FG-EQA isolates the evidence-seeking phase: the target is visible at the onset, yet necessitates a complex sequence of active viewpoint refinements to accurately answer the query. Specifically, it includes over 40K simulated trajectories and 1K human-piloted real-world trajectories. Furthermore, inspired by the “waggle dance” of scout bees, which iteratively hover and refine their flight paths to confirm discoveries, we propose ScoutVLA , a powerful dual-expert Vision-Language-Action (VLA) model trained with a decoupled strategy. To tackle the semantic-to-physical mapping, a PaliGemma-based multimodal expert perfectly aligns the question seman-tics with the missing visual evidence. To overcome viewpoint-sensitivity and continuous-control hurdles, an independent action expert employs high-DoF flow matching to generate continuous viewpoint-refinement control. Finally, to prevent continuous action regression from catastrophically overriding discrete language reasoning, we devise a two-stage training paradigm. By integrating knowledge insulation with parameter-efficient LoRA and LMAdapter modules, we successfully or-chestrate evidence-grounded QA without inducing catastrophic forgetting of continuous navigation capabilities. 
+
+Contributions. We formalize the problem of question-conditioned fine-grained active perception and introduce the FG-EQA benchmark, comprising over 40K simulated and 1K real-world trajec-tories. To tackle this challenge, we propose ScoutVLA, a bio-inspired dual-expert VLA model that translates semantic intent into continuous 5-DoF viewpoint-refinement maneuvers. Moreover, we establish a decoupled two-stage training paradigm that harmonizes the conflicting demands of spa-tial control and discrete reasoning text generation. Extensive sim-to-real experiments on FG-EQA 2verify the superiority of ScoutVLA over state-of-the-art baselines, demonstrating a 10.48 × higher average strict success rate and a 7.72 × higher average QA correctness. 
+
+## 2 Related Work 
+
+Embodied question answering. Early EQA focused on indoor navigation coupled with QA [10, 11, 12, 13, 14]. As studies transitioned to outdoor environments [1, 2, 7], they adopted modular navigate-then-answer pipelines. However, these systems implicitly assume that reaching a target’s general vicinity resolves the query, thereby entirely overlooking the fine-grained viewpoint adjust-ment necessary for angle-dependent visual evidence. ScoutVLA specifically targets this missing active perception phase. 
+
+Active perception and aerial VLA models. Recent multi-modal autonomous agents [15, 16, 17] and aerial VLA models [4, 5, 3, 6, 19, 20] have successfully mapped language instructions to flight control. Yet, despite their active mobility, they primarily execute macroscopic routing (e.g., “fly to the building”) utilizing low-DoF or discrete action spaces. ScoutVLA advances this paradigm by integrating the linguistic query directly into continuous 5-DoF control to actively reveal occluded evidence. A comprehensive discussion of related literature, alongside an architectural compar-ison table of recent VLA models, is provided in Appendix B. 
+
+## 3 FG-EQA Benchmark 
+
+3.1 Task Formulation 
+
+Each episode starts from an initial UAV view in which the target is visible, but the available visual cues are insufficient to correctly answer the question. At time t, the UAV receives an RGB perception 
+
+It, state st, and question q, executes a viewpoint-refinement command ut, and finally produces a short answer y. The goal is not merely to approach the target, but to induce a trajectory τ that exposes the requisite visual evidence. Formally, as defined in Equation 1, we aim to find the optimal policy parameters θ∗ that maximize the expected log-likelihood of generating the correct answer. Here 
+
+y∗ is the ground-truth short answer and τ is the trajectory induced by policy πθ . This formulation couples viewpoint selection with answer generation: success depends on whether the policy acquires question-relevant evidence, not only on terminal distance to the target. 
+
+θ∗ = arg max  
+
+> θ
+
+Eτ ∼πθ [log pθ (y∗ | τ, q )] . (1) For fine-grained perception, the UAV acts in a 5-DoF viewpoint-refinement space, ut =[∆ xt, ∆yt, ∆zt, ∆ψt, ∆θgt ], where the first three dimensions translate the UAV and the last two adjust body yaw and gimbal pitch. This action space is designed for local evidence acquisition after the target has appeared, rather than long-horizon target search. State and model-prediction action encodings are provided in Appendix C. 
+
+3.2 Dataset Construction 
+
+To bridge the gap between macroscopic spatial reasoning and fine-grained visual evidence acqui-sition, we construct the FG-EQA dataset through a systematic two-phase pipeline: (1) Perception Trajectory Generation, which formulates viewpoint-refinement flight paths; and (2) QA Data Anno-tation, which aligns terminal evidence with complex natural language queries. 
+
+Perception Trajectory Generation. We initiate episodes by reusing simulated outdoor scenes from UAV-ON [22]. To construct varied starting poses mimicking challenging initial views, we apply yaw offsets ( ±15 ◦, ±30 ◦) from the target-oriented optical axis, utilizing a Vision Language Model (VLM) to discard poses where the target is entirely obscured. Next, to define ideal observation endpoints, we uniformly sample candidate views on a target-centered continuous hemispherical grid. 3Figure 2: ScoutVLA overview. Left: dual-expert architecture for question-conditioned viewpoint control and short-answer generation. Right: two-stage training recipe. These candidates undergo rigorous filtering by a panel of UAV experts to select optimal terminal views ensuring structural completeness, visual clarity, and semantic richness of the target. Finally, base trajectories are collected by navigating from initial positions to these selected endpoints while keeping the target centered. To endow ScoutVLA with dynamic error-correction capabilities, we inject random pose perturbations into 30% of the trajectories to act as negative recovery samples. To evaluate model physical transferability, we also collect 1K real-world trajectories. Unlike the automated simulation pipeline, these physical episodes are captured by professional UAV pilots manually executing analogous micro-viewpoint refinement maneuvers around real-world targets, recording unconstrained onboard camera streams from initial discovery to final evidence acquisition. 
+
+QA Data Annotation. Based on the validated endpoint views, we define seven critical outdoor question types. An initially prompted VLM generates candidate reasoning chains and short-answer pairs based on the terminal view. To guarantee that the benchmark truly assesses active percep-tion, we apply a stringent two-round filtering mechanism: an initial VLM coarse filter eliminates factual errors and questions that are prematurely answerable from the initial view, followed by strict human verification for QA validity. To further mitigate overfitting to simulated textures and enhance visual-language generalizability, we introduce an additional 80K generic VQA samples from LLaVA-Instruct-150K [27]. Together, this composite dataset of over 120K examples robustly grounds the visual-language reasoning capabilities required for fine-grained outdoor EQA. Compre-hensive details regarding the automated evaluation pipeline, data collection prompts, and benchmark statistics are provided in Appendix C. 
+
+## 4 ScoutVLA 
+
+To systematically address the challenges of active perception mentioned in Section 1—viewpoint sensitivity, semantic-to-physical mapping, and high-DoF continuous control—we model ScoutVLA as a dual-expert end-to-end architecture. This model consists of two key modules: a PaliGemma 2-based multimodal expert [28], and an independent action expert network. Furthermore, we introduce a decoupled two-stage training strategy to ensure that the UAV agent establishes robust flight con-trol capabilities while successfully retaining visual question-answering skills. The comprehensive system overview is illustrated in Figure 2. Full implementation details and hyperparameter configu-rations are provided in Appendix D and Appendix E. 
+
+4.1 Architecture 
+
+ScoutVLA abandons explicit modular boundaries to process unified inputs and produce continuous navigational trajectories natively coupled with textual answers. 4The first core component is a PaliGemma 2-based multimodal expert, which is fundamentally re-sponsible for visual encoding and semantic reasoning. Visual tokens extracted by SigLIP [29] are contextually fused with language inputs through bidirectional attention. This process effectively bridges the semantic-to-physical gap, enabling the network to infer what answers can be derived from the current view and what target details remain hidden to guide the next viewpoint adjustment. The second core component is an independent action expert for high-DoF trajectory generation. Sharing the cross-modal context representations provided by the multimodal expert, the action ex-pert utilizes flow matching [30] to smoothly synthesize continuous 5-DoF flight maneuvers. This design bypasses discrete action quantization, directly targeting the fine-grained spatial maneuvers required to overcome viewpoint sensitivity. Finally, to harmonize the severe paradigm discrepancies between generating real-valued action fields and outputting discrete text tokens, we introduce tailored structural adaptations at the language out-put side. Rather than naively mixing the gradients into a shared head, we place an LMAdapter mod-ule independently after the multimodal backbone. This design supports continuous flow-matching regression while preserving the ability to generate autoregressive natural language text, which mo-tivates the two-stage training below. 
+
+4.2 Two-Stage Training Recipe 
+
+Although the structural adaptations introduced above accommodate divergent output formats, jointly training both capabilities from scratch remains fundamentally unstable. When the pretrained multi-modal backbone is updated predominantly by the flow matching regression loss, its hidden represen-tations become biased toward control-oriented action denoising, thereby weakening the visual-text alignment required for subsequent answer generation. Conversely, naively mixing flow matching with autoregressive language modeling introduces gradients with drastically different scales, causing action and language updates to brutally interfere with each other [23, 24]. Consequently, ScoutVLA implements a decoupled two-stage training paradigm. 
+
+Stage 1: action-only control learning. Given a clean action chunk u, Gaussian noise ϵ, interpola-tion scalar λ, interpolated sample xλ = λϵ+(1 −λ)u, and multimodal condition c, Stage 1 optimizes a continuous vector field objective to minimize the action denoising error, as shown in Equation 2. During this stage, all trainable model parameters are updated to establish the visual-action mapping. 
+
+Lstage1 = Eλ, u,ϵ
+
+h
+
+∥vθ (xλ, λ, c) − (ϵ − u)∥22
+
+i
+
+. (2) 
+
+Stage 2: action-language joint training with knowledge insulation. Stage 2 introduces language task data to activate the specific EQA capabilities. Given the terminal first person view (FPV) per-ception IT , the language objective is a short-answer next-token loss which is shown in Equation 4. 
+
+Lstage2 =
+
+Laction , action step ,
+
+Llanguage , language step . (3) 
+
+Llanguage = −
+
+> |y|− 1
+
+X
+
+> j=1
+
+wj log pθ (yj+1 | IT , q, y 1: j ). (4) 
+
+## 5 Experiments 
+
+To evaluate ScoutVLA, we design comprehensive simulated and real-world experiments to answer four research questions: (RQ1) Does ScoutVLA outperform the state-of-the-art baselines on the ac-tive perception task? (RQ2) How do the two-stage training paradigm and specific language-recovery modules contribute? (RQ3) Does the active perception process yield more answerable evidence at final viewpoint? (RQ4) Behaviorally, how does ScoutVLA transfer to real-world scenarios? Also, Appendix G discusses its success cases alongside its failure modes. 55.1 Setup Environments and Metrics. All simulation experiments are conducted in nine high-fidelity envi-ronments, and all test targets are unseen during training. We report navigation quality with Target Detection Rate (TDR), terminal Distance to Target (DT), and Average Trajectory Length (ATL); answer quality is evaluated with LLM-judged QA Score (QAS) and QA Correctness (QAC); and overarching end-to-end performance is heavily weighted by the Strict Success Rate (SSR). To sys-tematically mitigate evaluator variance, three independent LLM judges score each generated answer, and we average their ratings following established protocols in OpenEQA [11] and CityEQA [1]. 
+
+Implementation Details. The exhaustive hyperparameter configurations for both training stages are provided in Appendix F. 
+
+5.2 Baselines 
+
+We compare ScoutVLA with baselines covering seven evaluation families. Random executes ran-domly sampled navigation actions before final-frame QA. Passive QA includes blind text-only LLM baselines, which receive the question without visual input to test language priors, and an initial-view VQA baseline, which answers directly from the start frame. General VLM evaluate whether gen-eral multimodal models can act as zero-shot perception agents. Navigation baselines, including OpenFly [4] and TravelUAV [3], are designed for UAV navigation rather than answer generation. 
+
+Aerial VLA uses UAV-Flow [19], which generates UAV actions but has no native QA head, to test whether continuous UAV action generation alone is sufficient. Policy-only baselines without native answer generation are evaluated by using Qwen3-VL to answer from their terminal FPV image and the original question; details are provided in Appendix F. Indoor EQA and Outdoor EQA are represented by CoV [9] and CityEQA [1], respectively. 
+
+5.3 Comparison with State of the Art 
+
+To answer RQ1 , we evaluate end-to-end active perception performance. Results are summarized in Table 1. As shown, Passive QA baselines obtain low QAS and QAC, indicating that language priors or the initial view alone rarely contain sufficient answer evidence. General VLM and policy-only baselines can sometimes localize the target, as reflected by the 57.41% TDR of Qwen2-VL-2B, but their terminal viewpoints remain insufficient for reliable fine-grained EQA. Existing indoor and outdoor EQA methods improve over generic navigation policies, yet the best non-ScoutVLA base-line reaches only 11.79% SSR and 16.96% QAC. In contrast, ScoutVLA-Pi05 achieves 71.90% SSR, 80.99% TDR, and 72.70% QAC, while ScoutVLA-Pi0 obtains the lowest terminal distance. 
+
+Question-conditioned continuous perception significantly improves both missing evidence acqui-sition and final EQA success over all existing paradigms. 
+
+5.4 Ablation on Training Stages and Components 
+
+To address RQ2 , we analyze the efficacy of the two-stage recipe and the language-recovery compo-nents, as presented in Table 2. Stage 1 learns strong viewpoint-control policies, but it fundamentally lacks calibrated answer generation. Following Stage 2, ScoutVLA-Pi05 reaches 71.90% SSR and 72.70% QAC while retaining an 80.99% TDR. Removing LoRA adaptation keeps navigation almost unchanged but reduces QAC explicitly to 12.32%, showing that parameter-efficient semantic reason-ing is critical for the secondary QA task. Removing knowledge insulation degrades both TDR and QA, directly validating the action-language interference dilemma when the two divergent objectives are mutually allowed to overwrite parameters. Removing LMAdapter preserves navigation robustly, but abolishes calibrated short-answer generation under the evaluation protocol. The two-stage de-coupled recipe alongside its LMAdapter/LoRA components fundamentally mitigates catastrophic forgetting, seamlessly bridging viewpoint control and answer generation. 
+
+5.5 Terminal-View Answerability and VQA Quality 
+
+6Table 1: End-to-end active perception performance on FG-EQA. Values report mean ± standard deviation. Higher is better for SSR, TDR, QAS, and QAC; lower is better for DT. ATL measures path length and should be interpreted together with SSR and TDR. Type Method SSR (%) ↑ TDR (%) ↑ DT (m) ↓ ATL (m) QAS ↑ QAC (%) ↑                                                                                                                                                                                                                                            
+
+> Random Random 9.86 ±0.57 47.57 ±4.19 33.80 ±8.53 23.92 ±12.41 1.70 ±0.07 13.58 ±1.18 Passive QA Blind (V4 Pro) [31] ––––1.26 ±0.11 6.60 ±1.34 Blind (V4 Flash) [31] ––––1.13 ±0.08 3.30 ±0.82 Initial (Qwen3-VL) [8] ––––1.50 ±0.16 9.70 ±2.13 General VLM Qwen2-VL-2B [25] 10.35 ±1.87 57.41 ±3.82 40.60 ±9.21 6.10 ±2.19 1.60 ±0.19 13.00 ±2.48 Qwen3-VL-8B [8] 5.73 ±1.23 37.04 ±4.47 42.90 ±10.42 45.30 ±14.86 1.36 ±0.13 6.83 ±1.46 Qwen3-VL [8] 2.86 ±0.98 22.22 ±3.11 76.35 ±16.54 102.20 ±28.63 1.30 ±0.14 6.39 ±1.28 Navigation OpenFly [4] 4.63 ±1.09 19.91 ±2.87 65.50 ±14.18 72.20 ±18.37 1.48 ±0.17 10.57 ±2.14 TravelUAV [3] 0.00 ±0.00 12.96 ±2.41 26.60 ±7.83 46.00 ±12.52 1.17 ±0.11 3.08 ±0.77 Aerial VLA UAV-Flow [19] 5.73 ±1.38 29.17 ±3.63 79.70 ±15.82 93.40 ±24.54 1.49 ±0.18 9.03 ±1.81 Indoor EQA CoV [9] 10.79 ±2.16 36.11 ±4.23 52.80 ±11.38 44.90 ±13.24 1.80 ±0.21 16.96 ±2.78 Outdoor EQA CityEQA [1] 11.79 ±1.97 39.20 ±3.92 35.70 ±8.57 10.90 ±3.44 1.43 ±0.14 12.11 ±2.26 Ours ScoutVLA-Pi0 60.78 ±3.48 76.10 ±2.89 16.20 ±3.16 58.95 ±7.81 3.45 ±0.24 61.20 ±3.58
+> ScoutVLA-Pi05 71.90 ±2.83 80.99 ±2.18 17.56 ±2.76 62.04 ±6.54 3.91 ±0.19 72.70 ±2.92
+
+“–” indicates that the metric is not applicable because the method does not perform navigation. Bold values denote the best overall results, and underlined values denote the best non-ScoutVLA baselines. 
+
+Table 2: Ablation on training stages and Stage 2 components. 
+
+Model SSR (%) ↑ TDR (%) ↑ DT (m) ↓ ATL (m) QAS ↑ QAC (%) ↑
+
+Effect of two-stage training 
+
+ScoutVLA-Pi0-Stage1 – 71.91 ± 2.95 18.06 ± 3.21 60.72 ± 7.54 – –ScoutVLA-Pi0-Stage2 61.78 ± 3.48 76.10 ± 2.89 16.20 ± 3.16 58.95 ± 7.81 3.45 ± 0.24 61.20 ± 3.58 ScoutVLA-Pi05-Stage1 – 76.04 ± 2.51 18.01 ± 2.94 62.07 ± 6.82 – –
+
+ScoutVLA-Pi05-Stage2 71.90 ± 2.83 80.99 ± 2.18 17.56 ± 2.76 62.04 ± 6.54 3.91 ± 0.19 72.70 ± 2.92 
+
+Ablation on Stage 2 components based on ScoutVLA-Pi05 
+
+w/o LoRA 10.28 ± 3.31 80.85 ± 2.15 17.61 ± 2.79 62.11 ± 6.48 2.48 ± 0.26 12.32 ± 1.47 w/o knowledge insulation 8.04 ± 3.52 52.12 ± 3.42 22.43 ± 4.51 58.12 ± 8.17 1.48 ± 0.26 10.32 ± 1.47 w/o LMAdapter – 80.52 ± 2.21 17.65 ± 2.84 61.98 ± 6.63 – –
+
+“–” indicates that the model does not provide calibrated short-answer generation, so SSR and QA metrics are not applicable. 
+
+Table 3: Terminal-view answerability under a shared VQA panel. View source Metric Qwen3-VL-8B Qwen3-VL-32B Qwen3-VL Mean Qwen2-VL-2B QAS 1.42 1.45 1.50 1.46 QAC (%) 8.80 7.70 9.70 9.30 Qwen3-VL-8B QAS 1.36 1.42 1.36 1.40 QAC (%) 6.83 7.70 6.80 7.61 Qwen3-VL QAS 1.11 1.17 1.30 1.22 QAC (%) 2.20 2.00 6.39 3.96 ScoutVLA-Pi0 QAS 2.02 2.36 2.75 2.38 QAC (%) 25.60 33.90 43.80 34.43 ScoutVLA-Pi05 QAS 2.16 2.56 2.82 2.51     
+
+> QAC (%) 28.90 34.30 45.50 36.27
+
+To answer RQ3 , we decouple the evalua-tion of the generated terminal views from the inherent language-side answering ca-pability. Table 3 first evaluates terminal-view answerability. We use Qwen2-VL and Qwen3-VL variants as external VQA answerers. For each view source, we hold the terminal FPV image fixed, ask the same external VQA model panel to an-swer the original question, and score the generated answers with the standard judge protocol. As shown, ScoutVLA-Pi05 achieves the highest mean QAS and QAC, indicating that its policy pro-duces terminal views with significantly more complete and discriminative visual evidence compared to other baselines. Table 4: Language-side VQA quality. 
+
+Model QAS QAC (%) 
+
+Qwen2-VL-2B 3.21 50.40 Qwen3-VL 4.13 77.50 ScoutVLA-Pi0 4.67 92.10 ScoutVLA-Pi05 4.78 95.40 
+
+Furthermore, Table 4 isolates language-side VQA ability on held-out UAV-scene VQA samples. Qwen2-VL-2B is included as a comparable-scale general VLM baseline, while Qwen3-VL serves as a strong general-purpose reference. ScoutVLA-Pi05 reaches 4.78 QAS and 95.40% QAC, outperforming both baselines. This in-dicates that domain-specific training on FG-EQA improves visual-language grounding beyond what is obtained from general pretrain-ing alone. ScoutVLA’s superiority is twofold—it acquires stronger inherent VQA decoding via domain alignment, and more importantly, its active refinement definitively yields evidence-rich terminal perceptions that dramatically raise answerability for any downstream QA model. 
+
+7Figure 3: Real-world closed-loop deployment. 5.6 Real-World Qualitative Deployment 
+
+Due to UAV safety constraints and outdoor variability, quantitative evaluation in physical environ-ments remains challenging. Nevertheless, to address RQ4 and verify deployability, we fine-tune ScoutVLA-Pi05 on real-world trajectories to bridge the sim-to-real gap. During closed-loop infer-ence, ScoutVLA relies solely on onboard visual streams to execute autonomous continuous flight. As shown in Figure 3, the policy successfully navigates to the precise overhead close-up, expos-ing the necessary visual evidence to correctly answer the language query. ScoutVLA effectively generalizes its fine-grained active perception and QA capabilities to real-world hardware. 
+
+## 6 Limitations 
+
+While ScoutVLA significantly advances late-stage active perception, several structural limitations remain. First, the policy assumes the target is already within the general field of view, making it a complement to, rather than a replacement for, macroscopic long-horizon target search pipelines. Second, the current FG-EQA benchmark predominantly features static targets and single-agent tra-jectories; scaling to highly dynamic outdoor entities, extreme weather conditions, or multi-UAV col-laboration requires further investigation. Third, although our qualitative physical deployment shows strong promise, the real-world dataset remains limited, necessitating large-scale physical bench-marking to fully characterize visual sim-to-real robustness. Finally, our 5-DoF continuous action space inherently constrains drone roll to maintain camera stability, whereas more agile 6-DoF ma-neuvers could be explored in constraint-relaxed flight scenarios. 
+
+## 7 Conclusion 
+
+In aerial EQA, existing paradigms prematurely halt upon macroscopic target localization, leaving the fine-grained active perception required to gather hidden visual evidence largely unresolved. To address this critical gap, we introduce the FG-EQA benchmark alongside ScoutVLA. Drawing in-spiration from the “waggle dance” of scout bees, we closely emulate this behavior by coupling a multimodal expert for semantic intent inference with a continuous flow-matching expert for spatial viewpoint generation. To effectively realize this architecture without suffering from action-induced catastrophic forgetting, we employ a decoupled two-stage training paradigm equipped with knowl-edge insulation. Both rigorous simulation scaling and qualitative real-world deployments explicitly confirm that this design successfully guides UAVs to actively maneuver and expose occluded visual cues. Meaningfully, ScoutVLA shifts the paradigm of aerial EQA from passive geometric obser-vation to proactive, physically-grounded semantic probing. Future work will integrate this active policy with long-horizon search agents and extend the system to support dynamic open-world tar-gets. 8References 
+
+[1] Y. Zhao et al. CityEQA: A hierarchical LLM agent on embodied question answering bench-mark in city space. arXiv preprint arXiv:2502.12532 , 2025. [2] S. Varghese, J. Gao, A. U. Rahman, and V. Hoskere. BridgeEQA: Virtual embodied agents for real bridge inspections. arXiv preprint arXiv:2511.12676 , 2025. [3] X. Wang et al. Towards realistic UAV vision-language navigation: Platform, benchmark, and methodology. arXiv preprint arXiv:2410.07087 , 2024. [4] Y. Gao et al. OpenFly: A versatile toolchain and large-scale benchmark for aerial vision-language navigation. arXiv preprint arXiv:2502.18041 , 2025. [5] H. Cai et al. FlightGPT: Towards generalizable and interpretable UAV vision-and-language navigation with vision-language models. arXiv preprint arXiv:2505.12835 , 2025. [6] T. Li, T. Huai, Z. Li, Y. Gao, H. Li, and X. Zheng. SkyVLN: Vision-and-language navigation and NMPC control for UAVs in urban environments. arXiv preprint arXiv:2507.06564 , 2025. [7] Y. Li et al. IndustryEQA: Pushing the frontiers of embodied question answering in industrial scenarios. arXiv preprint arXiv:2505.20640 , 2025. [8] S. Bai et al. Qwen3-VL technical report. arXiv preprint arXiv:2511.21631 , 2025. [9] H. Zhao et al. CoV: Chain-of-view prompting for spatial reasoning. arXiv preprint arXiv:2601.05172 , 2026. [10] A. Das, S. Datta, G. Gkioxari, S. Lee, D. Parikh, and D. Batra. Embodied question answering. 
+
+arXiv preprint arXiv:1711.11543 , 2017. [11] A. Majumdar et al. OpenEQA: Embodied question answering in the era of foundation models. 2024. [12] K. Cheng, Z. Li, X. Sun, B.-C. Min, A. S. Bedi, and A. Bera. EfficientEQA: An efficient approach to open-vocabulary embodied question answering. In IEEE/RSJ International Con-ference on Intelligent Robots and Systems (IROS) , 2025. [13] M. Zhai, Z. Gao, Y. Wu, and Y. Jia. Memory-centric embodied question answer. arXiv preprint arXiv:2505.13948 , 2025. [14] K. Jiang et al. Beyond the destination: A novel benchmark for exploration-aware embodied question answering. arXiv preprint arXiv:2503.11117 , 2025. [15] Y. Hu et al. LongNav-R1: Horizon-adaptive multi-turn RL for long-horizon VLA navigation. 
+
+arXiv preprint arXiv:2602.12351 , 2026. [16] J. Zha et al. AirCopBench: A benchmark for multi-drone collaborative embodied perception and reasoning. arXiv preprint arXiv:2511.11025 , 2025. [17] J. He et al. Active Zero: Self-evolving vision-language models through active environment exploration. arXiv preprint arXiv:2602.11241 , 2026. [18] P. Zhang et al. Theory of space: Can foundation models construct spatial beliefs through active exploration? arXiv preprint arXiv:2602.07055 , 2026. [19] X. Wang et al. UAV-Flow Colosseo: A real-world benchmark for flying-on-a-word UAV imi-tation learning. arXiv preprint arXiv:2505.15725 , 2025. [20] Y. Wu et al. VLA-AN: An efficient and onboard vision-language-action framework for aerial navigation in complex environments. arXiv preprint arXiv:2512.15258 , 2025. 9[21] S. Shah, D. Dey, C. Lovett, and A. Kapoor. AirSim: High-fidelity visual and physical simula-tion for autonomous vehicles. arXiv preprint arXiv:1705.05065 , 2017. [22] J. Xiao et al. UAV-ON: A benchmark for open-world object goal navigation with aerial agents. 
+
+arXiv preprint arXiv:2508.00288 , 2025. [23] Z. Zhou et al. ChatVLA: Unified multimodal understanding and robot control with vision-language-action model. arXiv preprint arXiv:2502.14420 , 2025. [24] Z. Zhou et al. ChatVLA-2: Vision-language-action model with open-world embodied reason-ing from pretrained knowledge. 2025. [25] P. Wang et al. Qwen2-VL: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 , 2024. [26] Y. Ji et al. Towards autonomous UAV visual object search in city space: Benchmark and agentic methodology. arXiv preprint arXiv:2505.08765 , 2025. [27] H. Liu, C. Li, Q. Wu, and Y. J. Lee. Visual instruction tuning. In Advances in Neural Informa-tion Processing Systems , 2023. [28] A. Steiner et al. PaliGemma 2: A family of versatile VLMs for transfer. arXiv preprint arXiv:2412.03555 , 2024. [29] X. Zhai et al. Sigmoid loss for language image pre-training. arXiv preprint arXiv:2303.15343 ,2023. [30] Y. Lipman, R. T. Q. Chen, H. Ben-Hamu, M. Nickel, and M. Le. Flow matching for generative modeling. arXiv preprint arXiv:2210.02747 , 2022. [31] DeepSeek-AI. DeepSeek-V4 technical report. Technical report, 2026. 10 A Appendix Roadmap 
+
+This supplementary document provides implementation specifications, analytical frameworks, and qualitative observations corresponding to the main manuscript. The appendix is structured as fol-lows: • Appendix B provides an extended discussion of the relevant literature and a detailed archi-tectural taxonomy of recent aerial VLA models. • Appendix C details the comprehensive construction pipeline of the FG-EQA bench-mark, including state-action encodings, rigorous quality-filtering protocols, and descriptive dataset statistics. • Appendix D elaborates on the ScoutVLA dual-expert architecture, explicitly detailing the network configurations. • Appendix E specifies the exact engineering parameters required to reproduce our two-stage decoupled training paradigm, the gradient insulation mechanism, and the inference workflow. • Appendix F defines the formalized evaluation metrics, standardizes the baseline testing procedures, and provides the exact prompt templates utilized by our LLM judge panel. • Appendix G details the real-world hardware deployment architecture, provides supplemen-tary experimental analyses and discusses qualitative success cases alongside recognized failure modes in both simulation and physical deployments. 
+
+Anonymous Resources 
+
+To facilitate the peer-review process and ensure reproducibility, we have released our anonymized project repository and a dedicated project website. The repository includes the core source code for ScoutVLA, the main manuscript, and the supplementary appendix. The project website hosts qualitative demonstration videos. The full FG-EQA benchmark dataset (including all simulated and real-world trajectories) will be open-sourced and made publicly available in the near future. The anonymized resources can be temporarily accessed at: • Anonymous Repository: https://anonymous.4open.science/r/ScoutVLA-9657 
+
+• Anonymous Project Website: 
+
+https://anonymous.4open.science/w/ScoutVLA-B31F/ 
+
+## B Extended Related Work Notes 
+
+This section provides an extended discussion of the related literature and a detailed architectural comparison of recent aerial VLA models, which is abbreviated in the main text due to space con-straints. 
+
+Embodied question answering. Early EQA studies focus mainly on indoor environments, where navigation and question answering are tightly coupled [10, 11, 12, 13, 14]. The transition to out-door EQA introduced vastly larger spatial scales and sparser targets, leading recent systems to adopt modular pipelines. Pioneering works like CityEQA [1], BridgeEQA [2], and IndustryEQA [7] have made significant strides in macroscopic target search and high-level spatial reasoning. However, these works implicitly assume that reaching the target’s general vicinity equates to collecting suffi-cient visual evidence for the query. Due to the lack of the critical fine-grained viewpoint adjustment process, these agents often generate incorrect answers when confronted with questions requiring specific, angle-dependent observations. ScoutVLA specifically targets this overlooked active per-ception phase prior to final QA. 11 Table 5: Architectural comparison of recent VLA models for UAVs. Compared to existing baselines, ScoutVLA is uniquely designed for continuous fine-grained active perception driven by complex semantic questions, while replacing the traditional autoregressive scheme with flow matching.                                                                                 
+
+> Model DoF Trajectory Length (m) Camera Count Fixed Camera Image Type Action Space Question Input Viewpoint Model Size Action Head Type
+> OpenFly [4] 499 1✓RGB Discrete ✗FPV 7B Autoregressive FlightGPT [5] 4200 1✓RGB Discrete ✗Top-Down 7B Autoregressive TravelUAV [3] 6255 5✓RGB-D Continuous ✗Multi-view 7B Autoregressive OpenVLA-UAV [19] 610 1✓RGB Discrete ✗FPV 7B Autoregressive Pi0-UAV [19] 610 1✓RGB Continuous ✗FPV 4B Flow Matching VLA-AN [20] 410 1✓RGB-D Continuous ✗FPV 2B/3B/7B Autoregressive
+> ScoutVLA (Ours) 530 1✗RGB Continuous ✓FPV 2B Flow Matching
+
+Active perception. The core philosophy of active perception is that an agent can maximize infor-mation gain by autonomously altering its sensor state. Recently, this concept has been explored pri-marily from the perspectives of macroscopic geometric exploration and model cognitive evolution. For instance, LongNav-R1 [15] conceptualizes navigation as a multi-turn interaction between pol-icy and environment, utilizing reinforcement learning for adaptive exploration. AirCopBench [16] establishes a comprehensive benchmark for multi-UAV collaborative perception under degraded conditions. Meanwhile, Active-Zero [17] enables active self-evolution of Vision-Language Models through a multi-agent collaborative framework. However, a recent systematic evaluation of spatial reasoning reveals a fundamental bottleneck in current methods: severe spatial knowledge degrada-tion caused by belief inertia and inefficient exploration. This indicates that existing work largely re-mains at the level of macroscopic geometric exploration, lacking the capability for micro-viewpoint mapping driven by complex semantics. In contrast, ScoutVLA advances active perception from macroscopic target search to question-conditioned fine-grained view finding, utilizing continuous 5-DoF control to fulfill precise observations within minimal visual tolerances. 
+
+Aerial vision-language-action models. By integrating the reasoning capabilities of Large Lan-guage Models with low-level motion control, Vision-Language-Action (VLA) models have gained significant traction and are increasingly applied to the UAV domain. Systems such as OpenFly [4], FlightGPT [5], and TravelUAV [3] are primarily engineered as macroscopic navigation models, fo-cusing on language-guided long-range waypoint planning rather than target-focused observation. Conversely, short-range control models like SkyVLN [6], UAV-Flow [19], and VLA-AN [20] have validated the feasibility of diffusion-style or continuous action heads for flight, yet they remain ded-icated to path following rather than semantics-driven viewpoint mapping. Despite utilizing active mobility, these aerial VLA agents fundamentally lack the capacity for micro-viewpoint refinement driven by complex queries. To illustrate this architectural distinction, Table 5 summarizes the landscape of recent aerial VLA models. Existing baselines are primarily designed for destination arrival. Consequently, they heavily rely on fixed camera configurations, process only simple navigational commands, and yield discrete or lower-DoF actions without deep integration of question answering and flight control. Unlike ex-isting methods, ScoutVLA exclusively uses a monocular RGB camera and integrates the linguistic query directly into the action-generation context through a dual-expert architecture and flow match-ing paradigm, enabling continuous 5-DoF fine-grained control to actively reveal occluded visual evidence. 
+
+## C FG-EQA Construction Details 
+
+C.1 State and Action Encoding 
+
+The main paper defines the 5-DoF physical command inline. For implementation, the absolute UAV state is represented as Equation 5, where (xt, y t, z t) denotes the world-frame position, ψt is the body yaw, and θgt is the gimbal pitch. We encode the yaw angle utilizing its sine and cosine components to eliminate angular wrap-around discontinuities. 
+
+st = [ xt, y t, z t, sin( ψt), cos( ψt), θ gt ] (5) 12 Figure 4: The simulated perception trajectory generation pipeline. 
+
+For model prediction, the action chunk is formulated as relative increments, as shown in Equation 6, where the positional increments (∆ xt, ∆yt, ∆zt) are executed relative to the current UAV body frame. σstop  
+
+> t
+
+∈ [0 , 1] is a specialized stop score introduced to signal sequence termination. During inference, the UAV halts its active exploration when this score exceeds a threshold of 0.85. This value was established through an extensive empirical search during a validation phase. In our exper-iments, lower thresholds (e.g., < 0.8) often led to premature halting before sufficient visual evidence was acquired. Conversely, higher thresholds (e.g., > 0.9) typically triggered over-exploration, caus-ing the UAV to fly excessively close to the target, which increased the risk of losing the target from the field of view or potential collisions. Consequently, the threshold of 0.85 was selected as it achieves the optimal trade-off between spatial navigation efficiency and visual evidence sufficiency. 
+
+˜at = [∆ xt, ∆yt, ∆zt, sin(∆ ψt), cos(∆ ψt), ∆θgt , σ stop  
+
+> t
+
+] (6) During inference, both architectural variants output the encoded vector ˜at through flow-matching generation. This internal prediction is subsequently decoded—by recovering the scalar yaw an-gle via atan2(sin ∆ ψt, cos ∆ ψt) and separating the stop mechanism—back into the explicit 5-DoF physical command ut (defined in Section 3.1) to be executed by the flight controller. 
+
+C.2 Perception Trajectory Generation 
+
+As introduced in Section 3.2, the perception trajectory generation phase is designed to formulate the precise viewpoint-refinement flight paths. To systematically scale this process in simulation, we con-struct these observation trajectories through multi interconnected computational phases (illustrated in Figure 4). 
+
+Phase 1: Sub-optimal Initial View Generation. To simulate the termination of a macroscopic navigation phase where the target has just entered the Field of View (FOV), we establish the base 13 Figure 5: Simulated initial pose variations. The UAV systematically applies yaw offsets of 
+
+0◦, ±15 ◦, and ±30 ◦ relative to the line-of-sight, generating 5 distinct directional poses for robust-ness. 
+
+Figure 6: Initial view visibility filtering. Qwen3-VL acts as an automated visual filter, categorizing candidate poses into fully visible, partially visible, and completely invisible. Only the first two categories are retained to simulate realistic macroscopic search termination. orientation of the UAV as the direct line-of-sight connecting the starting position to the target. To enrich the dataset and emulate realistic pose variations, we systematically apply yaw offsets of 
+
+0◦, ±15 ◦, and ±30 ◦ relative to this base direction, thereby generating 5 distinct directional poses for each starting location (as visually demonstrated in Figure 5). Furthermore, due to complex outdoor environments, structural objects between the initial point and the target often cause partial or total occlusions, rendering the target indiscernible. To systematically address this, we employ Qwen3-VL as an automated visual filter to evaluate all candidate start poses. The VLM categorizes each initial view into one of three visibility states: fully visible , partially visible , and fully invisible . We retain only the fully and partially visible instances, discarding the completely invisible ones (examples of this filtering categorization are provided in Figure 6). This meticulous setup functionally mimics the realistic scenario where a macroscopic search agent hands over control to our fine-grained active perception module under suboptimal viewing angles. 
+
+Phase 2: Optimal Endpoint Generation. To accurately determine the endpoints and attitudes for the fine-grained UAV trajectories, we generate observation spheres centered on each specific target. The observation radius for each sphere is dynamically adjusted according to the varying physical dimensions of the corresponding target. Candidate observation points are then discretely sampled exclusively across the upper hemisphere. During sampling, we strictly constrain the camera orien-tation at each point to align precisely with the direct vector connecting the observation coordinate to the target center. While this geometric formulation yielded a diverse set of candidate terminal views, the generated images exhibit varying framing qualities, with some suffering from partial oc-clusions or incomplete visibility due to complex environmental layouts. To ensure data reliability, we conduct a manual screening process involving a panel of ten researchers with expertise in UAV operations. This expert group evaluate every rendered candidate image. For each target, they care-fully filter the pool, retaining only those terminal observation points that provided an entirely clear, unoccluded, and complete view of the target (examples of the candidate endpoint sampling and the expert retention criteria are illustrated in Figure 7). 
+
+Phase 3: Trajectory Rendering. Base trajectories are constructed by navigating from the valid sub-optimal initial positions to the sampled endpoints. The flight involves kinematic interpolation, keeping the camera smoothly tracking the target at a 10 Hz recording rate to ensure fluid spatial transition. Crucially, a strict collision detection mechanism is implicitly integrated during this con-14 Figure 7: Optimal endpoint sampling and expert screening. Candidate terminal viewpoints are sampled from the upper hemisphere and systematically evaluated by domain experts. Only com-pletely unoccluded and visually clear endpoints are retained. 
+
+Figure 8: System Prompt for QA Generation. The prompt template designed to instruct the VLM to generate highly specific, fine-grained visual queries and their corresponding reasoning chains based on localized visual evidence. tinuous movement. If the UAV collides with any environmental geometry along the interpolated path, that specific trajectory is immediately discarded to ensure absolute physical feasibility. 
+
+Phase 4: Recovery Perturbation. To endow the VLA model with robust error-correction capa-bilities, we inject random body-attitude and spatial perturbations into approximately 30% of the simulated trajectories. These serve as critical recovery samples during Stage 1 flow-matching train-ing, teaching the policy how to re-center the target if it drifts. 
+
+Phase 5: Final Manual Verification. After all automated computational phases, we conduct a con-cluding manual review across the generated dataset. Human annotators carefully replay and inspect the trajectory recordings to identify and eliminate any remaining defective episodes. Specifically, they screen for subtle unrecorded collisions, degraded visual clarity at either the starting or terminal viewpoints, and any other unpredictable simulation anomalies. This exhaustive human-in-the-loop verification ensures the quality, safety, and visual reliability of the finalized trajectories. 
+
+C.3 QA Data Annotation and Generic VQA Integration 
+
+As outlined in Section 3.2, the terminal viewpoints selected by UAV experts in Phase 2 provide definitive visual evidence. These high-quality images act as the explicit visual basis for QA anno-tation. To systematically generate and refine the QA pairs, we implement a comprehensive pipeline comprising automated generation and a rigorous three-stage filtering mechanism. 
+
+Question-Answer Generation. We utilize Qwen3-VL to automatically generate candidate question-answer pairs and their underlying reasoning chains. Taking the optimal terminal FPV image as input, the VLM is instructed to produce queries spanning seven fine-grained evidence cate-gories: Object Counting , State Recognition , Defect Detection , Spatial Reasoning , Attribute Recogni-tion , Activity Recognition , and Text Recognition . The prompt is designed to enforce highly localized visual grounding and concise answers, as shown in Figure 8. 15 Figure 9: Visual examples of the seven fine-grained evidence categories in FG-EQA. Three-Stage Quality Filtering. To ensure the generated data strictly assesses active perception rather than mere spatial navigation or language priors, we apply a stringent three-stage filtering protocol to the generated candidates: • Stage 1: Multimodal Self-Consistency Verification. First, to ensure factual correctness, the generated triplet (Question, Reasoning, Answer) is evaluated by Qwen3-VL against the optimal terminal image in an independent session. The model is tasked to rigorously verify whether the question is unambiguously resolvable from the image and whether the answer logically derives from the reasoning chain. Any candidate exhibiting visual hallucination, logical disconnects, or factual ambiguity is immediately discarded. • Stage 2: Counterfactual Initial-View Answerability Check. This is the most critical step to enforce the necessity of fine-grained maneuvering. We present the verified questions to the VLM, but this time paired exclusively with the sub-optimal initial view from Phase 1. If the VLM can successfully deduce the correct answer using only this macroscopic, unrefined starting viewpoint, the sample is classified as trivial and discarded. This counterfactual check guarantees that executing continuous viewpoint refinement is necessary to expose the occluded visual evidence. • Stage 3: Human-in-the-Loop Validation Fallback. While LLM-based filtering is highly scalable, it occasionally misses subtle visual-semantic mismatches. As a final safeguard, professional human annotators conduct a manual review of the surviving samples. They specifically eliminate edge cases such as awkward natural language phrasings, overly sub-jective questions, or scenarios where severe environment occlusions were mistakenly vali-dated by the VLM. This comprehensive human verification ensures QA reliability. Figure 9 visually illustrates representative examples from the finalized FG-EQA benchmark across all seven categories, demonstrating the necessity of viewpoint adjustment to acquire the hidden evidence. 
+
+Generic VQA Integration. Relying exclusively on simulated EQA samples risks severe semantic overfitting to synthetic textures and monotonic 3D assets, which would ultimately cripple the sim-to-real transferability during physical deployment. To mitigate this domain gap and enrich the model’s open-world visual vocabulary, we systematically integrate generic real-world VQA samples filtered from the LLaVA-Instruct-150K dataset [27]. However, naively mixing standard conversational data can catastrophically degrade the continuous control capabilities. Therefore, we subject the exter-nal dataset to a rigorous three-step semantic-alignment pipeline: (1) Task Filtering : exclusively isolating data explicitly categorized as objective visual question answering; (2) Format Alignment :excising all multi-turn dialogue structures to strictly enforce a single-turn ‘Query-to-Evidence’ map-ping paradigm; and (3) Length Constraint : discarding any samples with target responses exceeding 16 Figure 10: The 9 high-fidelity digital-twin simulation environments in FG-EQA. These envi-ronments simulate diverse weather conditions, complex lighting, and dense structural layouts to robustly challenge the agent’s fine-grained perception capability. a stringent 32-character limit. This final constraint is paramount, as it prevents the model from degenerating into a conversational chatbot, aligning the textual generation head with the concise, factual short-answer logic required for an aerial inspector. This process yields approximately 80K highly refined, domain-generalized instances, which serve as a robust semantic anchor during Stage 2 knowledge-insulated training. 
+
+C.4 Simulation Environments and Real-World Data Collection 
+
+Before detailing the statistical properties of FG-EQA, we explicitly define the environmental con-figurations and the physical data collection protocols that undergird our benchmark. 
+
+High-Fidelity Simulation Environments. To ensure robust multi-scenario generalization, all au-tomated simulated data collection (comprising ∼40K episodes) is conducted across 9 high-fidelity digital-twin environments built upon the UAV-ON [22] framework, as illustrated in Figure 10. These environments encompass a wide spectrum of semantic layouts, including dense urban blocks, intri-cate industrial zones, active construction sites, and cluttered residential communities (e.g., Brushi-fyUrban , CabinLake , Slum ). More importantly, these environments are engineered to introduce severe physical and visual constraints. They feature complex structural occlusions (e.g., targets ob-scured by chain-link fences or tree canopies), dynamic shadow variations driven by shifting sun elevations, and densely packed adversarial distractors. These environmental complexities are delib-erately leveraged to obscure initial target observations, thereby strictly necessitating the continuous, fine-grained active perception maneuvers that ScoutVLA must learn to execute. 
+
+Real-World Data for Dedicated Physical Validation. Distinct from the massive simulation dataset utilized to train the simulated agent, we explicitly curated a separate real-world split to train and evaluate a dedicated physical-scene policy. This subset comprises 1,000 real-world trajectories, uni-formly distributed across five representative physical inspection targets (Bicycle, Basketball, Car, Truck, and Road Sign), with 200 trajectories per task, as illustrated in Figure 11. During the data col-lection phase, professional UAV pilots manually teleoperated the drone, executing micro-viewpoint modifications to continuously gather the hidden visual evidence. These expert demonstrations cap-17 Figure 11: Representative real-world inspection targets. The 1,000 real-world trajectories cover five distinct categories, capturing authentic sensor noise and unconstrained lighting to validate the real-world applicability of the proposed ScoutVLA architecture.       
+
+> (a) Simulated VQA Len. (b) Simulated Word Cloud (c) Generic Word Cloud (d) Generic VQA Len.
+> (e) Environment Dist. (f) Simulated Traj. Len. (g) Real-World Traj. Len. (h) Target Category Dist.
+
+Figure 12: Descriptive statistics of the FG-EQA benchmark. (a) and (d) Output answer length distributions for the simulated domain-specific VQA and the filtered generic VQA data, respectively (enforcing concise short answers). (b) and (c) Word clouds illustrating semantic focuses. (e) The distribution of the 40K simulated trajectories across 9 high-fidelity digital-twin environments. (f) 
+
+and (g) Trajectory length (meters) distributions for simulated and real-world perception flights. (h) 
+
+Distribution of the 1K real-world episodes across 5 distinct physical target categories. ture a multitude of authentic physical artifacts absent in simulation, including hardware aerodynamic instability (e.g., wind-induced jitter), unconstrained outdoor lighting shifts, motion blur, and realis-tic RGB sensor noise (e.g., dynamic range clipping and lens flare). By training a dedicated model strictly on this physical dataset, we empirically demonstrate that the ScoutVLA architectural design natively accommodates real-world complexities, definitively validating its practical applicability be-yond synthetic environments. 
+
+C.5 Descriptive Data Analysis 
+
+Figure 12 presents a comprehensive descriptive statistical overview of the generated FG-EQA bench-mark, validating the diversity and rigor of our dataset construction pipeline from both linguistic and physical dimensions. 
+
+Linguistic Properties. Figures 12a and 12d depict the answer length distributions for the simulated domain-specific VQA and the filtered generic VQA data, respectively. Both distributions exhibit a sharp peak concentrated within 1-10 words, robustly demonstrating the efficacy of our stringent fil-tering protocols (e.g., the ≤ 32 characters constraint discussed in Appendix C.3). By tightly bound-ing the response length, we compel the VLM to fundamentally learn localized, evidence-grounded visual reasoning rather than hallucinating lengthy, unconstrained conversational text. Furthermore, the word clouds highlight a deliberate semantic complementarity: the simulated VQA (Figure 12b) is heavily dominated by fine-grained industrial and vehicular attributes (e.g., “color”, “wooden”, 
+
+18 “plate”, “material” ), whereas the integrated generic VQA (Figure 12c) provides broad, open-world semantic coverage (e.g., “man”, “woman”, “person”, “dog” ). This designed semantic divergence decisively prevents the multimodal backbone from overfitting to monotonic simulation geometries. 
+
+Spatial and Trajectory Properties. As delineated in Figure 12e, the 40K simulated episodes are well-balanced across 9 complex outdoor environments, with the largest proportion ( BrushifyUr-ban ) occupying roughly 20%, thereby guaranteeing rigorous spatial diversity. Correspondingly, Figure 12h verifies that our 1K real-world validation episodes are strictly uniformly distributed (20% each) across five distinct physical inspection targets. Crucially, the trajectory length distributions in Figures 12f and 12g reveal that both simulated and real-world perception flights average between 35 and 45 meters. This spatial displacement indicates that fine-grained active perception is not merely a localized adjustment; rather, it requires continuous spatial maneuvering to bridge the gap between macroscopic target discovery and microscopic evidence acquisition. 
+
+## D Model Details 
+
+ScoutVLA is built upon a robust dual-expert architecture designed to intrinsically couple semantic reasoning with continuous spatial control. For visual encoding and language modeling, the sys-tem utilizes a SigLIP ViT-So400m/14 encoder [29] paired with a PaliGemma 2B multimodal back-bone [28]. The language backbone consists of 18 layers (width 2048, MLP dimension 16384, 8 attention heads) with a shared vocabulary of 257,152 tokens. To mitigate the representation shift in-troduced by Stage 1 action training, the multimodal hidden states are sequentially processed through a FinalNorm layer and our lightweight LMAdapter before projecting to the vocabulary logits via the Embedder decoder. In parallel, the independent Action Expert is instantiated as a 300M parameter network (width 1024, depth 18, MLP dimension 4096). During practical deployment, the visual inputs are formulated across three image slots to ensure interface compatibility with the OpenPI framework, utilizing the active FPV and initial start frames while zero-filling the redundant slot. 
+
+## E Training and Inference Details 
+
+This section provides the implementation specifics required to reproduce the decoupled training paradigm and the closed-loop inference pipeline. The essential hyperparameter configurations are summarized in Table 6, omitting standard deep-learning defaults for clarity. 
+
+Computational Cost and Stage 1 Setup. All training pipelines are consistently executed across a compute cluster equipped with 8 × NVIDIA A800 GPUs. For Stage 1, both ScoutVLA variants are optimized over 5 full epochs, consuming approximately 120 hours of wall-clock time. The op-timization is driven by the AdamW optimizer with a cosine learning rate decay and a 1,000-step linear warmup. We define a continuous action chunk horizon of 10 steps and maintain an Expo-nential Moving Average (EMA) decay of 0.99 to ensure stability in the continuous flow-matching vector field regression. 
+
+Stage 2 Knowledge Insulation. During the Stage 2 joint training phase, which similarly lasts for 5 epochs, we formally enact the proposed Knowledge Insulation mechanism. At the engineering level, we freeze the base PaliGemma network and dynamically toggle gradient masks based on the modality of the current batch. The data loader strictly alternates updates, maintaining a rigid ratio of 3 action-control batches for every 1 language-QA batch. Control steps exclusively optimize the flow-matching parameters, whereas language steps selectively update the rank-16 LoRA modules and the LMAdapter. To accelerate text head convergence without inducing instability, the LMAdapter is assigned a 2.5× learning rate multiplier compared to other semantic parameters. 
+
+Inference and Deployment. For physical deployment and simulated evaluation, the control ex-ecution phase utilizes Euler solvers for rapid flow-matching denoising. Once the initial target is approached and the visual evidence acquisition is deemed complete by the stop token (threshold 
+
+> 0.85 ), the agent explicitly transitions to the VQA inference phase. For this terminal phase, 19 Table 6: ScoutVLA Training Configurations. Essential hyperparameters for the two-stage decou-pled training paradigm. 
+
+Parameter Value 
+
+Batch Size 128 Epochs per Stage 5Peak Learning Rate 2 × 10 −5
+
+LoRA Enabled True (Stage 2) LoRA Rank 16 Action Horizon Steps 10 Training Time ∼120 hours per stage Hardware 8 × NVIDIA A800 GPU ScoutVLA zero-fills the redundant OpenPI image slots and executes autoregressive greedy decoding at a temperature of 0 to rigorously enforce deterministic and factual short-answer generation. 
+
+## F Evaluation Protocol 
+
+F.1 Metrics Definition 
+
+To rigorously decouple and evaluate both the spatial maneuvering efficiency and the complex mul-timodal reasoning capabilities of the EQA agents, we establish a comprehensive evaluation suite comprising six specialized metrics. For a total of N evaluation episodes, we formally define the following components: Let di ∈ { 0, 1} denote a binary indicator of whether the underlying target object is successfully localized within the bounding frustum of the final frame. Let si ∈ [1 , 5] rep-resent the continuous QA quality score, derived as the arithmetic mean from our independent LLM proxy panel. We define ci = I[si > 4] as the categorical indicator for discrete QA correctness (where answers scoring strictly above 4 are considered factually correct). Furthermore, let δi rep-resent the Euclidean distance (in meters) from the UAV’s terminal coordinate to the target centroid, and ℓi denote the accumulative trajectory distance navigated during the episode. Based on these primitives, we compute the following three categories of metrics: 
+
+1. Spatial Navigation Metrics. These metrics evaluate the pure flight control and target-seeking bounds independent of language generation: 
+
+TDR = 100 
+
+N
+
+> N
+
+X
+
+> i=1
+
+di (Target Detection Rate ) (7) 
+
+DT = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+δi (Distance to Target ) (8) 
+
+ATL = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+ℓi (Average Trajectory Length ) (9) TDR measures the macroscopic success of bringing the target into the terminal Field of View. For passive QA baselines that inherently lack mobility, these navigation-dependent metrics are funda-mentally not applicable. 
+
+2. Multimodal Reasoning Metrics. These metrics evaluate the raw textual reasoning accuracy against the visual evidence provided by the terminal view: 
+
+QAS = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+si (QA Score ) (10) 
+
+QAC = 100 
+
+N
+
+> N
+
+X
+
+> i=1
+
+ci (QA Correctness ) (11) 20 QAS provides a granular assessment of answer completeness and formatting, while QAC serves as a harsh binary threshold for factual accuracy. 
+
+3. Joint Success Metric. To capture the overarching goal of active perception, we introduce the most rigorous EQA metric: 
+
+SSR = 100 
+
+N
+
+> N
+
+X
+
+> i=1
+
+dici (Strict Success Rate ) (12) SSR enforces a strict logical “AND” condition. An episode is deemed successful if and only if 
+
+the autonomous flight successfully captures the target within the terminal view ( di = 1 ) and the downstream language head subsequently generates the functionally correct answer ( ci = 1 ). This joint metric definitively reflects whether the entire semantic-to-physical loop is solved. 
+
+F.2 Baseline Evaluation Protocol 
+
+Given the fundamental architectural and functional discrepancies among the evaluated models, map-ping them to a unified evaluation framework requires standardizing the pipelines. We systematically categorize all baselines into three distinct families, explicitly outlining the algorithmic characteris-tics and the specific evaluation procedures for each: • General VLM and Passive QA Baselines: This category represents static language or vision-language models that do not interact with the physical environment. They act en-tirely as passive observers without the capability to generate continuous actions. 
+
+– Blind QA / Language-Only: These models explicitly receive the textual question while the visual input is completely zeroed out. They serve as a robust ablation probe to detect underlying language biases within the FG-EQA benchmark, fundamentally verifying that the questions cannot be guessed via ungrounded common sense. 
+
+– Initial-View VLMs (e.g., Qwen2-VL [25], Qwen3-VL [8]): Representing state-of-the-art generalist multimodal reasoning, these models receive exactly the sub-optimal initial FPV image alongside the complex query. Their zero-shot performance directly defines the theoretical upper bound of static visual reasoning when fine-grained active mobility is absent. • Navigation-Only Baselines: These are contemporary, dedicated aerial embodied policies. While they output functional flight navigation sequences (either continuous or discrete), they fundamentally lack a natural-language generation head capable of executing EQA. 
+
+– OpenFly [4]: An autoregressive 7B policy structured for long-range, point-to-point macroscopic routing via discrete waypoint generation. It fundamentally prioritizes destination arrival over semantic viewpoint alignment. 
+
+– TravelUAV [3]: An aerial framework operating via continuous 6-DoF control. How-ever, it relies heavily on multi-view geometric camera arrays and is engineered toward collision avoidance rather than monocular active visual search. 
+
+– UAV-Flow [19]: Employs an advanced diffusion/flow-based head to regress continu-ous low-level flight actions. Crucially, despite possessing robust spatial maneuverabil-ity for short-horizon path following, it lacks any multimodal decoder to emit textual answers. 
+
+Standardized Evaluation: For all navigation-only baselines, we first uniquely unroll their predicted active trajectories in the simulator until their respective internal sequence- termi-nation conditions are met. We then extract their final captured FPV image and uniformly query an external, frozen Qwen3-VL with the original text question. This paradigm rigor-ously decouples their spatial search capability from textual decoding constraints. • Embodied EQA Baselines: These agents are comprehensively designed for the full EQA task. We evaluate both modular navigate-then-answer frameworks and our end-to-end ap-proach, which output both the sequential spatial maneuvers and the terminal textual an-swers. 21 – CityEQA [1]: A prominent outdoor embodied framework engineered for macroscopic target search. It typically issues a stop action the moment the generic target enters the FOV, inherently lacking the architecture for subsequent fine-grained micro-viewpoint refinement. 
+
+– CoV [9]: A state-of-the-art indoor EQA paradigm. We introduce it to explicitly evalu-ate whether visual-navigation strategies tailored for heavily constrained indoor spatial geometries can successfully adapt to sparse, unconstrained outdoor aerial environ-ments. 
+
+– ScoutVLA (Ours): Employs a dual-expert integration mechanism driving flow matching generation. It optimally addresses active perception by seamlessly tran-sitioning from macroscopic target detection directly into 5-DoF continuous micro-refinement trajectories, culminating in factual short-answer synthesis. 
+
+Terminal-View Answerability Analysis. As discussed in Section 5.5, evaluating the raw informa-tion gain of an active trajectory requires isolating the view generation behavior from the model’s inherent language capacity. Thus, during this specific sub-evaluation, all terminal visual endpoints provided by the active embodied agents are frozen. We subsequently query an external panel of state-of-the-art VQA models acting uniformly as answer generators. Their textual outputs are iden-tically scored using the human-aligned LLM judge protocol detailed below. 
+
+F.3 LLM Judge Prompt Template 
+
+To rigorously minimize intra-model heuristic bias and mitigate unpredictable subjective variance during answer validation, our evaluation protocol employs a diverse proxy panel consisting of three frontier Large Language Models (Qwen3-VL, Kimi-K2.6, and GLM-5.1) acting as independent, blinded answer judges. Following the robust benchmarking practices established in OpenEQA [11] and CityEQA [1], we aggregate these independent assessments and report the exact arithmetic mean as the final score. During evaluation, each LLM judge receives a unified textual prompt containing the contextual se-mantic question, the ground-truth reference answer retrieved from our dataset, and the unverified generated answer produced by the embodied agent. The formalized evaluation template is designed to strictly constrain the model’s output to an integer scale from 1 (completely irrelevant or halluci-natory) to 5 (precise, meaning-aligned match). The complete text configuration of this unified 1–5 scoring prompt is visually presented in Figure 13. 
+
+## G Experimental Results and Deployment 
+
+G.1 Real-World Deployment Architecture 
+
+To deploy ScoutVLA on a real UAV, we designed a highly decoupled, hardware-in-the-loop de-ployment architecture. While deploying a multi-billion parameter VLA model directly onboard is theoretically feasible via heavy advanced edge-compute modules, doing so imposes exceptionally high hardware requirements on standard commercial off-the-shelf UAVs. Specifically, integrating massive local GPU accelerators severely compromises the UAV’s payload budget, drastically drains battery life, and escalates platform scaling costs. Consequently, we shift the heavy computational burden by deploying the frozen ScoutVLA pol-icy exclusively on a high-performance local edge ground station (equipped with an NVIDIA RTX 5090 GPU). The physical commercial platform strictly utilized for all unconstrained outdoor deploy-ments is explicitly illustrated in Figure 14. During live physical inspection tasks, an uncompromised closed-loop perception-action cycle is established: The UAV’s onboard monocular camera captures real-time visual perceptions and transmits them over a low-latency wireless transmission downlink directly to the handheld Remote Controller (RC). The RC, tethered to the local processing machine via a high-bandwidth wired protocol, continuously feeds these sequential FPV frames into the lo-22 Figure 13: Standardized LLM Judge Evaluation Prompt. The deterministic scoring template utilized by the proxy panel. This prompt strictly forces the LLM evaluators to cross-reference the agent’s predicted answer against the ground truth based on a granular, 5-tier semantic alignment mechanism, preventing uncontrolled text-generation variability. 
+
+Figure 14: Physical Hardware Setup. The commercial off-the-shelf DJI UAV utilized during our real-world physical deployment. By establishing a decoupled hardware-in-the-loop bridge between the UAV’s remote controller and the high-performance local ground station, ScoutVLA actively gov-erns the continuous flight maneuvers relying exclusively on the drone’s standard onboard monocular RGB camera. cal neural network. ScoutVLA subsequently executes rapid flow-matching inference to predict the necessary 5-DoF continuous spatial adjustments. These generated action increments are instanta-neously routed back to the RC, which translates them into concrete radio-frequency control signals to actively actuate the UAV’s flight controller. 
+
+G.2 Supplementary Experimental Analysis 
+
+Due to strict page limitations in the main manuscript, several critical mechanistic insights derived from our experiments (Section 5) are comprehensively elaborated here. 23 Analysis of SOTA Baselines (ref. Section 5.3). The performance gap in SSR between ScoutVLA and general VLMs empirically confirms that raw multimodal reasoning cannot substitute for active physical mobility. While Qwen2-VL localized the target in 57.41% of simulated episodes, its ter-minal viewpoints remained statically bound to the initial sub-optimal poses, keeping the critical evi-dence heavily occluded and strictly capping its final QAC. Conversely, while exclusively navigation-driven baselines like OpenFly and TravelUAV possess the required mobility, their autoregressive and explicitly discrete action formulation restrict them to macroscopic obstacle avoidance or coarse point-to-point waypoint routing. This fundamental architectural mismatch actively prevents them from executing the micro-scale, millimeter-level 5-DoF continuous refinements required to reliably expose highly angle-dependent visual cues. By natively unifying continuous flow-matching with linguistic multimodal reasoning, ScoutVLA directly bypasses this systemic bottleneck. 
+
+Analysis of Decoupled Training (ref. Section 5.4). The targeted ablation studies in the main text highlight the risk of catastrophic forgetting during unconstrained multimodal joint learning. When we systematically ablated the Knowledge Insulation mechanism, both navigation competence and reasoning accuracy crashed simultaneously to near-zero levels. This catastrophic degradation oc-curs because predicting real-valued, high-frequency continuous action vectors inherently generates massive gradient magnitudes. If left uninsulated, these action gradients entirely overwhelm and destructively overwrite the delicate, pre-trained parameters of the autoregressive language head, erasing the model’s textual decoding capability. By rigidly freezing the core semantic backbone and strategically bridging the discrete-continuous modalities exclusively via parameter-efficient LoRA adapters and our proposed LMAdapter, the two-stage decoupled recipe forces the continuous con-trol head to rapidly adapt to the stable visual representations, deliberately preventing the structural mutual destruction of the shared multimodal weights. 
+
+Underlying Logic of Terminal-View Answerability (ref. Section 5.5). A notable finding from the main text is that when utilizing frozen terminal images, external agnostic VLMs achieve dras-tically higher QA scores when evaluating ScoutVLA’s generated endpoints compared to endpoints from any baseline policy. This validates a profound assertion: the intrinsic value of active percep-tion is completely independent of the agent’s internal language capacity. ScoutVLA geometrically restructures the environment to optimize the subsequent semantic information gain. Consequently, by successfully translating abstract visual linguistic queries into 5-DoF active spatial alignment, the architecture unequivocally transforms a previously unanswerable scenario into a highly deter-ministic and factually localized visual configuration, thereby improving the performance bound for downstream reasoning models. 
+
+Quantitative Results in Physical Deployment via Sim-to-Real Transfer. To comprehensively val-idate the Sim-to-Real transferability of our architecture, we adopt a sequential fine-tuning paradigm. Rather than training blindly from scratch, we initialize the process by utilizing the ScoutVLA-Pi0 and ScoutVLA-Pi05 checkpoints that have been fully pre-trained on the massive 40K simulation trajectories. These robust foundational models—already possessing rich spatial intelligence—are subsequently subjected to a two-phase real-world fine-tuning process. First, the independent ac-tion expert is fine-tuned exclusively employing the targeted 1K real-world perception trajectories, allowing it to adapt to real aerodynamic dynamics and sensor noise. Following this, the multimodal language components are selectively aligned utilizing only authentic real-world generic VQA data (strictly excluding all AirSim-simulated visual-language pairs). In doing so, we efficiently bridge the visual and physical domain gaps. The resultant models are then seamlessly deployed onto our physical framework. As reported in Ta-ble 7, we execute 50 closed-loop physical inspection flights (10 independent trials strictly conducted across 5 distinct target categories). Remarkably, the fine-tuned ScoutVLA-Pi05 accomplishes a SSR of 68.30% under unconstrained outdoor conditions. This robust empirical performance definitively confirms that our simulated pre-training acts as a potent structural anchor, effortlessly unlocking high-fidelity real-world active perception via minimal, targeted physical fine-tuning. 24 Table 7: Quantitative Sim-to-Real Results in Physical Deployment. Evaluation of the fine-tuned ScoutVLA models across 50 physical inspection flights (10 independent trials per target category). The results systematically prove the efficacy of our Sim-to-Real transfer pipeline.                        
+
+> Method TDR (%) ↑DT (m) ↓ATL (m) QAS ↑QAC (%) ↑SSR (%) ↑
+> ScoutVLA-Pi0 (Real) 75.30 5.1 22.4 4.12 65.40 60.10 ScoutVLA-Pi05 (Real) 81.50 5.8 24.1 4.28 71.20 68.30
+
+G.3 Qualitative Success Cases Simulation Scenarios. In highly cluttered or visually challenging digital-twin environments, macro-scopic routing frequently terminates at sub-optimal distances. As illustrated by the sequential film-strip frames in Figure 15, ScoutVLA explicitly overcomes this premature termination across highly diverse topologies. In these demanding test cases—ranging from a nocturnal urban street and an in-dustrial construction zone to a grassy campsite and a coastal beach with penguins—the initial frames (top rows of each sub-panel) capture only general geometric outlines or heavily shadowed profiles. Utilizing its flow-matching action expert, ScoutVLA systematically generates a continuous spatial refinement trajectory. The drone smoothly descends and continuously modifies its Cartesian coordi-nates and camera pitch, tracking the corresponding entities (e.g., the green vehicle or the penguins) across the terrain. The resulting terminal frames (bottom rows) showcase improved visual clarity, firmly bringing the previously illegible microscopic evidence into the center of the FPV, directly enabling accurate EQA. 
+
+Real-World Scenarios. Operating under actual physical constraints introduces dynamic lighting shifts and aerodynamic variability largely absent in simulation. As depicted in the sequential frames of Figure 16, ScoutVLA maintains exceptional target-locking capabilities under physical deploy-ment. For instance, whether inspecting a black sedan in an unconstrained parking lot or tracking along a vibrant athletic track to locate specific ground-level signage, ScoutVLA initiates a highly stable, continuous spiraling approach. By dynamically adjusting the gimbal pitch in sync with its forward translation, the policy actively counters environmental reflections and physical distance constraints. The terminal FPV frames confirm that ScoutVLA successfully pinpoints the exact in-spection angle, providing a highly localized and illuminated close-up (e.g., exposing the front fascia of the vehicle unambiguously), leading directly to successful VQA resolution. 
+
+G.4 Failure Mode Analysis Simulation Scenarios. Through extensive trajectory logging, we identified two cardinal failure modes in digital-twin environments, exposing fundamental structural vulnerabilities in vision-action alignment (Figure 17): • Target Hijacking via Semantic Feature Drift: In the top snowy environment, the initial target was exclusively a distant excavator. However, the extreme albedo of the expansive snow effectively washes out high-frequency visual textures. Consequently, ScoutVLA’s visual encoder degrades to relying on coarse, low-frequency chromatic signals (e.g., the bright yellow hue). This visual ambiguity causes a nearby construction truck of a similar color to act as an overwhelming visual distractor. The continuous policy undergoes “se-mantic drift,” erroneously locking onto the distractor truck and ultimately misguiding the trajectory away from the true target. • Perceptual Collapse via Specular Reflection: In the bottom lake scenario, the designated target was a wooden pier. As the UAV approaches, severe sun glare and unpredictable spec-ular reflections emerge on the water surface. Since the flow-matching action space inher-ently relies on temporal feature consistency, these volatile radiometric artifacts completely destroy stable optical tracking. The visual-action vector field degrades into conflicting gra-dients, trapping the drone in a severe spatial “local minimum,” manifesting behaviorally as the UAV helplessly spinning in place until sequence termination. 25 Real-World Scenarios. 
+
+Extensive telemetry from physical deployments further exposes the intrinsic limitations of current single-view VLA paradigms. As shown in Figure 18, real-world outdoor failures frequently manifest through two specific behavioral patterns: • Action Paralysis via Homogeneous Distractors: In the upper sequence, the designated target (a black sedan) is positioned among multiple identical vehicles. As the UAV initi-ates its approach, the spatial vectors predicted by the flow-matching head begin to conflict. Mechanistically, when multiple identical visual attractors saturate the latent space, the vec-tor field geometry flattens. Unable to isolate unique, discriminative features of the target car, the regression output collapses into near-zero translational increments. Behaviorally, the drone stalls (”hesitates”) indefinitely at a sub-optimal distance, exposing a critical defi-ciency in current multimodal experts: the inability to maintain robust, fine-grained object tracking lock amidst dense homogeneity. • Kinematic Overshoot and Visual Amnesia: In the lower sequence, the UAV is tasked with identifying a small bicycle. While descending aggressively, the drone slightly over-shoots its kinematic trajectory, causing the tiny target to slip completely out of the limited FOV. Once the bicycle exits the frame, the agent’s spatial awareness abruptly terminates. Despite blindly panning the camera in an attempt to recover, it inevitably fails. This failure mode indicates that ScoutVLA—like most autoregressive or purely reactive contemporary visual-motor policies—lacks “Object Permanence” (the geometric memory of objects out-side the immediate optical frustum). Without a temporal, world-grounded 3D memory bank, the agent struggles to execute spatial backtracking once the visual anchor is momen-tarily lost. 26 Figure 15: Sequential Success Cases in FG-EQA Simulation. The continuous frame-by-frame sequences demonstrate ScoutVLA actively refining its viewpoint across various scenes (e.g., noc-turnal streets, industrial zones, beaches). It successfully transitions from a visually ambiguous initial discovery (top rows) to a microscopic, detailed terminal observation (bottom rows). 27 Figure 16: Sequential Success Cases in Real-World Deployment. Under authentic physical in-terference, ScoutVLA smoothly transitions from high-altitude macroscopic tracking (top rows) to precise, ground-level micro-inspections (bottom rows) around real vehicles and athletic tracks, se-curing highly detailed close-ups against real-world terrain textures. 28 Figure 17: Failure Analysis in Simulation. Top: Severe texture loss in snow causes semantic target hijacking, leading the UAV away from the excavator toward a distractor yellow truck. Bottom: Overwhelming specular reflection on a lake destroys temporal feature consistency, trapping the UAV in a spinning continuous-action local minimum. 29 Figure 18: Failure Analysis in Real-World Deployment. Top: The dense presence of homoge-neous distractor vehicles paralyzes the continuous action field, causing the drone to stall distantly. Bottom: A kinematic overshoot pushes the small target (bicycle) out of the FOV. Lacking struc-tured geometric memory (object permanence), the agent aimlessly searches empty concrete and irreversibly loses the target. 30

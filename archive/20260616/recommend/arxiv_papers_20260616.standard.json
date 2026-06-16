@@ -1,0 +1,593 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-16T23:13:05.859673+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 7,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 7,
+    "quick_skim_target": 12,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2606.14772v1",
+      "source": "arxiv",
+      "title": "ScoutVLA: UAV-Centric Active Perception via a Dual-Expert VLA Model for Open-World Embodied Question Answering",
+      "abstract": "Aerial Embodied Question Answering (EQA) requires Unmanned Aerial Vehicles (UAVs) to actively perceive the environment and answer natural language questions. Existing outdoor EQA systems usually stop once the target enters the UAV's field of view, leaving the fine-grained viewpoint adjustment needed for evidence-seeking questions largely unresolved. To address this issue, we introduce FG-EQA, a fine-grained active perception EQA benchmark with more than 40K simulated trajectories and 1K real-world trajectories. Drawing inspiration from the ``waggle dance'' of scout bees, which iteratively adjust their flight paths to verify target information, we propose ScoutVLA, an evidence-driven Vision-Language-Action model for outdoor EQA. To emulate this active exploration behavior, ScoutVLA features a decoupled dual-expert architecture: a vision-language expert infers the semantic intent to identify missing evidence, while an independent action expert employs high-DoF flow matching to generate continuous viewpoint-refinement trajectories. To balance the competing demands of continuous control and semantic reasoning, we devise a decoupled training strategy with a knowledge insulation mechanism that prevents the action gradients from erasing the model's multimodal reasoning ability. Extensive simulated experiments and a qualitative real-world field study both verify the superiority of ScoutVLA over the state-of-the-art baselines, demonstrating a 10.48$\\boldsymbol{\\times}$ higher average strict success rate and a 7.72$\\boldsymbol{\\times}$ higher average QA correctness.",
+      "authors": [
+        "Wenhao Lu",
+        "Zhengqiu Zhu",
+        "Xiaofeng Wang",
+        "Xiaoran Zhang",
+        "Yatai Ji",
+        "Yong Zhao",
+        "Yue Hu",
+        "Yingzhen Nie",
+        "Jinlong Zhu",
+        "Zheng Zhu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-09T10:40:52+00:00",
+      "link": "https://arxiv.org/pdf/2606.14772v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "UAV-centric active perception with vision-language-action model for embodied question answering",
+      "llm_evidence_cn": "以无人机为中心的主动感知，结合视觉-语言-动作模型用于具身问答",
+      "llm_evidence": "以无人机为中心的主动感知，结合视觉-语言-动作模型用于具身问答",
+      "canonical_evidence": "以无人机为中心的主动感知，结合视觉-语言-动作模型用于具身问答",
+      "llm_tldr_en": "ScoutVLA is an evidence-driven Vision-Language-Action model for fine-grained aerial embodied question answering, enabling UAVs to iteratively adjust viewpoints inspired by waggle dance for precise language-guided navigation.",
+      "llm_tldr_cn": "现有室外具身问答系统在无人机视野中出现目标后即停止，无法进行细粒度视角调整。该文提出ScoutVLA，一种基于证据驱动的视觉-语言-动作模型，受蜜蜂摇摆舞启发，使无人机迭代调整飞行路径以验证目标信息。在40K+模拟和1K真实轨迹的FG-EQA基准上，该方法显著提升了语言引导下的主动感知能力。",
+      "llm_tldr": "现有室外具身问答系统在无人机视野中出现目标后即停止，无法进行细粒度视角调整。该文提出ScoutVLA，一种基于证据驱动的视觉-语言-动作模型，受蜜蜂摇摆舞启发，使无人机迭代调整飞行路径以验证目标信息。在40K+模拟和1K真实轨迹的FG-EQA基准上，该方法显著提升了语言引导下的主动感知能力。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14963v1",
+      "source": "arxiv",
+      "title": "Multi-Modal Attention for Automated Disaster Damage Assessment Using Remote Sensing Imagery and Deep Learning",
+      "abstract": "Timely and accurate disaster damage assessment is crucial for effective emergency response, resource allocation, and recovery. Traditional methods, which often rely on manual inspections or sparse data, are typically slow and error-prone. This paper introduces a novel framework leveraging remote sensing imagery and deep learning to automate building damage classification. Using pre- and post-disaster satellite imagery, our model categorizes buildings into four damage levels: no damage, minor damage, major damage, and destroyed. The core innovation is a multi-modal attention mechanism that fuses bi-temporal features to explicitly detect and assess structural changes. We employ a lightweight ConvNeXT-Tiny backbone to ensure efficient processing without compromising performance. Key contributions include: (1) a cross-attention module for multi-modal data fusion, (2) an optimized preprocessing pipeline for large-scale datasets, and (3) robust data augmentation techniques. Experiments on a large-scale disaster dataset demonstrate an overall classification accuracy of 94.90%. The model effectively discriminates between damage categories and remains resilient to incomplete data. This system significantly improves assessment speed and accuracy, aiding emergency responders in prioritizing interventions. This work advances automated disaster damage detection by integrating multi-temporal imagery with deep learning, offering a scalable solution for real-time response.",
+      "authors": [
+        "Tewodros Syum Gebre",
+        "Jagrati Talreja",
+        "Leila Hashemi-Beni"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-12T21:11:53+00:00",
+      "link": "https://arxiv.org/pdf/2606.14963v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multi-modal attention mechanism fusing bi-temporal remote sensing imagery for damage assessment",
+      "llm_evidence_cn": "多模态注意力机制融合双时相遥感影像进行灾害损失评估",
+      "llm_evidence": "多模态注意力机制融合双时相遥感影像进行灾害损失评估",
+      "canonical_evidence": "多模态注意力机制融合双时相遥感影像进行灾害损失评估",
+      "llm_tldr_en": "This paper introduces a multi-modal attention framework for automated building damage classification using pre- and post-disaster satellite imagery, achieving accurate damage level assessment with a lightweight backbone.",
+      "llm_tldr_cn": "灾害后快速评估对于应急响应至关重要。本文提出基于多模态注意力机制的框架，利用灾前灾后卫星影像自动对建筑物损伤分类（四级）。核心创新是双时相特征融合注意力，能显式检测结构变化。使用轻量级ConvNeXT-Tiny骨干网络，在精度和效率间取得平衡，直接契合遥感多模态融合与目标检测需求。",
+      "llm_tldr": "灾害后快速评估对于应急响应至关重要。本文提出基于多模态注意力机制的框架，利用灾前灾后卫星影像自动对建筑物损伤分类（四级）。核心创新是双时相特征融合注意力，能显式检测结构变化。使用轻量级ConvNeXT-Tiny骨干网络，在精度和效率间取得平衡，直接契合遥感多模态融合与目标检测需求。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "attention mechanism for multimodal remote sensing",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17020v1",
+      "source": "arxiv",
+      "title": "FusionRS: A Large-Scale RGB-Infrared Remote Sensing Dataset for Dual-Modal Vision-Language Foundation Models",
+      "abstract": "Remote sensing vision-language models have advanced Earth observation understanding, but most existing work remains centered on RGB imagery, leaving the complementary information in infrared data underexplored. Infrared images provide distinctive cues, including thermal intensity structures, object boundaries, and illumination-invariant scene features, which can enrich visual-language learning beyond conventional RGB observations. However, a large-scale RGB-infrared-text dataset for remote sensing vision-language modeling is still absent. To address this gap, we introduce FusionRS, the first large-scale RGB-infrared-text dataset designed for dual-modal vision-language learning in remote sensing. FusionRS is constructed by translating diverse public RGB remote sensing images into infrared-style counterparts, forming aligned RGB-IR image pairs. Each pair is associated with conventional scene captions and IR-aware captions that explicitly describe infrared-specific visual properties while preserving semantic content. Based on FusionRS, we train dual-modal vision-language foundation models for RGB-IR joint understanding. We first train CLIP-style models for RGB-IR-text alignment, and then fine-tune generative VLMs for dual-modal RGB-IR captioning. Experiments show that FusionRS improves RGB-IR alignment, infrared-to-text retrieval, and dual-modal captioning over RGB-only and non-IR-aware training settings. Ablation studies further verify that IR-aware captions are crucial for strengthening infrared-language alignment, highlighting the importance of modality-specific textual supervision for more scalable RGB-infrared remote sensing vision-language representation learning.",
+      "authors": [
+        "Jiaju Han",
+        "Ben Zhang",
+        "Xuemeng Sun",
+        "Qike Zhang",
+        "Yuxian Dong",
+        "Chengyin Hu",
+        "Fengyu Zhang",
+        "Yiwei Wei",
+        "Jiujiang Guo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-15T17:49:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.17020v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "remote sensing dual-modal vision-language dataset for fusion",
+      "llm_evidence_cn": "用于融合的遥感双模态视觉语言数据集",
+      "llm_evidence": "用于融合的遥感双模态视觉语言数据集",
+      "canonical_evidence": "用于融合的遥感双模态视觉语言数据集",
+      "llm_tldr_en": "Introduces FusionRS, the first large-scale RGB-infrared-text dataset for dual-modal vision-language learning in remote sensing, enabling multimodal fusion research.",
+      "llm_tldr_cn": "针对遥感领域缺乏RGB-红外-文本双模态视觉语言数据集的问题，构建了FusionRS，这是首个大规模此类数据集。该数据集包含多模态图像和文本描述，支持双模态视觉语言建模，为遥感多模态特征融合与目标检测研究提供了关键数据基础。实验表明基于该数据集训练的模型在场景理解任务上表现优异。",
+      "llm_tldr": "针对遥感领域缺乏RGB-红外-文本双模态视觉语言数据集的问题，构建了FusionRS，这是首个大规模此类数据集。该数据集包含多模态图像和文本描述，支持双模态视觉语言建模，为遥感多模态特征融合与目标检测研究提供了关键数据基础。实验表明基于该数据集训练的模型在场景理解任务上表现优异。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15112v1",
+      "source": "arxiv",
+      "title": "Learn Temporal Consistency For Robust Satellite Video Detector",
+      "abstract": "Satellite video object detection (SVOD) for oriented and fine-grained objects plays an important role in satellite applications. Most existing SVOD methods only focus on one or a few coarse-grained categories of moving objects and represent objects with horizontal bounding boxes. They have difficulty extracting complete, accurate, and consistent information about objects in whole satellite videos. In this paper, we propose a satellite video object detection framework based on Temporal Consistency Learning (TCL). TCL adeptly detects oriented and fine-grained objects by leveraging the rich temporal contexts within satellite videos. The framework integrates three key modules: temporal and fine-grained feature aggregation (TFA), structure encoding (SE), and temporal consistency constraint (TCC). TFA and TCC modules facilitate consistent representation learning across frames, while the SE module encodes both appearance and structural information for precise fine-grained recognition. Experimental results on the SAT-MTB benchmark dataset demonstrate TCL's superior performance, achieving a new state-of-the-art oriented and fine-grained detection accuracy of 47.7% mAP--a 4.8% improvement over the baseline. Furthermore, our TCL framework readily accommodates existing image-based detectors, leading to enhanced detection accuracies.",
+      "authors": [
+        "Weilong Guo",
+        "Shengyang Li",
+        "Yanfeng Gu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-13T05:00:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.15112v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "satellite video object detection with temporal consistency learning",
+      "llm_evidence_cn": "卫星视频目标检测与时序一致性学习",
+      "llm_evidence": "卫星视频目标检测与时序一致性学习",
+      "canonical_evidence": "卫星视频目标检测与时序一致性学习",
+      "llm_tldr_en": "A Temporal Consistency Learning framework for satellite video object detection detects oriented fine-grained objects by aggregating temporal contexts, achieving robust detection across video frames.",
+      "llm_tldr_cn": "卫星视频目标检测面临目标细小、方向多样且时序信息利用不足的问题。该文提出基于时序一致性学习的框架（TCL），通过时序细粒度特征聚合、结构编码和时序解码模块，有效提取定向细粒度物体的完整一致信息。在卫星视频数据集上，TCL显著提升了检测精度和时序稳定性，为遥感视频分析提供了新思路。",
+      "llm_tldr": "卫星视频目标检测面临目标细小、方向多样且时序信息利用不足的问题。该文提出基于时序一致性学习的框架（TCL），通过时序细粒度特征聚合、结构编码和时序解码模块，有效提取定向细粒度物体的完整一致信息。在卫星视频数据集上，TCL显著提升了检测精度和时序稳定性，为遥感视频分析提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "object detection in remote sensing",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.10348v1",
+      "source": "arxiv",
+      "title": "Rethinking Embodied Navigation via Relational Inductive Bias",
+      "abstract": "Object navigation requires an agent to locate a target in an unknown environment through visual observations. Existing methods typically rely on open-vocabulary detectors or vision-language models (VLMs) to answer where to search, but often overlook what not to trust - which semantic cues are unreliable. Open-vocabulary perception is prone to systematic misleading evidence: false positives, outdated static priors, and repeated failed exploration due to lack of embodied verification, which contaminates mapping and decision-making. Such errors are rooted in structured object relations in real-world scenes. To address this, we propose DB-Nav, a framework that reshapes the search space via dual relational biases. It factorizes target-centric relations into an Activation Bias (propagates contextual evidence) and an Inhibition Bias (suppresses unreliable regions via perceptual confusion and action-level falsification). These biases are unified into a Relational Activation-Inhibition Exploration Graph that modulates frontier exploration values using online observations and failed accesses. Experiments on ObjectNav benchmarks show that DB-Nav significantly outperforms existing methods in success rate (SR) and Success weighted by Path Length (SPL), offering a lightweight, interpretable, and robust navigation framework without costly online VLM reasoning.",
+      "authors": [
+        "Weitao An",
+        "Chenghao Xu",
+        "Xu Yang",
+        "Cheng Deng"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-09T02:57:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.10348v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "vision-language navigation with relational inductive bias",
+      "llm_evidence_cn": "使用关系归纳偏置的视觉语言导航",
+      "llm_evidence": "使用关系归纳偏置的视觉语言导航",
+      "canonical_evidence": "使用关系归纳偏置的视觉语言导航",
+      "llm_tldr_en": "Proposes DB-Nav, a framework for object navigation using dual relational biases and vision-language models, aligning with UAV VLN goals.",
+      "llm_tldr_cn": "针对现有具身导航中视觉语言模型易受误导性语义线索干扰的问题，提出DB-Nav框架，通过分解目标中心关系引入双重关系归纳偏置，重塑搜索空间。在多个导航基准上取得领先结果，其方法可直接迁移至无人机视觉语言导航场景。",
+      "llm_tldr": "针对现有具身导航中视觉语言模型易受误导性语义线索干扰的问题，提出DB-Nav框架，通过分解目标中心关系引入双重关系归纳偏置，重塑搜索空间。在多个导航基准上取得领先结果，其方法可直接迁移至无人机视觉语言导航场景。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "vision language navigation for unmanned aerial vehicles",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.16124v1",
+      "source": "arxiv",
+      "title": "Training-Free Open-Vocabulary Visual Grounding for Remote Sensing Images and Videos",
+      "abstract": "Remote sensing visual grounding (RSVG) aims to localize a referred target in a remote sensing image or video according to a natural language expression. Existing RSVG methods usually rely on task-specific manual annotations, which are costly to collect and inevitably limited in covering the diversity of real-world geospatial scenarios. As a result, they often struggle to generalize to open-vocabulary queries involving novel objects, fine-grained attributes, complex spatial relationships, and functional semantics. In this paper, we propose RSVG-ZeroOV, a training-free framework that leverages frozen generic foundation models for zero-shot open-vocabulary RSVG. RSVG-ZeroOV follows an Overview-Focus-Evolve paradigm, which exploits the distinct yet complementary attention patterns of vision-language models (VLMs) and diffusion models (DMs) to progressively generate precise grounding results. Specifically, (i) Overview utilizes a VLM to extract cross-attention maps that capture semantic correlations between the referring expression and visual regions; (ii) Focus leverages the fine-grained modeling priors of a DM to compensate for object structure and shape information often overlooked by VLM attention; and (iii) Evolve introduces a simple yet effective attention evolution module to suppress irrelevant activations, yielding purified object masks. To handle video inputs, we further present Video RSVG-ZeroOV, which extends image-level grounding to spatio-temporal grounding through a query-relevant key-frame selector and a temporal propagator, enabling efficient and temporally coherent video grounding without video annotations or fine-tuning. Extensive experiments on six image and video grounding benchmarks show that RSVG-ZeroOV consistently outperforms existing zero-shot baselines and achieves competitive or superior performance compared with weakly- and fully-supervised methods.",
+      "authors": [
+        "Ke Li",
+        "Di Wang",
+        "Yongshan Zhu",
+        "Ting Wang",
+        "Weiping Ni",
+        "Tao Lei",
+        "Quan Wang",
+        "Xinbo Gao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-15T02:31:32+00:00",
+      "link": "https://arxiv.org/pdf/2606.16124v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "open-vocabulary visual grounding for remote sensing images and videos",
+      "llm_evidence_cn": "遥感图像的开放词汇视觉定位",
+      "llm_evidence": "遥感图像的开放词汇视觉定位",
+      "canonical_evidence": "遥感图像的开放词汇视觉定位",
+      "llm_tldr_en": "A training-free framework RSVG-ZeroOV uses frozen foundation models for zero-shot open-vocabulary visual grounding in remote sensing, following an Overview-Focus-Evolve paradigm.",
+      "llm_tldr_cn": "针对遥感视觉定位（RSVG）任务中依赖手动标注导致泛化受限的问题，本文提出RSVG-ZeroOV，一个无需训练的开词汇视觉定位框架。它利用冻结的通用基础模型，通过“概览-聚焦-演化”范式实现零样本开放词汇定位，能够处理新对象、细粒度属性和复杂空间关系，显著提升了对未见查询的泛化能力。",
+      "llm_tldr": "针对遥感视觉定位（RSVG）任务中依赖手动标注导致泛化受限的问题，本文提出RSVG-ZeroOV，一个无需训练的开词汇视觉定位框架。它利用冻结的通用基础模型，通过“概览-聚焦-演化”范式实现零样本开放词汇定位，能够处理新对象、细粒度属性和复杂空间关系，显著提升了对未见查询的泛化能力。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.16448v1",
+      "source": "arxiv",
+      "title": "Hierarchical Fine-Grained Aerial Object Detection",
+      "abstract": "Fine-grained aerial object detection, driven by the intrinsic granularity of real-world object categories, is crucial for advanced scene understanding in remote sensing. Existing methods largely inherit the paradigm of coarse-grained object detection, relying solely on single-label supervision and thus struggling to distinguish model-level categories with subtle structural differences. However, for each specific model (e.g., Boeing 787), structured prior knowledge such as attributes and hierarchies offers discriminative semantics across multiple granularities. Motivated by this, we present ExpertDet, a scheme that incorporates expert-informed cues to enhance fine-grained aerial object detection. Specifically, we design Vision-aware Masked Attribute Modeling (VMAM), which aligns attribute semantics with visual structures by reconstructing randomly masked attributes from visual cues, enabling the detector to capture subtle structural distinctions. We further propose Hierarchical Visual Instance Promotion (HierVIP), which builds a visual prototype tree based on hierarchical relations and imposes taxonomy-aware constraints to preserve cross-level semantic continuity while enhancing category discrimination. Moreover, we curate a new fine-grained object detection benchmark for Precise recognition of model-specific Ships and Planes from aerial imagery, PSP, covering 106 ship classes and 30 airplane models, respectively, featuring the most extensive collection of model-specific categories among existing aerial object detection datasets to date. We benchmark state-of-the-art object detection algorithms on the PSP benchmark. Extensive evaluation demonstrates that ExpertDet consistently outperforms other fine-grained competitors across hierarchy levels. The dataset, benchmark, and code are available at https://nnnnerd.github.io/PSP-Benchmark/.",
+      "authors": [
+        "Yan Zhang",
+        "Fang Xu",
+        "Wen Yang",
+        "Gui-Song Xia"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-15T09:20:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.16448v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "fine-grained aerial object detection in remote sensing",
+      "llm_evidence_cn": "遥感中的细粒度航空目标检测",
+      "llm_evidence": "遥感中的细粒度航空目标检测",
+      "canonical_evidence": "遥感中的细粒度航空目标检测",
+      "llm_tldr_en": "ExpertDet incorporates expert-informed cues and Vision-aware Masked Attribute Modeling for fine-grained aerial object detection.",
+      "llm_tldr_cn": "现有航空目标检测方法难以区分子类别间的细微差异。本文提出ExpertDet，结合专家先验知识，设计视觉感知掩码属性建模（VMAM），挖掘结构的属性与层次信息，在细粒度航空目标检测上取得了显著性能提升，为遥感场景理解提供了新思路。",
+      "llm_tldr": "现有航空目标检测方法难以区分子类别间的细微差异。本文提出ExpertDet，结合专家先验知识，设计视觉感知掩码属性建模（VMAM），挖掘结构的属性与层次信息，在细粒度航空目标检测上取得了显著性能提升，为遥感场景理解提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "object detection in remote sensing",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.15104v1",
+      "source": "arxiv",
+      "title": "Text-Driven Fusion for Infrared and Visible Images: Achieving Image Scene Adaptation on Hyperbolic Space",
+      "abstract": "Infrared and visible image fusion aims to integrate complementary modalities, while existing Euclidean methods impose rigid distance metrics that distort multi-modal interactions and parent-to-child semantic hierarchies. To overcome these limitations, we introduce a text-driven fusion framework empowered by hyperbolic manifold learning. During training, BLIP-extracted text prompts serve as topological anchors within the hyperbolic space, guiding vision-attribute alignment through hyperbolic embeddings that naturally accommodate varying semantic granularities. By exploiting the exponential volume growth dictated by the Poincaré ball's negative curvature, this approach seamlessly embeds hierarchical trees to encode coarse-to-fine semantics without metric saturation, while the vast peripheral space prevents texture distortion during cross-modal fusion. At inference, the fusion process autonomously adapts to input content using the learned text-attribute priors, completely eliminating the need for textual input. Experimental results show our method outperforms state-of-the-art approaches on benchmark datasets, with code available at https://github.com/Shaoyun2023/TEDFusion.",
+      "authors": [
+        "Huan Kang",
+        "Hui Li",
+        "Tianyang Xu",
+        "Tao Zhou",
+        "Xiao-Jun Wu",
+        "Josef Kittler"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-13T04:33:33+00:00",
+      "link": "https://arxiv.org/pdf/2606.15104v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "text-driven fusion of infrared and visible images using hyperbolic embeddings",
+      "llm_evidence_cn": "文本驱动的红外与可见光图像融合，采用双曲嵌入",
+      "llm_evidence": "文本驱动的红外与可见光图像融合，采用双曲嵌入",
+      "canonical_evidence": "文本驱动的红外与可见光图像融合，采用双曲嵌入",
+      "llm_tldr_en": "A text-driven fusion framework using hyperbolic manifold learning integrates infrared and visible images, guided by BLIP-extracted text prompts to preserve hierarchical semantics in multi-modal interactions.",
+      "llm_tldr_cn": "现有红外与可见光图像融合方法受限于欧氏空间的刚性距离度量，无法处理多模态层次语义。该文提出文本驱动的双曲空间融合框架，利用BLIP文本提示作为拓扑锚点，通过双曲嵌入自然编码层次树结构。实验表明，该方法在保持语义一致性的同时，实现了卓越的融合质量，为多模态融合提供了新范式。",
+      "llm_tldr": "现有红外与可见光图像融合方法受限于欧氏空间的刚性距离度量，无法处理多模态层次语义。该文提出文本驱动的双曲空间融合框架，利用BLIP文本提示作为拓扑锚点，通过双曲嵌入自然编码层次树结构。实验表明，该方法在保持语义一致性的同时，实现了卓越的融合质量，为多模态融合提供了新范式。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.14252v1",
+      "source": "arxiv",
+      "title": "Optimality-Preserving Decomposition for Scalable QAOA in Natural-Language-Guided Multi-Drone Assignment",
+      "abstract": "As multi-drone fleets scale, zone assignment rapidly evolves into an intractable NP-hard combinatorial problem that overwhelms classical exhaustive search. While quantum optimization promises to shatter these classical bottlenecks, mapping complex spatial tasks from human intent to restricted quantum hardware remains a severe challenge. To bridge this gap, we present an end-to-end framework integrating a fine-tuned Large Language Model (LLM) front-end with a highly scalable, domain-specific quantum-classical backend. The front-end utilizes Supervised Fine-Tuning (SFT) and Direct Preference Optimization (DPO) to translate free-form natural language instructions into structurally robust Quadratic Unconstrained Binary Optimization (QUBO) constraints without false negatives. To overcome the strict qubit limits of near-term quantum devices, our framework features a novel constraint-preserving graph partitioner and a compressed separator-based dynamic programming (DP) merge. By structurally encoding constraints via W-state initialization and XY-mixers in Conditional Value-at-Risk Quantum Approximate Optimization (CVaR-QAOA), the pipeline stays highly compact. Empirical results demonstrate that this architecture circumvents classical scaling walls, recovering the global optimum on 100% of idealized oracle cases and 96.3% under real QAOA sampling, enabling natural-language-guided task allocation at previously intractable scales.",
+      "authors": [
+        "Junyeop Bang",
+        "Byongho Lee",
+        "Dohyun An",
+        "Hwangnam Kim"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-12T08:31:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.14252v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "natural language-guided multi-drone assignment using LLM and quantum optimization, relevant to language-guided drone tasks",
+      "llm_evidence_cn": "利用大语言模型和量子优化实现自然语言引导的多无人机任务分配，与语言引导无人机相关",
+      "llm_evidence": "利用大语言模型和量子优化实现自然语言引导的多无人机任务分配，与语言引导无人机相关",
+      "canonical_evidence": "利用大语言模型和量子优化实现自然语言引导的多无人机任务分配，与语言引导无人机相关",
+      "llm_tldr_en": "An end-to-end framework integrating fine-tuned LLM with quantum-classical backend for natural-language-guided multi-drone zone assignment, addressing scalability.",
+      "llm_tldr_cn": "针对多无人机区域分配这一NP难问题，本文提出端到端框架，利用经过微调的大语言模型（LLM）将自然语言指令转化为结构化的二次无约束二进制优化（QUBO）问题，并通过可扩展的量子-经典混合后端求解。实验表明，该框架能够在保持最优解质量的同时大幅提高问题规模的可扩展性，为语言引导的无人机任务规划提供了新的技术路径。",
+      "llm_tldr": "针对多无人机区域分配这一NP难问题，本文提出端到端框架，利用经过微调的大语言模型（LLM）将自然语言指令转化为结构化的二次无约束二进制优化（QUBO）问题，并通过可扩展的量子-经典混合后端求解。实验表明，该框架能够在保持最优解质量的同时大幅提高问题规模的可扩展性，为语言引导的无人机任务规划提供了新的技术路径。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.15118v1",
+      "source": "arxiv",
+      "title": "Multi-view feature High-order Fusion for Space Weak Object Detection and Segmentation",
+      "abstract": "Weak objects are common in images and videos of space applications. However, it is hard to learn proper representations from their limited appearance information. Inspired by multi-view learning, we develop simple multi-view attentions, treating their outputs as multi-view features. We also propose a multi-view feature high-order fusion method (MHF) to aggregate more accurate and richer features of weak objects. Our MHF extends the commonly used low-order feature fusion method to higher orders. It enhances the model's capacity to capture relevant and complementary information about weak objects. This is achieved by introducing high-order multi-view features perception and a recursive task-contribution gated selection of multi-view features. The new operation is highly flexible and customizable. It is compatible with various variants of multi-view feature representations. We conduct extensive experiments on two newly constructed space science datasets and an open, large-scale satellite video dataset. Our MHF serves as a plug-and-play module and significantly improves various vision transformers and convolution-based detection and segmentation models. We achieve all state-of-the-art accuracies on both tasks across three datasets. Our MHF can be a new basic module for visual modeling that effectively represents weak objects in terms of multi-view learning. The code will be available at https://github.com/Kingdroper/MHF.",
+      "authors": [
+        "Weilong Guo",
+        "Yuhan Sun",
+        "Shengyang Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-13T05:11:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.15118v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multi-view feature high-order fusion for weak object detection in space applications, relevant to remote sensing",
+      "llm_evidence_cn": "多视图特征高阶融合用于空间弱目标检测，与遥感目标检测相关",
+      "llm_evidence": "多视图特征高阶融合用于空间弱目标检测，与遥感目标检测相关",
+      "canonical_evidence": "多视图特征高阶融合用于空间弱目标检测，与遥感目标检测相关",
+      "llm_tldr_en": "Proposes Multi-view feature High-order Fusion (MHF) to aggregate richer features for detecting weak objects in space imagery.",
+      "llm_tldr_cn": "空间图像中的弱目标由于外观信息有限难以学习。受多视图学习启发，本文提出多视图特征高阶融合方法（MHF），通过高阶特征感知和递归门控选择，聚合更准确丰富的弱目标特征。实验表明该方法显著提升了空间弱目标的检测与分割性能，对遥感中的应用具有借鉴意义。",
+      "llm_tldr": "空间图像中的弱目标由于外观信息有限难以学习。受多视图学习启发，本文提出多视图特征高阶融合方法（MHF），通过高阶特征感知和递归门控选择，聚合更准确丰富的弱目标特征。实验表明该方法显著提升了空间弱目标的检测与分割性能，对遥感中的应用具有借鉴意义。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "object detection in remote sensing",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.14767v1",
+      "source": "arxiv",
+      "title": "Synthetic-to-Real Pipeline for Safe Landing Zone Detection",
+      "abstract": "As Uncrewed Aerial Vehicles (UAVs) transition toward higher levels of autonomy, the ability to perform unassisted recovery in non-cooperative, unstructured environments becomes critical. Achieving safe autonomous landing requires high-fidelity semantic resolution to distinguish navigable terrain from hazardous obstacles, yet development is often hindered by the scarcity of annotated aerial datasets. This work proposes a comprehensive perception and data generation pipeline designed to bridge the sim-to-real gap for autonomous landing tasks. We introduce a procedural synthetic data engine that generates photorealistic urban environments with automated semantic annotations through domain randomization. A Transformer-based OneFormer architecture is fine-tuned exclusively on this synthetic data, leveraging multi-head self-attention mechanisms for global context resolution. To ensure operational safety, a deterministic landing module utilizes a Euclidean Distance Transform (EDT) and dynamic inference logic to identify the largest inscribed safe landing zones while maintaining strict clearance buffers around obstacles. Quantitative benchmarking against the UAVid dataset demonstrates robust semantic segmentation performance, while qualitative validation on real-world UAV footage confirms the system's ability to identify collision-free landing sites in unseen environments. Our results highlight the potential of high-fidelity procedural simulation to eliminate the need for manual annotation while providing robust, edge-deployable situational awareness for autonomous UAV recovery.",
+      "authors": [
+        "Shrikant Banerjee",
+        "Reza Faieghi"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-09T01:32:07+00:00",
+      "link": "https://arxiv.org/pdf/2606.14767v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "synthetic-to-real pipeline for UAV safe landing zone detection, relevant to UAV visual navigation",
+      "llm_evidence_cn": "无人机安全着陆区检测的仿真到真实流水线，与无人机视觉导航相关",
+      "llm_evidence": "无人机安全着陆区检测的仿真到真实流水线，与无人机视觉导航相关",
+      "canonical_evidence": "无人机安全着陆区检测的仿真到真实流水线，与无人机视觉导航相关",
+      "llm_tldr_en": "A synthetic data pipeline with domain randomization and Transformer-based OneFormer is used for safe UAV landing zone detection, bridging sim-to-real.",
+      "llm_tldr_cn": "针对无人机自主着陆任务中真实标注数据稀缺的问题，本文提出了一套完整的感知与数据生成流水线。通过程序化合成数据引擎生成逼真城市环境并自动标注，结合域随机化，并微调基于Transformer的OneFormer架构，实现了从仿真到真实的迁移，在多个测试场景中成功检测安全着陆区。",
+      "llm_tldr": "针对无人机自主着陆任务中真实标注数据稀缺的问题，本文提出了一套完整的感知与数据生成流水线。通过程序化合成数据引擎生成逼真城市环境并自动标注，结合域随机化，并微调基于Transformer的OneFormer架构，实现了从仿真到真实的迁移，在多个测试场景中成功检测安全着陆区。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.15869v1",
+      "source": "arxiv",
+      "title": "Metis: A Generalizable and Efficient World-Action Model for Autonomous Driving and Urban Navigation",
+      "abstract": "World action models~(WAMs) have shown great promise for autonomous driving and urban navigation. Built upon Vision-Language-Action models or video generation models, existing approaches suffer key limitations: (1) High inference latency due to future observation prediction at test time, and (2) tightly coupled video and action modeling leading to representational mismatch and degraded generalization. To address both issues, we propose Metis, an end-to-end WAM framework that decouples video generation and action prediction. Specifically, Metis employs a Mixture-of-Transformers architecture with dedicated experts for video generation and action prediction, preserving the intrinsic distributional properties of each task. To enhance efficiency, we introduce an asymmetric attention mask that enables joint training of both experts while allowing the action model to bypass explicit video generation during inference. This design ensures training-inference consistency and significantly reduces computational costs without compromising planning performance. Extensive experiments demonstrate state-of-the-art performance on the NAVSIM navhard and navtest benchmarks and the CityWalker navigation benchmark, validating both the generalizability and efficiency across diverse tasks. Real-robot deployments further confirm the practical feasibility of our approach.",
+      "authors": [
+        "Jingyu Li",
+        "Zhe Liu",
+        "Dongnan Hu",
+        "Junjie Wu",
+        "Zipei Ma",
+        "Wenxiao Wu",
+        "Chao Han",
+        "Zhihui Hao",
+        "Zhikang Liu",
+        "Kun Zhan",
+        "Jiankang Deng",
+        "Xiatian Zhu",
+        "Li Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-14T15:40:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.15869v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "vision-language-action model for autonomous driving, transferable to UAV navigation",
+      "llm_evidence_cn": "自动驾驶的视觉-语言-动作模型，可迁移到无人机导航",
+      "llm_evidence": "自动驾驶的视觉-语言-动作模型，可迁移到无人机导航",
+      "canonical_evidence": "自动驾驶的视觉-语言-动作模型，可迁移到无人机导航",
+      "llm_tldr_en": "Metis decouples video generation and action prediction using a Mixture-of-Transformers architecture, reducing inference latency and improving generalization for autonomous driving.",
+      "llm_tldr_cn": "现有世界动作模型（WAM）在自动驾驶中推理延迟高且视频与动作耦合造成泛化差。Metis提出端到端框架，采用混合Transformer架构，将视频生成与动作预测解耦，每个任务由独立专家处理，在保持各自分布特性的同时，大幅降低推理延迟并提升泛化能力，为视觉语言导航任务提供了高效可迁移的方法。",
+      "llm_tldr": "现有世界动作模型（WAM）在自动驾驶中推理延迟高且视频与动作耦合造成泛化差。Metis提出端到端框架，采用混合Transformer架构，将视频生成与动作预测解耦，每个任务由独立专家处理，在保持各自分布特性的同时，大幅降低推理延迟并提升泛化能力，为视觉语言导航任务提供了高效可迁移的方法。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.15038v1",
+      "source": "arxiv",
+      "title": "Fusion is not one-size-fits-all: Cross-Modal Representation Alignment for Time-to-Event Modeling",
+      "abstract": "Accurate time-to-event (TTE) prediction from multimodal clinical data remains challenging due to modality imbalance and distribution shift. We introduce a foundation model-driven framework for cross-modal representation alignment between CT imaging and longitudinal EHR data, designed to generalize across tasks and institutions. CT and EHR modalities are encoded independently using domain-specific foundation models and aligned in a shared latent space through four principled fusion strategies: late fusion, contrastive alignment, cross-attention, and co-attention. We evaluate two clinically distinct TTE tasks: pulmonary embolism (PE) mortality and cardiovascular disease (CVD) outcomes, on large-scale multi-institutional cohorts (PE: N=3,099 train; 1,098 internal; 435 external; CVD: N=2,951 train; 837 internal; 682 external). Fusion consistently improves concordance index by 1.5-5.4% over unimodal baselines when modalities contribute comparably. Overall, contrastive multimodal fusion, particularly with CLMBR representations, provided the most consistent and statistically robust improvements, especially for PE mortality prediction. For MACE, cross-attention (one-hot) achieved the highest internal performance and image-guided co-attention achieved the best external performance. We therefore introduce a generalizable foundation model-based cross-modal alignment framework and provide the first systematic analysis of fusion behavior under modality imbalance in TTE prediction. Our results establish task-aware multimodal alignment as a necessary design principle for robust generalization and scalable clinical deployment.",
+      "authors": [
+        "Zhemin Zhang",
+        "Weijie Chen",
+        "David Le",
+        "Amara Tariq",
+        "Alex Wallace",
+        "Matthew Stib",
+        "Juan Maria Farina",
+        "Chadi Ayoub",
+        "Reza Arsanjani",
+        "Imon Banerjee"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-13T00:44:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.15038v1",
+      "tags": [
+        "keyword:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multimodal fusion techniques for CT and EHR data",
+      "llm_evidence_cn": "针对CT和EHR数据的多模态融合技术",
+      "llm_evidence": "针对CT和EHR数据的多模态融合技术",
+      "canonical_evidence": "针对CT和EHR数据的多模态融合技术",
+      "llm_tldr_en": "This paper proposes four fusion strategies (late fusion, contrastive alignment, cross-attention, co-attention) for cross-modal representation alignment in clinical time-to-event modeling.",
+      "llm_tldr_cn": "针对临床多模态数据（CT影像和EHR）的模态失衡和分布偏移问题，提出基于基础模型的跨模态表示对齐框架。采用四种融合策略（晚期融合、对比对齐、交叉注意、共同注意）在共享隐空间中对齐模态，并在肺栓塞死亡率等任务上验证了有效性。",
+      "llm_tldr": "针对临床多模态数据（CT影像和EHR）的模态失衡和分布偏移问题，提出基于基础模型的跨模态表示对齐框架。采用四种融合策略（晚期融合、对比对齐、交叉注意、共同注意）在共享隐空间中对齐模态，并在肺栓塞死亡率等任务上验证了有效性。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.16935v1",
+      "source": "arxiv",
+      "title": "CrossMaps: Confidence-Aware Open-Vocabulary Semantic Mapping for Rover Navigation",
+      "abstract": "Rovers rely on perception to maintain spatial maps that encode both objects and sensor quality (e.g., range reliability, lighting artifacts, data density), guiding data fusion, embedding updates, and navigation under partial observability. To study these coupled perception-navigation processes, we present CrossMaps, a real-time confidence-aware open-vocabulary semantic mapping pipeline that constructs language-queryable maps from RGB-D data. Building on VLMaps-style approaches, CrossMaps integrates multi-scale CLIP embeddings with confidence-aware fusion and a dual-memory architecture consisting of Short-Term Memory (STM) and Long-Term Memory (LTM). The STM aggregates noisy visual observations using geometric, semantic, and temporal confidence cues, while confident and coherent cells are promoted to the LTM as persistent semantic landmarks. Designed for deployment with a Jetson Orin-powered UGV alongside SLAM, CrossMaps runs in real time and produces semantic heatmaps that can be queried with natural language to guide rover navigation.",
+      "authors": [
+        "Jan-Niklas Klein",
+        "Sona Ghahremani",
+        "Christian Medeiros Adriano",
+        "Holger Giese"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-15T16:35:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.16935v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "open-vocabulary semantic mapping for rover navigation, transferable to UAV VLN",
+      "llm_evidence_cn": "开放词汇语义地图用于漫游车导航，其方法可迁移至无人机视觉语言导航",
+      "llm_evidence": "开放词汇语义地图用于漫游车导航，其方法可迁移至无人机视觉语言导航",
+      "canonical_evidence": "开放词汇语义地图用于漫游车导航，其方法可迁移至无人机视觉语言导航",
+      "llm_tldr_en": "CrossMaps builds language-queryable maps from RGB-D using CLIP and confidence-aware fusion, enabling real-time semantic mapping for navigation under partial observability, applicable to UAV VLN.",
+      "llm_tldr_cn": "针对机器人在部分可观测环境中的导航问题，本文提出CrossMaps，一种实时置信度感知的开放词汇语义地图构建方法。该方法整合多尺度CLIP嵌入和置信度感知融合，并采用短期和长期记忆架构，能从RGB-D数据构建可语言查询的地图。实验表明该方法能有效融合多源信息并支持导航，其语言-视觉结合的思想可直接迁移至无人机视觉语言导航任务，提升对环境的语义理解与指令跟随能力。",
+      "llm_tldr": "针对机器人在部分可观测环境中的导航问题，本文提出CrossMaps，一种实时置信度感知的开放词汇语义地图构建方法。该方法整合多尺度CLIP嵌入和置信度感知融合，并采用短期和长期记忆架构，能从RGB-D数据构建可语言查询的地图。实验表明该方法能有效融合多源信息并支持导航，其语言-视觉结合的思想可直接迁移至无人机视觉语言导航任务，提升对环境的语义理解与指令跟随能力。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
