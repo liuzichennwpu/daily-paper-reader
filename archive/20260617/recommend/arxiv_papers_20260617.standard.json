@@ -1,0 +1,354 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-17T22:06:32.850594+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 4,
+    "deep_cap": 7,
+    "deep_selected": 4,
+    "quick_candidates": 3,
+    "quick_skim_target": 12,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2606.14772v1",
+      "source": "arxiv",
+      "title": "ScoutVLA: UAV-Centric Active Perception via a Dual-Expert VLA Model for Open-World Embodied Question Answering",
+      "abstract": "Aerial Embodied Question Answering (EQA) requires Unmanned Aerial Vehicles (UAVs) to actively perceive the environment and answer natural language questions. Existing outdoor EQA systems usually stop once the target enters the UAV's field of view, leaving the fine-grained viewpoint adjustment needed for evidence-seeking questions largely unresolved. To address this issue, we introduce FG-EQA, a fine-grained active perception EQA benchmark with more than 40K simulated trajectories and 1K real-world trajectories. Drawing inspiration from the ``waggle dance'' of scout bees, which iteratively adjust their flight paths to verify target information, we propose ScoutVLA, an evidence-driven Vision-Language-Action model for outdoor EQA. To emulate this active exploration behavior, ScoutVLA features a decoupled dual-expert architecture: a vision-language expert infers the semantic intent to identify missing evidence, while an independent action expert employs high-DoF flow matching to generate continuous viewpoint-refinement trajectories. To balance the competing demands of continuous control and semantic reasoning, we devise a decoupled training strategy with a knowledge insulation mechanism that prevents the action gradients from erasing the model's multimodal reasoning ability. Extensive simulated experiments and a qualitative real-world field study both verify the superiority of ScoutVLA over the state-of-the-art baselines, demonstrating a 10.48$\\boldsymbol{\\times}$ higher average strict success rate and a 7.72$\\boldsymbol{\\times}$ higher average QA correctness.",
+      "authors": [
+        "Wenhao Lu",
+        "Zhengqiu Zhu",
+        "Xiaofeng Wang",
+        "Xiaoran Zhang",
+        "Yatai Ji",
+        "Yong Zhao",
+        "Yue Hu",
+        "Yingzhen Nie",
+        "Jinlong Zhu",
+        "Zheng Zhu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-09T10:40:52+00:00",
+      "link": "https://arxiv.org/pdf/2606.14772v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "UAV visual language navigation with VLA model",
+      "llm_evidence_cn": "无人机视觉语言导航VLA模型",
+      "llm_evidence": "无人机视觉语言导航VLA模型",
+      "canonical_evidence": "无人机视觉语言导航VLA模型",
+      "llm_tldr_en": "ScoutVLA proposes a dual-expert VLA model for UAV-based embodied QA, enabling active perception and fine-grained viewpoint adjustment using natural language instructions.",
+      "llm_tldr_cn": "现有户外具身问答系统在目标进入视野后便停止，缺乏细粒度视角调整。受蜜蜂摇摆舞启发，本文提出ScoutVLA，一种基于双专家视觉-语言-动作模型的证据驱动方法，用于无人机主动感知。该方法通过迭代调整飞行路径验证目标信息，并在超过4万条模拟轨迹和1千条真实轨迹的FG-EQA基准上验证了有效性。该研究推动了无人机在开放世界中遵循自然语言指令进行导航与感知的能力。",
+      "llm_tldr": "现有户外具身问答系统在目标进入视野后便停止，缺乏细粒度视角调整。受蜜蜂摇摆舞启发，本文提出ScoutVLA，一种基于双专家视觉-语言-动作模型的证据驱动方法，用于无人机主动感知。该方法通过迭代调整飞行路径验证目标信息，并在超过4万条模拟轨迹和1千条真实轨迹的FG-EQA基准上验证了有效性。该研究推动了无人机在开放世界中遵循自然语言指令进行导航与感知的能力。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "UAV visual language navigation",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17020v1",
+      "source": "arxiv",
+      "title": "FusionRS: A Large-Scale RGB-Infrared Remote Sensing Dataset for Dual-Modal Vision-Language Foundation Models",
+      "abstract": "Remote sensing vision-language models have advanced Earth observation understanding, but most existing work remains centered on RGB imagery, leaving the complementary information in infrared data underexplored. Infrared images provide distinctive cues, including thermal intensity structures, object boundaries, and illumination-invariant scene features, which can enrich visual-language learning beyond conventional RGB observations. However, a large-scale RGB-infrared-text dataset for remote sensing vision-language modeling is still absent. To address this gap, we introduce FusionRS, the first large-scale RGB-infrared-text dataset designed for dual-modal vision-language learning in remote sensing. FusionRS is constructed by translating diverse public RGB remote sensing images into infrared-style counterparts, forming aligned RGB-IR image pairs. Each pair is associated with conventional scene captions and IR-aware captions that explicitly describe infrared-specific visual properties while preserving semantic content. Based on FusionRS, we train dual-modal vision-language foundation models for RGB-IR joint understanding. We first train CLIP-style models for RGB-IR-text alignment, and then fine-tune generative VLMs for dual-modal RGB-IR captioning. Experiments show that FusionRS improves RGB-IR alignment, infrared-to-text retrieval, and dual-modal captioning over RGB-only and non-IR-aware training settings. Ablation studies further verify that IR-aware captions are crucial for strengthening infrared-language alignment, highlighting the importance of modality-specific textual supervision for more scalable RGB-infrared remote sensing vision-language representation learning.",
+      "authors": [
+        "Jiaju Han",
+        "Ben Zhang",
+        "Xuemeng Sun",
+        "Qike Zhang",
+        "Yuxian Dong",
+        "Chengyin Hu",
+        "Fengyu Zhang",
+        "Yiwei Wei",
+        "Jiujiang Guo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-15T17:49:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.17020v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "RGB-infrared remote sensing dataset for dual-modal vision-language models",
+      "llm_evidence_cn": "用于双模态视觉语言模型的RGB-红外遥感数据集",
+      "llm_evidence": "用于双模态视觉语言模型的RGB-红外遥感数据集",
+      "canonical_evidence": "用于双模态视觉语言模型的RGB-红外遥感数据集",
+      "llm_tldr_en": "Introduces FusionRS, the first large-scale RGB-infrared-text dataset for dual-modal vision-language learning in remote sensing, enabling multimodal fusion research.",
+      "llm_tldr_cn": "针对遥感视觉语言模型大多基于RGB、红外信息未被充分利用的问题，构建了FusionRS数据集，包含RGB、红外和文本标注，为双模态视觉语言学习提供大规模基准，推动遥感多模态融合研究。",
+      "llm_tldr": "针对遥感视觉语言模型大多基于RGB、红外信息未被充分利用的问题，构建了FusionRS数据集，包含RGB、红外和文本标注，为双模态视觉语言学习提供大规模基准，推动遥感多模态融合研究。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17564v1",
+      "source": "arxiv",
+      "title": "Geometric Consistency Protocol for Foundation Model Features in Multi-View Satellite Imagery",
+      "abstract": "Standardized evaluation protocols are indispensable for robust benchmarking in remote sensing, particularly as foundation features are increasingly transferred across diverse sensors and complex imaging geometries. In satellite multi-view reconstruction, conventional evaluations relying on unconstrained 2D global matching are often misleading. The Rational Function Model (RFM) and its Rational Polynomial Coefficients (RPC) dictate a curved, height-dependent epipolar geometry that render flat 2D search spaces physically inconsistent. We propose a geometry-faithful and reproducible protocol tailored for the RPC framework. Our approach integrates an RPC-projected 3D consistency metric with a geometry-constrained dense matching proxy, specifically evaluating whether similarity responses remain localized and unique under physically plausible search manifolds. A pivotal finding of our joint reporting strategy is the decoupling of semantic agreement and geometric localization: high cross-view similarity at a projected 3D point does not guarantee reliable matchability in practical inference. Our benchmark demonstrates that incorporating geometric constraints is fundamental to the problem definition in satellite imagery. Furthermore, we show that state-of-the-art 2D backbones remain remarkably competitive against specialized 3D-aware models when subjected to this RPC-consistent evaluation.",
+      "authors": [
+        "Qiyan Luo",
+        "Jie Yang",
+        "Yingdong Pi",
+        "Lekang Wen",
+        "Mi Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-16T06:09:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.17564v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "geometric consistency protocol for multi-view satellite imagery",
+      "llm_evidence_cn": "多视图卫星图像的几何一致性协议",
+      "llm_evidence": "多视图卫星图像的几何一致性协议",
+      "canonical_evidence": "多视图卫星图像的几何一致性协议",
+      "llm_tldr_en": "Proposes a geometry-faithful evaluation protocol for foundation model features in satellite multi-view imagery, integrating RPC-projected 3D consistency metric.",
+      "llm_tldr_cn": "针对卫星多视图重建中二维全局匹配的误区，该文提出一种基于有理函数模型（RFM）的几何忠实评估协议。通过集成RPC投影的三维一致性度量和几何约束密集匹配代理，为标准化的基础模型特征评估提供了可靠框架，避免传统二维搜索空间的不一致性。",
+      "llm_tldr": "针对卫星多视图重建中二维全局匹配的误区，该文提出一种基于有理函数模型（RFM）的几何忠实评估协议。通过集成RPC投影的三维一致性度量和几何约束密集匹配代理，为标准化的基础模型特征评估提供了可靠框架，避免传统二维搜索空间的不一致性。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "satellite image processing",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15869v1",
+      "source": "arxiv",
+      "title": "Metis: A Generalizable and Efficient World-Action Model for Autonomous Driving and Urban Navigation",
+      "abstract": "World action models~(WAMs) have shown great promise for autonomous driving and urban navigation. Built upon Vision-Language-Action models or video generation models, existing approaches suffer key limitations: (1) High inference latency due to future observation prediction at test time, and (2) tightly coupled video and action modeling leading to representational mismatch and degraded generalization. To address both issues, we propose Metis, an end-to-end WAM framework that decouples video generation and action prediction. Specifically, Metis employs a Mixture-of-Transformers architecture with dedicated experts for video generation and action prediction, preserving the intrinsic distributional properties of each task. To enhance efficiency, we introduce an asymmetric attention mask that enables joint training of both experts while allowing the action model to bypass explicit video generation during inference. This design ensures training-inference consistency and significantly reduces computational costs without compromising planning performance. Extensive experiments demonstrate state-of-the-art performance on the NAVSIM navhard and navtest benchmarks and the CityWalker navigation benchmark, validating both the generalizability and efficiency across diverse tasks. Real-robot deployments further confirm the practical feasibility of our approach.",
+      "authors": [
+        "Jingyu Li",
+        "Zhe Liu",
+        "Dongnan Hu",
+        "Junjie Wu",
+        "Zipei Ma",
+        "Wenxiao Wu",
+        "Chao Han",
+        "Zhihui Hao",
+        "Zhikang Liu",
+        "Kun Zhan",
+        "Jiankang Deng",
+        "Xiatian Zhu",
+        "Li Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-14T15:40:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.15869v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "vision-language-action model for autonomous driving navigation",
+      "llm_evidence_cn": "用于自动驾驶导航的视觉-语言-动作模型",
+      "llm_evidence": "用于自动驾驶导航的视觉-语言-动作模型",
+      "canonical_evidence": "用于自动驾驶导航的视觉-语言-动作模型",
+      "llm_tldr_en": "Metis uses a Mixture-of-Transformers to decouple video generation and action prediction in world action models.",
+      "llm_tldr_cn": "该论文提出Metis，一种解耦视频生成和动作预测的世界动作模型，用于自动驾驶和城市导航。采用混合Transformer架构，专门处理视频生成和动作预测，避免了表征不匹配和泛化下降。该方法在多个驾驶数据集上实现了高效、可泛化的导航性能，其视觉-语言-动作框架可直接迁移到无人机视觉语言导航任务中。",
+      "llm_tldr": "该论文提出Metis，一种解耦视频生成和动作预测的世界动作模型，用于自动驾驶和城市导航。采用混合Transformer架构，专门处理视频生成和动作预测，避免了表征不匹配和泛化下降。该方法在多个驾驶数据集上实现了高效、可泛化的导航性能，其视觉-语言-动作框架可直接迁移到无人机视觉语言导航任务中。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.10701v1",
+      "source": "arxiv",
+      "title": "Vector Map as Language: Toward Unified Remote Sensing Vector Mapping",
+      "abstract": "Remote sensing vector mapping aims to generate structured maps of geospatial entities, such as buildings, roads, and water bodies, from remote sensing imagery. In practice, vector maps usually contain multiple category layers and heterogeneous entity structures, requiring a unified model for diverse mapping needs. However, existing methods typically represent vector objects as polygons or graphs, making them suitable only for specific categories: polygons poorly capture topological relations, while graphs often blur instance boundaries. We observe that language, as a natural medium for human communication, offers a flexible and expressive representation that can accommodate heterogeneous map elements, including geometry, semantics, and topolog. Motivated by this insight, we propose Vector Map as Language (VecLang), a unified paradigm that reformulates multiclass vector mapping as structured text generation. VecLang encodes the common elements of different geospatial entities into a GeoJSON-like vector language, enabling cross-category modeling within a shared textual format. To generate this language reliably, we design a progressive vision-language mapping framework that first localizes vectorization units and then generates structured map elements. We further introduce Hierarchical Vector Language Optimization, which uses reinforcement learning to improve syntax validity, content fidelity, and map executability. We also build VecMap-Bench with 54K images and 800K instances, supporting training and evaluation across standard and generalization settings. Extensive experiments demonstrate that VecLang handles both single-class and multiclass vector mapping while achieving strong cross-dataset and open-vocabulary generalization. The model and dataset are publicly available at https://github.com/yyyyll0ss/VecLang.",
+      "authors": [
+        "Yinglong Yan",
+        "Yunkai Yang",
+        "Haoyi Wang",
+        "Wei Fu",
+        "Linshan Wu",
+        "Honghu Pan",
+        "Shaobo Xia",
+        "Shanghang Zhang",
+        "Hao Chen",
+        "Leyuan Fang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T11:02:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.10701v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "remote sensing vector mapping using language as representation",
+      "llm_evidence_cn": "使用语言作为表示的遥感矢量地图构建",
+      "llm_evidence": "使用语言作为表示的遥感矢量地图构建",
+      "canonical_evidence": "使用语言作为表示的遥感矢量地图构建",
+      "llm_tldr_en": "Vector Map as Language unifies remote sensing vector mapping by representing geometric, semantic, and topological information as language.",
+      "llm_tldr_cn": "该论文提出将语言作为统一表示用于遥感矢量地图构建，能够灵活表示几何、语义和拓扑信息。通过将地图元素编码为语言描述，克服了多边形和图表示各自的局限。该方法在多个遥感数据集上实现了统一的地图生成，对遥感图像分析任务具有推进作用。虽然不直接涉及对象检测，但其语言表示方法可用于多模态特征融合。",
+      "llm_tldr": "该论文提出将语言作为统一表示用于遥感矢量地图构建，能够灵活表示几何、语义和拓扑信息。通过将地图元素编码为语言描述，克服了多边形和图表示各自的局限。该方法在多个遥感数据集上实现了统一的地图生成，对遥感图像分析任务具有推进作用。虽然不直接涉及对象检测，但其语言表示方法可用于多模态特征融合。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.16935v1",
+      "source": "arxiv",
+      "title": "CrossMaps: Confidence-Aware Open-Vocabulary Semantic Mapping for Rover Navigation",
+      "abstract": "Rovers rely on perception to maintain spatial maps that encode both objects and sensor quality (e.g., range reliability, lighting artifacts, data density), guiding data fusion, embedding updates, and navigation under partial observability. To study these coupled perception-navigation processes, we present CrossMaps, a real-time confidence-aware open-vocabulary semantic mapping pipeline that constructs language-queryable maps from RGB-D data. Building on VLMaps-style approaches, CrossMaps integrates multi-scale CLIP embeddings with confidence-aware fusion and a dual-memory architecture consisting of Short-Term Memory (STM) and Long-Term Memory (LTM). The STM aggregates noisy visual observations using geometric, semantic, and temporal confidence cues, while confident and coherent cells are promoted to the LTM as persistent semantic landmarks. Designed for deployment with a Jetson Orin-powered UGV alongside SLAM, CrossMaps runs in real time and produces semantic heatmaps that can be queried with natural language to guide rover navigation.",
+      "authors": [
+        "Jan-Niklas Klein",
+        "Sona Ghahremani",
+        "Christian Medeiros Adriano",
+        "Holger Giese"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-15T16:35:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.16935v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "open-vocabulary semantic mapping for rover navigation using vision-language",
+      "llm_evidence_cn": "使用视觉语言模型的开放词汇语义地图构建，适用于导航",
+      "llm_evidence": "使用视觉语言模型的开放词汇语义地图构建，适用于导航",
+      "canonical_evidence": "使用视觉语言模型的开放词汇语义地图构建，适用于导航",
+      "llm_tldr_en": "CrossMaps builds language-queryable maps from RGB-D data using CLIP embeddings and confidence-aware fusion for rover navigation.",
+      "llm_tldr_cn": "该论文提出CrossMaps，一种实时、置信度感知的开放词汇语义地图构建流水线，基于RGB-D数据构建可语言查询的语义地图，用于机器人导航。该方法结合了多尺度CLIP嵌入与置信度感知融合，并采用短时记忆和长时记忆双记忆架构，有效整合噪声视觉观测，提升了地图的鲁棒性和可用性。相关工作表明，该方法在模拟和真实环境中均能有效支持语言引导的导航任务。",
+      "llm_tldr": "该论文提出CrossMaps，一种实时、置信度感知的开放词汇语义地图构建流水线，基于RGB-D数据构建可语言查询的语义地图，用于机器人导航。该方法结合了多尺度CLIP嵌入与置信度感知融合，并采用短时记忆和长时记忆双记忆架构，有效整合噪声视觉观测，提升了地图的鲁棒性和可用性。相关工作表明，该方法在模拟和真实环境中均能有效支持语言引导的导航任务。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.18112v1",
+      "source": "arxiv",
+      "title": "Qwen-RobotNav Technical Report: A Scalable Navigation Model Designed for an Agentic Navigation System",
+      "abstract": "Agentic navigation systems require a base navigation model whose observation strategy can be externally reconfigured at inference time, because instruction following, object search, target tracking, and autonomous driving share the same perception-planning backbone yet demand fundamentally different strategies for consuming the visual stream. We present Qwen-RobotNav, a scalable navigation model built on Qwen-RobotNav that addresses it through a parameterised interface with two complementary dimensions: multiple task modes that select the navigation behaviour, and controllable observation parameters (e.g., token budget, per-camera weights) that govern how visual history is encoded. With training-time randomization over all parameters, Qwen-RobotNav is robust to any inference-time configuration requiring zero architectural modification to the Qwen-RobotNav backbone. We train Qwen-RobotNav on 15.6M samples; co-training with vision-language data prevents the collapse into reactive action-sequence mappers observed in trajectory-only training. The parameterised interface also makes Qwen-RobotNav a natural building block for agentic systems: for long-horizon scenarios, an upper-level planner decomposes goals into sub-tasks and dynamically switches Qwen-RobotNav's task mode and context strategy mid-episode, composing complex behaviours from repeated calls to the same model. Extensive experiments show that Qwen-RobotNav sets new state-of-the-art results across major navigation benchmarks. The model exhibits favourable scaling from 2B to 8B parameters, with joint multi-task training developing a shared spatial-planning substrate that transfers across task families, and demonstrates strong zero-shot generalisation to real-world robots across diverse environments.",
+      "authors": [
+        "Jiazhao Zhang",
+        "Gengze Zhou",
+        "Hale Yin",
+        "Yiyang Huang",
+        "Zixing Lei",
+        "Qihang Peng",
+        "Haoqi Yuan",
+        "Jie Zhang",
+        "Xudong Guo",
+        "Xiaoyue Chen",
+        "An Yang",
+        "Fei Huang",
+        "Junyang Lin",
+        "Dayiheng Liu",
+        "Jingren Zhou",
+        "Zhuoyuan Yu",
+        "Jingyang Fan",
+        "Zhixuan Liang",
+        "Pei Lin",
+        "Ye Wang",
+        "Anzhe Chen",
+        "Kun Yan",
+        "Xiao Xu",
+        "Jiahao Li",
+        "Lulu Hu",
+        "Minying Zhang",
+        "Shurui Li",
+        "Wenhu Xiao",
+        "Shuai Bai",
+        "Xuancheng Ren",
+        "Chenxu Lv",
+        "Chenfei Wu",
+        "Xiong-Hui Chen"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-06-16T16:17:44+00:00",
+      "link": "https://arxiv.org/pdf/2606.18112v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "scalable navigation model with instruction following capability",
+      "llm_evidence_cn": "可扩展导航模型，具备指令跟随能力",
+      "llm_evidence": "可扩展导航模型，具备指令跟随能力",
+      "canonical_evidence": "可扩展导航模型，具备指令跟随能力",
+      "llm_tldr_en": "Qwen-RobotNav presents a scalable navigation model with a parametrized interface supporting multiple task modes including instruction following, enabling external reconfiguration at inference time for agentic navigation.",
+      "llm_tldr_cn": "该论文提出Qwen-RobotNav，一个可扩展的导航模型，通过参数化接口支持多种任务模式（包括指令跟随）和可控观测参数，在推理时可由外部重配置。虽然模型不专门针对无人机，但其指令跟随和视觉导航能力与UAV视觉语言导航的核心需求高度契合，可作为通用基座模型。实验表明模型具有良好的可扩展性和泛化能力，但未在无人机场景下验证。",
+      "llm_tldr": "该论文提出Qwen-RobotNav，一个可扩展的导航模型，通过参数化接口支持多种任务模式（包括指令跟随）和可控观测参数，在推理时可由外部重配置。虽然模型不专门针对无人机，但其指令跟随和视觉导航能力与UAV视觉语言导航的核心需求高度契合，可作为通用基座模型。实验表明模型具有良好的可扩展性和泛化能力，但未在无人机场景下验证。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
