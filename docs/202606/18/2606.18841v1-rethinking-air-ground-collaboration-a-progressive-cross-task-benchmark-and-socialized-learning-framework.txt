@@ -1,0 +1,714 @@
+Title: Rethinking Air-Ground Collaboration: A Progressive Cross-Task Benchmark and Socialized Learning Framework
+
+URL Source: https://arxiv.org/pdf/2606.18841v1
+
+Published Time: Thu, 18 Jun 2026 00:41:20 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Rethinking Air-Ground Collaboration: A Progressive Cross-Task Benchmark and Socialized Learning Framework 
+
+Zhoupeng Guo, Yunqi Zhu, Zhihe Fan, Xinjie Yao, Ruipu Zhao, Boan Tao, Yiming Sun, Zhen Wang, and Pengfei Zhu 
+
+Abstract —Air-ground collaborative perception is crucial for robust visual understanding in real-world dynamic environments. However, existing studies typically formulate collaboration as single-task cross-view fusion, overlooking the functional depen-dencies among localization, target association, and fine-grained parsing. In addition, the heterogeneous nature of aerial and ground views introduces substantial geometric, scale, and occlusion discrepancies, making uniform feature sharing vulnerable to negative transfer. To tackle these issues, we model air-ground perception as a progressive cross-task collaboration task and construct the Air-Ground Progressive Collaboration (AGPC) benchmark, a spatio-temporally aligned benchmark comprising more than 745K raw video frames. Built upon this benchmark, we propose Socialized Co-Perception (SCP), a coarse-to-fine framework that organizes collaboration progressively from aerial global localization to ground target association and identity-aware parsing. Its core module, the Dual-Layer Router (DLR), decouples input-side multi-scale expert selection from output-side task-conditioned modulation, enabling selective cross-view and cross-task interaction while suppressing harmful interference. Extensive experiments demonstrate the effectiveness of SCP. It achieves a 3.73% coevolutionary gain and a 7.86% improvement in average downstream performance. These results show that task-conditioned collaboration is more effective than uniform fusion for heterogeneous air-ground perception. The code is available at https://github.com/g1136639260-spec/AGSCP. 
+
+Index Terms —Air-ground collaboration, socialized co-perception, progressive collaboration, task-conditioned routing. 
+
+I. I NTRODUCTION 
+
+Analogous to animal societies, where cooperation arises from differentiated roles and complementary capabilities rather than uniform behavior [1], [2], effective air-ground collaboration in machine systems requires more than the joint optimization of shared representations [3]. However, existing approaches typically treat sub-tasks in isolation, failing to explicitly 
+
+This work was supported in part by the National Natural Science Foundation of China under Grants 62436002, and 62506073, in part by Tianjin Natural Science Funds for Distinguished Young Scholar under Grant 23JCJQJC00270, and in part by the Xiongan New Area Science and Technology Innovation Special Project of the National Key Research and Development Program under Grant No.2025XAGG0039. Zhoupeng Guo, Yiming Sun, and Pengfei Zhu are with the School of Automation, Southeast University, Nanjing 210096, China. Yunqi Zhu is with the School of Computer Science and Engineering, University of New South Wales, Sydney, NSW 2052, Australia. Zhihe Fan is with the School of Sports Training, Tianjin University of Sport, Tianjin 301617, China Xinjie Yao is with the Faculty of Information Engineering and Automation, Kunming University of Science and Technology, Kunming 650500, China. Ruipu Zhao, and Boan Tao are with the School of Artificial Intelligence, Tianjin University, Tianjin 300350, China. Zhen Wang is with the School of Artificial Intelligence, Hebei University of Technology, Tianjin 300401, China. 
+
+Fig. 1. Social co-perception in animal and machine societies 
+
+exploit their functional complementarity. Furthermore, the assumption that shared feature learning suffices for cross-view synergy breaks down in heterogeneous environments. Discrepancies in imaging geometry, scale, and occlusion induce distribution shifts that amplify negative transfer and destabilize representation learning [4], [5]. These observations indicate that the core limitation lies not in model capacity, but in the implicit assumption of cross-view and cross-task homogeneity. Taken together, the problem is shaped jointly by cross-view heterogeneity across air-ground platforms and cross-task dependency across perception objectives. In machine learning, air-ground collaboration and multi-task learning are closely related yet built upon different assumptions, leading to a paradigm mismatch. Existing air-ground studies mainly formulate cross-view cooperation around task-specific objectives such as localization, retrieval, tracking, and coop-erative detection, where one view serves as a task prior for the other, but the interaction remains largely stage-isolated [6]– [8]. By contrast, representative multi-task frameworks mostly focus on single-view dense prediction and emphasize shared representations, adaptive sharing, loss balancing, or conflict-aware optimization over spatially aligned tasks [4], [5], [9]. Although both lines succeed in their respective settings, in cross-view and cross-task scenarios, severe discrepancies between aerial and ground observations weaken the implicit single-view alignment assumption behind most shared-representation designs, systematically compounding negative transfer and hindering transferable representation learning. To systematically study this joint cross-view and cross-task setting, we construct the Air-Ground Progressive Collabora-tion (AGPC) benchmark, which couples aerial and ground observations across localization, association, and parsing in a spatio-temporally aligned setting. Within this benchmark, however, existing paradigms remain limited by their underlying 
+
+> arXiv:2606.18841v1 [cs.CV] 17 Jun 2026 2
+
+assumptions: air-ground methods typically emphasize cross-view cooperation around isolated objectives, whereas multi-task frameworks are largely developed for spatially aligned single-view settings. As a result, this setting exposes two key challenges for effective air-ground collaboration. 1: How to eliminate task isolation for collaboration? 
+
+2: How to exploit cross-task air-ground complementarity? 
+
+Addressing the first challenge requires collaboration to be or-ganized across task stages rather than remaining stage-isolated, whereas addressing the second requires a mechanism that can preserve complementary cues while reducing interference from heterogeneous views. To this end, we draw inspiration from sociobiology and ethology. As illustrated in Fig. 1, mutualism between ravens and wolves [10] arises from asym-metric yet complementary roles, where aerial agents provide global localization and ground agents perform targeted capture. This mechanism highlights the importance of sociability [11] in complex perception, where agents exchange conditional information to resolve mutual ambiguities. Guided by this insight, air-ground collaboration can be viewed as a coarse-to-fine inference process. In this paradigm, global cues guide cross-view interaction to support fine-grained task reasoning, while fine-grained expertise reciprocally reinforces preceding coarse-level representations through bi-directional coevolution. Such a formulation naturally enables progressive task coupling for alleviating task isolation and task-conditioned information exchange for exploiting cross-view complementarity. To support the investigation of these problems, we first establish the AGPC benchmark, which comprises more than 745K raw video frames, 31,334 detection boxes, 4,319 ReID samples, and 4,268 segmentation instances. By organizing these tasks into a progressive evaluation chain from global localization to cross-view association and fine-grained parsing, AGPC provides an experimental basis for analyzing how cross-view cues propagate across tasks under realistic heterogene-ity. Building on this benchmark, we develop Socialized co-Perception (SCP) as a concrete framework for progressive air-ground collaboration. Within this setting, SCP operationalizes sociability and complementarity through a coarse-to-fine per-ception pipeline and a Dual-Layer Router (DLR) that regulates information exchange to promote beneficial interactions while reducing interference. Our contributions are summarized as follows:  
+
+> •
+
+We establish AGPC, an air-ground cross-task benchmark with over 745K real-world raw video frames, covering detection, ReID, and semantic segmentation, and enabling systematic evaluation of air-ground collaboration.  
+
+> •
+
+We propose the SCP framework, a socialized learning framework that realizes these principles through a coarse-to-fine design and a DLR module for cross-view and cross-task interaction.  
+
+> •
+
+We provide an information-theoretic perspective on col-laborative perception, identifying sociability and comple-mentarity as key principles for air-ground collaboration. II. R ELATED WORK 
+
+The proposed SCP framework targets progressive air-ground collaborative perception across heterogeneous views and mul-tiple tasks. Therefore, this section briefly reviews related work on air-ground cooperative perception and multi-task learning. 
+
+A. Air-Ground Cooperative Perception 
+
+Air-ground collaborative perception framework, as aparadigm for integrating heterogeneous aerial and ground visual streams, jointly models cross-view information to overcome the perception limits of single-platform sensing. Based on collaborative data dimensionality, existing air-ground methods can be grouped into two categories: (1) Single-task 2D collaboration: This line treats one platform as a conditional prior for the other and emphasizes task-specific cross-view coupling. For detection, Yu et al. [12] formulate air-ground cooperation as a hybrid-genetic task assignment process to optimize role allocation, whereas Chen et al. [13] estimate target location from monocular Unmanned Aerial Vehicle (UAV) imagery under severe scale uncertainty. For identity-centric perception, Nguyen et al. [14] establish cross-view air-ground ReID protocols with appearance-gap bridging, Nguyen et al. [15] extend evaluation to real-world video ReID with stronger temporal and occlusion challenges, and Hambarde et al. [16] provide stress-test conditions for UAV-based person detection and re-identification. For temporal association, Yan et al. [17] combine aerial global search with ground local tracking, Cui et al. [18] introduce hierarchical cooperative multi-target tracking using aerial fisheye cues, and Chen et al. [19] perform active localization by coupling visual-inertial cues with single-range constraints. (2) Single-task 3D collaboration: This branch mainly studies cross-agent 3D perception through staged fusion and cooperative message passing. Hu et al. [20] and Gao et al. [21] summarize the open challenges of connected perception, including synchronization, communication budget, and calibration dependence. Hou et al. [22] provide real-world air-ground driving data, while Zhang et al. [23] improve cooperative 3D detection via cross-agent feature fusion. Hao et al. [24] further reveal practical bottlenecks in end-to-end V2X pipelines. To improve transferability and robustness, Li et al. [25] learn domain-invariant representations for vehicle-infrastructure collaboration. Existing 3D collaborative perception methods are often impractical in real-world settings due to their reliance on precise geometric alignment. While 2D collaboration offers greater flexibility, current frameworks largely remain confined to single-task cooperation. In contrast, SCP adopts a 2D interaction paradigm and jointly models aerial detection, cross-view search, and semantic segmentation, enabling unified multi-task collaboration under complex operational conditions. 
+
+B. Multi-Task Learning 
+
+Multi-Task Learning (MTL) improves generalization by jointly optimizing related tasks while balancing shared priors and task-specific specialization. Following the taxonomy sum-marized by Vandenhende et al. [3], existing MTL methods can be roughly grouped into three categories: (1) Shared-representation dense prediction: This line focuses on how multiple tasks interact over common visual features. Xu et 3
+
+(a) (b) 
+
+(c)  
+
+> Fig. 2. Statistical analysis and qualitative examples of AGPC dataset. (a) The distribution of object categories and dataset types. (b) The instance counts for detection and ReID, alongside pixel counts per category for segmentation. (c) Visualization of sample frames and annotations for the three core tasks.
+
+al. [26] introduce a multi-query transformer to model task-aware interaction for dense prediction. Gao et al. [27] and Zhang et al. [28] study unified feature representations for panoptic or instance-level segmentation and detection-style objectives, showing that carefully designed shared embeddings can support multiple dense prediction tasks. Wang et al. [29] further extend this direction by adapting Segment Anything as a foundation prior for multi-task fine-tuning. (2) Scalable and heterogeneous MTL frameworks: This line emphasizes scaling MTL to broader model families, data sources, and modality settings. Chen et al. [30] align large vision foundation models for generic visual-linguistic tasks, Lu et al. [31] model client heterogeneity in federated multi-task learning, and Sun et al. [32] unify multimodal tasks through LLM-based neural tuning. (3) Flexible task composition and coupled supervision: This line relaxes fixed sharing hierarchies and exploits task complementarity more explicitly. Long et al. [33] model multilinear relationships among tasks. For coupled visual supervision, Yang et al. [34] show that mutual learning between detection and segmentation can significantly enhance infrared small target extraction. Kim et al. [35] and Wang et al. [36] further extend such joint optimization to the temporal domain by combining instance-level localization, semantic parsing, and temporal association in video panoptic segmentation. Most multi-task learning methods are developed under single-view assumptions. When extended to air-ground collaboration, discrepancies in geometry, scale, and occlusion induce dis-tribution shifts that amplify negative transfer under shared-representation paradigms. SCP addresses this limitation by explicitly structuring cross-view and cross-task interactions, enabling transferable and interference-aware representation learning beyond conventional shared representations. III. AGPC B ENCHMARK 
+
+This section introduces the AGPC benchmark in a systematic manner. We first define the target task and evaluation metrics, and then describe the key characteristics, statistical properties, and comparative positioning of AGPC with respect to existing benchmarks. Finally, we present the benchmark construction pipeline to show how AGPC is designed to support rigorous evaluation of progressive air-ground collaborative perception. 
+
+A. Task and Metrics 1) Task Definition: Unlike traditional independent perception tasks, we designate the process where a designated target observed in the aerial view is associated and localized within the ground view, followed by fine-grained feature analysis, as the air-ground target-guided parsing task. Specifically, this task encompasses four sub-tasks: aerial detection, re-identification, ground detection, and semantic segmentation. Formally, our collaborative framework consists of spatial perception models parameterized by Θco = {Θdet , Θseg }, and a shared dual-layer router parameterized by Φ. We restrict the joint optimization to the spatial sub-task set Tco = {det a, det g , seg }. To achieve performance coevolution, we optimize both the task representa-tions and the routing mechanism by minimizing the cumulative perception error across this subset: 
+
+J (Θ co , Φ) = X
+
+> t∈T co
+
+Lt(ˆ yt, y t), (1) 4
+
+where Lt represents the specific loss function for sub-task t,and the prediction ˆyt is the result optimized by Φ. Meanwhile, the ReID model is optimized independently to preserve identity-level purity; it is used specifically for cross-view association and does not participate in the DLR-driven feature interaction. 
+
+2) Evaluation Metrics: To evaluate both the holistic system capability and cooperative efficacy, we employ a dual-metric strategy: Average Downstream Performance (ADP) ensures a balanced assessment of multi-granularity perception across het-erogeneous tasks, while Coevolutionary Gain ( Gco ) quantifies the relative improvements driven by interactive coevolution. To provide a holistic and balanced evaluation of the cooperative system across heterogeneous tasks, we propose the ADP metric. It is calculated as the geometric mean of three-task downstream performance scores: ADP = 3
+
+r 12
+
+P 
+
+> d∈{ A,G }
+
+mAP det d
+
+
+
+· mIoU seg · Rank-1 reid . (2) ADP is intended as a supplementary system-level metric rather than a replacement for standard task-wise evaluations. We adopt the geometric mean because the proposed framework is progressive, with coarse localization, cross-view association, and fine-grained parsing being sequentially dependent; con-sequently, weakness in any stage can bottleneck the overall collaborative performance. Compared with the arithmetic mean, the geometric mean penalizes stage-wise imbalance more strongly and thus better reflects balanced downstream capability. To quantify the effectiveness of the coevolutionary interaction facilitated by DLR, we define the coevolutionary gain. It mea-sures the relative improvement of the cooperative perception tasks, specifically aerial detection and ground segmentation, compared to the non-interacting baseline: 
+
+Gco = 12
+
+P coop det − P base det 
+
+P base det 
+
++ P coop seg − P base seg 
+
+P base seg 
+
+!
+
+, (3) where P coop and P base denote the performance of the proposed SCP and the non-collaborative baseline, respectively. 
+
+B. Benchmark Characteristics 
+
+Our benchmark distinguishes itself through five key archi-tectural features designed to advance collaborative perception research: 
+
+1) Spatiotemporally Aligned Video-Based Construction: 
+
+Built from 89 synchronized video sequences captured by UAVs and Unmanned Ground Vehicles (UGVs), our benchmark ensures spatiotemporal alignment across views. Its video-based design preserves realistic disturbances such as motion blur, providing a practical testbed for multi-task learning while challenging model robustness in dynamic environments. 
+
+2) Hierarchical Multi-Granularity Perception: The three core tasks are derived from the same video streams and integrated into a unified closed-loop framework spanning coarse-grained detection, identity-level ReID, and fine-grained segmentation. This design enables holistic evaluation of lo-calization, identification, and parsing within a shared context, while introducing the challenge of cross-granularity feature alignment. 
+
+3) Cross-Altitude Domain Adaptability: To reflect realistic UAV deployment, we collect UAV videos at two altitudes (10m and 15m) and construct the corresponding ReID dataset with an explicit cross-altitude domain gap. This setting encourages scale-invariant representation learning, but also introduces substantial geometric variation and visual degradation, requiring stronger cross-domain generalization. 
+
+4) High Information Density and Non-Redundancy: De-tection and segmentation data are sampled from the same aligned air-ground videos, with segmentation targets anchored to objects associated through ReID. All object instances are unique, and each image is selected to capture distinctive poses, occlusions, or motion blur, reducing redundancy and discouraging shortcut learning from background cues. This results in a more rigorous evaluation while demanding stronger feature discrimination. 
+
+5) Cross-Seasonal Diversity: Furthermore, data acquisition spanned Summer, Autumn, and Winter, providing broad cross-seasonal diversity and featuring challenging environmental variations to verify system robustness. 
+
+C. Benchmark Statistics 
+
+The AGPC benchmark is a real-world dataset comprising over 745K raw video frames across 89 scene clips, specifically designed to advance cross-view and cross-task perception. As detailed in Table I, it provides high-quality annotations for four core tasks, namely aerial detection, ground detection, ReID, and semantic segmentation, all structured through a hierarchical taxonomy. This framework targets three macro-categories for detection and ReID, which are further refined into 11 fine-grained sub-categories for ground segmentation. Quantitatively, the dataset includes 31,334 detection bounding boxes, 4,319 ReID samples, and 4,268 segmentation instances. To ensure robust evaluation, the data is partitioned: detection and segmentation tasks follow a 7:2:1 split, while the ReID task adopts a 7:3 train-test ratio. This distribution enables a coarse-to-fine evaluation of multi-view cooperative perception capabilities. 
+
+D. Positioning Against Existing Benchmarks 
+
+Table II compares our dataset with representative air-ground collections, cooperative perception benchmarks and other mainstream public datasets. The comparison follows three key dimensions of this work, including targeted collaboration modes, explicit modeling of cross-view interaction, and en-hanced cross-task support beyond basic multi-task annotations. Table II shows that existing datasets only cover partial aspects of the target problem addressed by AGPC. AG-ReID.v2 [14] and AG-VPReID [15] focus on 2D air-ground collaboration, yet their evaluations are limited to ReID and human-centric perception, rather than progressive cross-task cooperation. Griffin [41], AGC-Drive [22], DAIR-V2X [38], and V2X-Seq [40] concentrate on 3D cooperative perception under vehicle-UAV and vehicle-infrastructure modes, with an emphasis on geometric fusion and collaborative detection. Meanwhile, datasets including BDD100K [37] and the VCNet unified dataset [39] only support partial task coverage and 5
+
+TABLE I STATISTICAL OVERVIEW OF THE AGPC DATASET . T HE TABLE DETAILS THE DISTRIBUTION OF SAMPLES AND PIXELS ACROSS FOUR TASKS . F OR DETECTION AND REID, “S AMPLES ” DENOTE BOUNDING -BOX INSTANCES (GT BOXES FOR REID). F OR SEGMENTATION , “S AMPLES ” DENOTE ANNOTATED IMAGE INSTANCES , WHILE CATEGORY STATISTICS ARE ADDITIONALLY REPORTED WITH PIXEL -LEVEL COUNTS (IN MILLIONS “ M” OR THOUSANDS “K”) 
+
+> TO HIGHLIGHT ANNOTATION DENSITY
+
+.
+
+Task Category Distribution (Instances/Pixels) Split Samples Pct. Aerial detection Instances per Category: Person (7,756), Motorized Vehicle (2,943), Roadside Infrastructure (5,487) Training 11,521 70% Validation 3,176 20% Testing 1,489 10% Total 16,186 100% Ground detection Instances per Category: Person (6,199), Motorized Vehicle (4,092), Roadside Infrastructure (4,857) Training 10,599 70% Validation 3,015 20% Testing 1,534 10% Total 15,148 100% Re-identification 10m Altitude: Person (929), Veh (1,689), Infra (155) 15m Altitude: Person (566), Veh (489), Infra (491) Training 3,088 70% Testing 1,231 30% Total 4,319 100% Ground segmentation Pixel Count per Category: Arm (0.5M), Car window (1.1M), Head (0.4M), Knapsack (0.3M), Leg (1.3M), License plate (0.1M), Torso (1.5M), Tyre (0.7M), Equip. Cabinet (26k), Bracket (0.2M), Signage (87k) Training 3,019 70% Validation 838 20% Testing 411 10% Total 4,268 100% 
+
+TABLE II POSITIONING AGPC AGAINST REPRESENTATIVE AIR -GROUND DATASETS , COOPERATIVE PERCEPTION BENCHMARKS , AND RELATED PUBLIC DATASETS .“M ODE ” INDICATES THE COLLABORATION RELATION , INCLUDING VEHICLE -VEHICLE (V EH -V EH ), VEHICLE -INFRASTRUCTURE (V EH -I NF ), AIR -AIR 
+
+(A IR -A IR ), AND VEHICLE -AIR (V EH -A IR ). 
+
+Dataset Mode Setting Cross-view Air-ground Cross-task Detection ReID Seg BDD100K (CVPR 2020) [37] − 2D × × × ✓ × ✓
+
+DAIR-V2X (CVPR 2022) [38] Veh-Inf 3D ✓ × × ✓ × ×
+
+MURI (TIP 2023) [39] Inf-Inf 2D ✓ × × × ✓ ×
+
+V2X-Seq (CVPR 2023) [40] Veh-Inf 3D ✓ × × ✓ × ×
+
+Cityscapes-VPS/VIPER (TIP 2022) [35] − 2D × × ✓ ✓ × ✓
+
+AG-ReID.v2 (TIFS 2024) [14] Inf-Air 2D ✓ ✓ × × ✓ ×
+
+AG-VPReID (CVPR 2025) [15] Inf-Air 2D ✓ ✓ × × ✓ ×
+
+AGC-Drive (NeurIPS 2025) [22] Veh-Air 3D ✓ ✓ × ✓ × ×
+
+Griffin (AAAI 2026) [41] Veh-Air 3D ✓ ✓ × ✓ × ×
+
+AGPC (Ours) Veh-Air 2D ✓ ✓ ✓ ✓ ✓ ✓
+
+are not tailored for air-ground collaboration. Cityscapes-VPS/VIPER [35] targets single-view panoptic video parsing without air-ground cross-view coupling. This clearly reveals a notable gap in existing benchmarks, as there is still no 2D vehicle-UAV benchmark that simultaneously supports detection, ReID, and segmentation, and explicitly evaluates progressive cross-task interaction. AGPC is designed to address this gap. 
+
+E. Benchmark Construction 1) Data Collection: To construct the benchmark, we devel-oped a synchronized UAV-UGV platform for real-world cross-view data collection. The UGV utilized a 3-axis stabilized 4K gimbal camera (SIYI ZT6), while the UAV (DJI Mavic 3TA) employed its wide-angle and telephoto sensors to capture high-resolution imagery. To ensure consistent cross-view overlap, the platforms were spatially coordinated: the UAV maintained a 45 ◦ oblique view at altitudes of 10m and 15m, synchronized with the horizontal front-facing perspective of the UGV. 
+
+2) Annotation Strategy: We provide high-quality 2D annota-tions for three core tasks: object detection, ReID, and semantic segmentation. All annotations were manually generated to ensure ground-truth fidelity. All benchmark annotations are derived from the same raw video corpus. Specifically, detection images are obtained by performing quality-controlled and redundancy-aware key frame sampling from the raw video frames in both aerial and ground streams. The ReID dataset is further constructed from the same raw video corpus by selecting synchronized cross-view target samples and assigning identity labels to their ground-truth bounding boxes. Based on the established ReID image set, the segmentation dataset is further annotated on selected ReID images, making the segmentation task a fine-grained subset of the ReID benchmark. 6 
+
+> Fig. 3. The proposed SCP framework. It establishes a progressive inference pipeline comprising three stages: (1) Global localization; (2) Cross-view search; and (3) Semantic segmentation. The right panel illustrates the cross-task coevolution, utilizing the DLR and main-auxiliary training strategy.
+
+This design ensures that detection, ReID, and segmentation are progressively connected rather than independently collected. IV. S OCIALIZED CO-P ERCEPTION 
+
+This section first introduces the two fundamental principles underlying the SCP air-ground collaborative framework, namely sociability and complementarity, and then elaborates on the overall architecture of SCP and the working principle of its core module, DLR. 
+
+A. Sociability and Complementarity 
+
+This section explores two fundamental principles of air-ground collaboration from an information-theoretic perspective. First, positive social interactions between cross-view air-ground models are beneficial, demonstrating the importance of socia-bility. Second, inherent cross-view visual disparities and task constraints can lead to cross-view interference, thereby reducing the effectiveness of auxiliary information. Therefore, effectively filtering complementary information between models is also crucial for air-ground collaboration. These theoretical insights motivate our design, specifically the cross-task coevolution in SCP and the multi-layer routing filtration in DLR. 
+
+Problem setup: Let S = {M m, Ma} be a society with a main task model Mm and an auxiliary model Ma. Let Xm, X a ∈ X 
+
+denote their respective input space, and Y ∈ Y the target label space for the main task. In the isolated setting, the prediction is based on P (Y |Xm). In the coevolutionary setting, the system utilizes the joint information P (Y |Xm, X a).
+
+Definition IV.1 (Sociability Information) . The sociability information Is provided by the auxiliary view is defined as the conditional mutual information between Xa and Y , given 
+
+Xm:
+
+Is = I(Xa; Y |Xm) = H(Y |Xm) − H(Y |Xm, X a). (4) Here, Is > 0 implies that Ma contributes unique information reducing the uncertainty of Y .
+
+Bayes error rate: The Bayes error rate [42] represents the minimum achievable probability of error. We define the error bounds for the isolated main task ( P iso e ) and the coevolutionary society ( P co e ) as follows: 
+
+P iso e ≤ 1 − exp   − H(Y |Xm), (5) 
+
+P co e ≤ 1 − exp   − H(Y |Xm, X a). (6) 
+
+Proposition IV.2 (Necessity of Sociability) . Building on prior work [43]–[45], if the sociability information Is > 0, the upper bound of the Bayes error rate for the collaborative society is lower than that of the isolated view, Upper (P co e ) <
+
+Upper (P iso e ).Proof. Based on Eq. (6) , the error bound for the society is expressed as follows: 
+
+P co e ≤ 1 − exp   − H(Y |Xm, X a). (7) Substituting the entropy reduction from Def. IV.1, we can derive: 
+
+P co e ≤ 1 − exp   − (H(Y |Xm) − Is). (8) Consequently             
+
+> Pco e≤1−exp  −H(Y|Xm)·exp( Is).
+
+(9) 7
+
+Since Is > 0, we have exp( Is) > 1. Comparing this with the isolated bound, we have:                  
+
+> 1−exp  −H(Y|Xm)·exp( Is)<1−exp  −H(Y|Xm).
+
+(10) Thus, we conclude: Upper (P co e ) < Upper (P iso e ). (11) 
+
+Definition IV.3 (Task-Relevant Information Degradation under Interference) . Let X∗ 
+
+> a
+
+denote the ideal, interference-free auxil-iary representation, and Xa denote the interference-corrupted auxiliary representation. Due to interference, the task-relevant information of the corrupted input ( Ibase s ) is less than that of the ideal input ( Iideal s ): 
+
+Ibase s = I(Xa; Y |Xm) < I (X∗ 
+
+> a
+
+; Y |Xm) = Iideal s . (12) We define ∆ = Iideal s − Ibase s > 0 as the information gap caused by interference. 
+
+Proposition IV.4 (Necessity of Complementarity Filtering) .
+
+The Bayes error upper bound of the system using base auxiliary data ( P base e ) is higher than that of the system using ideal filtered data ( P ideal e ). Thus, a filtering mechanism is theoretically motivated under this formulation to minimize the error bound. Proof. Let P base e and P ideal e be the error bounds for the base and ideal scenarios. Based on Proposition IV.2, they are expressed as follows: 
+
+P base e ≤ 1 − exp   − H(Y |Xm) · exp( Ibase s ), (13) 
+
+P ideal e ≤ 1 − exp   − H(Y |Xm) · exp( Iideal s ). (14) Substituting Iideal s = Ibase s + ∆ from Def. IV.3, we can derive: 
+
+P ideal e ≤ 1 − exp   − (H(Y |Xm) − (Ibase s + ∆)) . (15) Consequently, 
+
+P ideal e ≤ 1 − exp   − H(Y |Xm) · exp( Ibase s )
+
+| {z }
+
+> Term base
+
+· exp(∆) . (16) Since ∆ > 0, we have: Term base · exp(∆) > Term base . (17) Thus, we conclude: 
+
+P ideal e < P base e . (18) This indicates that recovering X∗ 
+
+> a
+
+is necessary to achieve the optimal error bound. 
+
+B. Methodology 1) Socialized Co-Perception Framework: To overcome task isolation and achieve efficient target locking and segmentation, we propose the SCP framework. As illustrated in Figure 3 and Algorithm 1, SCP operates as a unified ecosystem. Core to this framework is the air-ground cross-task coevolution mechanism, where the DLR module Φ facilitates the joint optimization of detection and segmentation. This process yields the evolved parameters Θ∗ 
+
+> det
+
+and Θ∗ 
+
+> seg
+
+, which encapsulate shared multi-granularity knowledge. Leveraging these evolved capabilities, SCP executes a progressive air-ground inference pipeline: 
+
+Mref ine = Mgseg 
+
+Ψmatch 
+
+E(Madet )
+
+| {z }
+
+> qsem
+
+, Mgdet 
+
+. (19) where Madet , Mgdet , and Mgseg denote the aerial detection, ground detection, and ground segmentation networks, respec-tively, parameterized by the co-evolved weights Θ∗ 
+
+> det
+
+and Θ∗ 
+
+> seg
+
+.The operator E(·) transforms the aerial detection results into a high-level semantic query vector qsem , while Ψmatch (·)
+
+performs cross-view association to lock the target among ground candidates. Finally, Mref ine represents the output identity-aware fine-grained segmentation mask. 
+
+Algorithm 1 SCP Framework. 
+
+Input : DLR module Φ, aerial video stream Ia, ground video stream Ig ;
+
+Output : Fine-grained mask sequence Vout ; 
+
+> 1:
+
+{Step 1: Cross-task coevolution } 
+
+> 2:
+
+Θ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+, Φ∗ ← Coevolve (Θ det , Θseg ; Φ) ; 
+
+> 3:
+
+{Step 2: Execute progressive inference pipeline } 
+
+> 4:
+
+Phase 1: Global Localization  
+
+> 5:
+
+Ba ← M adet (Ia; Θ ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+, Φ∗); 
+
+> 6:
+
+Phase 2: Cross-View Search  
+
+> 7:
+
+qsem ← E (Ba); 
+
+> 8:
+
+for frame Itg in Ig do  
+
+> 9:
+
+Cg ← M gdet (Itg ; Θ ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+, Φ∗); 
+
+> 10:
+
+ˆotg ← Ψmatch (qsem , Cg ); 
+
+> 11:
+
+if ˆotg is valid then  
+
+> 12:
+
+Phase 3: Identity-Aware Fine-Grained Parsing  
+
+> 13:
+
+Mref ine ← M gseg (ˆ otg ; Θ ∗ 
+
+> seg
+
+, Θ∗
+
+> det
+
+, Φ∗); 
+
+> 14:
+
+Vout .append (Mref ine ); 
+
+> 15:
+
+end if  
+
+> 16:
+
+end for  
+
+> 17:
+
+Return Vout ;
+
+Phase 1: Global Localization. Operating as the global observer, the UAV inputs aerial video streams ( Ia) into the aerial detector initialized with the co-evolved parameters {Θ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+} and the optimized DLR module Φ∗. By dynamically routing auxiliary features via Φ∗, the detector enhances its representation capabilities, generating robust global candidate bounding boxes 
+
+Ba:
+
+Ba ← M adet (Ia; Θ ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+, Φ∗). (20) 
+
+Phase 2: Cross-View Search. This module bridges the viewpoint gap to lock the target on the ground. First, the aerial target region is cropped from the detected aerial candidates 8 
+
+> Fig. 4. Illustration of the DLR. It comprises the I-Router for adaptive multi-scale feature aggregation and the O-Router for dynamic residual gating, facilitating robust cross-task knowledge transfer.
+
+and transformed by E(·) into a semantic query embedding. In implementation, E(·) is instantiated by the ReID encoder rather than an additional learnable query head: each aerial crop is resized to 256 × 128 , normalized, and fed into a ResNet-50-IBN-a network followed by global average pooling and a BN neck, yielding a 2048-dimensional feature that is further ℓ2-normalized to form the query representation qsem . Second, the ground vehicle acts as the local executor. It generates ground candidates Cg from ground video streams Itg using the coupled parameter set and the routing module Φ∗:
+
+Cg = Mgdet (Itg ; Θ ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+, Φ∗). (21) Thus, the system computes the matching similarity between 
+
+qsem and Cg to return the specific target ˆotg :
+
+ˆotg ← Ψmatch (qsem , Cg ). (22) 
+
+Phase 3: Identity-Aware Fine-Grained Parsing. Once the target is spatially locked, the framework performs pixel-level refinement. The bounding box of the valid target ˆotg is used to crop the region of interest. This RoI is then processed by the segmentation network. To ensure precise boundary delineation, the segmentation model, parameterized by Θ∗ 
+
+> seg
+
+,is conditionally gated by Φ∗ to incorporate auxiliary detection knowledge from Θ∗
+
+> det
+
+. This step captures fine-grained attributes invisible from the aerial view: 
+
+Mref ine ← M gseg (ˆ otg ; Θ ∗ 
+
+> seg
+
+, Θ∗
+
+> det
+
+, Φ∗). (23) 
+
+2) DLR-Driven Cross-Task Coevolution: As formally de-rived in Proposition IV.2 and Proposition IV.4, the performance evolution of air-ground models similarly depends on sociability and complementarity. To this end, we employ the main-auxiliary training strategy (Algorithm 2) to facilitate social interaction across models, as illustrated in Figure 3. Furthermore, to ensure the complementarity of interactive information, we propose the DLR module, a hierarchical gating module inserted between different task backbones that reformulates feature interaction as a dense expert routing process. 
+
+Algorithm 2 Main-Auxiliary Training Strategy. 
+
+Input : Datasets Ddet , Dseg , models Θdet , Θseg , DLR Φ, main task m ∈ { det, seg };
+
+Output : Optimized Θ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+, Φ∗; 
+
+> 1:
+
+Phase 1: Expert Pretraining  
+
+> 2:
+
+Initialize Θdet , Θseg independently on their respective datasets;  
+
+> 3:
+
+Phase 2: Main Task Training  
+
+> 4:
+
+Define auxiliary task a ∈ { det, seg }; 
+
+> 5:
+
+Freeze Θa, unfreeze Θm, Φ; 
+
+> 6:
+
+while not converged do  
+
+> 7:
+
+Fm, F a ← Θm(Dm), Θa(Dm); 
+
+> 8:
+
+Fout ← DLR (Fm, F a; Φ) ; 
+
+> 9:
+
+Update Θm, Φ by minimizing Lm(Fout , Y m); 
+
+> 10:
+
+end while  
+
+> 11:
+
+Return Θ∗
+
+> det
+
+, Θ∗ 
+
+> seg
+
+, Φ∗;As illustrated in Figure 4, at the l-th interaction layer, let the main-branch feature be Fmain ∈ RCl×Hl×Wl , where 
+
+Cl ∈ { 256 , 512 , 1024 } corresponds to layer1, layer2, and layer3, respectively. We first define multi-scale auxiliary features Faux = {fk} as a set of candidate experts, where k
+
+represents varying semantic depths. After bilinear interpolation and 1 × 1 Conv-BN-ReLU projection, each candidate expert is aligned to the same spatial and channel dimensions as the main branch, namely fk ∈ RCl×Hl×Wl . To prioritize the most 9
+
+informative granularity without hard selection, parallel routing heads Gin generate a spatially adaptive consensus F ′ 
+
+> aux
+
+via dense soft-routing, 
+
+F ′ 
+
+> aux
+
+= X
+
+> k
+
+
+
+Softmax 
+
+ Gin (fk)
+
+τ
+
+
+
+⊙ fk
+
+
+
+. (24) where Gin (fk) ∈ R1×Hl×Wl denotes the spatial routing score of the k-th expert, and the Softmax is performed across the expert dimension at each spatial location. Therefore, the input of I-Router is Faux = {fk}, and its output is the aggregated auxiliary feature F ′ 
+
+> aux
+
+∈ RCl×Hl×Wl . Here, τ
+
+modulates the routing sharpness. Functioning as a pixel-wise scale selector, this mechanism dynamically aggregates the most salient granularity for each spatial coordinate, thereby ensuring scale-invariance before interaction. Subsequently, to control the information flow and filter negative transfer, we employ a residual gating mechanism. We employ a gating network Gout to predict a pair of modulation coefficients [αmain , α aux ] based on the joint representation 
+
+Z = Concat( Fmain , F ′
+
+> aux
+
+), (25) where Z ∈ R2Cl×Hl×Wl . Then, 
+
+[αmain , α aux ] = Softmax 
+
+ Gout (Z)
+
+τ
+
+
+
+, (26) where αmain , α aux ∈ R1×Hl×Wl . Therefore, the input of O-Router is the joint representation Concat( Fmain , F ′
+
+> aux
+
+), and its output is a pair of spatial gating maps that task-condition the retention of main-branch features and the injection of auxiliary features, respectively. These gates govern the selective injection process via a residual update, 
+
+Fout = R(Fmain , F ′
+
+> aux
+
+; αmain , α aux ), (27) where R(·) denotes the residual fusion function parameterized by the predicted spatial gates, and Fout ∈ RCl×Hl×Wl . This design effectively decouples the feature space, allowing the model to prioritize intrinsic representations where the main view is sufficient, while selectively absorbing complementary cues to resolve ambiguities. V. E XPERIMENTS 
+
+In this section, we use ResNet-50 as the common back-bone. We employ Faster R-CNN, DeepLabv3, and ResNet-50-IBN as baselines for the detection, segmentation, and ReID tasks, respectively. Specifically, we conduct the evaluation covering comparisons with representative adapted interaction methods, ablation studies on DLR modules, and holistic efficacy analysis. We further discuss system robustness across varying collaboration scenarios and UAV altitudes. More experiments and implementation details are provided in the following subsections. 
+
+A. Implementation Details 
+
+We evaluate the proposed method on the AGPC dataset across four subsets: aerial detection, ground detection, ground segmentation, and air-ground ReID integrated from 10m and 15m altitudes. This section details the comparative methods and datasets utilized in our experiments. All models were implemented using the PyTorch framework and trained on eight NVIDIA RTX 3090 GPUs. Specifically, for detection-centric models, we employed Stochastic Gradient Descent (SGD) as the optimizer with a momentum of 0.9 and a weight decay of 1 × 10 −4.These models utilized the SmoothL1Loss function and were trained for 12 epochs with a batch size of 2 and an initial learning rate of 0.02. For the ReID task, we adopted the Adam optimizer. The models were trained for 120 epochs with a batch size of 8. The learning rate was initialized at 3.5 × 10 −4. The objective function incorporated Triplet Loss and Cross-Entropy Loss with label smoothing. Finally, regarding segmentation-centric models, we utilized SGD (momentum 0.9, weight decay 
+
+1×10 −4) combined with the CrossEntropyLoss function. These models were trained for 20,000 iterations with a batch size of 4 and a learning rate of 0.01. 
+
+B. Compared Methods 
+
+To validate the effectiveness of DLR, we compare it with several representative interaction methods from recent multi-task and heterogeneous learning literature. These baselines cover different interaction paradigms, including general knowl-edge transfer, selective collaboration, dynamic task routing, and cross-modal alignment, thereby providing a comprehensive reference for evaluating interaction mechanisms in our air-ground cross-view setting.  
+
+> •
+
+NKT [46] builds a general vision ecosystem through multi-stage pre-training.  
+
+> •
+
+DISC [11] enhances multi-task learning via dynamic hierarchical selective collaboration.  
+
+> •
+
+DTF [47] improves task-specific representation through adaptive transformer path routing.  
+
+> •
+
+TVAM [48] bridges cross-modal gaps via guidance-driven heterogeneous feature alignment.  
+
+> •
+
+BCSI [49] enables selective cross-task transfer via bidi-rectional channel interaction.  
+
+> •
+
+ACFA [50] enhances task interaction via adaptive cross-fusion attention.  
+
+> •
+
+DDIM [51] captures spatial dependencies through dual-dimensional branch interaction.  
+
+> •
+
+SSFM [52] fuses semantic and structural cues for cross-task integration. Since these methods were not originally designed for the air-ground cross-task framework, we adapt them under a unified protocol by keeping all modules unchanged except for replacing the DLR interaction block. These modules are inserted at the same feature interaction interface as DLR, while ReID is kept as an independent branch. This ensures a fair comparison of interaction mechanisms under the same air-ground cross-view setting. 
+
+1) Necessity of Socialized Collaboration: The data in Table III indicate that all model variants equipped with in-teraction mechanisms achieve considerably better performance than the Vanilla baseline without social collaboration. By constructing bidirectional interactive correlations between aerial global cues and ground fine-grained cues, the collaborative 10 
+
+gain of the model is effectively improved. This sufficiently demonstrates that in scenarios with significant air-ground feature heterogeneity, social correlation between aerial and ground models serves as a key basis for achieving steady performance improvement. 
+
+2) Complementarity Based on Task-Conditioned Routing: 
+
+DLR further surpasses all adapted interaction modules, ex-hibiting its most significant advantage on the segmentation task, where it improves by 2.17% over the runner-up, and ultimately yielding a 3.73% increase in the Gco metric. This result suggests that the core challenge in air-ground multi-task perception lies in regulating the content, semantic scale, and downstream objectives of cross-view information transfer. By decoupling spatial expert selection from task-conditioned output modulation, DLR effectively extracts fine-grained complementary information from cross-view features, thereby demonstrating a significant advantage.                                      
+
+> TABLE III COMPARISON OF PERFORMANCE ACROSS DIFFERENT METHODS ON AGPC. THE 1st /2nd BEST RESULTS ARE INDICATED IN RED /BLUE .Method Det-A(%) ↑Seg(%) ↑Gco (%) ↑
+> Vanilla 76.12 37.72 -NKT [46] 88.07 52.82 27.87 DISC [11] 87.15 44.60 17.32 DTF [47] 88.68 52.17 27.40 TVAM [48] 88.45 46.19 19.33 ACFA [50] 88.28 54.03 29.61
+> BCSI [49] 88.08 53.86 29.25 DDIM [51] 88.73 53.31 28.95 SSFM [52] 88.07 53.29 28.68 DLR (Ours) 89.59 (+0 .86) 56.20 (+2 .17) 33.34 (+3 .73)
+
+C. Ablation Analysis of DLR Modules 1) Hierarchical Mechanism of Dual Routing: The ablation study in Table IV reveals the hierarchical interaction of the dual routing modules. Enabling the I-Router or O-Router individually raises Gco to 26.05% and 29.66%, respectively, demonstrating that input-side expert filtering and output-side task-conditioned modulation can independently optimize feature fusion. When both modules are activated, the full DLR improves upon the no-routing baseline by 0.69%, 6.79%, and 9.45% on Det-A, Seg, and Gco , respectively. These step-wise gains suggest that effective air-ground interaction follows a coarse-to-fine hierarchical mechanism: the I-Router first suppresses irrelevant multi-scale responses and retains transferable auxiliary cues, after which the O-Router selectively allocates features according to the demands of downstream tasks. 
+
+2) Asymmetric Gains Across Task Granularities: DLR exhibits asymmetric performance gains across detection and segmentation tasks. The relatively small absolute improvement on Det-A reflects the limited optimization space for the coarse-grained localization task on the existing dataset: AGPC contains only three macro-detection categories, and strong interaction baselines are already saturated on Det-A (87.15%– 88.68%). In contrast, the segmentation task requires pixel-level discrimination for dense categories, imposing stricter requirements on the semantic compatibility of cross-view cues. The more significant gain in segmentation metrics demonstrates that as the system transitions from coarse-grained target locking to fine-grained scene parsing, the routing mechanism plays a critical role in driving performance gains.                           
+
+> TABLE IV ABLATION STUDIES OF THE EFFECT OF RELATED COMPONENTS .✓
+> DENOTES DLR WITH THE CORRESPONDING MODULE ENABLED .
+> Method I-Router O-Router Det-A (%) ↑Seg (%) ↑Gco (%) ↑
+> DLR --88.90 49.41 23.89
+> ✓-89.53 51.04 26.05 -✓89.54 53.26 29.66
+> ✓✓89.59 (+0 .69) 56.20 (+6 .79) 33.34 (+9 .45)
+
+D. Overall-Level Performance Analysis of SCP 1) System-Level Optimization: As shown in Table V, the introduction of the DLR module improves aerial and ground detection performance by 13.47% and 10.90%, segmentation performance by 18.48%, and the overall ADP metric by 7.86%. The performance improvements in localization and parsing validate that SCP facilitates effective complementation be-tween coarse-grained global cues and fine-grained downstream knowledge. This enables robust cross-view and cross-task collaboration among air-ground individuals, ultimately realizing effective system-level optimization. 
+
+2) Feature Decoupling and Collaboration Strategy: The performance of ReID in Table V remains unchanged at 21.20% because this task does not participate in the DLR-driven joint optimization. This setup aims to maintain the representational independence of the identity matching task while spatially aware tasks undergo collaborative optimization, avoiding negative interference between tasks.                       
+
+> TABLE V COMPARISON OF SCP PERFORMANCE ACROSS ALL SUB -TASKS . CC
+> DENOTES CROSS -TASK COEVOLUTION .Method Det-A (%) ↑Det-G (%) ↑Seg (%) ↑ReID (%) ↑ADP (%) ↑
+> SCP w/o CC 76.12 71.25 37.72 21.20 38.91 SCP w/ CC 89.59 (+13 .47) 82.15 (+10 .90) 56.20 (+18 .48) 21.20 46.77 (+7 .86)
+
+E. Cross-Scenario Robustness Analysis 1) Cross-Scenario Collaborative Robustness: To verify the generalization capability of the SCP collaborative framework, we train the ground segmentation task under three data scenarios, namely pure ground G, air-ground fusion AG, and pure aerial A. Table VI shows that the relative gains remain positive across all scenarios, with Gco reaching 27.52%, 29.67%, and 33.34%, respectively. This result indicates that the proposed routing mechanism does not overfit a single viewpoint topology and remains effective under diverse scenarios. 
+
+2) Cross-View Complementarity as a Driver of Performance: 
+
+Experiments further show that the collaborative gain peaks in the Aerial-Only (A) setting, where the segmentation improve-ment rises from 15.47% in G and 16.38% in AG to 18.48% in A. This trend indicates that the Ground-Only (G) setting mainly provides the same-view local assistance, whereas the joint Air-Ground (AG) setting introduces blended contextual cues. 11 
+
+By contrast, the Aerial-Only (A) setting provides distinctive global constraints that are more beneficial for downstream ground parsing. Consequently, after task-conditioned routing, the complementarity between global aerial cues and local ground details can be effectively transformed into auxiliary supervision for fine-grained ground understanding, thereby improving overall model performance.                                    
+
+> TABLE VI COMPARISON OF COLLABORATIVE PERCEPTION BENEFITS ACROSS DIFFERENT COLLABORATION SCENARIOS . S CENARIOS A, G, AND AG
+> DENOTE INTERACTION USING AERIAL ,GROUND ,AND FUSED AIR -GROUND DETECTION DATA WITH SEGMENTATION DATA ,RESPECTIVELY .Scenario Method Det (%) ↑Seg (%) ↑Gco (%) ↑
+> GVanilla 71.25 37.72 –SCP 82.15 (+10 .90) 53.19 (+15 .47) 27.52
+> AG Vanilla 74.43 37.72 –SCP 86.28 (+11 .85) 54.10 (+16 .38) 29.67
+> AVanilla 76.12 37.72 –SCP 89.59 (+13 .47) 56.20 (+18 .48) 33.34
+
+F. Cross-Altitude Domain Gap Analysis 
+
+Table VII shows that changes in UAV altitude pose a major challenge for air-ground association. As the altitude increases from 10m to 15m, Rank-1 accuracy falls from 36.00% to 15.90%, while mAP decreases from 33.60% to 19.90%. This drop suggests that aerial identity features are easily affected by altitude. At higher altitudes, targets occupy fewer pixels, local appearance cues become less clear, and viewpoint-induced geometric changes become more pronounced, making direct cross-view matching less reliable. The result also clarifies the roles of the two views in our pipeline. Aerial observations are useful for global localization and candidate search, but their identity cues alone are not stable enough under altitude changes. Ground-view features, in contrast, retain finer local structures and more consistent identity information, and can therefore provide auxiliary evidence for feature alignment. This finding is in line with the progressive design of SCP, where cross-view association links aerial global localization with ground-based fine-grained parsing.                        
+
+> TABLE VII REID PERFORMANCE ACROSS DATASETS WITH VARYING UAV ALTITUDES .Height Rank-1 (%) ↑Rank-5 (%) ↑Rank-10 (%) ↑mAP (%) ↑
+> 10m 36.00 47.00 51.00 33.60
+> 15m 15.90 28.40 36.40 19.90 all 21.20 31.20 39.70 22.10
+
+VI. D ISCUSSION 
+
+Unified Architectural Synergy: As summarized in Table VIII, existing paradigms fail to simultaneously satisfy cross-task interaction, cross-view synergy, and practical applicability in real environments. SCP addresses these limitations by synthesizing detection, ReID, and segmentation into a unified ecosystem. Unlike standard MTL restricted to intra-view sharing or 2D/3D AGPS, confined to single-task cooperation, SCP leverages the DLR to enable adaptive cross-task knowledge transfer, achieving a more comprehensive coverage under the considered setting. 
+
+Coarse-to-Fine Inference: The proposed pipeline unlocks complex long-horizon tasks by chaining aerial global localiza-tion with ground-based fine-grained parsing. This design allows the aerial model to serve as a global observer to overcome occlusions, while the ground model acts as a local executor for pixel-level refinement. This progressive collaboration not only improves performance through complementary exploitation but also offers a robust solution for real-world air-ground applications, such as disaster response.                          
+
+> TABLE VIII COMPARISON OF DIFFERENT PARADIGMS . 2D AGPS DENOTES 2D AIR -G ROUND PERCEPTION SYSTEMS ,AND 3D AGPS DENOTES 3D AIR -G ROUND PERCEPTION SYSTEMS .Paradigm Cross-task Cross-view Applicability MTL ✓×✓
+> 2D AGPS ×✓✓
+> 3D AGPS ×✓×
+> SCP ✓✓✓
+
+VII. C ONCLUSION 
+
+This paper studies air-ground collaborative perception as a progressive cross-task problem under heterogeneous views. We introduce AGPC, a synchronized UAV-UGV benchmark that connects detection, re-identification, and semantic segmentation within the same video corpus, enabling systematic evaluation of cross-view and cross-task collaboration. Based on AGPC, we propose SCP, a coarse-to-fine framework that organizes perception from aerial global localization to ground target association and identity-aware parsing. Its core module, DLR, selectively routes multi-scale auxiliary features and modulates task-specific information to transfer complementary cues while reducing negative interference. Experiments show that SCP improves both task-level performance and system-level col-laborative perception over adapted interaction baselines. More importantly, the results suggest that effective collaboration benefits from stage-aware interaction rather than indiscriminate feature sharing, and that aerial cues are most useful when selectively used to guide fine-grained ground understanding. Future work will explore stronger cross-view association, temporal reasoning, and scalable multi-agent perception. REFERENCES [1] N. K. Humphrey, “The social function of intellect,” Cambridge University Press , pp. 303–317, 1976. [2] R. I. Dunbar, “The social brain hypothesis,” Evol. Anthropol. , vol. 6, no. 5, pp. 178–190, 1998. [3] S. Vandenhende, S. Georgoulis, W. Van Gansbeke, M. Proesmans, D. Dai, and L. Van Gool, “Multi-task learning for dense prediction tasks: A survey,” IEEE Trans. Pattern Anal. Mach. Intell. , vol. 44, no. 7, pp. 3614–3633, 2022. [4] T. Yu, S. Kumar, A. Gupta, S. Levine, K. Hausman, and C. Finn, “Gradient surgery for multi-task learning,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 33, 2020. [5] B. Liu, X. Liu, X. Jin, P. Stone, and Q. Liu, “Conflict-averse gradient descent for multi-task learning,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 34, 2021. [6] Y. Shi, L. Liu, X. Yu, and H. Li, “Spatial-aware feature aggregation for image based cross-view geo-localization,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 32, 2019. 12 
+
+[7] S. Zhu, T. Yang, and C. Chen, “Vigor: Cross-view image geo-localization beyond one-to-one retrieval,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2021, pp. 3640–3649. [8] S. Zhu, M. Shah, and C. Chen, “Transgeo: Transformer is all you need for cross-view image geo-localization,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2022, pp. 1162–1171. [9] H. Ye and D. Xu, “Taskprompter: Spatial-channel multi-task prompting for dense scene understanding,” in Int. Conf. Learn. Represent. (ICLR) ,2023. [10] D. Stahler, B. Heinrich, and D. Smith, “Common ravens, corvus corax, preferentially associate with grey wolves, canis lupus, as a foraging strategy in winter,” Anim. Behav. , vol. 64, no. 2, pp. 283–290, 2002. [11] X. Yao, Y. Wang, P. Zhu, W. Lin, R. Zhao, Z. Guo, W. Li, and Q. Hu, “Socialized coevolution: Advancing a better world through cross-task collaboration,” in Proc. Int. Conf. Mach. Learn. (ICML) , vol. 267, 2025, pp. 71 780–71 797. [12] L. Yu, Y. Yang, X. Su, S. Sun, T. Jiang, and J. Huang, “Cooperative task assignment for aerial-ground detection systems via a novel hybrid genetic method,” IEEE Trans. Ind. Electron. , vol. 72, no. 4, pp. 4063–4072, 2025. [13] J. Chen, G. Zhang, H. Jiang, and Y. He, “A monocular vision-based localization system of size-uncertain ground targets for uavs,” IEEE Trans. Instrum. Meas. , vol. 74, pp. 1–10, 2025. [14] H. Nguyen, K. Nguyen, S. Sridharan, and C. Fookes, “Ag-reid. v2: Bridging aerial and ground views for person re-identification,” IEEE Trans. Inf. Forensics Security , vol. 19, pp. 2896–2908, 2024. [15] H. Nguyen, K. Nguyen, A. Pemasiri, F. Liu, S. Sridharan, and C. Fookes, “Ag-vpreid: A challenging large-scale benchmark for aerial-ground video-based person re-identification,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2025, pp. 1241–1251. [16] K. A. Hambarde, N. Mbongo, M. Pavan Kumar, S. Mekewad, C. Fernan-des, G. Silahtaroglu, A. Nithya, P. Wasnik, M. Rashidunnabi, P. Samale, and H. Proenca, “Detreidx: A stress-test dataset for real-world uav-based person recognition,” IEEE Trans. Biometrics, Behav., Identity Sci. , vol. 8, no. 3, pp. 365–377, 2026. [17] K. Yan, W. Qian, J. Cao, and C. Bi, “Agvot: Visual object tracking via cooperation of aerial and ground views,” IEEE Trans. Intell. Transp. Syst. , vol. 27, no. 1, pp. 1416–1425, 2026. [18] Y. Cui, H. Lu, X. Dong, J. Xiang, D. Li, and Z. Tu, “Air–ground cooperative multitarget hierarchical tracking method based on aerial fisheye view,” IEEE Trans. Syst., Man, Cybern., Syst. , vol. 55, no. 11, pp. 7651–7662, 2025. [19] S. Chen and W. Dong, “A2visr: An active and adaptive ground–aerial localization system using visual inertial and single-range fusion,” IEEE Trans. Ind. Electron. , vol. 73, no. 5, pp. 7340–7349, 2026. [20] S. Hu, Z. Fang, Y. Deng, X. Chen, and Y. Fang, “Collaborative perception for connected and autonomous driving: Challenges, possible solutions and opportunities,” IEEE Wireless Commun. , vol. 32, no. 5, pp. 228–234, 2025. [21] B. Gao, J. Liu, H. Zou, J. Chen, L. He, and K. Li, “Vehicle-road-cloud collaborative perception framework and key technologies: A review,” 
+
+IEEE Trans. Intell. Transp. Syst. , vol. 25, no. 12, pp. 19 295–19 318, 2024. [22] Y. Hou, B. Zou, M. Zhang, S. Yang, Y. Zhang, J. Zhuo, S. Chen, J. Chen, and H. Ma, “Agc-drive: A large-scale dataset for real-world aerial-ground collaboration in driving scenarios,” Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 38, 2025. [23] Y. Zhang, B. Chen, J. Qin, F. Hu, and J. Hao, “Coopercept: Cooperative perception for 3d object detection of autonomous vehicles,” Drones ,vol. 8, no. 6, p. 228, 2024. [24] R. Hao, H. Yu, J. Zhong, C. Wang, J. Wang, Y. Kan, W. Yang, S. Fan, H. Yin, J. Qiu, Y. Mu, J. Sun, L. Chen, W. Zimmer, D. Zhang, S. Zhang, M. Schwager, P. Luo, and Z. Nie, “Research challenges and progress in the end-to-end v2x cooperative autonomous driving competition,” in 
+
+Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV) , 2025, pp. 1828–1839. [25] X. Li, J. Yin, W. Li, C. Xu, R. Yang, and J. Shen, “Di-v2x: Learning domain-invariant representation for vehicle-infrastructure collaborative 3d object detection,” in Proc. AAAI Conf. Artif. Intell. (AAAI) , vol. 38, no. 4, 2024, pp. 3208–3215. [26] Y. Xu, X. Li, H. Yuan, Y. Yang, and L. Zhang, “Multi-task learning with multi-query transformer for dense prediction,” IEEE Trans. Circuits Syst. Video Technol. , vol. 34, no. 2, pp. 1228–1240, 2024. [27] N. Gao, Y. Shan, X. Zhao, and K. Huang, “Learning category- and instance-aware pixel embedding for fast panoptic segmentation,” IEEE Trans. Image Process. , vol. 30, pp. 6013–6023, 2021. [28] H. Zhang, Y. Tian, K. Wang, W. Zhang, and F.-Y. Wang, “Mask ssd: An effective single-stage approach to object instance segmentation,” IEEE Trans. Image Process. , vol. 29, pp. 2078–2093, 2020. [29] X. Wang, Z. ZHUANG, F. YE, and Y. Zhang, “Mtsam: Multi-task fine-tuning for segment anything model,” in Int. Conf. Learn. Represent. (ICLR) , Y. Yue, A. Garg, N. Peng, F. Sha, and R. Yu, Eds., vol. 2025, 2025, pp. 95 268–95 289. [30] Z. Chen, J. Wu, W. Wang, W. Su, G. Chen, S. Xing, M. Zhong, Q. Zhang, X. Zhu, L. Lu, B. Li, P. Luo, T. Lu, Y. Qiao, and J. Dai, “Internvl: Scaling up vision foundation models and aligning for generic visual-linguistic tasks,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) ,2024, pp. 24 185–24 198. [31] Y. Lu, S. Huang, Y. Yang, S. Sirejiding, Y. Ding, and H. Lu, “Fedhca2: Towards hetero-client federated multi-task learning,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2024, pp. 5599–5609. [32] H. Sun, Y. Song, J. Liu, J. Hu, Y.-W. Chen, and L. Lin, “One framework to rule them all: Unifying multimodal tasks with llm neural-tuning,” 
+
+Pattern Recognit. , vol. 171, p. 112275, 2026. [33] M. Long, Z. Cao, J. Wang, and P. S. Yu, “Learning multiple tasks with multilinear relationship networks,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 30, 2017. [34] B. Yang, F. Li, S. Zhao, W. Wang, J. Luo, H. Pu, M. Zhou, and Y. Pi, “Mtmlnet: Multi-task mutual learning network for infrared small target detection and segmentation,” IEEE Trans. Image Process. , vol. 34, pp. 4414–4425, 2025. [35] D. Kim, S. Woo, J.-Y. Lee, and I. S. Kweon, “Dense pixel-level interpretation of dynamic scenes with video panoptic segmentation,” 
+
+IEEE Trans. Image Process. , vol. 31, pp. 5383–5395, 2022. [36] L. Wang, H. Liu, S. Zhou, W. Tang, and G. Hua, “Instance motion tendency learning for video panoptic segmentation,” IEEE Trans. Image Process. , vol. 32, pp. 764–778, 2023. [37] F. Yu, H. Chen, X. Wang, W. Xian, Y. Chen, F. Liu, V. Madhavan, and T. Darrell, “Bdd100k: A diverse driving dataset for heterogeneous multitask learning,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2020, pp. 2636–2645. [38] H. Yu, Y. Luo, M. Shu, Y. Huo, Z. Yang, Y. Shi, Z. Guo, H. Li, X. Hu, J. Yuan et al. , “Dair-v2x: A large-scale dataset for vehicle-infrastructure cooperative 3d object detection,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2022, pp. 21 361–21 370. [39] A. Zheng, C. Zhang, C. Li, J. Tang, and C. Tan, “Multi-query vehicle re-identification: Viewpoint-conditioned network, unified dataset and new metric,” IEEE Trans. Image Process. , vol. 32, pp. 5948–5960, 2023. [40] H. Yu, W. Yang, H. Ruan, Z. Yang, Y. Tang, X. Gao, X. Hao, Y. Shi, Y. Pan, N. Sun et al. , “V2x-seq: A large-scale sequential dataset for vehicle-infrastructure cooperative perception and forecasting,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2023, pp. 5486–5495. [41] J. Wang, X. Cao, J. Zhong, Y. Zhang, Z. Han, H. Yu, C. Zhang, L. He, S. Xu, and J. Wang, “Griffin: Aerial-ground cooperative detection and tracking dataset and benchmark,” in Proc. AAAI Conf. Artif. Intell. (AAAI) ,vol. 40, no. 12, 2026, pp. 9867–9875. [42] K. Fukunaga and D. M. Hummels, “Bayes error estimation using parzen and k-nn procedures,” IEEE Trans. Pattern Anal. Mach. Intell. , no. 5, pp. 634–643, 1987. [43] X. Yao, Y. Wang, P. Zhu, W. Lin, J. Li, W. Li, and Q. Hu, “Socialized learning: Making each other better through multi-agent collaboration,” in 
+
+Proc. Int. Conf. Mach. Learn. (ICML) , vol. 235, 2024, pp. 56 927–56 945. [44] L. Lin, J. Zhang, and J. Liu, “Mutual information driven equivariant contrastive learning for 3d action representation learning,” IEEE Trans. Image Process. , vol. 33, pp. 1883–1897, 2024. [45] C. Cui, Y. Ren, J. Pu, J. Li, X. Pu, T. Wu, Y. Shi, and L. He, “A novel approach for effective multi-view clustering with information-theoretic perspective,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine, Eds., vol. 36. Curran Associates, Inc., 2023, pp. 44 847–44 859. [46] J. Shao, S. Chen, Y. Li, K. Wang, Z. Yin, Y. He, J. Teng, Q. Sun, M. Gao, J. Liu et al. , “Intern: A new learning paradigm towards general vision,” 
+
+arXiv preprint arXiv:2111.08687 , 2021. [47] S. Baek, S. Lee, H. Jo, H. Choi, and D. Min, “Tadformer: Task-adaptive dynamic transformer for efficient multi-task learning,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2025, pp. 14 858–14 868. [48] L. Wei, Y. Ma, Z. Lin, F. Wang, C. Jin, H. Zhao, and D. Chen, “Few-shot incremental multi-modal learning via touch guidance and imaginary vision synthesis,” in Proc. Int. Joint Conf. Artif. Intell. (IJCAI) , 2025, pp. 2045–2053. [49] K. Huang, Y. Zhang, Y. Zhou, T. Xu, and T. Zhou, “Bidirectional channel-selective semantic interaction for semi-supervised medical segmentation,” 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 7, p. 5040–5048, Mar. 2026. 13 
+
+[50] F. Zhang, Z. Gu, and H. Wang, “Decoding with structured awareness: integrating directional, frequency-spatial, and structural attention for medical image segmentation,” in Proc. AAAI Conf. Artif. Intell. (AAAI) ,vol. 40, no. 15, 2026, pp. 12 421–12 429. [51] F. Gu, Y. Li, X. Long, K. Ji, C. Chen, Q. Gu, and Z. Ni, “Mambaseg: Harnessing mamba for accurate and efficient image-event semantic segmentation,” in Proc. AAAI Conf. Artif. Intell. (AAAI) , vol. 40, no. 6, 2026, pp. 4302–4310. [52] Q. Cai, G. Yan, F. Zhang, C. Zhang, Z. Liu et al. , “Semc: Structure-enhanced mixture-of-experts contrastive learning for ultrasound standard plane recognition,” in Proc. AAAI Conf. Artif. Intell. (AAAI) , vol. 40, no. 4, 2026, pp. 2543–2551.

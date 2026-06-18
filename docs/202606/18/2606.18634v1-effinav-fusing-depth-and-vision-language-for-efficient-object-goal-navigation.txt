@@ -1,0 +1,334 @@
+Title: EffiNav: Fusing Depth and Vision-Language for Efficient Object Goal Navigation
+
+URL Source: https://arxiv.org/pdf/2606.18634v1
+
+Published Time: Thu, 18 Jun 2026 00:24:34 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# EffiNav: Fusing Depth and Vision-Language for Efficient Object Goal Navigation 
+
+Zecheng Yin, Benedict Jun Ma Systems Hub of Intelligence Transportation HKUST(GZ) Guangzhou, Guangdong 
+
+Abstract —To locate a target object while exploring the un-known environment is a fundamental capability for autonomous agents, with applications ranging from search-and-rescue to field robots. A simplified version of such task is Object Goal Navigation (ObjNav). In ObjNav, successful arrival at the target object provides a basic measure of performance; however, the efficiency of the navigation trajectory is equally important, as it indicates how intelligently the agent explores and how much time remains for subsequent tasks. In unknown environments, the key to efficient navigation lies in deciding where to explore next. While many prior works aim to address this core challenge and achieved promising performance in certain settings, recent training-based models and non-training frameworks still suffer from generalization and efficiency issues respectively, which in the worst cases can lead to excessive exploration of already-visited ar-eas or redundant back-and-forth motion. We evaluate EffiNav on two widely used simulation benchmarks Habitat Matterport 3D (HM3D) and Open-Vocabulary Object goal Navigation (OVON), and further validate its effectiveness on physical robots in real-world settings. We conduct failure analysis on massive simulation episodes. With minimal modification, we also extend EffiNav to a memory-augmented ObjNav task on the GOAT-BENCH dataset, demonstrating its adaptability beyond standard ObjNav settings. Across two standard metrics—Success Rate (SR) and Success weighted by Path Length (SPL), EffiNav matches or outperforms recent baselines, reflecting its efficiency, robustness, and practical applicability. Recognizing the different emphases of the two datasets, the performances reveals this framework is more balanced and generalizable for efficient ObjNav. Code and datasets are publicly available. 
+
+I. I NTRODUCTION 
+
+ObjNav is a one-stage navigation task which requires robot to directly go to the target object in an unknown environment .Unlike map-based approaches, ObjNav does not assume prior knowledge of the scene; instead, the robot must intelligently explore the environment while minimizing the path length to the goal. This imposes high demands on the navigation strategy in terms of spatial perception, active exploration, and semantic scene understanding, as the surrounding context often provides critical cues for efficient search. For instance, since pots are typically found in kitchens, a smart agent should prioritize locating kitchen-like regions to accelerate task completion. It is important to distinguish ObjNav from Vision-and-Language Navigation in Continuous Environments (VLN-CE) [10]. In VLN-CE, the agent receives complex, temporally or spatially extended natural language instructions that oper-ates with prior information [15, 11, 5]. In contrast, ObjNav provides no environmental prior at initialization, making most VLN-CE frameworks ill-suited for this setting due to their re-liance on structured instructions and global scene knowledge. To equip agents with intelligent exploration capabilities, three main lines of research have emerged: 
+
+a) End-to-end foundation models.: This type of method usually integrates diverse navigation tasks such as Embodied Question Answering and Human Following, into one universal foundation model[35, 19, 34, 36] with decent performance across multiple tasks. However, developing such models de-mands a strong base Vision-Language Model (VLM), large-scale self-collected simulation and real-world data, and sub-stantial computational resources for training. Although these models exhibit broad task versatility, their performance on specific ObjNav tasks often remains suboptimal. 
+
+b) Learning-based modular architectures.: This ap-proach trains a core decision or guidance module to guide the robot’s next exploration area, often integrating components within a Simultaneous Localization and Mapping (SLAM) pipeline. Such methods offer flexibility in design. In top-down map wise, some works employ diffusion models to predict either object locations [7] or future navigation trajectories [29]. 
+
+Others operate directly on egocentric observations, using diffusion-based policies to generate local trajectory plans that steer the robot toward unexplored regions [31, 20, 2]. However, these approaches are highly sensitive to training data quality and often struggle with generalization across object categories, excessive exploration, and environmental diversity. 
+
+c) Training-free ObjNav frameworks.: With the rapid advancement of Vision-Language Models (VLMs), recent works have explored leveraging their reasoning capabilities for navigation. These frameworks design algorithmic strate-gies—based on egocentric observations [6, 25, 24], top-down maps [3, 27, 30], or hybrid representations [26], to interpret visual-language represented environment-goal information and select next exploration area. They often finalize the navigation by locating the goal using detection. Although such methods require careful engineering of the navigation strategy, they offer several compelling advantages over learning-based ap-proaches: training-free, eliminating the need for data collection and model training, easy to extend, readily generalizable to real-world settings, and robust across diverse environments. ObjNav is evaluated using two complementary metrics: Success Rate (SR), the fraction of episodes in which the 
+
+> arXiv:2606.18634v1 [cs.RO] 17 Jun 2026
+
+target object is successfully reached; Success weighted by Path Length (SPL), which penalizes inefficient trajectories by nor-malizing success with respect to path length. To better capture navigation efficiency among successful trials, we introduce a new metric Normalized Efficiency on Successes (EoS) ,formulated in Equation 2. EoS quantifies how efficiently an agent reaches the goal when it succeeds, providing a finer-grained assessment beyond SR and SPL. An intelligent ObjNav should have balance on these three measurements. For example, exhaustive full-scene exploration may guarantee success but yields poor SPL whereas efficient navigation with low SR compromises reliability and practical usability. Due to inherent limitations in training paradigms or design flaws, previous strategies could have excessive trajectory or re-exploration in visited areas in their navigation, thus causing inefficiency. To address the efficiency while balancing others, we propose EffiNav. EffiNav is a depth-aware intelligent non-training framework for ObjNav, utilizing reasoning ability of opensource VLMs to perceiving the surroundings and depth to drive the robots and incorporates modules to prevent history re-explorations. Furthermore, we extend EffiNav with an ob-ject memory module and evaluate its performance on memory-augmented navigation, demonstrating both its extensibility and consistent efficiency gains. II. R ELATED WORKS 
+
+In simulation, ObjNav is typically evaluated with HM3D [17] and OVON [28] two standard benchmarks. Both are built on MatterPort3D [4] indoor scenes but emphasize different challenges: HM3D focuses on navigation difficulty, with only 5 object categories and often longer exploration; OVON emphasizes object generalization, offering richer goals (e.g., “electric box”, “stair railing”) but relatively simpler navigation. Further details are provided in Section IV-A. Recent navigation foundation models have shown improve-ments in ObjNav. For instance, [34] achieves the best reported performance in both SR and SPL on the HM3D dataset, outperforming previous baselines[27]. However, this perfor-mance comes at a substantial cost of pre-collecting 483,000 samples in HM3D and training of 40 NVIDIA H800 GPUs for approximately 35 hours, totaling 1400 GPU hours[34]. Moreover, its performance drops considerably on OVON, which features a larger variety of target objects yet is com-paratively easier in terms of spatial navigation within the same indoor environment. Models may produce erratic back-and-forth actions and trajectories when encountering out-of-domain language instructions or unfamiliar environments. This indicates that without proper data, foundation models struggle to generalize across diverse object goals, despite being trained in the same environment, which is a key challenge for future foundation model in ObjNav. Recent modular trained models particularly diffusion-based approaches have demonstrated impressive capabilities in ego-centric instruction following [33, 23]. As the representative models of the previous[31, 20, 2] , [33, 23] can diffuse a local path in ego-centric observation to follow a tracking instruc-tion such as “Go after the boy” with amazing performance. However, such approaches appear less suited to long-horizon ObjNav tasks. For example, despite training on 1.02 million episodes using 56 NVIDIA H100 GPUs for approximately 72 hours, [33] achieves only about 67% of the SR performance of a non-training framework [26] on OVON, the dataset with abundant goal categories but relatively straightforward navigation. It remains to be seen whether these methods can deliver competitive results on HM3D which demands sustained, efficient exploration over extended trajectories. The two types of non-training frameworks are develop-ing very fast as well. Egocentric observation–based ap-proaches [8, 6, 25] generate candidate short-term exploration regions from the current egocentric image and prompt a VLM to reason about the next region to reach. Although with promising ObjNav performance, they suffer from inherent limitations: the agent can easily become trapped in corners, where no valid frontal egocentric observation is available, making it difficult to escape, even though the “turn around” action option is explicitly offered on the image[6]. Moreover, since the current VLM still lacks the ability to retain or incorporate historical information, it often revisits previously explored areas, which reduces navigation efficiency. On the other hand, Frontier-based frameworks [27, 24, 3]leverage CLIP [16] or VLMs to select the most promising frontier from a list of candidate frontiers in the explored area, and finalize navigation by detecting the goal upon arrival. For instance, [3] introduces a layer-aware cognitive graph to discover good “landmarks” to be explored next and a spinning Voronoi tree in explored area for travels between landmarks, while ensuring a high SR, but resulting a low SPL inevitably. In single-robot ObjNav, a worst-case scenario for such schemes involves the robot repeatedly traveling between distant frontiers, generat-ing inefficient back-and-forth trajectories, especially for large scenes, since the cost of traversing between far-apart frontiers increases substantially, due to their failure to incorporate a global top-down map to validate the spatial reasonableness of the frontier choice. In this paper, to address the aforementioned limitations of existing training-free approaches, we propose EffiNav, a training-free, VLM-based framework for efficient ObjNav. EffiNav features a depth-aware design that identifies valid candidate regions for navigation, as well as a local- and global-aware intelligent decision scheme that integrates egocentric visual observations with top-down spatial reasoning to validate the reasonableness of each next-to-go region selection. Besides the advantages contributing to the efficient and intelligent navigation, we conducted extensive memory-augmented Ob-jNav on GOAT-BENCH [9], which further demonstrates the extensibility and potential of our framework. III. F RAMEWORK 
+
+As illustrated in Figure 1, our framework is lightweight and requires only an RGB-D sensor and odometry to localize the robot. EffiNav leverages an open-source VLM as its reason-ing and decision-making core, enhanced with an intelligent selection-and-verification scheme to enable efficient ObjNav. 
+
+A. Perception and Intelligent Guidance 
+
+This section describes the intelligent control core of EffiNav. After generating a potential area masks based on depth thresholds (e.g. greater than 5m), these regions are labeled with numerical identifiers at their corresponding positions in the egocentric view, serving as candidate exploration options for VLM-based decision-making ( Module a in Figure 1). 
+
+Module a (Ego Region Selecting) implements a depth-aware intelligent exploration selection mechanism. The RGB in-formation from these candidate regions provides contextual environmental cues to the VLM, enabling it to reason about which area is most suitable for exploration. Following prior work [25, 6, 8, 26], this process is formulated as a Vision Question Answering (VQA) task, with prompts such as “To find the bed, which of the given areas is the best to reach?”. This module ensures that the decision core receives rich and immediate feedback about the surrounding environment and available exploration candidates. 
+
+Module b (Global-wise Checking) performs global consis-tency verification. After the VLM selects the best candidate region in the egocentric view, this region is projected onto the gradually constructed top-down map and highlighted with a distinct color. This colored map is then fed back as visual input to a second VQA query to the same VLM decision core, using a prompt such as: “Is the colored area a good option to find the bed?” The VLM thus evaluates the spatial reasonableness of the selected option from a global perspective. If the decision core rejects the choice, the framework discards this candidate and returns to the previous selection step ( Module a ) to choose second best alternative. To prevent redundant exploration, we incorporate a history-aware pruning mechanism: any candidate region that lies within a predefined distance of the explored area (the gray area in Figure 1) boundary is considered valid; regions beyond this margin are deemed already sufficiently explored and are removed from the candidate pool. There are cases where the global verification step rejects all candidate options, due to revisiting previously explored regions or skewed viewpoints. In this case, we use the nearest frontier point (the purple dots in Figure 1) as a backup target. Here, “frontier” refers simply to the (i,j) pixel coordinates along the boundary of the explored area in the top-down map, rather than a sophisticated data structure employed by [24, 3]. This module provides a guarantee for continued exploration. In practice, however, this fallback is rarely invoked. 
+
+B. Destination Confirmation and Path Planning 
+
+After global-wise verification, the selected regions which projected from the 2D egocentric image onto the top-down map typically form a set of short-term destination candidate areas. Destination Confirmation ( module c in Figure 1) selects the nearest candidate as the immediate navigation goal. If none of the candidates are reachable on the initial attempt, the module iteratively dilates the destination mask up to a predefined maximum number of iterations. In this way, the robot can approach as closely as possible to the intended target while maintaining feasibility. Illustrated in Figure 2, our path planning module ( Module d 
+
+in Figure 1) dynamically computes a collision-free trajectory to the confirmed exploration point using A-star search, once the current path collides with any obstacles, as new obstacles are revealed during exploration. To enhance robustness and mitigate issues caused by imperfect scene reconstruction, we pre-process the map by dilating obstacle regions to avoid collision or step into areas where structural elements are absent. Additionally, if necessary, both the robot’s current pose and the destination are slightly adjusted to lie within free space before path computation. The resulting path is then executed via low-level path-following actions, such as “turn left” or “move forward.” These discrete commands are generated based on the relative position and orientation between the robot’s current state and the next waypoint along the planned trajectory. 
+
+C. Map Construction 
+
+As we mentioned above at I, ObjNav has no pre-constructed map in prior. We use depth and odometry information to gradually construct the environment map. To begin with, the robot performs a full 360° rotation to capture its immediate surroundings and establish a basic local map. Afterwards, the robot continuously updates the environment map by inte-grating incoming depth observations as it navigates. Notably, a complete map is not required: in most cases, navigation succeeds well before full exploration, as our framework often locates the target object after traversing only a fraction of the environment. 
+
+D. Finalization and Termination 
+
+The finalization of the ObjNav is the navigation towards target object when detector locates it at ego-observation before termination. Our framework has an object detector provided by [22] to identify the target object in the 2D RGB observation. o improve localization accuracy and mitigate spatial planning errors, we further refine the detection by segmenting the object using [32]. The resulting instance mask, combined with corre-sponding depth data, is then projected onto the top-down map to be the final goal region. The robot subsequently navigates toward this projected destination. During the reaching process, no more VLM guidance is provided. During this final approach phase, no additional VLM-based guidance is needed. And during the process, refinement module periodically checks every five steps, whether the goal position should be updated based on the latest observation. Knowing when to autonomously terminate navigation upon reaching the target object is crucial. In our framework, besides max-step limits, termination is triggered based on the pixel-wise distance between the robot’s current position and the goal region on the map. Fig. 1. Overview of the proposed EffiNav framework. The EffiNav processes RGB-D input to generate region masks, selects ego-centric regions via VLM reasoning (a), performs global consistency checks (b), and either proceeds to destination confirmation (c) or fallback frontier exploration. If the target is found, it undergoes segmentation and projection of the target before path planning and execution.  
+
+> Fig. 2. Illustration of path planning. Goal: TV monitor.
+
+IV. S IMULATION EXPERIMENT 
+
+To testify and evaluate our framework, we conduct ObjNav on two popular ObjNav datasets HM3D and OVON. We further conducted memory ObjNav on GOAT-BENCH to see the potential extension of our frameworks. 
+
+A. Datasets and Environments 
+
+HM3D[17], OVON[28], and GOAT-BENCH[9] are all object-goal navigation benchmarks built upon the Matterport3D[4] indoor scene dataset. Matterport3D provides a large collection of vivid indoor environments with decent reconstructed 3D geometry. For the ObjNav benchmarks HM3D and OVON, each episode specifies a robot’s starting position, the location of the target object, and the shortest geodisec distance to it. Both datasets include separate training and evaluation splits. As a training-free framework, we evaluate solely on the official validation sets—specifically,  
+
+> Fig. 3. Illustration of some “easy navigation” in OVON. Goal: fireplace, window frame. The final observation and the top-down trajectories (red lines in top-down map). In these episodes, the robot can detect the target from the observation with a self-rotation in start position.
+
+the “val” split of HM3D and the “unseen val” split of OVON to ensure a fair comparison with learning-based baselines without using any training data. HM3D has 2019 episodes in 20 scenes and OVON has 3000 episodes differently separated in 35 scenes. GOAT-BENCH is a memory-augmented ObjNav dataste which organizes episodes into groups that sequentially involve either new or previously encountered target objects, with memory assistance. Following [9] benchmark and [24], we report results on the first group of the “unseen val” split. All simulations are implemented using the Habitat platform [14]. Although both HM3D and OVON are object-goal navigation (ObjNav) benchmarks, they emphasize different aspects of the task: HM3D places greater emphasis on navigation capabil-ity , whereas OVON focuses more on generalization across diverse object categories . As shown in Figure 5, the target objects in HM3D are limited to a small set of common indoor categories—such as “bed” and “TV monitor”, while OVON includes a broader, long-tailed distribution of object classes, including more complex languages like “table lamp” and “lamp table”, which emphasizes the language understanding abilities. However, the navigation difficulty obviously differs between the two datasets, as reflected in the distribution of Fig. 4. Distribution of goal geodesic distance in HM3D and OVON  
+
+> Fig. 5. Distribution of goals in HM3D and OVON
+
+geodesic distances from the agent’s initial position to the goal, illustrated in Figure 4. HM3D has a higher mean geodesic distance (7.60 m) and median (6.02 m), compared to OVON’s mean of 5.81 m and median of 5.07 m. Moreover, OVON contains a large number of goals within 4 meters of the start location, whereas most HM3D goals fall in the 3–6 meter range. Notably, objects within 3 meters are often visible from the initial pose, effectively reducing the task to near-range detection rather than active exploration. The “easy navigation” is shown in Figure 3. Because of the differences above, results from one single dataset could not tell the full picture, both are needed to fairly assess navigation performance .
+
+B. Metrics and Settings 
+
+The metrics of ObjNav are Success Rate (SR) and Success weighted by Path Length (SPL)[1]. SR measures the propor-tion of episodes in which the robot successfully reaches the target object. SPL evaluates navigation efficiency by weighting success based on how close the agent’s path is to the opti-mal geodesic shortest path. The upper bound of SPL equals SR—this occurs only when every successful episode follows a perfectly optimal trajectory. These two metrics are also used in the memory-augmented ObjNav task on GOAT-BENCH. SR = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+Ii, SPL = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+Ii · L∗
+
+> i
+
+max( Li, L ∗ 
+
+> i
+
+) , (1) where Ii = 1 if the agent succeeds in episode i, and 
+
+0 otherwise; L∗ 
+
+> i
+
+is the shortest-path distance (the geodesic distance in dataset) from start to goal, and Li is the agent’s traversed path length. We introduce a new metric, Normalized Efficiency on Successes (EoS) , which purely measures navigation efficiency conditioned on successful episodes, as defined in Eq. 2. EoS is computed as the ratio of SPL to SR. We use this to disscuss the stability of navigation effectiveness of our framework. EoS = SPL SR = 1
+
+Nsucc 
+
+X
+
+> i:Ii=1
+
+L∗
+
+> i
+
+Li
+
+, (2) where Nsucc = PNi=1 Ii is the number of successful episodes, and we assume Li ≥ L∗ 
+
+> i
+
+for all i (so max( Li, L ∗ 
+
+> i
+
+) = Li). A detailed derivation is provided in . We introduce the hardware and settings of the experiments. We used opensouce VLM Qwen2.5VL-7B[22] in decision modules and detection as well. Following [26], the segmenta-tion model is MobileSAM[32]. The atomic actions are turn left/right, move forward, terminate. Our turn angle is 30°, and move forward distance is 2.5 meter. We conduct the experiments on one single A6000 GPU. The HFOV of robot RGB-D sensor is set to be 90°. The threshold of reaching is 15 pixels. The max step limitation is 500. 
+
+C. Performance Statistics and Analysis 
+
+In Table I and Table III, each Room id ( R.id in Table) corresponds to a different indoor scene. We encourage a thorough analysis of per-scene performance, as the quality of geometric information varies significantly across scenes, which greatly influences navigation performance, especially for depth-aware frameworks. Due to space limitations, we report full results on HM3D and GOAT-BENCH, clips from OVON. Complete statistics are provided in the supplementary materials.                                                                                                                    
+
+> TABLE I FULL PERFORMANCE IN HM3D R. id SR ↑SPL ↑R. id SR ↑SPL ↑R. id SR ↑SPL ↑
+> 800 70.7 44.1 802 58.6 38 813 70.7 49.2 814 44.4 26.5 820 29.3 21.3 824 75.8 50.6 829 69.7 47.3 832 33.3 20.1 835 40.4 31.5 839 46.2 34.9 843 50.5 33.0 848 89.9 58.7 853 69.7 44.8 873 35.5 22.4 876 58.6 44.7 877 63.6 37.9 878 26.3 15.8 880 68.4 46.1 890 53.5 39.2 891 44.4 28.2 Avg 55.0 36.7
+> TABLE II FULL EOSIN HM3D R. id EoS ↑R. id EoS ↑R. id EoS ↑R. id EoS ↑
+> 800 62.38 802 64.85 813 69.59 814 59.68 820 72.70 824 66.75 829 67.86 832 60.36 835 77.97 839 75.54 843 65.35 848 65.29 853 64.28 873 63.10 876 76.28 877 59.59 878 60.08 880 67.40 890 73.27 891 63.51 Median 65.32 Mean 66.79 CV 10.083
+
+Our framework demonstrates consistent performance across different scenes . Compared with ourself, as shown in                                                                                                                                                                                          
+
+> 1CV stands for Coeffecient of Variant, formulated as std/mean. TABLE III
+> FULL PERFORMANCE IN OVON R. id SR ↑SPL ↑R. id SR ↑SPL ↑R. id SR ↑SPL ↑
+> 800 80.2 49.5 802 63.6 35.7 803 62.2 45.1 808 66.7 50.9 810 87.5 67.9 813 88.9 55.7 814 55.2 34.2 815 74.8 51.3 820 83.9 65.4 821 48.1 34.0 823 53.6 39.1 824 67.4 44.0 827 53.3 35.0 829 72.5 53.3 831 47.6 33.3 832 40.7 23.7 835 61.6 42.4 839 66.0 43.1 843 55.6 33.5 844 54.4 31.9 847 73.4 61.2 848 67.0 45.5 849 69.1 49.5 853 66.9 40.6 861 47.4 33.0 862 68.3 45.6 869 63.5 38.7 871 53.7 34.4 873 64.7 55.8 876 50.0 42.0 877 60.2 47.6 878 68.2 54.4 880 68.9 51.0 890 55.2 40.2 891 64.0 40.0 894 44.4 26.3
+> Avg 63.0 43.7
+> TABLE IV FULL EOSIN OVON R. id EoS ↑R. id EoS ↑R. id EoS ↑R. id EoS ↑
+> 800 61.72 802 56.13 803 72.51 808 76.31 810 77.60 813 62.65 814 61.96 815 68.58 820 77.95 821 70.69 823 72.95 824 65.28 827 65.67 829 73.52 831 69.96 832 58.23 835 68.83 839 65.30 843 60.25 844 58.64 847 83.38 848 67.91 849 71.64 853 60.69 861 69.62 862 66.76 869 60.94 871 64.06 873 86.24 876 84.00 877 79.07 878 79.77 880 74.02 890 72.83 891 62.50 894 59.23 Median 68.71 Mean 69.09 CV 0.113
+
+Tables II and IV, EffiNav achieves remarkably stable results across diverse scenes, with a mean EoS of 66.33, median of 65.35, and coeffient of variant of only 0.085 on HM3D and 0.113 on OVON. Notably, even though all scenes are decently reconstructed, the absence constructions in house layouts vary significantly, leading to substantial performance fluctuations [21], as reflected in unstable SR and SPL across scenes, especially in depth-aware methods like ours. Despite of that, EffiNav maintains consistent EoS despite environmental variations, highlighting its robustness.                                                                
+
+> TABLE V BASELINE COMPARISON IN HM3D, OVON Method Train HM3D OVON cost SR ↑SPL ↑EoS ↑SR ↑SPL ↑EoS ↑
+> PIRLNav[18] •64.1 27.1 42.3 ---PIVOT[13] •24.6 10.6 43.1 ---VLFM 2[27] 52.5 30.4 57.9 35.2 19.6 55.7 DyNaVLM[8] 45.0 23.2 51.5 ---CogNav[3] 72.5 26.2 36.1 ---UniNavid[34] ••• 73.7 37.1 50.3 39.5 19.8 50.1 NavFom[33] ••• ---43.6 31.3 71.8
+> Ours 55.0 36.7 66.8 63.0 43.7 69.1
+
+EffiNav has a balance between efficiency, navigation capability, and goal generalization. Compared with different baselines, Table V shows that our method delivers well-rounded performance on both benchmarks. Bold denotes the 
+
+> 2Note: The OVON performance of VLFM[27] is taken from [34].
+
+best performance; italics indicate the second-best. While the foundation model UniNav [34], benefiting from large-scale self-collected training data (483,000 episode samples) and heavy training (40 NVIDIA H800 GPUs for approximately 35 hours)[34], evaluated on 2019 episodes, achieves top re-sults, its performance drops considerably on OVON due to the challenge of generalizing to diverse object categories. In contrast, with the efficiency advantage, EffiNav remains highly competitive, ranking second on HM3D and first on OVON, demonstrating advantages in both navigation skill and semantic generalization. 
+
+Our framework performs efficient navigation . As shown in Table V, EffiNav outperforms nearly all baselines in SPL and achieves the highest EoS on both HM3D and OVON. This stems from our core design principle: prioritizing nav-igation efficiency in a training-free framework. The depth-aware perception and the joint confirmation from egocentric observations and top-down visual-language reasoning together contribute efficient decision-making in ObjNav. 
+
+Our framework outperforms non-training baselines and rivals trained foundation models . Remarkably, EffiNav re-mains highly competitive against large-scale trained models yet without any cost of training or data collection. This ad-vantage is especially valuable in real-world cross-environment scenarios, where adaptability without retraining is critical. In contrast to other training-free methods such as VLFM [27] and CogNav [3], our approach employs a depth-driven, ego-centric selection strategy combined with global history-aware guidance that actively avoids revisiting explored regions. This relieves redundant back-and-forth traversal across frontiers in worst cases, which directly contributes to our superior ObjNav performance. 
+
+D. Failure Statistics and Analysis  
+
+> Fig. 6. Failure analysis results. Failure reson and item distribution in HM3D, OVON. Note the X-axis is percentage of their own dataset.
+
+Figure 6 summarizes failure statistics across two bench-marks: 906 failures out of 2,019 episodes on HM3D and 993 failures out of 3,000 episodes on OVON. Main causes are as follows:  
+
+> •
+
+Constraint Map : The agent exhaustively explores all accessible free space in the 2D map but fails to locate the target object.  
+
+> •
+
+Semantic Understanding : Failures due to fine-grained semantic confusion—e.g., mistaking a regular lamp for a table lamp, a desk chair for a regular chair, or a kitchen cabinet for a bathroom cabinet. As shown in Fig. 7. Some failure cases in Others , such as missing structural elements, reflective or transparent surfaces (e.g., mirrors, windows), and visual occlu-sions.  
+
+> Fig. 8. EffiNav search trajectories toward refrigerator cabinet and bed as navigation goals. The agent avoids unnecessary hesitation in non-relevant rooms, enabling efficient object navigation.
+
+Figure 6, “shelf” and “kitchen cabinet” are among the most challenging object categories to identify correctly.  
+
+> •
+
+Category Mismatch : The object detector retrieves an instance from an incorrect category. In HM3D, this often occurs when a highly skewed 2D view of a table is misinterpreted as a bed (statistics in Figure 6).  
+
+> •
+
+Others : Failures caused by map reconstruction artifacts, occlusion in 2D detection, path planning errors, or other miscellaneous factors, shown in Figure 6.  
+
+> •
+
+Timeout . The robot exceeds the maximum allowed num-ber of steps and terminates. Notably, the distribution of failure modes differs between the two datasets. In HM3D, the dominant cause is navigation-related (primarily Constraint Map and Timeout ), reflecting its emphasis on robust exploration and mobility. In contrast, OVON exhibits a higher proportion attributed to Semantic Understanding and Category Mismatch , emphasizing its focus on object grounding under diverse goals. The navigation settings in OVON are comparatively simpler, accounting for a smaller proportion (around 25%) of Constraint Map failures than in HM3D (around 45%). Additionally, a non-negligible fraction of episodes in both datasets terminate due to Timeout . Some scenes genuinely require a larger step budget while others possibly performed inefficient exploration.  
+
+> Fig. 9. Trajectories on the same goal “refrigerator cabinet” with different starting position in the same room, ending up with the same observation, demonstrating the consistent exploration strategy of our framework.
+
+E. Case study 
+
+As shown in Figure 8 and Figure 9, our robot was able to locate the target object without fully exploring the environment or reconstructing the entire house. We selected these long-horizon navigation episodes to highlight the active exploration capability of our framework. Benifit from our path planning module, even though no valid ego observation is provided, robot can escape from corners. 
+
+F. Extensive evaluation on Memory ObjNav 
+
+To evaluate the extensibility of our framework, we extend it to the memory-augmented object-goal navigation (Memory ObjNav) task on GOAT-BENCH by incorporating a module that records the locations of previously found objects. The agent is required to locate a sequence of target objects in the specified order with possible repetitions, and performance is evaluated using group-level Success Rate (SR) and SPL. Results are reported in Table VI.                     
+
+> TABLE VI COMPARISON OF MEMORY OBJ NAV .
+> Method Success Rate ↑SPL ↑
+> GOAT-Bench Baselines
+> Modular GOAT 24.9 17.2 Modular CLIP on Wheels 16.1 10.4 SenseAct-NN Skill Chain 29.5 11.3 SenseAct-NN Monolithic 12.3 6.8
+> Open-Sourced VLM Exploration
+> 3D-Mem w/o memory 40.6 14.6 3D-Mem 49.6 29.4 Ours 52.3 48.5
+
+3DMem [24] is another training-free, frontier-based explo-ration framework for Memory ObjNav. It follows VLFM [27] in using a VLM rather than CLIP to pre-filter and select frontiers for further exploration. However, no results on HM3D or OVON are reported in [24]. The majority of the baseline numbers in Table VI are taken from this work. As illustrated in the Table VI, our framework achieved best performance in both two aspects. Our SPL is far surpass baselines, demonstrating again our framework performs asteady efficient navigation ability. This reveals that with easy extension, our framework can be applied for many other tasks with potential considerable efficiency improvement. EoS is not reported in the table, as the condition of EoS is not satisfied in this setting. It is worth mentioning that the baseline Fig. 10. Real world environment, position settings and trajectory overview.  
+
+> Fig. 11. Trajectory of real-world validation on Unitree robot.
+
+method [24] relies on simulation tools such as the Habitat planner and teleportation for agent movement, whereas our framework implements the entire path planning module from scratch. V. R EAL -W ORLD VALIDATION 
+
+We validated our framework on real-world robots in lab house environment, shown in Figure 10. We used unitree go2 robot with odometry and Microsoft Azure Kinect RGB-D sensor. We extract the point cloud, depth, rgb information from the sensor via pyk4a using a self-made server in unit16 
+
+format. Both methods use the same detection and segmentation service provided by [22] and [32]. We conduct the experiment in indoor office. The observation RGB is set to be (360, 680). In Table VII, we made 5 episodes for targets and compared our method with BFS nearest-frontier exploration. As we see both of the methods have fairly steady SR, but they differ very much on the EoS and SPL, where EffiNav has obvious advantage. Even with the same detection ability, without the intelligent perception and ego-centric and global wise guidance, the efficiency of the ObjNav can drop considerably.            
+
+> TABLE VII REAL -WORLD ABLATION ON GOAL “TEDDY BEAR ON SOFA ”. target Nearest Frontier EffiNav Succ./All 3/5 4/5 SR 0.60 0.80 SPL 0.43 0.65 EoS 0.72 0.81
+
+An overview of validation and comparison is in Figure 10. We intentionally selected a starting position where the robot could observe the sofa but not the teddy bear, to highlight how effectively each method leverages observable information, thereby contrasting EffiNav with the nearest-frontier exploration strategy. To analyze this performance, a key difference between the two method is that EffiNav is able to perceive the ego-observation information with intelligent VLM control navigation guidance to select good exploration area with high possibilities of target object appearance, while the other method could not well absorb such information thus leading to ineffecient ObjNav. This gap tends to widen, especially in larger rooms. In the top-down map of the real-world environment, obstacle shapes are incomplete or missing due to sensor inaccuracies and limited sensor range. This in a way limits our framework performance. In an effort to enrich the scene representation, we tried to combine depth estimation from the latest depth estimated model [12] and depth from an Intel RealSense depth sensor. We used mean squared error (MSE) to align the scale of the estimated depth and leveraged the camera’s intrinsic matrix to generate dense point clouds. However, due to spatial inconsistencies in the estimated depth across time steps, the reconstructed map of the surroundings remains unreliable. VI. L IMITATION 
+
+Despite its promising performance, our framework has sev-eral limitations that warrant discussion. First, as our approach relies on a VLM for control, it requires an accurate and in-formative representation of the current environment. However, both the egocentric observations and the top-down views used in our pipeline are 2D images, which significantly sacrifice spatial information. We adopt this design because current training-free VLMs have limited capability to reason about 3D structure and establish consistent spatial correspondences across multi-view images. Second, EffiNav is a depth-aware framework and thus critically depends on accurate depth esti-mates. Errors in depth measurement directly affect the spatial projection of VLM-generated guidance, which in turn degrades navigation performance, especially for real-world sensors, as they may fail to perceive certain materials. In our experiments, we attempted to use estimated depth from RGB images using the method of [12], but the results were unsatisfactory. Third, finalization of navigation relies on 2D object detection which is sensitive to viewpoint variations. VII. C ONCLUSION 
+
+In this paper, we propose EffiNav, a training-free framework for efficient object-goal navigation (ObjNav) that delivers stable, balanced performance and exhibits extensibility to versatile navigation tasks. EffiNav harnesses the reasoning ca-pabilities of vanilla VLM to provide intelligent, vision-driven guidance for navigation control, to achieve efficient ObjNav. Through abundant experiments across diverse indoor scenes in simulation, we demonstrate that EffiNav outperforms recent state-of-the-art foundation models and frameworks in both navigation capability and target generalization. Furthermore, our extension to memory-augmented navigation highlights the framework’s adaptability and potential for broader applica-tions. This work is not an endpoint. As VLMs continue to advance rapidly, the potential of our framework, which built upon their evolving reasoning power, will only grow stronger. ACKNOWLEDGMENTS 
+
+VQA text prompt, simulation and real-world navigation videos, Efficiency on Successes (EoS) Derivation are in sup-plemental materials. REFERENCES 
+
+[1] Peter Anderson, Angel Chang, Devendra Singh Chaplot, Alexey Dosovitskiy, Saurabh Gupta, Vladlen Koltun, Jana Kosecka, Jitendra Malik, Roozbeh Mottaghi, Mano-lis Savva, and Amir R. Zamir. On evaluation of embodied navigation agents, 2018. URL https://arxiv.org/abs/1807. 06757. [2] Wenzhe Cai, Jiaqi Peng, Yuqiang Yang, Yujian Zhang, Meng Wei, Hanqing Wang, Yilun Chen, Tai Wang, and Jiangmiao Pang. Navdp: Learning sim-to-real navigation diffusion policy with privileged information guidance, 2025. [3] Yihan Cao, Jiazhao Zhang, Zhinan Yu, Shuzhen Liu, Zheng Qin, Qin Zou, Bo Du, and Kai Xu. Cognav: Cognitive process modeling for object goal navigation with llms. In International Conference on Computer Vision (ICCV) , 2025. [4] Angel Chang, Angela Dai, Thomas Funkhouser, Maciej Halber, Matthias Niessner, Manolis Savva, Shuran Song, Andy Zeng, and Yinda Zhang. Matterport3D: Learning from RGB-D data in indoor environments. International Conference on 3D Vision (3DV) , 2017. [5] An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Xueyan Zou, Jan Kautz, Erdem Biyik, Hongxu Yin, Sifei Liu, and Xiaolong Wang. Navila: Legged robot vision-language-action model for navigation. In RSS , 2025. [6] Dylan Goetting, Himanshu Gaurav Singh, and Antonio Loquercio. End-to-end navigation with vlms: Trans-forming spatial reasoning into question-answering. In 
+
+Workshop on Language and Robot Learning: Language as an Interface , 2024. [7] Yiming Ji, Kaijie Yun, Yang Liu, Zhengpu Wang, Boyu Ma, Zongwu Xie, and Hong Liu. Diffusion as reasoning: Enhancing object navigation via diffusion model condi-tioned on llm-based object-room knowledge, 2025. URL https://arxiv.org/abs/2410.21842. [8] Zihe Ji, Huangxuan Lin, and Yue Gao. Dynavlm: Zero-shot vision-language navigation system with dynamic viewpoints and self-refining graph memory, 2025. URL https://arxiv.org/abs/2506.15096. [9] Mukul Khanna*, Ram Ramrakhya*, Gunjan Chhablani, Sriram Yenamandra, Theophile Gervet, Matthew Chang, Zsolt Kira, Devendra Singh Chaplot, Dhruv Batra, and Roozbeh Mottaghi. Goat-bench: A benchmark for multi-modal lifelong navigation, 2024. [10] Jacob Krantz, Erik Wijmans, Arjun Majumdar, Dhruv Batra, and Stefan Lee. Beyond the nav-graph: Vision-and-language navigation in continuous environments. In Andrea Vedaldi, Horst Bischof, Thomas Brox, and Jan-Michael Frahm, editors, Computer Vision - ECCV 2020 - 16th European Conference, Glasgow, UK, August 23-28, 2020, Proceedings, Part XXVIII , volume 12373 of 
+
+Lecture Notes in Computer Science , pages 104–120. Springer, 2020. doi: 10.1007/978-3-030-58604-1 \ 7. URL https://doi.org/10.1007/978-3-030-58604-1 7. [11] Zerui Li, Gengze Zhou, Haodong Hong, Yanyan Shao, Wenqi Lyu, Yanyuan Qiao, and Qi Wu. Ground-level viewpoint vision-and-language navigation in continuous environments. In 2025 IEEE International Conference on Robotics and Automation (ICRA) , pages 5266–5273, 2025. doi: 10.1109/ICRA55743.2025.11127275. [12] Haotong Lin, Sili Chen, Jun Hao Liew, Donny Y. Chen, Zhenyu Li, Guang Shi, Jiashi Feng, and Bingyi Kang. Depth anything 3: Recovering the visual space from any views. arXiv preprint arXiv:2511.10647 , 2025. [13] Soroush Nasiriany, Fei Xia, Wenhao Yu, Ted Xiao, Jacky Liang, Ishita Dasgupta, Annie Xie, Danny Driess, Ayzaan Wahid, Zhuo Xu, Quan Vuong, Tingnan Zhang, Tsang-Wei Edward Lee, Kuang-Huei Lee, Peng Xu, Sean Kirmani, Yuke Zhu, Andy Zeng, Karol Hausman, Nicolas Heess, Chelsea Finn, Sergey Levine, and Brian Ichter. PIVOT: iterative visual prompting elicits action-able knowledge for vlms. In Forty-first International Conference on Machine Learning, ICML 2024, Vienna, Austria, July 21-27, 2024 . OpenReview.net, 2024. URL https://openreview.net/forum?id=051jaf8MQy. [14] Xavi Puig, Eric Undersander, Andrew Szot, Mikael Dal-laire Cote, Ruslan Partsey, Jimmy Yang, Ruta Desai, Alexander William Clegg, Michal Hlavac, Tiffany Min, Theo Gervet, Vladim´ ır Vondrus, Vincent-Pierre Berges, John Turner, Oleksandr Maksymets, Zsolt Kira, Mrinal Kalakrishnan, Jitendra Malik, Devendra Singh Chaplot, Unnat Jain, Dhruv Batra, Akshara Rai, and Roozbeh Mottaghi. Habitat 3.0: A co-habitat for humans, avatars and robots, 2023. [15] Yanyuan Qiao, Wenqi Lyu, Hui Wang, Zixu Wang, Zerui Li, Yuan Zhang, Mingkui Tan, and Qi Wu. Open-nav: Exploring zero-shot vision-and-language navigation in continuous environment with open-source llms. In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA) , 2025. [16] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. Learning transferable visual models from natural language supervision, 2021. URL https://arxiv.org/abs/2103.00020. [17] Santhosh K. Ramakrishnan, Aaron Gokaslan, Erik Wij-mans, Oleksandr Maksymets, Alex Clegg, John Turner, Eric Undersander, Wojciech Galuba, Andrew Westbury, Angel X. Chang, Manolis Savva, Yili Zhao, and Dhruv Batra. Habitat-matterport 3d dataset (hm3d): 1000 large-scale 3d environments for embodied ai, 2021. URL https://arxiv.org/abs/2109.08238. [18] Ram Ramrakhya, Dhruv Batra, Erik Wijmans, and Ab-hishek Das. Pirlnav: Pretraining with imitation and rl finetuning for objectnav. In Computer Vision and Pattern Recognition (CVPR), 2023 IEEE Conference on , 2023. [19] Dhruv Shah, Ajay Sridhar, Nitish Dashora, Kyle Sta-chowicz, Kevin Black, Noriaki Hirose, and Sergey Levine. Vint: A foundation model for visual navigation. In Jie Tan, Marc Toussaint, and Kourosh Darvish, editors, 
+
+Proceedings of The 7th Conference on Robot Learning ,volume 229 of Proceedings of Machine Learning Re-search , pages 711–733. PMLR, 06–09 Nov 2023. URL https://proceedings.mlr.press/v229/shah23a.html. [20] Ajay Sridhar, Dhruv Shah, Catherine Glossop, and Sergey Levine. NoMaD: Goal Masked Diffusion Policies for Navigation and Exploration. In International Confer-ence on Robotics and Automation(ICRA) , 2024. URL https://arxiv.org/abs/2310.xxxx. [21] Boyang Sun, Hanzhi Chen, Stefan Leutenegger, Cesar Cadena, Marc Pollefeys, and Hermann Blum. Frontier-net: Learning visual cues to explore. IEEE Robotics and Automation Letters , 10(7):6576–6583, 2025. doi: 10.1109/LRA.2025.3569122. [22] Qwen Team. Qwen2.5-vl, January 2025. URL https: //qwenlm.github.io/blog/qwen2.5-vl/. [23] Shaoan Wang, Jiazhao Zhang, Minghan Li, Jiahang Liu, Anqi Li, Kui Wu, Fangwei Zhong, Junzhi Yu, Zhizheng Zhang, and He Wang. Trackvla: Embodied visual tracking in the wild. arXiv pre-print , 2025. URL http://arxiv.org/abs/2505.23189. [24] Yuncong Yang, Han Yang, Jiachen Zhou, Peihao Chen, Hongxin Zhang, Yilun Du, and Chuang Gan. 3d-mem: 3d scene memory for embodied exploration and reasoning. In Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR) , pages 17294–17303, June 2025. [25] Zecheng Yin, Chonghao Cheng, and Lizhen. Navigation with vlm framework: Go to any language, 2024. URL https://arxiv.org/abs/2410.02787. [26] Zecheng Yin, Hao Zhao, and Zhen Li. Hypernav: Hybrid perception for object-oriented navigation in unknown en-vironment, 2025. URL https://arxiv.org/abs/2510.22917. [27] Naoki Yokoyama, Sehoon Ha, Dhruv Batra, Jiuguang Wang, and Bernadette Bucher. Vlfm: Vision-language frontier maps for zero-shot semantic navigation. In 
+
+International Conference on Robotics and Automation (ICRA) , 2024. [28] Naoki Yokoyama, Ram Ramrakhya, Abhishek Das, Dhruv Batra, and Sehoon Ha. Hm3d-ovon: A dataset and benchmark for open-vocabulary object goal naviga-tion. In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2024. [29] Xinyao Yu, Sixian Zhang, Xinhang Song, Xiaorong Qin, and Shuqiang Jiang. Trajectory diffusion for objectgoal navigation. In Proceedings of the 38th International Conference on Neural Information Processing Systems ,NIPS ’24, Red Hook, NY, USA, 2025. Curran Associates Inc. ISBN 9798331314385. [30] Shuaihang Yuan, Hao Huang, Yu Hao, Congcong Wen, Anthony Tzes, and Yi Fang. Gamap: zero-shot object goal navigation with multi-scale geometric-affordance guidance. In Proceedings of the 38th International Conference on Neural Information Processing Systems ,NIPS ’24, Red Hook, NY, USA, 2025. Curran Associates Inc. ISBN 9798331314385. [31] Yiming Zeng, Hao Ren, Shuhang Wang, Junlong Huang, and Hui Cheng. Navidiffusor: Cost-guided diffusion model for visual navigation. In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA) , 2025. [32] Chaoning Zhang, Dongshen Han, Yu Qiao, Jung Uk Kim, Sung-Ho Bae, Seungkyu Lee, and Choong Seon Hong. Faster segment anything: Towards lightweight sam for mobile applications. arXiv preprint arXiv:2306.14289 ,2023. [33] Jiazhao Zhang, Anqi Li, Yunpeng Qi, Minghan Li, Jia-hang Liu, Shaoan Wang, Haoran Liu, Gengze Zhou, Yuze Wu, Xingxing Li, et al. Embodied navigation foundation model. arXiv preprint arXiv:2509.12129 , 2025. [34] Jiazhao Zhang, Kunyu Wang, Shaoan Wang, Minghan Li, Haoran Liu, Songlin Wei, Zhongyuan Wang, Zhizheng Zhang, and He Wang. Uni-navid: A video-based vision-language-action model for unifying embodied navigation tasks. Robotics: Science and Systems , 2025. [35] Lingfeng Zhang, Xiaoshuai Hao, Yingbo Tang, Haoxiang Fu, Xinyu Zheng, Pengwei Wang, Zhongyuan Wang, Wenbo Ding, and Shanghang Zhang. nava 3: Under-standing any instruction, navigating anywhere, finding anything, 2025. URL https://arxiv.org/abs/2508.04598. [36] Yufeng Zhong, Chengjian Feng, Feng Yan, Fanfan Liu, Liming Zheng, and Lin Ma. Robotron-nav: A unified framework for embodied navigation integrating percep-tion, planning, and prediction. In International Confer-ence on Computer Vision (ICCV) , 2025. APPENDIX 
+
+Let N denote the total number of evaluation episodes. For each episode i ∈ { 1, . . . , N }, define: • Ii ∈ { 0, 1} as the success indicator ( Ii = 1 if the agent reaches the goal within the required tolerance, and 0
+
+otherwise),  
+
+> •
+
+L∗ 
+
+> i
+
+as the shortest-path (geodesic) distance from the start position to the goal,  
+
+> •
+
+Li as the actual path length traversed by the agent. The standard metrics for object-goal navigation are defined as: SR = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+Ii, SPL = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+Ii · L∗
+
+> i
+
+max( Li, L ∗ 
+
+> i
+
+) . (3) In practice, for all successful episodes ( Ii = 1 ), the agent’s path length satisfies Li ≥ L∗ 
+
+> i
+
+, so max( Li, L ∗ 
+
+> i
+
+) = Li. Thus, SPL simplifies to: SPL = 1
+
+N
+
+X
+
+> i:Ii=1
+
+L∗
+
+> i
+
+Li
+
+. (4) We define the Normalized Efficiency on Successes (EoS) 
+
+as the average path efficiency over only the successful episodes: EoS = 1
+
+Nsucc 
+
+X
+
+> i:Ii=1
+
+L∗
+
+> i
+
+Li
+
+, (5) where Nsucc = PNi=1 Ii = N · SR is the number of successful episodes. Substituting into the expression for SPL, we obtain: SPL = Nsucc 
+
+N · EoS = SR · EoS . (6) Rearranging yields the key relationship: EoS = SPL SR , provided that SR > 0. (7) Thus, EoS isolates the efficiency of navigation conditioned on success , decoupling it from the agent’s raw success rate. It ranges from 0 to 1, with higher values indicating that successful trajectories are closer to optimal. We did not invest significant effort in crafting text prompts for VQA in either the egocentric or global modules, as the mechanism leverages the model’s inherent capability rather than the specific wording of the prompt. Both prompts are designed to elicit simple responses. For the egocentric prompt (Figure 14), after summarization of the response via another QA, we extract only the numerical value; for the top-down prompt (Figure 13), after summarization, we accept only a binary “yes” or “no” answer. If an unexpected response is received, we detect the anomaly and simply retry the process. These prompts remain unchanged during all ex-periments on HM3D[17], OVON[28] and GOAT-BENCH[9]. In GOAT-Bench, the target goal sequence of navigation is predefined by the dataset. We implement a memory-augmented module that maintains a mapping of previously discovered objects to their locations along the way. When the next target object in the sequence is specified, the robot first checks whether it exists in memory. If found, the robot navigates    
+
+> Fig. 12. Qwen2.5 VL detection prompt (green box) and VLM output (blue box).
+> Fig. 13. Qwen2.5 VL VQA prompt in global wise check in module b .
+
+directly to the stored location; otherwise, it initiates a new ObjectNav task to locate the object. The detection service of Qwen-VL 2.5 model is a stable vision-language inference service provided by the official Qwen team [22]. Following their recommended prompt tem-plate shown in Figure 12, we use the same input format and decode the outputs with the official code. This service has demonstrated high reliability, introducing only minimal performance variation in our long-term experiments conducted over more than five months. Fig. 14. Qwen2.5 VL ego centric VQA prompt in module a .
