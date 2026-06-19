@@ -1,0 +1,587 @@
+Title: See-and-Reach: Precise Vision-Language Navigation for UAVs within the Field of View
+
+URL Source: https://arxiv.org/pdf/2606.20045v1
+
+Published Time: Fri, 19 Jun 2026 00:52:16 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+1
+
+# See-and-Reach: Precise Vision-Language Navigation for UAVs within the Field of View 
+
+Fanfu Xue, En Yu, Yantian Shen, Zhikun Hu, Hongjun Wang, Yang Yang, Xindi Wang and Jiande Sun 
+
+Abstract —UAV Vision-Language Navigation (UAV-VLN) is typically formulated as a holistic search-and-reach problem, where long-range target discovery and final target approach are optimized and evaluated jointly. This formulation makes it difficult to assess a critical capability of aerial embodied agents, namely whether a UAV can accurately ground a visible target and translate vision-language evidence into precise 3D motion once the target enters its field of view. To address this limitation, we introduce UAV-VLN-FOV, a target-visible navigation task that isolates the see-and-reach stage and enables a more diagnostic evaluation of terminal reaching ability. We further propose 3DG-VLN, a vision-language waypoint prediction framework guided by dynamic 3D direction cues to enhance fine-grained visual grounding and spatial direction alignment for precise target reaching. Specifically, 3DG-VLN adaptively processes high-resolution front-view and downward-view observations to preserve fine-grained visual and geometric details for target grounding. It also updates the target-relative direction online during closed-loop navigation, allowing the agent to maintain spatial alignment with the target and reduce accumulated di-rection drift. To support this task, we construct a dedicated high-resolution benchmark which contains 2,717 trajectories with target-oriented high-level instructions, high-resolution front-view and downward-view egocentric observations, and contin-uous 3D waypoint annotations. Experiments show that 3DG-VLN outperforms competitive UAV-VLN baselines, achieving a 13.82% improvement in success rate. Real-world trials further demonstrate the potential of 3DG-VLN for practical see-and-reach navigation. The source code and benchmark are available at https://github.com/xuefanfu/3DG-VLN. 
+
+Index Terms —UAV Navigation, Vision-Language Navigation, Aerial Embodied Intelligence, 3D Waypoint Prediction, Spatial Direction Alignment. 
+
+I. I NTRODUCTION 
+
+UAV Vision-Language Navigation (UAV-VLN) requires an aerial agent to execute complex navigation tasks based on linguistic instructions and egocentric observations. Compared with ground-based VLN [1]–[4], UAV-VLN presents unique 
+
+Fanfu Xue, Yantian Shen, Hongjun Wang and Yang Yang are with the School of Information Science and Engineering, Shandong University, Qingdao 266237, China (e-mail: {fanfuxue, ytshen }@mail.sdu.edu.cn, {hjw, yyang }@sdu.edu.cn) En Yu is with the Faculty of Engineering and Information Technol-ogy, University of Technology Sydney, Sydney, NSW, Australia (e-mail: isenn.yu@gmail.com) Zhikun Hu is with the School of Computer Science and Technology, Shan-dong University, Qingdao 266237, China (e-mail: huzhikun@zhiyang.com.cn) Xindi Wang is with the School of Artificial Intelligence, Shandong Univer-sity, Jinan 250100, China (e-mail: xindi.wang@sdu.edu.cn) Jiande Sun is with the School of Computer Science and Artificial Intelli-gence, Shandong Normal University, Jinan 250358, China, and also with the Interdisciplinary Research Center of General Artificial Intelligence, Shandong Normal University, Jinan 250358, China (e-mail: jiandesun@hotmail.com). Corresponding authors: Xindi Wang and Jiande Sun LLN    
+
+> Search Reach
+> UAV-VLN
+> UAV-VLN-FOV
+> Precise Reach
+> 12
+> 3
+> 1. Fly forward and turn right
+> at the intersection;
+> 2. Fly forward, turn right
+> again.
+> 3 . F l y t o w a r d a s q u a r e
+> building, then turn right and
+> stop beside a yellow car.
+> HLN
+> The target is located in the
+> front-left of the UAV. It is a
+> yellow sports car. It is next to
+> an intersection and beside a
+> tree.
+> Target
+> invisible
+> Target
+> visible
+> Success
+> 20m 10m
+> Target
+> visible
+
+Fig. 1. UAV-VLN vs UAV-VLN-FOV. UAV-VLN emphasizes the holistic search-and-reach process, whereas UAV-VLN-FOV focuses on the see-and-reach stage. 
+
+challenges arising from the 3D topology of aerial spaces, which are inherently more expansive and less structured. Suc-cessful navigation in this domain necessitates the convergence of multimodal grounding, 3D spatial awareness, and dynamic motion planning under continuous control constraints. De-spite recent exploratory efforts in instruction design, dataset construction and model frameworks [5]–[7], current research often struggles to maintain the fine-grained spatial alignment required for complex real-world deployments, placing the field at a nascent stage where terminal reaching precision remains a largely unaddressed challenge. Existing UAV-VLN studies [5], [8], [9] can be broadly categorized by instruction granularity into Low-Level Instruc-tion Navigation (LLN) and High-Level Instruction Navigation (HLN). While LLN minimizes decision ambiguity through granular, sequential commands, such step-by-step guidance is often unrealistic in natural human-UAV interaction [10]. Conversely, HLN abstracts navigation into semantic target descriptions, encompassing categories, visual attributes, and contextual relationships, rendering it more amenable to prac-tical deployment. Despite utilizing diverse instruction formats, extant research predominantly conceptualizes UAV-VLN as a monolithic search-and-reach process, as shown in Fig. 1. We argue that this holistic formulation tends to obscure a fundamental divergence in navigational requirements, specif-ically the transition from semantic exploration to geometric precision .Specifically, we posit that the search stage prioritizes high-level scene understanding and long-horizon discovery. In contrast, the reaching stage , hereafter referred to as the 
+
+see-and-reach stage, necessitates an entirely distinct suite of capabilities including fine-grained visual localization and 3D trajectory control. The critical nature of this stage is exemplified in high-stakes missions such as post-disaster relief 
+
+> arXiv:2606.20045v1 [cs.CV] 18 Jun 2026 2
+
+or emergency supply delivery. In these scenarios, once a target, such as a specific emergency supply station, is visu-ally identified, the mission’s success hinges entirely on the agent’s ability to execute a precise approach for safe payload delivery. While current UAV-VLN benchmarks often adopt a permissive 20-meter success radius [5], [8], [11], such a coarse metric is inadequate for real-world missions where a 20-meter deviation could result in mission failure, such as dropping critical supplies into inaccessible terrain. Consequently, the prevailing holistic evaluation framework suffers from a lack of diagnostic granularity, as terminal precision failures are frequently masked by exploratory errors. By isolating the reaching process and advocating for a more stringent 10-meter success criterion, we seek to address a fundamental question in aerial embodied intelligence: how an agent can effectively transform linguistic instruction and visual evidence into the precise 3D maneuvers required for reliably reaching the target vicinity. 
+
+Motivated by these observations, we formalize UAV-VLN-FOV , a navigation task explicitly constrained by the agent’s 
+
+Field of View (FOV). This task concentrates on the see-and-reach stage of aerial navigation, shifting the research emphasis from expansive exploration to precise target reaching once the objective becomes visually accessible, as shown in Fig. 1. In this setting, the target is visible within the UAV’s field of view at the initial position, necessitating the direct translation of linguistic instruction and egocentric visual evidence into exe-cutable 3D waypoint plans. To ensure a successful approach, the UAV must maintain robust spatial alignment despite rad-ical scale variations, partial occlusions, and transient target disappearance from the field of view, while simultaneously executing reactive obstacle avoidance and continuous waypoint planning. To distinguish high-precision navigation from mere regional proximity, UAV-VLN-FOV mandates a stringent 10-meter success radius. By establishing this rigorous criterion, the task seeks to evaluate the agent’s terminal control fidelity in complex environments, ensuring that the navigational output meets the precision requirements of real-world deployment. The setting reveals two critical deficiencies in extant methodologies. First, existing studies [5], [8] are primar-ily designed under long-range, search-oriented task settings, where low-resolution observations and visual architectures are often sufficient for scene-level exploration and coarse target localization. When applied to the precise reaching stage in UAV-VLN-FOV, they fail to reliably identify and approach targets. This is because low-resolution observations cannot precisely capture fine-grained geometric details, discriminate targets from visually similar distractors, or perceive nearby ob-stacles, all of which are essential for waypoint-level planning and terminal maneuvering. Second, existing direction-guided methods [5], [12] often rely on static initial cues. While these methods provide a coarse prior at the trajectory onset, they inevitably succumb to accumulative spatial drift as the UAV moves, leading to a severe misalignment between the linguistic instruction and the current egocentric perspective. To address these challenges, we propose 3DG-VLN , a vision-language waypoint prediction framework guided by dynamic 3D direction cues. Primarily, 3DG-VLN processes high-resolution front-view and downward-view observations in a resolution-adaptive manner rather than through traditional down-sampling [5], [13]. This architecture enables the model to exploit fine-grained visual cues regarding target morphology and local spatial structures, thereby supporting more accurate visual grounding and 3D motion prediction. Additionally, to mitigate the risk of spatial drift, we introduce an online direction updating strategy that dynamically re-estimates the relative target direction from current observations. This mech-anism ensures continuous spatial alignment and significantly improves reaching precision within the field of view . To sup-port training and evaluation under the UAV-VLN-FOV setting, we further construct a high-resolution benchmark driven by target-oriented high-level instructions. The dataset contains 2,717 trajectories and 31,878 image-instruction-waypoint tu-ples. It covers 14 realistic rural, town, and urban scenes, as well as 89 target categories derived from [5]. Each trajectory consists of a target-oriented instruction, high-resolution front-view and downward-view observations, and corresponding 3D waypoint sequences. The main contributions of this work are summarized as follows:  
+
+> •
+
+We formalize UAV-VLN-FOV , a novel task designed to evaluate the reaching-stage capability of aerial agents. By isolating the see-and-reach stage and advocating for a stringent 10-meter success criterion, this task enables the systematic study of how agents achieve high-precision 3D navigation toward visually observable objectives.  
+
+> •
+
+We propose 3DG-VLN , a vision-language waypoint pre-diction framework that leverages high-resolution dual-view observations for fine-grained target grounding and waypoint-level motion prediction. To address direction misalignment during flight, 3DG-VLN further updates the target direction online from current onboard observations and uses the updated cue to guide subsequent waypoint prediction.  
+
+> •
+
+We construct a high-resolution UAV-VLN-FOV bench-mark with target-oriented high-level instructions, front-view and downward-view egocentric observations, and continuous 3D waypoint annotations, providing a ded-icated basis for training and evaluating UAV agents in precise see-and-reach navigation.  
+
+> •
+
+Extensive experiments show that 3DG-VLN achieves bet-ter target-reaching performance than existing UAV-VLN baselines under the UAV-VLN-FOV setting. Real-world experiments further demonstrate its practical applicability in see-and-reach scenarios. II. R ELATED WORK 
+
+A. Aerial Navigation Datasets 
+
+VLN has been extensively studied in ground-based em-bodied environments, where agents are required to follow natural language instructions by grounding them in visual observations and action histories [14]–[20]. Inspired by these advances, recent efforts have extended VLN from ground robots to UAVs, giving rise to UAV-VLN. Compared with ground-based VLN, UAV-VLN introduces more challenging navigation conditions, including large-scale outdoor scenes, 3
+
+sparse visual landmarks, six-degree-of-freedom motion, and continuous control in 3D space. AerialVLN [8] constructs a dedicated benchmark for language-guided aerial navigation, thereby establishing the foundation for this emerging field. Following this, AVDN [21] extends aerial navigation to a dialog-based setting, where the UAV can request additional guidance from a commander dur-ing navigation. OpenUAV [5] further moves toward realistic UAV-VLN by building a simulation platform with multi-view observations and approximately 12k target-oriented trajecto-ries, and introduces the UAV-Need-Help benchmark to study assistant-guided object search in complex aerial environments. AirSim360 [22] further enriches the perception setting by introducing panoramic observations for UAV navigation. In addition, to reduce the gap between synthetic benchmarks and realistic urban aerial scenarios, CityNav [23] constructs a UAV-VLN dataset based on real urban-scale point clouds from SensatUrban [24], providing realistic city-scale environments for aerial navigation. NavAgent [25] focuses on real urban street-view scenes and introduces a fine-grained landmark dataset designed to support landmark-centric UAV embodied navigation. More recently, AirNav [26] constructs a large-scale real-world UAV-VLN benchmark from real urban aerial data with natural and diverse instructions, addressing the limitations of prior datasets that mainly rely on virtual environments and templated language. To better reflect the unique motion dynamics of UAVs, several datasets formulate UAV-VLN as continuous waypoint prediction rather than discrete action selection. OpenUAV [5] and DuAl-VLN [12] emphasize continuous 6-DoF aerial motion and target-oriented navigation. In particular, DuAl-VLN introduces a dual-altitude collaborative setting, where a high-altitude UAV performs broad environmental reasoning while a low-altitude UAV conducts precise navigation and target grounding. Wang et al. [27] further study short-distance language-conditioned UAV control in real-world scenarios, providing a benchmark for fine-grained trajectory execution. Despite these advances, existing UAV-VLN datasets are mainly designed for either long-horizon target search, global path planning, dialog-guided exploration, or short-range spe-cific actions. They do not explicitly isolate the critical see-and-reach stage, where the target is already visible within the UAV’s field of view and the agent must perform fine-grained visual grounding, local spatial reasoning, and precise waypoint-level motion planning. Therefore, they are not suf-ficient for evaluating whether a UAV can accurately approach a visible target under concise high-level instructions, which motivates our UAV-VLN-FOV benchmark. 
+
+B. Aerial Navigation Agents 
+
+Earlier UAV-VLN studies largely follow the ground-based VLN paradigm, using task-specific encoders and policy net-works [28], [29] to map visual observations and language instructions to navigation actions. However, the aerial domain requires stronger spatial reasoning, long-horizon planning, and continuous motion control. To address these challenges, recent methods increasingly exploit large language models (LLMs), vision-language models (VLMs), and multimodal foundation models to improve instruction understanding, visual ground-ing, and planning ability [30]–[36]. One representative paradigm is to directly integrate general-purpose LLMs or VLMs into aerial navigation sys-tems. GeoNav [37] introduces a geospatially aware mul-timodal chain-of-thought prompting mechanism. It projects instruction-related semantic masks into a top-down represen-tation and converts spatial relations into metric-aware textual prompts, enabling LLMs to reason over landmark navigation, target search, and precise localization. VLFly [38] adopts a modular framework for open-vocabulary UAV navigation. In this framework, an LLM-based instruction encoder reformu-lates high-level language into structured prompts, a VLM-based goal retriever associates these prompts with goal im-ages, and a waypoint planner generates executable trajectories from monocular egocentric observations. CityNavAgent [39] leverages LLMs to decompose complex urban navigation tasks into hierarchical planning subtasks, reducing long-horizon planning difficulty and predicting intermediate waypoints for downstream execution. To further incorporate external spatial structures or semantic memory to improve robustness, NavAgent [25] combines multi-scale environmental information, including global topo-logical maps, medium-scale panoramas, and local fine-grained landmarks. It further fine-tunes a GLIP-based landmark rec-ognizer to linguisticize visual landmarks and uses a dynam-ically growing scene topology graph to support large-VLM-based UAV embodied navigation. AeroDuo [12] introduces a collaborative dual-UAV framework, in which a high-altitude UAV equipped with a multimodal LLM performs broad target reasoning, while a low-altitude UAV executes lightweight multi-stage navigation and target grounding. Such methods demonstrate the benefit of structured spatial priors for large-scale aerial navigation, but their focus remains on search and global decision-making rather than target-visible precise reaching. Recent studies also explore task-specific adaptation of VLMs through fine-tuning or reinforcement learning. Flight-GPT [40] proposes a two-stage training pipeline for UAV-VLN: supervised fine-tuning on high-quality demonstrations to improve initialization and structured reasoning, followed by group relative policy optimization with a composite re-ward that considers goal accuracy, reasoning quality, and format compliance. OpenVLN [41] further investigates data-efficient reinforcement learning for open-world aerial VLN, optimizing VLMs under limited training data and introducing a value-based long-horizon planner for trajectory synthesis. AerialVLA [13] moves toward end-to-end vision-language-action modeling by mapping raw visual observations and fuzzy linguistic instructions directly to continuous control signals, while another AerialVLA-style online-dialogue frame-work [42] studies proactive question asking and history-aware spatial-temporal fusion for UAV navigation with online human interaction. Although these agents have significantly advanced UAV-VLN, most of them are optimized for holistic search-and-reach navigation, where the target must first be discovered in a 4Observations                             
+
+> Down-view
+> Valid?
+> Front-view Geometric Processing
+> 3.3 Direction Determination
+> Yes
+> No
+> Qwen2.5-VL
+> (Waypoint Predictor)
+> yyyyy
+> zzzzz
+> xxxxx
+> t+1 t+2 t+3 t+4 t+5
+> Predicted Future 3D Waypoints (5-step sequence)
+> DeepSeek-v3.2
+> 1) Instruction Processing
+> Target
+> Object &
+> Attribute
+> 2) Waypoint Prediction
+> UAV Execution
+> UAV flies along waypoints
+> New Observations
+> Qwen2.5 LLM Decoder LoRA
+> Vision Encoder Text Tokenizer
+> Instruction
+> Fly to the blue car near the
+> tall tower. It's straight ahead.
+> 3) Online 3D Direction Updating
+> Open-Set
+> Detector
+> 3.1 Open-Vocabulary Detection
+> 3.2 Validity Determination
+> Valid?
+> Do Not
+> Update
+> Direction
+> No
+> Center (u,v) Camera Frame Body Frame Yaw Angle
+> yyyyy
+> zzzzz
+> xxxxx
+> t+1 t+2 t+3 t+4 t+5
+> 3DG-VLN learns to predict future 3D waypoints from a
+> high-level instruction, high-resolution dual-view
+> observations and a coarse 3D direction.
+
+INFERENCE STAGE TRAINING STAGE    
+
+> Instruction: Fly to the
+> black car. It's off to the
+> front-left.
+> cz
+> by
+> bz
+> brbx
+> by
+> brbx
+> 
+> front-left
+> front front-right
+> cz
+> cx
+> cy
+> cam r
+> down
+> Observations
+> Yes
+
+Fig. 2. Overall framework of 3DG-VLN. During training, we fine-tune Qwen2.5-VL using the constructed dataset to predict smooth waypoints based on instructions and observations. During inference, 3DG-VLN leverages the fine-tuned Qwen2.5-VL for waypoint prediction, DeepSeek V3.2 for extracting target objects and their intrinsic attributes, and an online 3D direction updating module for directional guidance. 
+
+large-scale environment before being approached. In contrast, UAV-VLN-FOV focuses on the final target-visible reaching stage, where the primary challenges shift from where to search to how to precisely ground, approach, and stop near the visible target. This setting requires high-resolution egocen-tric perception, local obstacle awareness, waypoint-level 3D motion planning, and fine-grained stopping behavior, which are not sufficiently evaluated by existing aerial navigation agents and benchmarks. Moreover, existing aerial VLN meth-ods often differ substantially in their observation modalities and action interfaces: some operate on top-down geospatial maps, some rely on fixed action primitives or task-specific execution protocols. As a result, they are not well suited to the precise target-reaching requirement of UAV-VLN-FOV, which demands closed-loop execution with continuous waypoint-level 3D motion planning from egocentric observations. III. UAV-VLN-FOV T ASK FORMALIZATION 
+
+We define UAV-VLN-FOV , a UAV-VLN task within the 
+
+field of view for precise target reaching. Unlike beyond-visual-range exploration, UAV-VLN-FOV targets the final reaching stage where the objective is already visually accessible within the agent’s field of view. Formally, we formulate the see-and-reach stage as a sequential 3D waypoint prediction problem for precise target reaching. Let S ⊂ SE (3) denote the state space of the UAV, where the pose at time t is defined as Pt =(pt, qt), with pt ∈ R3 representing the Cartesian coordinates and qt ∈ S3 representing the orientation in the global frame. 
+
+Observation Space. At each discrete timestep t, the agent receives a multimodal observation tuple Xt = {I , Vt, Dt}.Concretely, I is the linguistic instruction, providing high-level semantic constraints. Vt = {Rf ront t , Rdown t } represents the high-resolution dual-view egocentric observations, where R ∈
+
+RH×W ×3. Distinct from conventional low-resolution explo-ration, our formulation preserves the perceptual details of Vt
+
+needed to localize visually accessible targets, distinguish sub-tle distractors, and reason about nearby obstacles for waypoint-level planning. Dt ∈ { front, front-left, front-right, down } is the coarse 3D direction cue, which provides a semantically explicit spatial prior to maintain alignment between the agent and the target. 
+
+Action Space and Policy Flow. The agent’s action is defined as the prediction of a short-horizon trajectory 
+
+Wt = {wt+k}Kk=1 on the waypoint manifold. To ensure translation and rotation invariance, each waypoint wt+k =(∆ xt+k, ∆yt+k, ∆zt+k) is expressed as a relative displace-ment in the UAV-centric local coordinate frame, where ∆xt+k,
+
+∆yt+k, and ∆zt+k denote forward, rightward, and downward displacements, respectively. The navigation policy π executes a deterministic mapping from the observation history to the action space: 
+
+Wt = π(I, V≤t, Dt; θ) (1) where θ denotes the learnable parameters. This policy flow requires the model to implicitly resolve the coordinate trans-formation between semantic visual evidence and physical actuation, mapping what is seen into where to reach .
+
+Objective and Success Criterion. Given a ground-truth target position ptar , the navigational episode is successful if the terminal pose satisfies a stringent proximity constraint. The success indicator S is defined as: 
+
+S = I (∥pT − ptar ∥2 ≤ δ) (2) where pT is the terminal position of the UAV, and δ =10 meters represents the precision threshold necessitated by high-stakes real-world deployments (e.g., post-disaster relief or emergency supply delivery), which is stricter than the commonly used 20-meter threshold in previous UAV-VLN settings [5], [8], [11]. The objective of UAV-VLN-FOV is to learn a policy π that maximizes the expected success rate 
+
+Eτ ∼π [S(τ )] within the field of view , where the agent must 5front front-left front-right 
+
+# x
+
+# y
+
+# z down 
+
+> Fig. 3. 3D direction schematic of 3DG-VLN. The front-left, front, front-right, and down bins describe the target’s relative position in the UAV-centric body frame, where the x, y, and z axes denote front, right, and down, respectively.
+
+handle large target-scale variations, viewpoint changes, and temporary loss of target visibility during precise reaching. IV. P ROPOSED METHOD 
+
+A. Overview 
+
+As illustrated in Fig. 2, we propose 3DG-VLN , a vision-language waypoint prediction framework for the see-and-reach stage of UAV-VLN. Given a language instruction, high-resolution visual observations and a coarse 3D direction cue, 3DG-VLN predicts continuous 3D waypoints in the UAV body frame. Our design focuses on two key aspects that are crucial for precise see-and-reach navigation: fine-grained visual grounding and spatial direction alignment .To achieve fine-grained visual grounding, 3DG-VLN em-ploys Qwen2.5-VL to adaptively process high-resolution ego-centric observations instead of aggressively downsampled in-puts. This is important because, in the see-and-reach stage, the target may be visible but still occupy a small image region or be identifiable only through fine-grained appearance and contextual details. By constructing multimodal instruction-response pairs with a language instruction, high-resolution visual observations, a coarse 3D direction cue, and waypoint responses, the model learns to associate the specified target with detailed visual evidence and translate such grounding into continuous 3D waypoint predictions, as detailed in Sec. IV-C. To achieve spatial direction alignment, 3DG-VLN dynam-ically updates the coarse 3D direction cue during inference, aligning the model’s guidance with the UAV’s current egocen-tric observations, as detailed in Sec. IV-D. Instead of treating the initial direction as a static prior, 3DG-VLN dynamically re-estimates the target’s relative direction from the UAV’s current observations and updates the direction cue online. This mechanism continuously aligns the model’s spatial guidance with the current egocentric viewpoint, reducing accumulated direction drift and enabling more accurate target reaching. 
+
+B. 3D Direction Construction 
+
+To help the agent quickly anchor the target area under a large aerial field of view, we introduce a coarse 3D di-rectional guidance system, as illustrated in Fig. 3. Instead of using precise target angles or metric coordinates, the proposed representation discretizes the target direction into human-friendly direction cues, including front-left , front , front-right , and down . The coarse 3D direction serves as a unified directional interface throughout both training and inference. During training, it provides an explicit spatial condition that helps the model learn direction-aware waypoint generation. During inference, the same direction representation is used to maintain spatial consistency during closed-loop navigation in high-fidelity simulation and real-world environments, pro-viding continuous alignment between the UAV’s egocentric perception and the target. As shown in Fig. 3, we define a UAV-centric body frame with x, y, and z axes corresponding to front, right, and down, respectively. Given the UAV pose ( pt,qt) and target position 
+
+ptar , the target displacement is first transformed from the global frame into the UAV body frame: 
+
+dt = R(qt)⊤ (ptar − pt) , (3) where R(qt) is the rotation matrix corresponding to the UAV orientation, mapping vectors from the UAV body frame to the global frame. Therefore, R(qt)⊤ maps the target displacement from the global frame to the UAV body frame. Let dt = ( dx, d y , d z ), and let ∥dt∥ denote its Euclidean norm. The horizontal yaw angle of the target relative to the UAV heading is computed as 
+
+αt = arctan 2( dy , d x). (4) The coarse 3D direction label Dt is assigned by 
+
+Dt =
+
+
+
+down , if dz
+
+∥dt∥ > cos ϕ, 
+
+front-left , else if − ϕ ≤ αt < −γfront ,
+
+front , else if − γfront ≤ αt ≤ γfront ,
+
+front-right , else if γfront < α t ≤ ϕ, 
+
+(5) where ϕ denotes the outer boundary angle threshold of the coarse directional regions, αt represents the horizontal azimuth of the target on the UAV body-frame x-y plane at the timestep 
+
+t, and dz /∥dt∥ measures whether the target direction is dom-inated by the downward viewing component. The threshold 
+
+γfront separates the central front region from the left and right regions. This coarse 3D direction representation is not intended to provide precise geometric control. Instead, it offers a compact and human-interpretable spatial cue that guides the model toward the target region and provides a consistent direction space for subsequent waypoint prediction and online direction updating. 
+
+C. Training Stage 
+
+The goal of the training stage is to adapt a general-purpose vision-language model into a geometry-aware way-point prediction policy for UAV-VLN-FOV. 3DG-VLN is 6
+
+trained to map concise high-level instructions, high-resolution egocentric observations , and coarse 3D directional priors into sequences of 3D waypoints. Unlike approaches that down-sample images to fit a low-resolution model [5], [13], 3DG-VLN leverages a model capable of adaptive high-resolution processing , preserving fine-grained visual details critical for accurately perceiving targets and subtle environmental cues in UAV-VLN-FOV scenarios. To achieve this, we employ Low-Rank Adaptation (LoRA) [43] to efficiently fine-tune a pre-trained vision-language model Qwen2.5-VL [44] for waypoint prediction. This approach allows the model to fully exploit high-resolution visual inputs without sacrificing pretrained multimodal reason-ing abilities, ensuring that the extracted fine-grained visual features effectively guide the UAV’s body-centric motion planning. 
+
+a) Multimodal Training Formulation: For each training trajectory, the target-oriented instruction I is kept fixed across sampled timesteps. The coarse 3D direction cue is constructed from the initial UAV pose and the target position accord-ing to Sec. IV-B, and is used as a trajectory-level spatial prior during training. At timestep t, the model takes the multimodal observation Xt = {I , Vt, D0} as input, where 
+
+Vt = {Rf ront t , Rdown t } denotes the high-resolution front-view and downward-view observations, and D0 denotes the initial coarse 3D direction cue. The target output is a sequence of K future UAV-centric waypoints: 
+
+Wt = {wt+k}Kk=1 . (6) Thus, each training sample is formulated as: 
+
+(Xt, Wt) = 
+
+
+
+{I , Vt, D0} , {wt+k}Kk=1 
+
+
+
+. (7) This formulation encourages the model to ground the language-specified target in high-resolution visual observa-tions, use the direction cue as a coarse spatial prior, and generate future motion in a form directly executable by the UAV controller. 
+
+b) Egocentric Waypoint Supervision: To ensure transla-tion and rotation invariance, we represent each future waypoint in the UAV-centric body coordinate system. For a future timestep t+k, the displacement from the current UAV position to the future position in the global frame is computed as 
+
+∆pworld  
+
+> t+k
+
+= pt+k − pt. (8) Next, we transform this displacement into the UAV body frame: 
+
+wt+k = R(qt)⊤∆pworld  
+
+> t+k
+
+. (9) Finally, the resulting waypoint wt+k =(∆ xt+k, ∆yt+k, ∆zt+k) represents the relative 3D displacement from the UAV’s current pose to a future trajectory point. By supervising the model with the sequence 
+
+{wt+k}Kk=1 , 3DG-VLN learns to generate short-horizon, body-frame waypoint predictions that align with egocentric observations and are suitable for closed-loop aerial navigation. 
+
+c) Training Objective: We follow the standard instruction-tuning paradigm and serialize the waypoint sequence into a structured assistant response. Given the multimodal input Xt, the model is trained to autoregressively generate the target waypoint response St = ( st, 1, . . . , s t,L t ).The supervised fine-tuning loss is defined as 
+
+LSFT = − 1
+
+N
+
+> N
+
+X
+
+> t=1
+
+1
+
+LtLtX
+
+> ℓ=1
+
+log pθ (st,ℓ | Xt, s t,<ℓ ) , (10) where pθ denotes the LoRA-adapted Qwen2.5-VL model, and 
+
+st,<ℓ denotes the preceding response tokens. 
+
+D. Inference Stage 
+
+During inference, 3DG-VLN performs closed-loop see-and-reach navigation, built upon the fine-tuned Qwen2.5-VL waypoint predictor. As illustrated in Fig. 2, the infer-ence framework integrates an instruction parser based on DeepSeek-V3.2, the fine-tuned waypoint predictor, and the online direction updating module. The instruction parser ex-tracts the target object and its visual attributes, providing a semantic foundation for the direction updating module. At each timestep t, the online 3D direction updating module 
+
+dynamically estimates the coarse 3D direction from onboard high-resolution front-view and downward-view observations. The updated direction cue is incorporated into the multimodal observation Xt = {I , Vt, Dt} to guide the prediction of short-horizon waypoints. By iteratively updating the direction cue, the UAV continuously corrects for spatial drift, ensuring that subsequent waypoint predictions remain aligned with the target and improving overall target-reaching performance. 
+
+a) Closed-loop Waypoint Prediction: At each timestep 
+
+t, the model receives the multimodal observation Xt =
+
+{I , Vt, Dt} with the coarse 3D direction cue Dt being updated dynamically as the UAV navigates. The initial direction D0 is provided at the start of each navigation episode. The fine-tuned Qwen2.5-VL predicts a sequence of K future waypoints in the UAV body frame: 
+
+{wt+k}Kk=1 = pθ (Xt) . (11) To execute these predictions, each egocentric waypoint is transformed back to the global coordinate frame by reversing the waypoint construction in Sec. IV-C: 
+
+pt+k = pt + R(qt)wt+k, k = 1 , . . . , K. (12) The UAV follows the resulting global waypoint sequence and then captures new front-view and downward-view obser-vations at the updated timestep. 
+
+b) Online 3D Direction Updating: To ensure accurate spatial guidance throughout the trajectory, the online direc-tion updating module continuously processes front-view and downward-view images to detect the target. When a valid detection is obtained, the 3D direction is generated according to the downward-view priority principle. For a valid detection from the front-view camera, the module estimates the target’s relative 3D orientation using camera geometry. The center pixel of the bounding box is first converted into a normalized ray in the camera frame, which is then transformed into the 7
+
+UAV body frame to compute the horizontal yaw angle. This angle is discretized into a semantic direction category and incorporated into the instruction to guide the prediction of subsequent waypoints. Specifically, given the target object and attributes extracted from the instruction, we apply Grounding DINO [45] to the front-view and downward-view images, producing detection sets Bfront and Bdown .Since multiple detections in the same view may introduce target ambiguity, we only regard a view as valid when it contains exactly one detection: 
+
+˜Bv =
+
+(
+
+Bv , if |B v | = 1 ,
+
+∅, otherwise , v ∈ { front , down }. (13) The valid observation for direction updating is selected as 
+
+(Bvalid , v valid ) = 
+
+
+
+( ˜Bdown , down) , if ˜Bdown ̸ = ∅,
+
+( ˜Bfront , front) , else if ˜Bfront ̸ = ∅,
+
+(∅, none) , otherwise .
+
+(14) This rule gives priority to the downward view because a valid detection from the downward-view camera indicates that the target is already located below the UAV, where vertical alignment becomes the dominant navigation cue. The updated direction cue Dt is then determined by 
+
+Dt =
+
+
+
+Dt−1, if vvalid = none ,
+
+down , else if vvalid = down ,gfront (Bvalid ), otherwise vvalid = front ,
+
+(15) where Dt−1 is the previous direction cue, and gfront (·) maps a valid front-view detection to a horizontal direction category. For a valid front-view detection box, let (u, v ) denote its center pixel. Given image resolution W , H, field of view 
+
+FOV , principal point (cx, c y ) = ( W/ 2, H/ 2) , and focal length 
+
+f = W 
+
+> 2 tan(FOV /2)
+
+, we first compute the normalized ray in the camera frame: 
+
+r′ 
+
+> cam
+
+=
+
+ u − cx
+
+f , v − cy
+
+f , 1
+
+
+
+, rcam = r′
+
+> cam
+
+∥r′
+
+> cam
+
+∥ . (16) The ray is then transformed into the UAV body frame: 
+
+rbody =
+
+0 0 11 0 00 1 0
+
+ rcam . (17) Let rbody = ( rx, r y , r z ). The horizontal yaw angle of the detected target is 
+
+ψ = arctan 2( ry , r x). (18) Finally, the front-view direction is discretized as 
+
+gfront (Bvalid ) = 
+
+
+
+front-left , if − ϕ ≤ ψ < −γfront ,
+
+front , if − γfront ≤ ψ ≤ γfront ,
+
+front-right , if γfront < ψ ≤ ϕ. 
+
+(19) The updated direction cue is inserted into the multimodal observation Xt = {I , Vt, Dt}, providing a precise spatially   
+
+> (a) Data split distribution (b) Trajectory length Fig. 4. Dataset statistical analysis.
+
+aligned prior for the model to generate subsequent waypoint predictions. Through this iterative process, 3DG-VLN contin-uously refines its spatial guidance from onboard observations and improves target-reaching precision. V. UAV-VLN-FOV B ENCHMARK 
+
+To facilitate the study of UAV-VLN-FOV, we construct a high-resolution benchmark driven by concise high-level instructions tailored for precise see-and-reach navigation. The benchmark focuses on target-visible navigation, requiring agents to ground concise high-level instructions in high-resolution egocentric observations and produce waypoint-level plans for precise target reaching. This design complements existing UAV-VLN datasets centered on long-range search, offering a more diagnostic testbed for fine-grained grounding and local 3D planning. 
+
+A. Dataset Construction 
+
+We develop an asynchronous high-resolution imagery and continuous waypoint collection platform controlled via the AirSim API, leveraging the Unreal Engine environment, data assets and manually collected continuous waypoints provided in [5]. Specifically, to maintain the diversity of target positions and prevent the agent from overfitting to specific target locations, we analyze the UAV-Need-Help dataset [5] and count the number of trajectories corresponding to targets at each position in every scene. A maximum of two trajectories is selected from those corresponding to each position to construct a trajectory repository. Second, we develop the asynchronous high-resolution data collection platform based on the path-following asynchronous API in AirSim. Using this platform, we approximate the manually flown trajectories with the discontinuous waypoints from the UAV-Need-Help dataset, collect high-resolution images from the UAV’s forward and downward cameras at fixed time intervals, and sample the continuous flight trajectories simultaneously. Note that trajec-tories involving collisions during flight are discarded. Third, to build a high-quality UAV-VLN-FOV dataset, we manually screen the collected images to obtain trajectory sequences where the target appears within the filed of view. Furthermore, we leverage DeepSeek V3.2 [46] to convert the original target descriptions from the UAV-Need-Help dataset into application-friendly concise high-level instructions. Finally, we construct a high-resolution navigation dataset driven by concise high-level 8
+
+instructions, comprising 2,717 trajectories and 31,878 image-instruction-waypoint tuples. 
+
+B. Dataset Analysis 
+
+This dataset covers 14 different scenarios across three spatial categories: rural areas, towns, and cities. Significant differences exist in terrain, building density, and visual features among these scenarios, providing abundant data support for the UAV-VLN-FOV task. The dataset includes all 89 targets from [5]. Following the division methods [5], [8], we split the 2,717 generated trajectories into four subsets: the training set, test set (Test), unseen-object test set (Test UO) and unseen-scene test set (Test US). Specifically, the training set comprises 2,228 trajectories, while the Test, Test UO, and Test US sets contain 152, 164, and 173 trajectories, respectively, as shown in Fig. 4 (a). Although this task is confined to the field of view, the overall trajectory length remains considerable due to the vast and unstructured outdoor space, with the maximum trajectory length reaching 138 meters, as shown in Fig. 4 (b). In addition, the instructions in this dataset feature high practicality with an average length of merely 12 words, which is much shorter than that of the instructions in [5], [8] and better suited to real-world application scenarios. VI. E XPERIMENTS 
+
+To comprehensively evaluate 3DG-VLN, we conduct ex-tensive experiments on the UAV-VLN-FOV benchmark and in real-world environments, focusing on three key questions: (1) How does 3DG-VLN compare with SOTA UAV-VLN baselines? (2) Are the proposed components, including high-resolution observation processing, directional guidance, and online 3D direction updating, essential and effective for precise target reaching? (3) Can 3DG-VLN generalize from simulation to real-world scenarios? We answer these questions through comparisons with SOTA methods in Sec. VI-C, ablation stud-ies in Sec. VI-D, and real-world experiments in Sec. VI-E. 
+
+A. Configurations 
+
+Baseline Methods. We compare 3DG-VLN with four baselines: Random , Fixed , Qwen2.5-VL-7B [44] and Trav-elUAV [5]. Random and Fixed are used to provide lower-bound references, helping to quantify the navigable spatial range and the inherent difficulty of the see-and-reach stage without intel-ligent guidance. Qwen2.5-VL-7B is used as the base model of 3DG-VLN to examine the effect of task-specific adaptation for UAV-VLN-FOV waypoint prediction. TravelUAV is adopted as the primary comparative baseline because it is the closest closed-loop waypoint-based UAV-VLN method to our setting. Unlike many existing aerial VLN agents that rely on different observation modalities, action spaces, or execution protocols, TravelUAV generates executable waypoint-level UAV motions under closed-loop navigation, enabling a fair comparison with 3DG-VLN in see-and-reach stage. Specifically, 1) Random generates random 3D waypoints within the range of 2-5 meters based on the UAV’s position at the current timestep t. 2) Fixed: requires that the UAV randomly selects actions from a fixed set, including straight ahead, shift left, shift right, turn left, turn right, ascend, descend, and stop. Among these, the distances for straight ahead, shift left, and shift right are set to 5 meters, the distances for ascend and descend are 2 meters, and the turn left and turn right angles are 15 degrees. To prevent premature stopping, the stop action cannot be selected within the first 10 steps [11]. 3) TravelUAV: is a SOTA method for UAV-VLN. Given multi-view images and high-level instruction with target descriptions and direction, it leverages the multimodal understanding capability of VLM to jointly process visual and textual information for trajectory generation [5]. 
+
+Metrics. For a rigorous evaluation of UAV agents, we em-ploy four widely adopted metrics: Success Rate (SR), Oracle Success Rate (OSR), Navigation Error (NE), and Success-weighted Path Length (SPL), which together quantify task completion, trajectory efficiency, and navigation precision. 
+
+B. Implementation Details 
+
+We adopt Qwen2.5-VL-7B as the base model for 3DG-VLN to balance navigation capability and computational cost. All training experiments are conducted using the PyTorch framework on an NVIDIA Tesla A100 GPU with 40GB of memory. We set the camera field of view to FOV = π/ 2, the image resolution to W = 1024 and H = 1024 , the angular thresholds to γfront = 15 ◦ and ϕ = FOV /4, and the length of waypoint sequence to K = 5 . Both 3DG-VLN and TravelUAV are fine-tuned for 2 epochs. For 3DG-VLN, we use a batch size of 2, 8 gradient accumulation steps, a learning rate of 10 −4
+
+and a warmup ratio of 0.1. To enable a fair comparison of navigation models, both TravelUAV and 3DG-VLN adopt the stopping strategy proposed by TravelUAV [5]. This strategy uses an open-set object detector [45] to locate the target and retrieves the corresponding depth values within the detected bounding box to determine whether to stop. 
+
+C. Comparisons with SOTA Methods 
+
+We quantitatively compare 3DG-VLN with baseline meth-ods on three distinct test sets, as summarized in Table I. Random and Fixed obtain nearly zero SR and OSR across all test sets, indicating that target-visible navigation is still highly challenging due to the vast and unstructured 3D motion space. Although Qwen2.5-VL-7B exhibits limited oracle success in some cases, it still fails to achieve effective target reaching without task-specific waypoint supervision. Compared with the current SOTA UAV-VLN method, Trav-elUAV, 3DG-VLN consistently achieves better performance across all test sets and metrics. On the Test set, it improves SR from 25.00% to 38.82%, OSR from 30.26% to 55.92%, and SPL from 17.89% to 27.70%, while reducing NE from 34.03 m to 24.41 m. The improvements on Test UO and Test US further demonstrate its robustness to unseen objects and unseen scenes. These results demonstrate that 3DG-VLN is not only more successful in reaching visible targets, but also more effective in approaching target regions. The improvements mainly stem from its high-resolution egocentric perception, which preserves fine-grained visual evidence for 9
+
+TABLE I COMPARISON WITH BASELINE METHODS .
+
+Methods Test Test UO Test US SR ↑ OSR ↑ NE ↓ SPL ↑ SR ↑ OSR ↑ NE ↓ SPL ↑ SR ↑ OSR ↑ NE ↓ SPL ↑
+
+Random 0.66 0.66 46.34 0.07 0.00 1.22 60.66 0.00 0.00 1.73 61.45 0.00 Fixed 0.00 3.29 46.30 0.00 0.00 2.44 60.51 0.00 0.00 0.00 59.54 0.00 Qwen2.5-VL-7B 0.00 3.29 42.31 0.00 0.00 3.05 56.53 0.00 0.58 2.31 55.36 0.04 TravelUAV 25.00 30.26 34.03 17.89 20.12 24.39 37.30 16.08 16.76 24.28 38.75 12.15 3DG-VLN 38.82 55.92 24.41 27.70 28.05 39.63 35.07 21.92 21.39 35.84 37.73 13.43 initial front view  
+
+> Instruction: Fly to the
+> black car on the narrow
+> road with a curb.
+
+initial down view  
+
+> Instruction: Fly to the red
+> car on the road with white
+> lane lines.
+
+0
+
+1 2 3 4 5 6 7
+
+front 
+
+view 
+
+initial front view 
+
+down 
+
+view 
+
+0 1 2 3 4 5 6 7
+
+front 
+
+view 
+
+down 
+
+view  
+
+> I n s t r u c t i o n : F l y t o t h e
+> woman standing near the
+> building with the blue wall
+> and red awning.
+
+0 1 2 3 4 5 6 7
+
+front 
+
+view 
+
+down 
+
+view 
+
+Fig. 5. Visualization of 3DG-VLN navigation in high-fidelity simulation environments. 
+
+target grounding, and dynamic 3D directional guidance, which provides accurate spatial priors for waypoint-level navigation in the see-and-reach stage. Fig. 5 illustrates representative visualized trajectories. Across these examples, 3DG-VLN demonstrates robust nav-igation and planning capabilities, autonomously generating feasible paths, avoiding obstacles, and efficiently reaching the vicinity of the target. 
+
+D. Ablation Study 
+
+Effect of Resolution: As shown in Table II, compared with the LR method, 3DG-VLN achieves significant performance improvements on all metrics across three different test sets. In particular, for the SR, the improvement margins of 3DG-VLN over LR on the three datasets reach 15.79%, 9.76% and 4.05%, respectively; while for the OSR, the margins are 19.08%, 15.85% and 6.36%, respectively. This indicates that the model fine-tuned with high-resolution images can provide more informative visual evidence for target grounding and waypoint prediction. Essentially, high-resolution images can provide fine-grained visual cues regarding target morphology and local spatial structures, thereby supporting more accurate language grounding and 3D motion prediction. This not only confirms the important impact of high-resolution images on the UAV-VLN-FOV task, but also fully demonstrates the necessity of constructing high-resolution datasets for this task. 
+
+Effect of Directional Guidance: Table II evaluates the contribution of 3D directional guidance. Compared with 3DG-10 (a) 3DG-S 
+
+0
+
+1 2 3 4 5 6 7
+
+front 
+
+view 
+
+initial front view  
+
+> Instruction: Fly to the black
+> car on the two-lane road.
+
+(b) 3DG-VLN 
+
+front 
+
+view 
+
+1 2 3 4 5 6 7
+
+Fig. 6. Comparison between 3DG-VLN and 3DG-S under the same navigation instruction. Each sub-image shows the front-view observation at a specific timestep, and the arrow in the upper-right corner indicates the current direction cue, where ↑ denotes front and ↗ denotes front-right .TABLE II ABLATION STUDY OF DIFFERENT STRATEGIES . LR: T HE MODEL IS FINE -TUNED WITH LOW -RESOLUTION IMAGES RESIZED TO 256 × 256 , A COMMONLY ADOPTED INPUT RESOLUTION IN LONG -RANGE UAV-VLN SETTINGS ; 3DG-W: W ITHOUT 3D DIRECTIONAL GUIDANCE ; 3DG-S: N AVIGATING WITH ORIENTATION FROM THE INITIAL INSTRUCTION ONLY .
+
+Strategies Test Test UO Test US SR ↑ OSR ↑ NE ↓ SPL ↑ SR ↑ OSR ↑ NE ↓ SPL ↑ SR ↑ OSR ↑ NE ↓ SPL ↑
+
+LR 23.03 36.84 35.03 17.05 18.29 23.78 38.90 13.59 17.34 29.48 39.48 10.56 3DG-W 25.00 44.08 29.86 17.31 22.56 36.59 33.08 17.53 17.34 31.79 43.23 10.24 3DG-S 34.87 49.34 27.53 24.61 23.17 32.93 34.08 17.09 16.76 30.06 40.52 9.19 3DG-VLN 38.82 55.92 24.41 27.70 28.05 39.63 35.07 21.92 21.39 35.84 37.73 13.43 
+
+TABLE III ABLATION STUDY ON OUTDATED AND RECOMPUTED DIRECTION CUES . T RAVEL UAV-O AND 3DG-VLN-O DENOTE THE ORIGINAL DIRECTION CUE COMPUTED AT THE BEGINNING OF THE LONG -HORIZON UAV-VLN TASK , WHILE TRAVEL UAV AND 3DG-S DENOTE THE DIRECTION CUE RECOMPUTED AT THE UAV-VLN-FOV STAGE USING THE SAME DIRECTION -COMPUTATION RULE .
+
+Strategies Test Test UO Test US SR ↑ OSR ↑ NE ↓ SPL ↑ SR ↑ OSR ↑ NE ↓ SPL ↑ SR ↑ OSR ↑ NE ↓ SPL ↑
+
+TravelUAV-O 24.34 26.97 34.81 16.58 20.12 22.56 37.96 15.60 16.18 23.12 39.59 11.85 TravelUAV 25.00 30.26 34.03 17.89 20.12 24.39 37.30 16.08 16.76 24.28 38.75 12.15 
+
+3DG-VLN-O 26.32 40.79 35.90 19.29 17.07 26.22 36.92 12.49 14.45 26.59 43.19 8.94 3DG-S 34.87 49.34 27.53 24.61 23.17 32.93 34.08 17.09 16.76 30.06 40.52 9.19 
+
+W, which removes the direction cue, 3DG-VLN improves SR, OSR, and SPL across all test sets, while reducing NE on Test and Test US. Specifically, on the Test set, SR, OSR, and SPL increase from 25.00%, 44.08%, and 17.31% to 38.82%, 55.92%, and 27.70%, respectively. Similar gains are observed on Test UO and Test US, although NE slightly increases on Test UO. This may be because the direction-guided policy in 3DG-VLN is more actively target-seeking based on current visual evidence. Under unseen-object con-ditions, target grounding can be more uncertain. Therefore, noisy or ambiguous direction cues may occasionally guide the UAV toward an incorrect or visually similar region, leading to larger terminal deviations in a few failure cases. Nevertheless, the consistent gains in SR, OSR, and SPL indicate that 3D directional guidance provides an effective spatial prior for target reaching in the see-and-reach stage. 
+
+Effect of Direction Updating: We first examine whether the direction cue should be updated when entering the see-and-reach stage. As shown in Table III, using the direction recom-puted at the UAV-VLN-FOV stage consistently outperforms using the outdated direction from the beginning of long-range navigation for both TravelUAV and 3DG-VLN. This suggests that the initial direction may no longer reflect the current UAV-target spatial relation after the UAV has moved, and that direction cues should be updated according to the target-visible reaching stage. Although such stage-level recomputation still provides only a static cue, it already offers a more reliable spatial prior than the stale long-range direction. We further evaluate whether this direction cue should be continuously updated during closed-loop navigation. As shown in Table II, 3DG-VLN consistently outperforms 3DG-S across all test sets, except for a slight increase in NE on Test UO. This confirms that online updating of direction cues helps maintain alignment with the target during the flight process, providing clearer visual cues of the target and enhancing waypoint-level motion prediction, which ultimately improves the UAV’s precision and success in reaching the target within its field of view. The visualization in Fig. 6 further illustrates this effect. 3DG-VLN dynamically updates the direction cue from front to 
+
+front-right as the target shifts in the egocentric view, enabling 11 Instruction: Fly to the 
+
+> chair.
+
+down 
+
+view 
+
+front 
+
+view 
+
+global view 
+
+down 
+
+view 
+
+front 
+
+view 
+
+global view  
+
+> Instruction: Fly to the
+> blue box.
+
+Fig. 7. Visualization of 3DG-VLN navigation in the real world. 
+
+the UAV to adaptively adjust its motion toward the target, whereas 3DG-S maintains a static direction and gradually loses target alignment. 
+
+E. Real-World Experiments 
+
+We further conduct real-world experiments to evaluate the practical applicability of 3DG-VLN in precise see-and-reach navigation. As shown in Fig. 7, given the navigation instructions, the UAV predicts continuous 3D waypoints from real-time egocentric observations and progressively navigates toward the targets. Despite real-world challenges such as illumination changes and background variations, 3DG-VLN successfully guides the UAV into a close spatial vicinity of the specified target, rather than merely approaching the target area. This result demonstrates that 3DG-VLN can accurately trans-form linguistic instructions and visual observations into precise 3D maneuvers for high-precision target reaching, aligning with the stringent 10-meter success criterion emphasized in the UAV-VLN-FOV setting. It also provides preliminary evidence of 3DG-VLN’s generalization from simulation to real-world scenarios. VII. C ONCLUSION AND FUTURE WORK 
+
+This paper introduces UAV-VLN-FOV , a novel UAV-VLN task that explicitly focuses on the see-and-reach stage, where the target is initially visible within the UAV’s field of view. To overcome limitations of existing methods in fine-grained visual grounding and spatial direction alignment, we propose 
+
+3DG-VLN , a vision-language waypoint prediction framework that integrates high-resolution dual-view observations for fine-grained target grounding and motion prediction, while dynami-cally updating direction cues during flight to ensure continuous spatial alignment. To support UAV-VLN-FOV, we construct a high-resolution navigation dataset, comprising trajectories annotated with target-oriented high-level instructions and con-tinuous 3D waypoints. Experimental results show that 3DG-VLN significantly outperforms existing baseline methods on this task, achieving SOTA performance. Despite outperforming the baselines, 3DG-VLN still relies on an external open-set object detector for online direction updating, making target-relative direction estimation sensitive to detection quality. Future work will explore an integrated framework that jointly models visual grounding, spatial align-ment, and motion planning to improve precise target-reaching performance. REFERENCES [1] N. Wang, W. Chen, L. Chen, H. Ji, Z. Guo, X. Zhang, and H. Sun, “Ex-pand your scope: Semantic cognition over potential-based exploration for embodied visual navigation,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 22, 2026, pp. 18 620–18 628. [2] K. He, Y. Huang, Y. Jing, Q. Wu, and L. Wang, “Fine-grained alignment supervision matters in vision-and-language navigation,” IEEE Transac-tions on Pattern Analysis and Machine Intelligence , 2026. [3] T. Yu, Y. Wu, Q. Cui, Q. Huang, and J. Yu, “Mossvln: Memory-observation synergistic system for continuous vision-language naviga-tion,” IEEE Transactions on Multimedia , vol. 27, pp. 6690–6704, 2025. [4] M. Tan, P. Chen, H. Zhi, J. Mai, B. Rosman, D. Ji, and R. Zeng, “Source-free elastic model adaptation for vision-and-language navigation,” IEEE Transactions on Multimedia , vol. 27, pp. 3953–3965, 2025. [5] X. Wang, D. Yang, H. Kwan, J. Chen, H. Li, Y. Liao, S. Liu et al. ,“Towards realistic uav vision-language navigation: Platform, benchmark, and methodology,” in International Conference on Learning Represen-tations , 2025, pp. 7292–7310. [6] X. Ding, J. Gao, C. Pan, W. Wang, and J. Qin, “History-enhanced two-stage transformer for aerial vision-and-language navigation,” in 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 22, 2026, pp. 18 225–18 233. [7] G. Zheng, Y. Ban, M. Zhang, J. Zheng, and B. Zhou, “Onfly: Onboard zero-shot aerial vision-language navigation toward safety and efficiency,” 
+
+arXiv preprint arXiv:2603.10682 , 2026. [8] S. Liu, H. Zhang, Y. Qi, P. Wang, Y. Zhang, and Q. Wu, “Aeri-alvln: Vision-and-language navigation for uavs,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2023, pp. 15 384–15 394. [9] Y. Ning, G. Zhao, Y. Qin, S. Liu, Y. Liu, L. Lin, and G. Li, “Lookasidevln: direction-aware aerial vision-and-language navigation,” 
+
+arXiv preprint arXiv:2604.17190 , 2026. [10] L. Zhang, H. Fu, X. Hao, S. Zhang, Q. Zhang, R. Liu, L. Chen, and W. Ding, “What you see is what you reach: Towards spatial navigation with high-level human instructions,” Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 15, p. 12627–12635, Mar. 2026. [11] J. Xiao, Y. Sun, Y. Shao, B. Gan, R. Liu, Y. Wu, W. Guan, and X. Deng, “Uav-on: A benchmark for open-world object goal navigation with aerial agents,” in Proceedings of the 33rd ACM International Conference on Multimedia , 2025, pp. 13 023–13 029. [12] R. Wu, Y. Zhang, J. Chen, L. Huang, S. Zhang, X. Zhou, L. Wang, and S. Liu, “Aeroduo: Aerial duo for uav-based vision and language navigation,” in Proceedings of the 33rd ACM International Conference on Multimedia , 2025, pp. 2576–2585. [13] P. Xu, Z. Deng, J. Deng, Z. Gu, and S. Wan, “Aerialvla: A vision-language-action model for uav navigation via minimalist end-to-end control,” arXiv preprint arXiv:2603.14363 , 2026. 12 
+
+[14] Y. Zhong, Z. Zhang, R. Zhang, L. Huang, H. Gao, S. Wang, D. Li, R. Han, J. Guo, S. Peng et al. , “Run, ruminate, and regulate: A dual-process thinking system for vision-and-language navigation,” in 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 22, 2026, pp. 18 845–18 854. [15] S. Wu, X. Fu, F. Wu, and Z.-J. Zha, “Vision-and-language navigation via latent semantic alignment learning,” IEEE Transactions on Multimedia ,vol. 26, pp. 8406–8418, 2024. [16] Z. Wang, S. Lee, and G. H. Lee, “Dynam3d: Dynamic layered 3d tokens empower vlm for vision-and-language navigation,” Advances in Neural Information Processing Systems , vol. 38, pp. 153 522–153 544, 2026. [17] S. Zhang, Y. Qiao, Q. Wang, L. Guo, Z. Wei, and J. Liu, “Flexvln: Flexible adaptation for diverse vision-and-language navigation tasks,” 
+
+IEEE Transactions on Multimedia , vol. 27, pp. 6307–6318, 2025. [18] E. Yu, J. Lu, K. Zhang, and G. Zhang, “Enhancing outdoor vision: Binocular desnowing with dual-stream temporal transformer,” Pattern Recognition , vol. 170, p. 112075, 2026. [19] S. Zhang, Y. Qiao, Q. Wang, Z. Yan, Q. Wu, Z. Wei, and J. Liu, “Cosmo: Combination of selective memorization for low-cost vision-and-language navigation,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2025, pp. 5511–5522. [20] C. Xu, E. Yu, J. Xuan, and J. Lu, “Vgas: Value-guided action-chunk selection for few-shot vision-language-action adaptation,” arXiv preprint arXiv:2602.07399 , 2026. [21] Y. Fan, W. Chen, T. Jiang, C. Zhou, Y. Zhang, and X. Wang, “Aerial vision-and-dialog navigation,” in Findings of the Association for Com-putational Linguistics: ACL 2023 , 2023, pp. 3043–3061. [22] X. Ge, Y. Pan, Y. Zhang, X. Li, W. Zhang, D. Zhang, Z. Wan, X. Lin, X. Zhang, J. Liang et al. , “Airsim360: A panoramic simulation platform within drone view,” arXiv preprint arXiv:2512.02009 , 2025. [23] J. Lee, T. Miyanishi, S. Kurita, K. Sakamoto, D. Azuma, Y. Matsuo, and N. Inoue, “Citynav: Language-goal aerial navigation dataset with geographic information,” arXiv preprint arXiv:2406.14240 , 2024. [24] Q. Hu, B. Yang, S. Khalid, W. Xiao, N. Trigoni, and A. Markham, “Sensaturban: Learning semantics from urban-scale photogrammetric point clouds,” International Journal of Computer Vision , vol. 130, no. 2, pp. 316–343, 2022. [25] Y. Liu, F. Yao, Y. Yue, G. Xu, X. Sun, and K. Fu, “Navagent: Multi-scale urban street view fusion for uav embodied vision-and-language navigation,” arXiv preprint arXiv:2411.08579 , 2024. [26] H. Cai, Y. Rao, L. Huang, Z. Zhong, J. Dong, J. Tan, W. Lu, and R. Zhong, “Airnav: A large-scale real-world uav vision-and-language navigation dataset with natural and diverse instructions,” arXiv preprint arXiv:2601.03707 , 2026. [27] X. Wang, D. Yang, Y. Liao, W. Zheng, B. Dai, H. Li, S. Liu et al. ,“Uav-flow colosseo: A real-world benchmark for flying-on-a-word uav imitation learning,” arXiv preprint arXiv:2505.15725 , 2025. [28] F. Xue, J. Sun, Y. Xue, Q. Wu, L. Zhu, X. Chang, and S.-C. Cheung, “Attention guidance by cross-domain supervision signals for scene text recognition,” IEEE Transactions on Image Processing , vol. 34, pp. 717– 728, 2025. [29] E. Yu, J. Lu, K. Zhang, and G. Zhang, “Enhancing outdoor vision: Binocular desnowing with dual-stream temporal transformer,” Pattern Recognition , vol. 170, p. 112075, 2026. [30] E. Yu, J. Lu, and G. Zhang, “Generalized incremental learning under concept drift across evolving data streams,” in Proceedings of the ACM Web Conference 2026 , 2026, pp. 3905–3916. [31] S. Liu, H. Zhang, Q. Qiao, Q. Wu, and P. Wang, “Vln-chenv: Vision-language navigation in changeable environments,” in Proceedings of the 33rd ACM International Conference on Multimedia , 2025, pp. 3798– 3807. [32] T. Zhang, E. Yu, Y. Shao, and J. Sun, “Multimodal inverse attention network with intrinsic discriminant feature exploitation for fake news detection,” in Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence , 2025, pp. 7940–7948. [33] Y. Wu, M. Zhu, X. Li, Y. Du, Y. Fan, W. Li, Z. Han, X. Zhou, and F. Gao, “Vla-an: An efficient and onboard vision-language-action frame-work for aerial navigation in complex environments,” arXiv preprint arXiv:2512.15258 , 2025. [34] W. Jiang, K. Huang, L. Wang, W. Xu, W. Fan, J. Liu, S. Liu, H. Liang, H. Duan, B. Xu et al. , “Spatialfly: Geometry-guided representation align-ment for uav vision-and-language navigation in urban environments,” 
+
+arXiv preprint arXiv:2603.21046 , 2026. [35] T. Li, T. Huai, Z. Li, Y. Gao, H. Li, and X. Zheng, “Skyvln: Vision-and-language navigation and nmpc control for uavs in urban environments,” in 2025 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) . IEEE, 2025, pp. 17 199–17 206. [36] C. Yuan, Y.-H. Zhou, C. Guo, D. Han, G. Shi, and W. Wang, “See-ing with words: Interpretable language-guided drone geo-localization via llm-enriched semantic attribute alignment,” IEEE Transactions on Multimedia , vol. 28, pp. 2132–2144, 2025. [37] H. Xu, Y. Hu, C. Gao, Z. Zhu, Y. Zhao, Y. Li, and Q. Yin, “Geonav: Em-powering mllms with explicit geospatial reasoning abilities for language-goal aerial navigation,” arXiv preprint arXiv:2504.09587 , 2025. [38] Y. Zhang, H. Yu, J. Xiao, and M. Feroskhan, “Grounded vision-language navigation for uavs with open-vocabulary goal understanding,” arXiv preprint arXiv:2506.10756 , 2025. [39] W. Zhang, C. Gao, S. Yu, R. Peng, B. Zhao, Q. Zhang, J. Cui, X. Chen, and Y. Li, “CityNavAgent: Aerial vision-and-language navigation with hierarchical semantic planning and global memory,” in Proceedings of the 63rd Annual Meeting of the Association for Computational Linguis-tics (Volume 1: Long Papers) , W. Che, J. Nabende, E. Shutova, and M. T. Pilehvar, Eds. Vienna, Austria: Association for Computational Linguistics, Jul. 2025, pp. 31 292–31 309. [40] H. Cai, J. Dong, J. Tan, J. Deng, S. Li, Z. Gao, H. Wang, Z. Su, A. Sumalee, and R. Zhong, “Flightgpt: Towards generalizable and interpretable uav vision-and-language navigation with vision-language models,” arXiv preprint arXiv:2505.12835 , 2025. [41] P. Lin, G. Sun, C. Liu, F. Li, W. Ren, and Y. Cong, “Open-vln: Open-world aerial vision-language navigation,” arXiv preprint arXiv:2511.06182 , 2025. [42] J. Chen, H. Li, Z. Tang, X. Li, W. Wu, and S. Liu, “Aerialvla: A vision-language-action model for aerial navigation with online dialogue,” in 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 22, 2026, pp. 18 161–18 169. [43] E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang, and W. Chen, “LoRA: Low-rank adaptation of large language models,” in International Conference on Learning Representations , 2022. [44] S. Bai, K. Chen, X. Liu, J. Wang, W. Ge, S. Song, K. Dang, P. Wang, S. Wang, J. Tang, H. Zhong, Y. Zhu, M. Yang, Z. Li, J. Wan, P. Wang, W. Ding, Z. Fu, Y. Xu, J. Ye, X. Zhang, T. Xie, Z. Cheng, H. Zhang, Z. Yang, H. Xu, and J. Lin, “Qwen2.5-vl technical report,” 2025. [45] S. Liu, Z. Zeng, T. Ren, F. Li, H. Zhang, J. Yang, Q. Jiang, C. Li, J. Yang, H. Su et al. , “Grounding dino: Marrying dino with grounded pre-training for open-set object detection,” in European conference on computer vision . Springer, 2024, pp. 38–55. [46] A. Liu, A. Mei, B. Lin, B. Xue, B. Wang, B. Xu, B. Wu, B. Zhang, C. Lin, C. Dong et al. , “Deepseek-v3. 2: Pushing the frontier of open large language models,” arXiv preprint arXiv:2512.02556 , 2025.

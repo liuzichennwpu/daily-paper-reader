@@ -1,0 +1,454 @@
+Title: GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates
+
+URL Source: https://arxiv.org/pdf/2606.20479v1
+
+Published Time: Fri, 19 Jun 2026 01:15:24 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates 
+
+Nastaran Darabi 1, Divake Kumar 1, Sina Tayebati 1, Devashri Naik 1 and Amit Ranjan Trivedi 1
+
+Fig. 1: Overview of the GroundControl framework for trajectory-consistent uncertainty estimation in vision-language navigation. A VLM-based navigation agent produces a trajectory with distance-to-goal signal {dt} while executing actions conditioned on observations and language instructions. GroundControl models the evolution of this signal using a constant-velocity Kalman filter that predicts nominal goal-directed progress. Deviations from this prediction are captured through normalized innovation statistics and posterior covariance growth, and fused with trajectory descriptors including normalized progress, monotonicity, path efficiency, and oscillatory behavior. The resulting episode-level score Ui measures geometric and temporal inconsistency in the trajectory rather than instantaneous decision ambiguity. Uncertainty quality is evaluated using the proposed Selective Risk–Coverage Navigation (SRCN) protocol, which assesses how effectively uncertainty ranks navigation episodes by failure or inefficiency using risk–coverage curves and AURC / E-AURC metrics. 
+
+Abstract — Vision-language navigation agents achieve compet-itive average success on benchmark tasks, yet failures often arise through predictable trajectory-level breakdowns such as oscil-lation, stagnation, or inefficient detours. Reliable deployment, therefore, requires uncertainty signals that anticipate emerging failure dynamics during execution rather than reflect only instantaneous action entropy. We introduce GroundControl , a trajectory-consistent uncertainty estimator defined as statistical deviation from nominal goal-directed distance-to-goal dynamics aggregated over an episode. GroundControl models distance evolution using a constant-velocity Kalman filter and combines normalized innovation statistics with complementary trajectory features capturing progress, monotonicity, path efficiency, and oscillatory behavior. The resulting uncertainty score reflects geometric and temporal inconsistency in navigation behavior rather than local prediction dispersion. To evaluate uncertainty quality independently of task success, we formalize Selective Risk–Coverage Navigation (SRCN) , a protocol that measures how effectively an uncertainty score ranks episodes by failure or inefficiency using risk–coverage curves and AURC / E-AURC summaries. Across five EB-Navigation splits ( N = 300 
+
+episodes), trajectory-consistent uncertainty achieves near-oracle ordering under success-based selective risk, with weighted-          
+
+> This work was supported in part by COGNISENSE, one of seven centers in JUMP 2.0, a Semiconductor Research Corporation (SRC) program sponsored by DARPA, and NSF funding #2235207. Corresponding Authors Email: ndarab2@uic.edu, amitrt@uic.edu
+> 1Authors are with the University of Illinois at Chicago (UIC).
+
+average E-AURC SR = 0.0024 for the GPT-4o model, sub-stantially outperforming entropy-, conformal-, and heuristic baselines. Under SPL-based selective evaluation, GroundCon-trol consistently achieves the lowest AURC and E-AURC across models and navigation splits. These results show that modeling deviation from goal-directed dynamics provides an interpretable and robust signal for anticipating navigation failures in vision-language agents. 
+
+I. I NTRODUCTION 
+
+Vision-language navigation (VLN) agents have recently achieved strong benchmark performance by combining lan-guage understanding with visual grounding and discrete motion policies. Modern vision-language models (VLMs) can interpret multi-step instructions, resolve object references in egocentric observations, and execute navigation primitives with competitive Success weighted by Path Length (SPL) [1], [2], [3]. While these results indicate substantial progress in instruction following, benchmark success alone does not imply reliable execution. In practice, navigation failures often emerge gradually during execution through characteristic trajectory-level breakdowns. Agents may stall near distrac-tors, oscillate between conflicting actions, accumulate path length without proportional geometric progress, or drift away from the intended goal. These behaviors are reflected in the 
+
+> arXiv:2606.20479v1 [cs.RO] 18 Jun 2026
+
+temporal evolution of the distance-to-goal signal and action trajectory. However, current VLN systems rarely provide a principled mechanism for detecting such failure dynamics while an episode is unfolding [4], [5], [6]. For reliable deployment, navigation systems therefore re-quire an uncertainty signal indicating whether an ongoing trajectory is deviating from successful goal-directed execu-tion. Existing uncertainty proxies, however, are poorly suited for this setting. Most rely on instantaneous signals such as predictive entropy over action distributions or token-level confidence. These measures capture ambiguity in individual decisions but do not reflect whether the resulting trajectory remains consistent with geometric progress toward the goal. An agent may therefore maintain high step-wise confidence while repeatedly executing actions that lead to oscillation, stagnation, or inefficient detours. This suggests that uncertainty in embodied navigation should reflect trajectory-level consistency of goal-directed dynamics . In successful episodes, the distance-to-goal signal typically follows a structured evolution characterized by sus-tained progress with bounded variation. Systematic violations of this structure, such as oscillation, stagnation, divergence, or low path efficiency relative to displacement, provide quantitative evidence that execution is deviating from the intended navigation objective. Under this view, uncertainty estimation becomes the problem of detecting statistically significant deviations from expected goal-directed motion. We implement this principle through GroundControl ,an interpretable trajectory-consistent uncertainty estimator. GroundControl models distance-to-goal dynamics using a constant-velocity Kalman filter over the state xt = [ dt, ˙dt]⊤.The filter predicts nominal goal-directed progress and quan-tifies deviation through normalized innovation statistics and posterior covariance growth. These signals are fused with complementary trajectory features capturing normal-ized progress, monotonicity of the distance sequence, path efficiency relative to displacement, and action-reversal fre-quency. The resulting episode-level uncertainty score Ui
+
+reflects temporal, geometric, and behavioral inconsistency in the trajectory rather than dispersion in individual action. To evaluate uncertainty independently of raw task success, we introduce Selective Risk–Coverage Navigation (SRCN) ,a protocol for trajectory-level uncertainty signals that mea-sures how effectively an uncertainty score ranks naviga-tion episodes by failure using risk–coverage curves and summary metrics including AURC and excess-AURC. This formulation isolates ranking quality without modifying the underlying navigation policy and enables comparison across entropy and behavioral estimators. Our contributions are:  
+
+> •
+
+We formalize trajectory-level consistency of distance-to-goal dynamics as a foundation for uncertainty estimation in VLN-based embodied navigation.  
+
+> •
+
+We introduce GroundControl , a lightweight trajectory-consistent estimator that detects statistically significant deviations from nominal goal-directed motion.  
+
+> •
+
+Across five EB-Navigation splits ( N = 300 episodes), our trajectory-consistent uncertainty achieves near-oracle ordering under success-based selective risk with weighted-average E-AURC SR = 0 .0024 , outperforming entropy-, conformal-, and heuristic baselines while remaining com-petitive under SPL-based selective evaluation. II. R ELATION TO PRIOR WORK 
+
+Embodied Navigation Benchmarks and Evaluation. 
+
+Instruction-conditioned embodied navigation has been stan-dardized through benchmarks such as Room-to-Room (R2R) [7] and Habitat-based environments [8], [9], [10]. Agents follow natural language instructions using egocentric observations and are evaluated primarily by Success Rate and Success weighted by Path Length (SPL). Recent vision-language systems built on large pretrained transformers achieve competitive performance under these metrics [11], [3]. However, they measure task outcome only after episode termination and do not assess whether an agent can anticipate failure during execution [12], [13], [14]. 
+
+Uncertainty in Sequential Decision Making. Uncertainty in embodied agents arises from partial observability, percep-tual aliasing, ambiguous language grounding, and stochastic control. In VLN, common proxies include predictive en-tropy over action distributions, logit margins, and heuristics derived from reasoning traces. In reinforcement learning and robotics, epistemic and aleatoric uncertainty have been modeled using Bayesian critics, deep ensembles, and dis-tributional value functions to support exploration or risk-sensitive control. These methods operate at the level of action probabilities or value estimates and are typically eval-uated through state-wise prediction accuracy. None models distance-to-goal evolution as a stochastic dynamical process, and therefore they do not capture structured trajectory-level failure modes that unfold over multiple steps [15], [16], [17]. 
+
+Failure Prediction and Introspection. Failure prediction for embodied agents has been explored using auxiliary clas-sifiers over latent representations, trajectory statistics such as episode length, and heuristic signals, including invalid-action rates or plan divergence. While these signals may correlate with failure on fixed benchmarks, they are often architecture-specific or implicitly exploit dataset artifacts, such as the coupling between failure and maximum episode length. In contrast, geometric observables such as distance-to-goal provide a task-level, model-agnostic signal of progress dy-namics. Despite being readily available in navigation envi-ronments, trajectory-level geometric consistency has not been formalized for uncertainty estimation [18], [19], [20]. 
+
+Selective Prediction and Risk-Coverage Analysis. Se-lective prediction evaluates models that abstain on high-uncertainty inputs, trading coverage for reduced risk [17]. Risk–coverage curves and metrics such as AURC or excess-AURC summarize ranking quality independently of threshold choice. Although widely adopted in classification, this frame-work is limited in embodied navigation, where uncertainty must be aggregated over temporally correlated trajectories rather than individual states. Our formulation adapts selective evaluation to episode-level uncertainty [15], [21], [8]. III. M ETHODOLOGY 
+
+A. Task Setup and Standard Navigation Metrics 
+
+Each episode i ∈ { 1, . . . , N } specifies an initial robot pose, a natural-language instruction Li, and a target object definition [22]. At each time step t = 1 , . . . , T i, the agent receives an egocentric observation ot and selects a discrete action ut ∈ A , where |A| = 8 corresponds to forward, backward, left, right, rotate-left, rotate-right, look-up, and look-down motions of fixed magnitude. An episode is considered successful if the agent reaches the target within a distance threshold δ = 1 m, denoted by Succ i ∈ { 0, 1}. In addition to Success Rate, we report Success weighted by Path Length (SPL), 
+
+SPL i = Succ i · pi
+
+max( pi, l i) , (1) where pi is the initial geodesic distance to the goal and 
+
+li = Ti · ∆ is the executed path length with fixed step size 
+
+∆ = 0 .25 m. These metrics evaluate task completion and efficiency only at episode termination. In this work, we retain them unchanged and introduce complementary measures that assess the quality of episode-level uncertainty. For each episode i, an uncertainty estimator produces a scalar score Ui ∈ R, where lower values indicate higher confidence. The score may originate from internal state statistics such as posterior covariance or innovation energy, model-internal signals including attention entropy or belief dispersion, or post hoc behavioral measures such as action entropy, plan instability, invalid-action rates, or conformal nonconformity. This abstraction allows heterogeneous uncertainty estima-tors to be evaluated within a common framework while iso-lating the quality of their episode-level ranking. In particular, the SRCN evaluation introduced later depends only on the ordering induced by Ui through thresholding. 
+
+B. Selective Risk–Coverage Navigation (SRCN) 
+
+We formalize Selective Risk–Coverage Navigation 
+
+(SRCN) as an evaluation protocol for episode-level uncertainty ranking. Given uncertainty scores {Ui}Ni=1 ,SRCN measures how well these scores order episodes by true loss without modifying the underlying navigation policy, where high-uncertainty episodes are progressively excluded, and performance is evaluated on the retained subset. For a threshold τ , define the retained index set 
+
+I(τ ) ≜ { i : Ui ≤ τ }, Cov( τ ) ≜ |I (τ )|
+
+N , (2) where Cov( τ ) ∈ [0 , 1] denotes coverage, i.e., the fraction of retained episodes. As τ increases, coverage increases monotonically to 1.
+
+Selective risk. For success-based evaluation, we define the episode loss ℓSR  
+
+> i
+
+= 1 − Succ i. The selective risk at threshold 
+
+τ is 
+
+Risk SR (τ ) ≜ 1
+
+|I (τ )|
+
+X 
+
+> i∈I (τ)
+
+ℓSR  
+
+> i
+
+, (3) which equals the empirical failure rate among retained episodes. To incorporate path efficiency we also define the SPL-based loss ℓSPL  
+
+> i
+
+= 1 − SPL i, yielding 
+
+Risk SPL (τ ) ≜ 1
+
+|I (τ )|
+
+X 
+
+> i∈I (τ)
+
+ℓSPL  
+
+> i
+
+. (4) This variant penalizes both outright failures and inefficient successful trajectories. 
+
+Risk–Coverage curve and AURC. Varying τ traces arisk–coverage curve that describes how risk decreases as increasingly uncertain episodes are removed. An uncertainty score with strong ranking quality yields low selective risk even at high coverage. We summarize this trade-off using the area under the risk–coverage curve (AURC). Episodes are sorted in ascending order of Ui, and the integral 
+
+AURC SPL ≜
+
+Z 10
+
+Risk SPL (Cov) dCov , (5) is computed via the trapezoidal rule; AURC SR is defined analogously. Lower AURC indicates better ranking. 
+
+Excess-AURC (E-AURC). Because AURC depends on task difficulty and class balance, we report the normalized excess AURC 
+
+E-AURC ≜ AURC − AURC ⋆, (6) where AURC ⋆ is the oracle lower bound obtained by sorting episodes by true loss. E-AURC = 0 corresponds to perfect ordering. 
+
+Calibration. When a calibrated failure probability ˆpi(fail) is available, we additionally report Expected Calibration Error (ECE): 
+
+ECE ≜
+
+> M
+
+X
+
+> m=1
+
+|Bm|
+
+N acc( Bm) − conf( Bm) , (7) where {Bm} are uniform bins over [0 , 1] , acc( Bm) is the empirical failure frequency in bin m, and conf( Bm) is the average predicted failure probability. 
+
+C. GroundControl: Uncertainty via Distance Dynamics 
+
+GroundControl estimates trajectory-consistent uncertainty by modeling the evolution of distance-to-goal and measuring deviation from expected goal-directed dynamics. The key observation is that successful navigation exhibits locally con-sistent geometric progress, whereas oscillation, stagnation, or divergence produces statistically detectable inconsistency. 
+
+Distance-to-Goal Dynamics via Constant-Velocity KF. Let 
+
+dt denote the Euclidean distance from the agent to the goal at step t. Rather than modeling full spatial motion, we treat the scalar distance trajectory as a dynamical signal. Under nominal execution, distance evolves smoothly and decreases approximately linearly over short horizons. We capture this local structure using the state 
+
+xt = [ dt, ˙dt]⊤,
+
+where ˙dt denotes the instantaneous rate of change. We adopt linear-Gaussian dynamics 
+
+xt+1 = Fx t + wt, dt = Hx t + vt, (8) with 
+
+F =
+
+1 10 1
+
+
+
+, H = [1 0] ,
+
+process noise wt ∼ N (0 , Q) and observation noise vt ∼N (0 , σ 2 
+
+> r
+
+). The constant-velocity assumption is not intended to model exact robot motion; it provides a locally consistent surrogate for nominal goal-directed progress against which deviations can be tested statistically. The filter is initialized as 
+
+ˆx0 = [ d0, 0] ⊤, Σ0 = diag(0 .01 , 1.0) ,
+
+encoding high confidence in initial distance and diffuse uncertainty in velocity. At each step, standard Kalman prediction and update equations are applied: 
+
+ˆxt|t−1 = Fˆxt−1|t−1, (9) 
+
+Σt|t−1 = FΣ t−1|t−1F⊤ + Q, (10) 
+
+νt = dt − Hˆxt|t−1, (11) 
+
+St = HΣ t|t−1H⊤ + σ2 
+
+> r
+
+, (12) 
+
+Kt = Σt|t−1H⊤/S t, (13) 
+
+ˆxt|t = ˆ xt|t−1 + Ktνt, (14) 
+
+Σt|t = ( I − KtH)Σt|t−1(I − KtH)⊤ + σ2 
+
+> r
+
+KtK⊤ 
+
+> t
+
+.
+
+(15) The innovation 
+
+νt = dt − Hˆxt|t−1
+
+measures the discrepancy between observed and predicted distance. The normalized innovation squared ν2 
+
+> t
+> St
+
+is the squared Mahalanobis residual and, under linear-Gaussian assumptions, follows a χ2 distribution with one degree of freedom. It therefore serves as a statistical consistency test: small values indicate agreement with nominal goal-directed dynamics, whereas persistently large values indicate significant deviation from expected geometric progress. 
+
+Per-Step Uncertainty Score. We define a per-step un-certainty score Ht that aggregates three complementary indicators of trajectory inconsistency: (i) posterior belief dispersion, (ii) action-level instability, and (iii) statistical deviation from nominal goal-directed dynamics: 
+
+Ht ≜ λ1 log det  Σt|t + εI + λ2 H(αt) + λ3
+
+ν2
+
+> t
+
+St
+
+. (16) The term log det( Σt|t) measures posterior belief dispersion and increases when the filter becomes uncertain about lo-cal distance dynamics. The normalized innovation squared 
+
+ν2 
+
+> t
+
+/S t is the squared Mahalanobis residual; under linear-Gaussian consistency assumptions, it follows a χ2 distri-bution with one degree of freedom and therefore acts as a statistical consistency test. Persistently large values indicate significant deviation from expected goal-directed motion. TABLE I: Standard navigation performance on EB-Navigation.                                       
+
+> GPT-4o GPT-5-mini Gemini-1.5-Flash Set Success (%) SPL Success (%) SPL Success (%) SPL base 58.3 0.493 75.0 0.656 60.0 0.538 common sense 58.3 0.497 70.0 0.618 55.0 0.475 complex inst. 56.7 0.509 73.3 0.668 46.7 0.408 visual app. 53.3 0.464 65.0 0.576 53.7 0.446 long horizon 16.7 0.112 16.7 0.129 14.5 0.107
+
+The action-level term H(αt) is the Bernoulli entropy 
+
+H(αt) = −αt log αt − (1 −αt) log(1 −αt), (17) where αt ∈ [0 , 1] is the normalized confidence assigned by the policy to the executed action at time t (i.e., the softmax probability of the selected action before environment execution). The entropy is maximal near 0.5 and minimal near 0 or 1, capturing action-level indecision. The weights 
+
+(λ1, λ 2, λ 3) = (1 .0, 0.5, 0.8) are fixed across all experi-ments to isolate signal quality from learned weighting effects. 
+
+Multi-Signal Episode Uncertainty. To obtain an episode-level signal, we aggregate the per-step score by taking the maximum over time and mapping it to [0 , 1] via a sigmoid: 
+
+˜sskf  
+
+> i
+
+= σ
+
+
+
+max  
+
+> t
+
+Ht
+
+
+
+. (18) The max operator preserves brief but statistically signif-icant deviations that might otherwise be diluted by sta-ble segments, while the sigmoid normalizes scale across episodes. Thus ˜sskf  
+
+> i
+
+reflects peak dynamical inconsistency within episode i.We fuse ˜sskf  
+
+> i
+
+with four complementary trajectory-level fea-tures, each normalized to [0 , 1] with larger values indicating greater deviation from nominal goal-directed motion: 
+
+f prog  
+
+> i
+
+= 1 − clip d(i)0 − d(i)
+
+> Ti
+
+d(i)0
+
+, 0, 1
+
+!
+
+, (19) 
+
+f mono  
+
+> i
+
+= 1 − 1
+
+Ti − 1
+
+> Ti−1
+
+X
+
+> t=1
+
+⊮[dt < d t−1], (20) 
+
+f eff  
+
+> i
+
+= 1 − |d(i)0 − d(i) 
+
+> Ti
+
+|
+
+PTi−1 
+
+> t=0
+
+|dt+1 − dt| , (21) 
+
+f osc  
+
+> i
+
+= 1
+
+Ti − 1
+
+> Ti−1
+
+X
+
+> t=1
+
+⊮[( ut−1, ut) ∈ R ], (22) where R denotes action-reversal pairs. These features capture insufficient net progress, non-monotonic distance evolution, geometric inefficiency relative to cumulative motion, and oscillatory control behavior. The final episode-level uncertainty score is defined as a fixed linear fusion 
+
+Ui ≜ wskf ˜sskf  
+
+> i
+
++wprog f prog  
+
+> i
+
++wmono f mono  
+
+> i
+
++weff f eff  
+
+> i
+
++wosc f osc  
+
+> i
+
+,
+
+(23) 
+
+with weights (wskf , w prog , w mono , w eff , w osc ) =(0 .30 , 0.25 , 0.20 , 0.15 , 0.10) . Fixed weights preserve interpretability and isolate the intrinsic quality of trajectory-consistent signals from learned weighting effects. TABLE II: Success-based selective risk evaluation (SRCN) across EB-Navigation splits. Metrics report AURC SR and 
+
+E-AURC SR (lower is better). E-AURC = 0 corresponds to oracle ordering. Best results are highlighted in bold.                                                                                                                                                                                                                                 
+
+> GPT-4o GPT-5-mini Gemini-1.5-Flash Metric Method base common complex visual long Avg base common complex visual long Avg base common complex visual Avg
+> AURC SR  ↓ GroundControl 0.10 0.10 0.11 0.13 0.55 0.20 0.03 0.05 0.04 0.07 0.54 0.15 0.09 0.12 0.18 0.13 0.13
+> Conformal 0.53 0.59 0.50 0.54 0.83 0.60 0.34 0.38 0.45 0.40 0.78 0.47 0.46 0.53 0.54 0.35 0.48 Entropy 0.25 0.21 0.22 0.34 0.90 0.38 0.04 0.06 0.04 0.08 0.65 0.17 0.27 0.22 0.28 0.23 0.25 Self-Consist. 0.30 0.21 0.21 0.29 0.86 0.37 0.07 0.09 0.08 0.10 0.80 0.23 0.18 0.27 0.30 0.24 0.25 Invalid-act 0.24 0.29 0.27 0.33 0.82 0.39 0.08 0.09 0.10 0.11 0.73 0.22 0.18 0.21 0.27 0.26 0.23 Random 0.33 0.43 0.38 0.42 0.83 0.48 0.18 0.22 0.23 0.34 0.79 0.35 0.32 0.40 0.44 0.42 0.39
+> E-AURC SR  ↓ GroundControl 0.00 0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00
+> Conformal 0.43 0.49 0.39 0.41 0.29 0.40 0.31 0.33 0.41 0.33 0.25 0.33 0.37 0.41 0.37 0.22 0.35 Entropy 0.15 0.11 0.11 0.21 0.36 0.19 0.00 0.01 0.00 0.01 0.12 0.03 0.17 0.10 0.10 0.10 0.12 Self-Consist. 0.20 0.11 0.10 0.16 0.33 0.18 0.04 0.04 0.04 0.03 0.26 0.08 0.09 0.15 0.13 0.11 0.12 Invalid-act 0.13 0.19 0.15 0.20 0.29 0.19 0.05 0.04 0.06 0.04 0.20 0.08 0.09 0.09 0.09 0.13 0.10 Random 0.23 0.33 0.27 0.28 0.29 0.28 0.15 0.17 0.19 0.27 0.26 0.21 0.23 0.28 0.26 0.29 0.26
+
+TABLE III: SPL-based selective risk evaluation (SRCN) across EB-Navigation splits. Metrics report AURC SPL and 
+
+E-AURC SPL (lower is better). E-AURC = 0 corresponds to oracle ordering. Best results are highlighted in bold.                                                                                                                                                                                                                                 
+
+> GPT-4o GPT-5-mini Gemini-1.5-Flash Metric Method base common complex visual long Avg base common complex visual long Avg base common complex visual Avg
+> AURC SPL  ↓ GroundControl 0.19 0.18 0.17 0.21 0.67 0.29 0.12 0.12 0.09 0.13 0.63 0.22 0.16 0.20 0.26 0.23 0.21
+> Conformal 0.61 0.64 0.55 0.61 0.88 0.66 0.43 0.45 0.51 0.46 0.83 0.53 0.53 0.59 0.59 0.45 0.55 Entropy 0.32 0.27 0.26 0.39 0.92 0.43 0.10 0.11 0.09 0.14 0.71 0.23 0.31 0.27 0.33 0.31 0.30 Self-Consist. 0.36 0.30 0.27 0.37 0.90 0.44 0.16 0.17 0.14 0.17 0.83 0.30 0.26 0.34 0.36 0.32 0.32 Invalid-act 0.30 0.35 0.30 0.39 0.87 0.44 0.16 0.15 0.15 0.17 0.77 0.28 0.24 0.29 0.34 0.34 0.30 Random 0.43 0.49 0.42 0.47 0.87 0.54 0.27 0.29 0.29 0.41 0.83 0.42 0.38 0.47 0.50 0.55 0.47
+> E-AURC SPL  ↓ GroundControl 0.01 0.01 0.01 0.01 0.01 0.01 0.03 0.02 0.02 0.01 0.01 0.02 0.01 0.02 0.02 0.01 0.02
+> Conformal 0.43 0.47 0.39 0.41 0.22 0.38 0.34 0.35 0.43 0.34 0.22 0.34 0.39 0.41 0.35 0.24 0.36 Entropy 0.14 0.10 0.11 0.19 0.26 0.16 0.01 0.01 0.01 0.02 0.09 0.03 0.17 0.09 0.09 0.10 0.11 Self-Consist. 0.18 0.13 0.12 0.17 0.24 0.17 0.07 0.07 0.06 0.05 0.22 0.10 0.11 0.15 0.12 0.11 0.13 Invalid-act 0.13 0.18 0.15 0.19 0.21 0.17 0.07 0.05 0.08 0.05 0.15 0.08 0.10 0.10 0.11 0.13 0.11 Random 0.25 0.32 0.26 0.28 0.21 0.26 0.18 0.19 0.21 0.29 0.21 0.22 0.23 0.28 0.26 0.34 0.28
+
+Interpretation. The four trajectory features capture comple-mentary failure modes. f prog identifies insufficient net reduc-tion in distance-to-goal, f mono penalizes frequent increases in distance indicating inconsistent approach dynamics, f eff 
+
+detects inefficient detours relative to displacement, and f osc 
+
+captures repeated action reversals indicative of unstable control. These features complement the Kalman-based sta-tistical signals. Innovation energy detects local deviations from nominal distance dynamics, while posterior dispersion reflects uncertainty in distance evolution. Together, they capture geometric, temporal, and behavioral inconsistencies that single-signal baselines cannot represent. 
+
+Active Recovery. Although our primary focus is uncertainty evaluation, the trajectory-consistent signal can also support online control. Let ˆUt denote the running episode score defined as the maximum per-step signal observed up to time 
+
+t. A simple switching controller is 
+
+ut =
+
+
+
+πtask (o1: t, L) ˆUt < τ stable ,πrecover (o1: t, L) τstable ≤ ˆUt < τ crit ,πhalt ˆUt ≥ τcrit .
+
+(24) where (τstable , τ crit ) = (0 .35 , 0.65) . Thus, trajectory-consistent uncertainty can also enable runtime introspection, though recovery policies are not studied in this paper. 
+
+D. Baselines 
+
+We compare against seven representative uncertainty base-lines spanning conformal, entropy-based, trajectory-based, and heuristic signals. Each baseline produces an episode-level score Ui evaluated under the SRCN protocol. 
+
+Conformal (ACI). Online adaptive conformal inference [23] is implemented with step-wise nonconformity | ˆdt−dt|, where 
+
+ˆdt = 2dt−1 − dt−2 extrapolates the distance trajectory. The episode score combines running miscoverage (60%) and mean normalized residual (40%). 
+
+Predictive Entropy. Normalized Shannon entropy of the episode action histogram, H(p)/ log |A| , measuring disper-sion in action usage. 
+
+Self-Consistency. Plan instability is measured as 1 − J,where J is the mean Jaccard similarity between consecutive executable plans extracted from VLM reasoning [24]. 
+
+Invalid-action rate. Fraction of steps where the executed action is rejected by the environment. 
+
+Random. Random uncertainty scores Ui ∼ Uniform(0 , 1) 
+
+as a lower bound. IV. RESULTS 
+
+A. Experimental Protocol and Sets 
+
+We evaluate episode-level uncertainty quality on EB-Navigation across five splits: base , common sense ,
+
+complex instruction , visual appearance , and 
+
+long horizon , with N = 60 episodes per split ( N =300 total). The navigation policy is fixed; no retraining or policy modification is performed. All uncertainty methods are evaluated post hoc on the same trajectories [22]. We report standard navigation performance (Success Rate and mean SPL) together with SRCN ranking met-rics: AURC SR , E-AURC SR for success-based loss, and AURC SPL , E-AURC SPL for SPL-based loss. Lower val-ues indicate a better ranking of difficult episodes, with 
+
+E-AURC = 0 corresponding to oracle ordering. Table I presents baseline navigation performance across three LLM backbones: GPT-4o, GPT-5-mini, and Gemini-1.5-Flash. For GPT-4o, success rates exceed 53% on four splits, but fall sharply to 16.7% on long horizon , where lengthy execution chains increase compounding errors. Using GPT-5-mini, success exceeds 65% on four splits, but the suc-cess rate for log horizon does not improve. The resulting degradation in both Success Rate and SPL makes this split a stringent test of trajectory-level uncertainty ranking. 
+
+B. SRCN Summary Metrics 
+
+Table II reports success-based SRCN results per split and as weighted averages across the five splits ( N = 60 
+
+each). Trajectory-consistent uncertainty achieves the lowest or tied-lowest AURC SR on every split and the best weighted-average performance overall. Its excess risk is E-AURC SR =0.00 on four splits and 0.01 on long horizon , indicating a near-optimal ordering of failure episodes for all three models: GPT-4o, GPT-5-mini, and Gemini-1.5-Flash. In contrast, entropy-, conformal-, and self-consistency-based baselines exhibit substantially higher selective risk, reflecting weaker separation between successful and failing trajectories. The advantage becomes most pronounced on 
+
+long horizon (SR = 16 .7% for GPT-4o and GPT-5-mini), where longer execution chains amplify compounding errors. Under these conditions, entropy and conformal signals approach near-random ordering, while trajectory-aware signals remain close to oracle. This indicates that geometric progress dynamics, rather than instantaneous action dispersion, provide the dominant signal for detecting navigation failure under deeper temporal horizons. Table III reports selective risk evaluation based on SPL. Across most splits and models, GroundControl achieves the lowest or near-lowest values, demonstrating its ability to accurately identify trajectories that lead to inefficient naviga-tion paths. For GPT-4o, GroundControl consistently attains the best performance across all splits, achieving the lowest average AURC SPL (0.29) and E-AURC SPL (0.01). Similar trends are observed for GPT-5-mini and Gemini-1.5-Flash, where GroundControl again achieves the best average scores, indicating strong cross-model generalization. Although en-tropy occasionally performs competitively for some GPT-5-mini splits, its performance deteriorates on more challenging settings such as long-horizon tasks. In contrast, conformal, self-consistent, invalid-action, and random baselines exhibit significantly higher AURC and E-AURC values, suggesting a weaker ability to rank trajectories by navigation efficiency. 
+
+C. Risk–Coverage Curves and Diagnostic Plots 
+
+Figure 2 shows the distribution of episode-level un-certainty Ui conditioned on outcome for representative splits. A reliable estimator should assign consistently higher scores to failing trajectories while maintaining a com-pact distribution for successful executions. The trajectory-
+
+Fig. 2: Distribution of episode-level uncertainty Ui con-ditioned on outcome (left: successes; right: failures) for representative splits (base, complex instruction, and long horizon). A well-ranked estimator shifts failure episodes toward higher Ui with limited overlap. GroundControl con-sistently produces a clear upward shift and tighter success cluster, particularly under long-horizon compounding effects, whereas entropy- and conformal-based baselines exhibit sub-stantial overlap. This separation aligns with the near-oracle selective ranking observed under SRCN. consistent formulation produces a clear upward shift of the failure distribution with limited overlap across base ,
+
+complex instruction , and long horizon . In con-trast, entropy- and conformal-based baselines exhibit sub-stantial overlap between success and failure distributions, indicating weak discriminative structure. The separation is most pronounced on long horizon , where compounding execution errors create sustained deviations in distance dy-namics that are captured by the proposed trajectory signal. This separation implies that degrading executions can be detected directly from trajectory evolution, enabling runtime intervention before episode termination. Distributional separation alone does not guarantee cor-rect ranking. The risk–coverage curves in Fig. 3 therefore evaluate ordering quality explicitly. Episodes are sorted by ascending Ui and progressively revealed as coverage increases. The proposed method closely tracks the oracle boundary under success-based selective risk, maintaining low Fig. 3: Risk–coverage curve ( N = 60 ). Episodes are sorted by ascending uncertainty Ui and progressively revealed; the y-axis shows selective risk ˆR(θ) = 1
+
+> |C (θ)|
+
+P
+
+> i∈C (θ)
+
+(1 − Succ i) over the covered subset. The dotted black line denotes the oracle ordering and the dash-dot line the unconditional failure rate. Lower curves indicate better selective ranking. GroundControl closely tracks the oracle. 
+
+Fig. 4: Risk–coverage curve using path-efficiency loss (1 − SPL i). Unlike binary success risk, SPL-risk captures navigation inefficiency: a covered episode contributes a graded penalty proportional to how far the agent’s path deviates from the shortest route. GroundControl’s trajectory-level signals, particularly the Kalman innovation energy and path-efficiency sensitivity, allow it to maintain a low SPL-risk curve at every coverage level. failure rates even at high coverage. This indicates that fail-ing trajectories are consistently assigned higher uncertainty and removed early when a system abstains from high-risk episodes. Entropy- and conformal-based baselines exhibit elevated risk at intermediate coverage, reflecting weaker isolation of failing executions. Figure 4 shows risk–coverage curves under SPL-based loss, which penalizes inefficient trajectories in addition to outright failures. Trajectory-consistent uncertainty maintains low selective risk across coverage levels, indicating sensi-tivity to gradual degradation in navigation efficiency rather than only terminal failure. This behavior is particularly relevant for robotic navigation, where inefficient wandering, oscillatory motion, or repeated backtracking often precede failure and consume limited execution time or energy. Finally, Fig. 5 plots uncertainty Ui against episode ef-ficiency SPL i. The proposed estimator exhibits a strong negative correlation across splits: low-efficiency or failing episodes map to higher uncertainty, while efficient trajecto-ries concentrate at low Ui. Entropy- and conformal-based baselines show substantially weaker monotonic structure, suggesting that action-level dispersion alone does not re-flect trajectory-level execution quality. Overall, the align-ment between uncertainty and geometric progress supports interpretable runtime introspection capable of identifying degrading navigation behavior before catastrophic failure. V. CONCLUSION We framed uncertainty in embodied navigation as atrajectory-level consistency problem and introduced Selec-tive Risk–Coverage Navigation (SRCN), a protocol that evaluates how well uncertainty scores rank episodes by failure or inefficiency through risk–coverage analysis. We presented GroundControl, a trajectory-aware estimator based on distance-to-goal dynamics, where a constant-velocity Kalman filter models nominal goal-directed motion and statistically significant deviations are captured through nor-malized innovation statistics and belief dispersion, combined with global trajectory features. Across EB-Navigation splits, GroundControl achieves near-oracle ordering under success-based selective risk and remains competitive under SPL-based evaluation despite fixed-horizon length artifacts. These results indicate that trajectory-consistent signals capture ex-ecution degradation more reliably than entropy or conformal residuals, supporting interpretable introspection for embod-ied navigation systems. REFERENCES [1] T. Windecker, M. Patel, M. Reuss, R. Schwarzkopf, C. Cadena, R. Lioutikov, M. Hutter, and J. Frey, “Navitrace: Evaluating embodied navigation of vision-language models,” arXiv:2510.26909 , 2025. [2] P. Gao, P. Wang, F. Gao, F. Wang, and R. Yuan, “Vision-language navigation with embodied intelligence: A survey,” arXiv preprint arXiv:2402.14304 , 2024. [3] Y. Liu, L. Liu, Y. Zheng, Y. Liu, F. Dang, N. Li, and K. Ma, “Embodied navigation,” Science China Information Sciences , vol. 68, no. 4, p. 141101, 2025. [4] C. Zhao, Y. Qi, and Q. Wu, “Mind the gap: Improving success rate of vision-and-language navigation by revisiting oracle success routes,” in   
+
+> Proceedings of the 31st ACM international conference on multimedia ,2023, pp. 4349–4358. [5] F. Zhu, Y. Zhu, X. Chang, and X. Liang, “Vision-language navigation with self-supervised auxiliary reasoning tasks,” in Proceedings of the
+
+Fig. 5: Per-episode uncertainty score Ui versus SPL i for each method. Points are coloured green (success) and red (failure). A well-calibrated estimator produces a negative correlation, high Ui for failed/inefficient episodes and low Ui for successful ones shown by the dashed linear trend. The Pearson correlation r is annotated in each panel. GroundControl achieves the strongest negative correlation among methods on this set, indicating that its multi-signal fusion captures both categorical (success/failure) and continuous (efficiency) aspects of navigation quality. 
+
+IEEE/CVF conference on computer vision and pattern recognition ,2020, pp. 10 012–10 022. [6] S. Wang, Y. Luo, X. Chen, A. Luo, D. Li, C. Liu, S. Chen, Y. Zhang, and J. Yu, “Vlingnav: Embodied navigation with adap-tive reasoning and visual-assisted linguistic memory,” arXiv preprint arXiv:2601.08665 , 2026. [7] A. Ku, P. Anderson, R. Patel, E. Ie, and J. Baldridge, “Room-across-room: Multilingual vision-and-language navigation with dense spatiotemporal grounding,” in Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP) , 2020, pp. 4392–4412. [8] M. Savva, A. Kadian, O. Maksymets, Y. Zhao, E. Wijmans, B. Jain, J. Straub, J. Liu, V. Koltun, J. Malik, et al. , “Habitat: A platform for embodied ai research,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 9339–9347. [9] J. Krantz, E. Wijmans, A. Majumdar, D. Batra, and S. Lee, “Beyond the nav-graph: Vision-and-language navigation in continuous environ-ments,” in European Conference on Computer Vision , 2020. [10] S. Raychaudhuri, D. Ta, K. Ashton, A. X. Chang, J. Wang, and B. Bucher, “Zero-shot object-centric instruction following: Integrat-ing foundation models with traditional navigation,” arXiv preprint arXiv:2411.07848 , 2024. [11] D. Zheng, S. Huang, Y. Li, and L. Wang, “Efficient-vln: Atraining-efficient vision-language navigation model,” arXiv preprint arXiv:2512.10310 , 2025. [12] J. Zhang, A. Li, Y. Qi, M. Li, J. Liu, S. Wang, H. Liu, G. Zhou, Y. Wu, X. Li, et al. , “Embodied navigation foundation model,” arXiv preprint arXiv:2509.12129 , 2025. [13] L. Hou, L. Gao, Y. Wu, and Y. Chang, “A survey on evaluation of embodied ai,” Authorea Preprints , 2026. [14] S. Lin, Z. Li, X. Zhao, G. Zhou, L. Wang, R. Wei, R. Tang, J. Li, H. Wang, J. Pang, et al. , “Vlnverse: A benchmark for vision-language navigation with versatile, embodied, realistic simulation and evaluation,” arXiv preprint arXiv:2512.19021 , 2025. [15] J. Gawlikowski, C. R. N. Tassi, M. Ali, J. Lee, M. Humt, J. Feng, A. Kruspe, R. Triebel, P. Jung, R. Roscher, et al. , “A survey of uncertainty in deep neural networks,” Artificial intelligence review ,vol. 56, no. Suppl 1, pp. 1513–1589, 2023. [16] T. Yu, V. Shah, M. Wahed, K. A. Nguyen, A. Juvekar, T. August, and I. Lourentzou, “Uncertainty in action: Confidence elicitation in embodied agents,” arXiv preprint arXiv:2503.10628 , 2025. [17] S. Tayebati, D. Kumar, N. Darabi, D. Jayasuriya, R. Krishnan, and A. R. Trivedi, “Learning conformal abstention policies for adaptive risk management in large language and vision-language models,” arXiv preprint arXiv:2502.06884 , 2025. [18] H. Kondoh and A. Kanezaki, “Embodied navigation with auxiliary task of action description prediction,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2025, pp. 7025–7036. [19] E. Ahmed, L. Zintgraf, C. A. S. de Witt, and N. Usunier, “A self-supervised auxiliary loss for deep rl in partially observable settings,” 
+
+arXiv preprint arXiv:2104.08492 , 2021. [20] J. Ye, D. Batra, A. Das, and E. Wijmans, “Auxiliary tasks and explo-ration enable objectgoal navigation,” in Proceedings of the IEEE/CVF international conference on computer vision , 2021, pp. 16 117–16 126. [21] P. Anderson, Q. Wu, D. Teney, J. Bruce, M. Johnson, N. S¨ underhauf, I. Reid, S. Gould, and A. Van Den Hengel, “Vision-and-language nav-igation: Interpreting visually-grounded navigation instructions in real environments,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 3674–3683. [22] R. Yang, H. Chen, J. Zhang, M. Zhao, C. Qian, K. Wang, Q. Wang, T. V. Koripella, M. Movahedi, M. Li, et al. , “Embodiedbench: Compre-hensive benchmarking multi-modal large language models for vision-driven embodied agents,” arXiv preprint arXiv:2502.09560 , 2025. [23] I. Gibbs and E. Candes, “Adaptive conformal inference under dis-tribution shift,” Advances in Neural Information Processing Systems ,vol. 34, pp. 1660–1672, 2021. [24] X. Wang, J. Wei, D. Schuurmans, Q. Le, E. Chi, S. Narang, A. Chowd-hery, and D. Zhou, “Self-consistency improves chain of thought reasoning in language models,” arXiv:2203.11171 , 2022.

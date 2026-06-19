@@ -6,58 +6,61 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-18
-- 运行时间：2026-06-18 22:37:14 UTC
+- 最新运行日期：2026-06-19
+- 运行时间：2026-06-19 22:10:03 UTC
 - 运行状态：成功
-- 本次总论文数：12
-- 精读区：7
-- 速读区：5
+- 本次总论文数：13
+- 精读区：6
+- 速读区：7
 
 ### 今日简报（AI）
-今日推荐12篇论文，精读2篇得分高达9.0的突破性研究。  
-最值得关注：自然语言引导的多无人机分配最优性保持分解方法，以及任意尺度全色锐化的连续高斯原语表示。  
-建议优先精读这两篇高分论文，以掌握可扩展的量子近似优化算法与高光谱图像融合新范式。
-- 详情：[/202606/18/README](/202606/18/README)
+今日聚焦无人机视场内精准导航与机器人语言条件任务，两篇高评分论文深入探讨了视觉-语言导航与语义一致性。  
+最值得关注的是《See-and-Reach》在无人机视野内实现精确导航，以及《ReSiReg》解决机器人任务中的空间语义一致性。  
+建议关注结合视觉与语言指令的导航方法，为无人机和移动机器人提供更智能的自主决策。
+- 详情：[/202606/19/README](/202606/19/README)
 
 ### 精读区论文标签
-1. [Optimality-Preserving Decomposition for Scalable QAOA in Natural-Language-Guided Multi-Drone Assignment](/202606/18/2606.14252v1-optimality-preserving-decomposition-for-scalable-qaoa-in-natural-language-guided-multi-drone-assignment)  
+1. [See-and-Reach: Precise Vision-Language Navigation for UAVs within the Field of View](/202606/19/2606.20045v1-see-and-reach-precise-vision-language-navigation-for-uavs-within-the-field-of-view)  
+   标签：评分：10.0/10、query:uav-vln
+   evidence：无人机视觉语言导航，提出FOV隔离任务
+2. [ReSiReg: Towards Spatially Consistent Semantics in Language-Conditioned Robotic Tasks](/202606/19/2606.19088v1-resireg-towards-spatially-consistent-semantics-in-language-conditioned-robotic-tasks)  
    标签：评分：9.0/10、query:uav-vln
-   evidence：通过LLM和量子优化实现自然语言指令驱动的多无人机任务分配
-2. [GSPan: A Continuous Gaussian Primitive Representation for Arbitrary-Scale Pansharpening](/202606/18/2606.17722v1-gspan-a-continuous-gaussian-primitive-representation-for-arbitrary-scale-pansharpening)  
+   evidence：语言条件机器人任务中的空间一致语义
+3. [Integrating national forest inventory, airborne lidar, and satellite imagery for wall-to-wall mapping of forest structure with computer vision](/202606/19/2606.20291v1-integrating-national-forest-inventory-airborne-lidar-and-satellite-imagery-for-wall-to-wall-mapping-of-forest-structure-with-computer-vision)  
    标签：评分：9.0/10、query:rs-fusion
-   evidence：遥感多模态融合，全色锐化，高斯喷溅
-3. [Quantum Enchanced Multi-Scale CNN with Bi-directional Mamba for Crop Field Analysis](/202606/18/2606.17222v1-quantum-enchanced-multi-scale-cnn-with-bi-directional-mamba-for-crop-field-analysis)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：高光谱图像分类中的多尺度CNN与光谱注意力，跨分辨率特征融合
-4. [VEGA: Learning Navigation VLAs from In-the-Wild Egocentric Video with Geometric Trajectory Supervision](/202606/18/2606.18426v1-vega-learning-navigation-vlas-from-in-the-wild-egocentric-video-with-geometric-trajectory-supervision)  
+   evidence：卫星图像与激光雷达融合用于森林制图
+4. [GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates](/202606/19/2606.20479v1-groundcontrol-anticipating-navigation-failures-in-vision-language-agents-via-trajectory-consistent-uncertainty-estimates)  
+   标签：评分：9.0/10、query:uav-vln
+   evidence：视觉语言导航智能体失败预测
+5. [VISTA: Scale-Aware Visual Navigation via Action History Conditioning](/202606/19/2606.17294v1-vista-scale-aware-visual-navigation-via-action-history-conditioning)  
    标签：评分：8.0/10、query:uav-vln
-   evidence：从自我中心视频学习导航VLA模型，直接适用于视觉语言导航
-5. [EffiNav: Fusing Depth and Vision-Language for Efficient Object Goal Navigation](/202606/18/2606.18634v1-effinav-fusing-depth-and-vision-language-for-efficient-object-goal-navigation)  
+   evidence：基于视觉的导航基础模型，具有尺度感知能力，可应用于无人机视觉语言导航
+6. [VEGA: Learning Navigation VLAs from In-the-Wild Egocentric Video with Geometric Trajectory Supervision](/202606/19/2606.18426v1-vega-learning-navigation-vlas-from-in-the-wild-egocentric-video-with-geometric-trajectory-supervision)  
    标签：评分：8.0/10、query:uav-vln
-   evidence：深度融合视觉语言实现目标导航
-6. [Rethinking Air-Ground Collaboration: A Progressive Cross-Task Benchmark and Socialized Learning Framework](/202606/18/2606.18841v1-rethinking-air-ground-collaboration-a-progressive-cross-task-benchmark-and-socialized-learning-framework)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：空地协同感知基准与跨任务融合，促进鲁棒视觉理解
-7. [A Unified Framework for Efficient Remote Sensing Visual Question Answering: Adapting Dual, Hybrid, and Encoder-Decoder Architectures](/202606/18/2606.19277v1-a-unified-framework-for-efficient-remote-sensing-visual-question-answering-adapting-dual-hybrid-and-encoder-decoder-architectures)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：遥感视觉语言模型，多模态融合，参数高效微调
+   evidence：从视频中学习导航视觉-语言-动作模型
 
 ### 速读区论文标签
-1. [CrossMaps: Confidence-Aware Open-Vocabulary Semantic Mapping for Rover Navigation](/202606/18/2606.16935v1-crossmaps-confidence-aware-open-vocabulary-semantic-mapping-for-rover-navigation)  
+1. [CrossMaps: Confidence-Aware Open-Vocabulary Semantic Mapping for Rover Navigation](/202606/19/2606.16935v1-crossmaps-confidence-aware-open-vocabulary-semantic-mapping-for-rover-navigation)  
    标签：评分：7.0/10、query:uav-vln
-   evidence：可语言查询的语义地图用于机器人导航，方法可迁移至无人机视觉语言导航
-2. [ReSiReg: Towards Spatially Consistent Semantics in Language-Conditioned Robotic Tasks](/202606/18/2606.19088v1-resireg-towards-spatially-consistent-semantics-in-language-conditioned-robotic-tasks)  
+   evidence：开放词汇语义映射用于漫游车导航，语言可查询地图
+2. [MM++: Unsupervised Scale-Invariant Multilayer OOD Detection via Top-K Gated Feature Fusion](/202606/19/2606.17352v1-mm-unsupervised-scale-invariant-multilayer-ood-detection-via-top-k-gated-feature-fusion)  
+   标签：评分：7.0/10、query:rs-fusion
+   evidence：面向OOD检测的特征融合方法
+3. [Qwen-RobotNav Technical Report: A Scalable Navigation Model Designed for an Agentic Navigation System](/202606/19/2606.18112v1-qwen-robotnav-technical-report-a-scalable-navigation-model-designed-for-an-agentic-navigation-system)  
    标签：评分：7.0/10、query:uav-vln
-   evidence：具有空间一致性的视觉语言模型用于语言条件任务
-3. [UrbanWell: Benchmarking Multimodal Large Language Models for Spatio-Temporal Urban Wellbeing Analytics](/202606/18/2606.15890v1-urbanwell-benchmarking-multimodal-large-language-models-for-spatio-temporal-urban-wellbeing-analytics)  
-   标签：评分：6.0/10、query:rs-fusion
-   evidence：遥感图像分析，卫星影像，多模态评估
-4. [SemGeoNav:A Safety-Guided Visual Navigation Approach with Semantic Reasoning and Geometric Planning](/202606/18/2606.16400v1-semgeonava-safety-guided-visual-navigation-approach-with-semantic-reasoning-and-geometric-planning)  
+   evidence：支持指令跟随的可扩展导航模型
+4. [Qwen-RobotNav Technical Report: A Scalable Navigation Model Designed for an Agentic Navigation System](/202606/19/2606.18112v2-qwen-robotnav-technical-report-a-scalable-navigation-model-designed-for-an-agentic-navigation-system)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：可扩展的指令跟随导航模型
+5. [A Unified Framework for Efficient Remote Sensing Visual Question Answering: Adapting Dual, Hybrid, and Encoder-Decoder Architectures](/202606/19/2606.19277v1-a-unified-framework-for-efficient-remote-sensing-visual-question-answering-adapting-dual-hybrid-and-encoder-decoder-architectures)  
+   标签：评分：7.0/10、query:rs-fusion
+   evidence：利用PEFT适配VLM进行遥感视觉问答，涉及多模态融合
+6. [Metis: A Generalizable and Efficient World-Action Model for Autonomous Driving and Urban Navigation](/202606/19/2606.15869v1-metis-a-generalizable-and-efficient-world-action-model-for-autonomous-driving-and-urban-navigation)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：结合语义推理与几何规划的视觉导航，与语言引导导航概念相关
-5. [Qwen-RobotNav Technical Report: A Scalable Navigation Model Designed for an Agentic Navigation System](/202606/18/2606.18112v1-qwen-robotnav-technical-report-a-scalable-navigation-model-designed-for-an-agentic-navigation-system)  
+   evidence：面向导航的视觉-语言-动作模型，可迁移至无人机场景
+7. [Hardware- and Vision-in-the-Loop Validation of Deep Monocular Pose Estimation for Autonomous Maritime UAV Flight](/202606/19/2606.19176v1-hardware--and-vision-in-the-loop-validation-of-deep-monocular-pose-estimation-for-autonomous-maritime-uav-flight)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：可扩展的导航模型，具备指令跟踪能力，与语言引导导航相关
+   evidence：无人机视觉位姿估计用于自主飞行
 
 
 <div class="dpr-home-promo-card">
