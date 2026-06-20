@@ -1,0 +1,284 @@
+Title: SemGeoNav:A Safety-Guided Visual Navigation Approach with Semantic Reasoning and Geometric Planning
+
+URL Source: https://arxiv.org/pdf/2606.16400v1
+
+Published Time: Tue, 16 Jun 2026 01:55:32 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# SemGeoNav: A Safety-Guided Visual Navigation Approach with Semantic Reasoning and Geometric Planning 
+
+Yu Liu 1, Zongyang Chen 1, Yan Guo 1, Chao Liu 1, and Xianfei Pan 1,2 
+
+> 1
+
+College of Intelligence Science and Technology, National University of Defense Technology, Changsha 410073, China.  
+
+> 2
+
+afeipan@126.com 
+
+Abstract. Learning-based visual navigation has enhanced semantic goal-reaching capabilities. However, due to their black-box nature, purely end-to-end models often lack explicit geometric constraints, leading to unpre-dictable and unreliable obstacle avoidance in open environments. Con-versely, traditional geometric planners ensure safety but struggle with high-dimensional visual targets. To address these limitations, we propose SemGeoNav, a novel hierarchical visual navigation framework. It tightly integrates the high-level semantic reasoning of end-to-end models with the reliable local planning ability of geometry-based methods, achiev-ing robust image-based navigation while significantly improving obstacle avoidance. Furthermore, we introduce a temporal trajectory smoothing mechanism to ensure continuous and stable robot motion. We evaluated SemGeoNav on a Unitree Go2 quadruped robot in real-world environ-ments. The results demonstrate that SemGeoNav outperforms existing representative methods, including ViNT and NoMaD, achieving higher success rates and shorter navigation times. 
+
+Keywords: visual navigation, semantic reasoning, geometric planning, obstacle avoidance 
+
+## 1 Introduction 
+
+Visual navigation has recently undergone a paradigm shift with the rapid devel-opment of learning-based methods, giving rise to a series of end-to-end general-purpose navigation models. Representative approaches such as GNM [1], ViNT [2], and NoMaD [3] have demonstrated impressive zero-shot generalization ca-pabilities. By directly mapping current RGB observation sequences and goal images to motion commands, these methods enable robots to navigate in map-less environments. However, purely end-to-end models lack explicit geometric reasoning and typically rely on implicitly predicted waypoints or latent policies for obstacle avoidance. As a result, their safety behavior is largely learned from large-scale training data rather than enforced by physical or spatial constraints. When deployed on unseen robotic platforms or in the presence of unfamiliar  
+
+> arXiv:2606.16400v1 [cs.RO] 15 Jun 2026 2Y. Liu et al.
+
+obstacles, such methods may exhibit unreliable avoidance behavior, leading to an increased risk of collision in real-world settings. Conversely, traditional geometry-based navigation methods, such as the A* algorithm [4] and the Dynamic Window Approach (DWA) [5], rely on explicit geometric representations and often require pre-built maps for path planning and obstacle avoidance. More recent local geometric planners, such as Ego-Planner [6], relax this requirement by constructing local environment representations on-line and optimizing collision-free trajectories in real time without a global map. Although these methods provide more reliable and intuitive obstacle avoidance, they generally suffer from limited generalization and lack the ability to under-stand or reason about semantic goals in the environment. To integrate semantic reasoning and geometric obstacle avoidance, recent re-search has increasingly explored hybrid frameworks that combine learning-based navigation with geometric planning. One representative direction uses classical geometric planners to provide geometric supervision for training visual founda-tion models (VFMs), thereby improving the robustness of the learned navigation policy [7]. However, in this representative line of work, geometry mainly influ-ences the policy before inference, while deployment still depends on the implicit obstacle-avoidance behavior learned by the VFM. In contrast, SemGeoNav adds an explicit geometric planning module after the implicit VFM-based inference stage. The VFM first generates semantically guided motion candidates, and the geometric module further optimizes these trajectories based on depth observa-tions to improve obstacle avoidance. This design preserves the semantic goal-reaching ability of the VFM while explicitly improving local geometric safety during inference. To address these challenges, we propose SemGeoNav, a hierarchical navi-gation framework that preserves high-level semantic reasoning while enhancing explicit geometry-aware obstacle avoidance. Specifically, our framework leverages an end-to-end network to extract global contextual features, which are passed to a diffusion model for generating diverse candidate trajectories and preserving high-level semantic reasoning. To improve safety, we introduce a TTC-based risk estimation module to proactively identify and suppress high-risk commands at an early stage. These candidate trajectories are further refined by a gradient-based optimizer to obtain safer trajectories. Finally, a temporal smoothing mechanism is applied to improve motion continuity and reduce execution jitter during real-world robot deployment. Extensive real-world experiments demonstrate that our method achieves safer and more stable navigation performance in cluttered en-vironments. Our contributions are summarized as follows: 
+
+– We propose SemGeoNav, a hierarchical navigation framework that seam-lessly integrates semantic and geometric information. Our method explic-itly accounts for geometric and physical constraints while preserving robust global semantic reasoning. 
+
+– We develop a real-time geometric planner that leverages depth images to refine the navigation commands generated by an end-to-end model, signifi-SemGeoNav 3
+
+cantly improving obstacle avoidance and success rates in unstructured envi-ronments. 
+
+– We collect a dedicated dataset on the Unitree Go2 quadruped platform and conduct targeted training for the proposed method, thereby improving its navigation performance and robustness in real-world deployment. Encode  
+
+> Encode 
+> Decode
+> 4 Layers, 4 Heads
+> Depth image
+> 640*480
+> Goal image
+> 640*480*3 RGB
+> Observation
+> 640*480*3 RGB
+> Gradient -Based
+> Optimizer
+> Diffusion
+> Model
+> Actions ()
+> ,v
+> 
+
+Semantic Reasoning Module 
+
+Geometric Planning Module   
+
+> Candidate Trajectory cluster
+> 7 Tokens
+> 256 -D
+> Trajectory
+> Shaping
+
+Input  Output 
+
+> Encode Encode Encode Encode Encode 6
+> KD -Tree
+> Depth
+> Back -
+> Projection
+> TTC -Risk
+> Estimation
+
+Fig. 1: Overview of our proposed SemGeoNav framework. 
+
+## 2 Related Work 
+
+2.1 End-to-End Visual Navigation 
+
+Learning-based visual navigation is undergoing a paradigm shift from task-specific policies to more generalizable foundation models. Early systems such as BADGR [8] demonstrated the potential of end-to-end navigation in unstructured environments. Building on this foundation, large-scale visual foundation models for embodied agents [9] were introduced to improve generalization across tasks and platforms. Meanwhile, another line of research has developed general topo-logical navigation architectures. GNM [1] pioneered cross-embodiment training. ViNT [2] advanced this paradigm with efficient Transformer-based architectures. NoMaD [3] further incorporated diffusion models to capture multimodal naviga-tion behaviors and improve exploration in unseen environments. Nevertheless, despite their strong goal-conditioned semantic reasoning capabilities, these meth-ods still lack explicit geometric grounding and strict safety guarantees during real-world deployment. 4 Y. Liu et al. 
+
+2.2 Traditional Geometry-Based Navigation 
+
+Traditional geometry-based navigation methods prioritize geometric safety and physical feasibility. These include global search algorithms like A* [4], as well as reactive local planners like DWA [5] and TEB [10]. All of these methods can achieve reliable obstacle avoidance when an accurate map is available. To reduce the high computational overhead of building dense maps, gradient-based trajectory optimization methods such as Fast-Planner [11] and Ego-Planner [6] have been proposed. These methods do not require a pre-built global map and can generate smooth and safe trajectories by constructing local maps in real time. However, these methods are inherently semantically blind. They treat all point clouds as rigid obstacles and cannot reason about traversable terrain or high-level goals. 
+
+2.3 Hybrid Visual-Geometric Navigation 
+
+Recent navigation methods have started to integrate semantic understanding with geometric safety. Representative approaches include Less Is More [7], LM-Nav [12], and Embodied-R1 [13]. These methods use visual models to generate spatial sub-goals that are not constrained by a dedicated geometric module, and then pass them to geometric controllers for execution. However, most of these methods use geometry mainly for sub-goal execution or expect obstacle avoid-ance to be implicitly learned from data, rather than tightly coupling semantic intent and geometric safety during online command generation. 
+
+## 3 Methodology 
+
+As depicted in Fig. 1, SemGeoNav tightly integrates high-level semantic rea-soning with low-level geometric planning. First, the current observations and goal image are encoded into a contextual representation, which is used to condi-tion a diffusion model for candidate trajectory generation. Next, the geometric planning module performs depth back-projection to construct a local obstacle representation and applies TTC-based risk estimation for early safety filtering. The filtered trajectories are then refined by a gradient-based optimizer under geometric safety constraints. Finally, temporal smoothing is applied to produce a safe and stable control command. 
+
+3.1 Semantic Reasoning Module 
+
+Following ViNT [2] and NoMaD [3], we employ a hybrid architecture that com-bines EfficientNet [14] and a Transformer [15]. EfficientNet enhances the lo-cal feature extraction capabilities, improving robustness across diverse scenes. The Vision Transformer further captures global feature associations through its self-attention mechanism. When the current observation sequence and the target image are input into our Semantic Reasoning Module, both the obser-vation images and the goal image are encoded using EfficientNet-B0. Define SemGeoNav 5
+
+ot−P +1: t = {ot−P +1 , . . . , o t} as the current RGB observation sequence and og as the target image. Let ψ(·) denote the visual encoder and ϕ(·) denote the target encoder. The visual encoding zi obtained through EfficientNet and the target encoding zg are defined as: 
+
+zi = ψ(oi), i ∈ { t − P + 1 , . . . , t }; zg = ϕ(og ) (1) The resulting encodings are then treated as input tokens and aggregated by a Transformer backbone Fθ to produce a semantic context vector: 
+
+ct = Fθ
+
+ [zt−P +1 , . . . , z t, z g ] (2) The semantic context ct summarizes the current scene, the recent motion history, and the relation between the current view and the goal. This enables the generated navigation commands to reason about future motion intentions rather than instantaneous control commands. In contrast to NoMaD, which introduces additional exploration strategies for non-goal-oriented navigation, our method considers only goal-oriented navigation within the visible range. As a result, the goal mask mechanism is omitted. On top of the shared context ct, we model the navigation policy as a diffusion model [16] over a short-horizon waypoint sequence wt. Rather than predicting a single deterministic command, the diffusion head learns a conditional distribu-tion over future waypoints: 
+
+p(wt | ct) (3) At inference time, we initialize the waypoint sequence with Gaussian noise, 
+
+wKt ∼ N (0 , I ), and iteratively denoise it for K steps: 
+
+wk−1 
+
+> t
+
+= αk
+
+ wkt − γk ϵθ (ct, wkt , k ) + σkη, (4) where ϵθ (ct, wkt , k ) is the noise predicted by the diffusion network at denoising step k, αk is a step-dependent scaling coefficient, γk controls the update mag-nitude during denoising, σk determines the noise level injected at step k, and 
+
+η ∼ N (0 , I ) is standard Gaussian noise. The final output w0 
+
+> t
+
+is the predicted short-horizon waypoint sequence conditioned on the semantic context ct.This semantic strategy is trained through an integrated objective function, which includes the diffusion denoising loss and the auxiliary distance prediction loss: 
+
+Lsem = E
+
+h
+
+∥η − ϵθ (ct, wkt , k )∥22 + λd ℓd( ˆdt, d t)
+
+i
+
+(5) Here, η is the Gaussian noise added to the clean waypoint sequence during the forward diffusion process, ˆdt is the predicted temporal distance to the goal, 
+
+dt is the corresponding supervision signal, ℓd(·, ·) is the distance prediction loss function, and λd is a weighting coefficient that balances the two objectives. The denoising term enables the model to learn a multimodal distribution over feasible future waypoints, while the auxiliary distance prediction term encourages the semantic module to capture goal progress information. 6 Y. Liu et al. 
+
+3.2 Geometric Planning Module 
+
+Given the semantic waypoint candidates produced by the high-level policy, we employ a geometry-aware local planner to convert them into safe and executable control commands. The planner consists of four components: local geometric representation from depth, TTC-based risk shaping, collision-aware trajectory refinement, and final trajectory scoring with temporal smoothing. In this way, the semantic policy provides the motion intent, while the geometric module enforces collision safety and execution stability. 
+
+Depth Back-Projection: We first convert the depth image into an explicit local obstacle representation in the robot frame. Given a depth map Dt ∈ RH×W ,we back-project valid pixels into a set of 2D obstacle points using the camera intrinsics ( fx, f y , c x, c y ). Since collision checking is performed on the local ground plane, we retain only the forward and lateral coordinates in the robot frame. For a pixel coordinate ( u, v ) with depth value z(u,v ), the corresponding 2D point is approximated by 
+
+x(u,v ) = z(u,v ), y(u,v ) = − (u − cx) z(u,v )
+
+fx
+
+. (6) Here, x(u,v ) and y(u,v ) denote the forward and lateral coordinates, respec-tively. After subsampling and filtering invalid measurements, we obtain a com-pact local obstacle set 
+
+Pt = {pj }Nj=1 , pj = [ xj , y j ]⊤, (7) where N is the number of retained obstacle points, and pj denotes the j-th obstacle point in the local obstacle set. To accelerate collision queries, we build a KD-tree over Pt.
+
+TTC-Based Risk Estimation: Before the subsequent gradient-based optimiza-tion and trajectory selection, we first estimate the short-term collision risk from the depth image. In our implementation, we divide the image into a central re-gion and two side regions, and compute a robust depth statistic for each region. Let zc 
+
+> t
+
+denote the first decile of depth in the center region at time t, and let zc
+
+> t−1
+
+denote the first decile of depth in the center region at time t − 1. If the center depth decreases over time, the approach speed of the robot toward the obstacle ahead can be approximated as 
+
+vt = zc 
+
+> t−1
+
+− zc
+
+> t
+
+∆t , (8) where ∆t denotes the time interval between two consecutive frames. The corresponding time-to-contact can then be approximated as TTC t = zc
+
+> t
+
+vt
+
+, vt > 0. (9) SemGeoNav 7
+
+When TTC t falls below a predefined threshold τttc , or when the center depth 
+
+zc 
+
+> t
+
+becomes smaller than the safety distance dsafe , the planner enters an emer-gency mode. In this mode, the high-risk components of the candidate motion are strongly suppressed, and the control command is temporally smoothed over a short horizon to avoid abrupt oscillatory behavior. Furthermore, when the traversable space in a certain direction becomes smaller, the motion component along that direction is also suppressed. In this way, the TTC-based risk estima-tion module acts as a fast safety filter that reshapes high-risk candidates before the subsequent fine-grained trajectory optimization. The empirical thresholds are selected according to the robot footprint, max-imum velocity, control frequency, and depth noise. This module is used as a lightweight front-end safety filter, rather than an independent optimal planner. The TTC threshold τttc and the safety distance dsafe mainly determine when the emergency mode is activated. Smaller values delay the response to frontal ob-stacles, while larger values trigger earlier intervention and make the robot more conservative. The side-distance threshold ds controls the suppression of lateral motion when the traversable space on one side becomes limited. The smoothing factor β adjusts the temporal smoothness of the output command and helps reduce abrupt oscillations. In validation, moderate perturbations of these pa-rameters did not change the overall navigation trend. They mainly affected the trade-off between safety margin, motion smoothness, and conservativeness in narrow passages. 
+
+Gradient-Based Optimizer: Let q = {q1, . . . , q M } denote a candidate short-horizon trajectory predicted by the semantic policy, where qi ∈ R2 denotes the i-th waypoint on the predicted trajectory, and M is the total number of waypoints. We refine each candidate trajectory and score it with a unified objective: 
+
+C(q) = αcJc(q) + αsJs(q) + αdJd(q) − αpRp(q) − αr Rc(q), (10) where αc, αs, αd, αp, and αr are weighting coefficients. Here, Jd(q) measures the deviation between the refined trajectory and the original trajectory, Rp(q)rewards forward progress toward the goal, and Rc(q) encourages the trajectory to stay farther away from obstacles. Js(q) denotes the smoothness cost, and 
+
+Jc(q) denotes the collision cost. They are defined as follows: 
+
+Js(q) =  
+
+> M−1
+
+X
+
+> i=2
+
+∥qi+1 − 2qi + qi−1∥22 (11) 
+
+Jc(q) = 
+
+> M
+
+X
+
+> i=1
+
+max(0 , d s − δi)3 (12) Here, ds is determined by the robot footprint and an additional safety margin, and is set to 0.25 m in our implementation. The distance term δi is defined as 
+
+δi = min  
+
+> b∈B (qi)
+
+min 
+
+> p∈P t
+
+∥b − p∥2, (13) 8 Y. Liu et al. 
+
+where B(qi) consists of sampled body points at waypoint qi. In addition, Jd(q)measures the deviation from the original semantic trajectory, Rp(q) rewards forward progress toward the goal, and Rc(q) encourages larger clearance from nearby obstacles. The final trajectory is selected as 
+
+q⋆t = arg min  
+
+> q
+
+C(q). (14) Let wt denote the candidate waypoint selected from the best trajectory q⋆t .To improve execution stability, we apply a temporal smoothing filter: ˆwt = β ˆwt−1 + (1 − β)wt, (15) where ˆwt is the smoothed waypoint command sent to the controller, and β ∈
+
+[0 , 1) is the smoothing coefficient. In addition, we constrain command increments between consecutive time steps to suppress jitter, especially in narrow passages. 
+
+## 4 Experiments 
+
+4.1 Experimental Setup 
+
+We evaluate our method on a real-world Unitree Go2 quadruped robot in indoor visual navigation tasks. Following the real-robot evaluation protocol adopted in NoMaD, we deploy the system in a closed-loop setting, where perception, policy inference, and motion control are executed on a physical robot platform. Specifically, the sensor streams provided by the Go2, including RGB observations and depth measurements, are transmitted to an external computer through a ROS master–slave communication framework. Both the RGB images and the depth images are captured at a resolution of 640 ×480. The computer is equipped with an NVIDIA GeForce RTX 4060 GPU, on which all policy inference and local planning computations are performed in real time. The predicted linear and angular velocity commands, denoted by ( v, ω ), are then sent back to the robot to control its motion. To systematically evaluate the proposed method, we construct three repre-sentative navigation scenarios: (1) obstacle-free navigation; (2) navigation with a single static obstacle; (3) navigation with multiple static obstacles.   
+
+> (a) Obstacle-free. (b) Single-obstacle. (c) Multiple-obstacle.
+
+Fig. 2: Experimental scenes in the real-world navigation evaluation. SemGeoNav 9
+
+For comparison, we evaluate our method against two representative vision-based navigation baselines, ViNT and NoMaD, both using the official pre-trained weights provided by the authors. In addition, to assess the effectiveness of the collected dataset for platform-specific adaptation, we also report results for ViNT fine-tuned on our dataset. For fairness, all compared methods are deployed on the same Go2 platform, use the same sensor inputs and goal specifications, and share the same ROS-based control interface. All methods are evaluated using the same goal images and initial positions, with a fixed start-to-goal distance of 11 meters. For all methods, the output control commands are bounded by a maximum forward linear velocity of 0.4 m/s and a maximum angular velocity of 0.8 rad/s. 
+
+4.2 Experimental Results 
+
+The evaluation results under the obstacle-free setting are summarized in Table 1. Here, ViNT and NoMaD denote the results obtained using the official pre-trained weights provided by the authors, while ViNT-Go2 denotes the ViNT model evaluated with our fine-tuned weights. Ours denotes the proposed method. SI denotes the success indicator for each trial, where 1 means success and 0 means failure. Time denotes the travel duration from the start point to the goal. Table 1: Experimental results of different navigation methods in the obstacle-free scenario.                                                                                                                                                                                     
+
+> -ViNT NoMaD ViNT-Go2 SemGeoNav (Ours) Sequence SI Time SI Time SI Time SI Time 1134.06 130.54 132.07 129.06 20-130.00 131.84 129.31 3132.32 131.80 131.57 130.06 4132.32 131.56 131.07 126.81 5132.82 131.10 131.32 129.81 6133.83 0-132.32 129.30 7132.58 131.31 132.57 131.08 8133.08 131.57 131.07 130.60 9133.82 131.56 130.81 129.83 10 0-130.57 130.06 130.84 11 131.83 130.58 132.58 129.84 12 131.82 0-132.06 129.56 13 131.82 0-131.07 128.83 14 131.08 132.56 129.58 126.35 15 130.59 130.30 131.56 129.08 16 133.07 131.80 129.82 128.83 17 131.83 130.80 131.56 130.58 18 130.09 0-130.57 128.58 19 0-134.62 131.84 129.82 20 132.08 0-130.82 127.58 Average time 32.30 31.38 31.31 29.29
+> SR (success rate) 85% 75% 100% 100%
+
+Table 1 presents the experimental results in the obstacle-free scenario. Al-though this scenario does not require explicit obstacle avoidance, SemGeoNav still achieves the best overall performance, attaining a 100% success rate and the shortest average navigation time of 29.29 s. This suggests that the introduction of the geometric planning module does not compromise the goal-oriented capabil-ity of the visual navigation model, but instead improves execution stability and 10 Y. Liu et al. 
+
+navigation efficiency. Moreover, after being fine-tuned on our collected dataset, ViNT improves its success rate from 85% to 100%, further demonstrating the effectiveness of the collected dataset for platform-specific adaptation. Overall, these results validate that both the proposed framework and the collected train-ing data contribute to improved real-world navigation performance. Table 2: Experimental results of different navigation methods in the single-obstacle scenario.                                                                                                     
+
+> -ViNT NoMaD ViNT-Go2 SemGeoNav (Ours) Sequence SI Time SI Time SI Time SI Time 1132.07 129.09 129.08 129.83 2131.56 0-130.57 129.07 3131.32 130.58 129.36 128.32 4131.07 0-131.57 130.09 5131.83 129.58 0-130.33 60-0-127.35 129.57 7131.32 0-131.07 127.33 8131.82 129.08 127.82 128.34 9132.32 129.31 130.32 127.36 10 131.57 0-131.57 129.33 Average time 31.65 29.53 29.86 28.96
+> SR (success rate) 90% 50% 90% 100%
+
+Table 3: Experimental results of different navigation methods in the multiple-obstacle scenario.                                                                                                     
+
+> -ViNT NoMaD ViNT-Go2 SemGeoNav (Ours) Sequence SI Time SI Time SI Time SI Time 1129.82 0-0-126.59 2131.58 0-0-131.33 30-0-130.82 130.94 40-0-129.81 132.33 50-0-128.82 127.57 6130.82 0-0-126.59 70-0-130.08 0-8132.32 0-128.84 131.34 90-0-0-0-10 0-0-0-128.10 Average time 31.14 –29.67 29.35
+> SR (success rate) 40% 0% 50% 80%
+
+Table 2 and Table 3 present the experimental results in environments with obstacles. When obstacles are present, the advantage of SemGeoNav becomes apparent. This advantage becomes more pronounced in the multiple-obstacle scenario. Compared with ViNT-Go2, our method improves the success rate by 30%. Compared with ViNT, the improvement reaches 40%. SemGeoNav also achieves highly competitive navigation efficiency and obtains the best average navigation time. In contrast, the performance of NoMaD decreases significantly when obstacles are present. A possible reason is that NoMaD directly executes the first trajectory generated by the diffusion model, without explicit geometric refinement during inference. Overall, these results show that our method is more robust and effective in obstacle-rich environments. 
+
+4.3 Ablation Study 
+
+We conduct an ablation study to evaluate the contribution of each component in the geometric planning module of SemGeoNav. All experiments are performed SemGeoNav 11 
+
+in the multiple-obstacle setting. All variants are implemented within the Sem-GeoNav framework and are obtained by removing or replacing specific compo-nents of its geometric planning module. Gradient-Only removes the TTC-based risk filtering and temporal smoothing from the geometric planning module, leaving only the gradient-based optimizer. TTC-Only removes the gradient-based refinement and uses only TTC-based risk estimation to reshape candidate motions. APF-Only replaces the geometric plan-ner in SemGeoNav with an artificial potential field planner. SemGeoNav (Ours) is the complete framework with all proposed geometric planning components. The experimental results are shown in Table 4. Table 4: Ablation study results of different geometric planning methods in the multiple-obstacle scenario.                                                                                                     
+
+> -Gradient-Only TTC-Only APF-Only SemGeoNav (Ours) Sequence SI Time SI Time SI Time SI Time 10-0-0-126.59 2127.11 137.36 0-131.33 3129.07 130.92 131.83 130.94 4130.56 132.35 0-132.33 5128.84 0-0-127.57 60-136.82 128.07 126.59 70-0-127.85 0-8129.81 0-128.83 131.34 90-133.35 0-0-10 128.05 132.37 0-128.10 Average time 28.91 33.86 29.15 29.35 SR (success rate) 60% 60% 40% 80%
+
+The results indicate that both Gradient-Only and TTC-Only achieve a suc-cess rate of 60%. However, the TTC-Only variant tends to produce repeated left-right oscillations, resulting in a much longer navigation time. The APF-Only method performs worse, with a success rate of only 40%. In comparison, our method achieves the best overall performance, reaching an 80% success rate while maintaining short navigation times through smooth trajectory outputs. Overall, the ablation results demonstrate that the proposed geometric planning module is more effective than each individual component alone. 
+
+## 5 Conclusion 
+
+In this paper, we proposed SemGeoNav, a hierarchical visual navigation frame-work for safe and robust goal-directed navigation. It combines high-level se-mantic reasoning with geometry-aware local planning. We conducted real-world experiments on the Unitree Go2 robot, and the results show that SemGeoNav outperforms representative baselines in success rate, navigation efficiency, and robustness. In the future, we aim to align the scale of depth observations with that of the waypoints predicted by the model to further improve navigation performance. 12 Y. Liu et al. 
+
+## References 
+
+1. Shah, D., Sridhar, A., Bhorkar, A., Hirose, N., Levine, S.: GNM: A general naviga-tion model to drive any robot. In: 2023 IEEE International Conference on Robotics and Automation (ICRA), pp. 7226–7233. IEEE (2023) 2. Shah, D., Sridhar, A., Dashora, N., Stachowicz, K., Black, K., Hirose, N., Levine, S.: ViNT: A foundation model for visual navigation. arXiv preprint arXiv:2306.14846 (2023) 3. Sridhar, A., Shah, D., Glossop, C., Levine, S.: NoMaD: Goal masked diffusion policies for navigation and exploration. In: 2024 IEEE International Conference on Robotics and Automation (ICRA), pp. 63–70. IEEE (2024) 4. Hart, P.E., Nilsson, N.J., Raphael, B.: A formal basis for the heuristic determina-tion of minimum cost paths. IEEE Transactions on Systems Science and Cyber-netics 4(2), 100–107 (1968) 5. Fox, D., Burgard, W., Thrun, S.: The dynamic window approach to collision avoid-ance. IEEE Robotics & Automation Magazine 4(1), 23–33 (2002) 6. Zhou, X., Wang, Z., Ye, H., Xu, C., Gao, F.: EGO-Planner: An ESDF-free gradient-based local planner for quadrotors. IEEE Robotics and Automation Letters 6(2), 478–485 (2020) 7. Inglin, Y., Frey, J., Chen, C., Hutter, M.: Less Is More: Scalable visual navigation from limited data. arXiv preprint arXiv:2601.17815 (2026) 8. Kahn, G., Abbeel, P., Levine, S.: Badgr: An autonomous self-supervised learning-based navigation system. IEEE Robotics and Automation Letters 6(2), 1312–1319 (2021) 9. Majumdar, A., Yadav, K., Arnaud, S., Ma, J., Chen, C., Silwal, S., Jain, A., Berges, V.-P., Wu, T., Vakil, J., et al.: Where are we in the search for an artificial visual cortex for embodied intelligence? Advances in Neural Information Processing Systems 36 , 655–677 (2023) 10. R¨ osmann, C., Feiten, W., W¨ osch, T., Hoffmann, F., Bertram, T.: Trajectory mod-ification considering dynamic constraints of autonomous robots. In: ROBOTIK 2012; 7th German Conference on Robotics, pp. 1–6. VDE (2012) 11. Zhou, B., Gao, F., Wang, L., Liu, C., Shen, S.: Robust and efficient quadrotor trajectory generation for fast autonomous flight. IEEE Robotics and Automation Letters 4(4), 3529–3536 (2019) 12. Shah, D., Osi´ nski, B., Levine, S., et al.: LM-Nav: Robotic navigation with large pre-trained models of language, vision, and action. In: Conference on Robot Learning, pp. 492–504. PMLR (2023) 13. Yuan, Y., Cui, H., Huang, Y., Chen, Y., Ni, F., Dong, Z., Li, P., Zheng, Y., Hao, J.: Embodied-R1: Reinforced embodied reasoning for general robotic manipulation. arXiv preprint arXiv:2508.13998 (2025) 14. Tan, M., Le, Q.: EfficientNet: Rethinking model scaling for convolutional neu-ral networks. In: International Conference on Machine Learning, pp. 6105–6114. PMLR (2019) 15. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, L., Polosukhin, I.: Attention is all you need. In: Advances in Neural Information Processing Systems, pp. 5998–6008 (2017) 16. Ho, J., Jain, A., Abbeel, P.: Denoising diffusion probabilistic models. In: Advances in Neural Information Processing Systems, pp. 6840–6851 (2020)

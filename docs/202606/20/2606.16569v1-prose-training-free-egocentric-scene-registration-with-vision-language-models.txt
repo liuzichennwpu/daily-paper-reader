@@ -1,0 +1,714 @@
+Title: PROSE: Training-Free Egocentric Scene Registration with Vision-Language Models
+
+URL Source: https://arxiv.org/pdf/2606.16569v1
+
+Published Time: Tue, 16 Jun 2026 02:41:24 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+# PROSE: Training-Free Egocentric Scene Registration with Vision-Language Models 
+
+Zhiang Chen ∗ 1 Nahyuk Lee ∗ Boyang Sun 1 Taein Kwon 2
+
+Marc Pollefeys 1 Zuria Bauer † 1 Sunghwan Hong † 1,31ETH Zurich 2VGG, University of Oxford 3ETH AI Center 
+
+https://RCKola.github.io/prose Identify all objects   
+
+> present in the video!
+> Scene Representation Cross -scan Instance Correspondence Registered Scene
+> Find object correspondences
+> across the sequences!
+> Pose Estimation
+
+Figure 1: Overview of PROSE. From two egocentric RGB sequences of the same scene captured at different times with partial overlap, PROSE prompts a pretrained VLM to (i) list the objects in each sequence, lifting them into an object-level 3D scene graph, and (ii) match instances across the two scans. The resulting correspondences drive a training-free pose estimation that registers the two scenes. No depth sensor, training, or annotated graph is required. 
+
+Abstract: Registering two captures of the same indoor space taken at different times underpins persistent spatial memory for robots and AR systems, yet the realistic version of this task is egocentric and its most scalable form is RGB-only. Head-mounted cameras yield blurry, fast-moving, partially overlapping views from which dense geometry is hard to recover. Classical registration leans on exactly the clean point clouds this setting lacks, while learned scene-graph methods require a pre-built or annotated graph and a trained matcher that we find brittle under egocentric data. We take a different route, using a pretrained vision-language model as the source of both scene understanding and cross-scan matching. Our method, PROSE (Pro mpted Scene r Egistration), lifts each RGB sequence into an object-level 3D scene graph using off-the-shelf foundation mod-els for geometry, segmentation, and language, then prompts the same VLM to match object instances across the two RGB sequences. To make this matching tractable and reliable, we leverage object heights as a prior and verify each pro-posed match with a paired same/different query, then solve for the rigid transform by hypothesizing a candidate per matched object and selecting the one with the strongest geometric consensus. PROSE adds no learned parameters and requires no depth sensor, training, or annotated graph. On the egocentric Aria Digital Twin and Aria Everyday Activities benchmarks, it outperforms both geometric and learned scene-graph baselines in registration accuracy, on ground-truth and RGB-reconstructed point clouds alike, and the scene graph it produces transfers directly to downstream tasks. 
+
+Keywords: Scene Registration, Vision-Language Models, Egocentric Perception, Scene Graphs, Training-Free, 3D Scene Understanding 
+
+> ∗
+
+Equal contribution. 
+
+> †
+
+Equal supervision. 
+
+> arXiv:2606.16569v1 [cs.CV] 15 Jun 2026
+
+## 1 Introduction 
+
+Aligning two captures of the same indoor scene taken at different times is a primitive for persistent autonomy: a robot revisiting a room it mapped last month, an AR headset re-anchoring content across sessions, or a fleet of agents sharing a map all reduce to recovering a rigid transform between two RGB sequences with moved furniture and partial overlap [1]. The deployment-realistic version is egocentric, where head-mounted cameras introduce motion blur, fast viewpoint changes, and re-arranged objects that degrade the geometric signal point-cloud registration relies on. The landmark objects in the scene, however, remain recognizable, and they are also what an embodied agent ulti-mately cares about: a robot acting in the aligned scene needs to know what populates it and how it is arranged, not just where the cameras stood. Existing methods provide neither robustly. The two families that dominate the cross-time scene registration literature both come up short in the egocentric RGB setting. Pure geometric methods [2, 3, 4, 5, 6] discard semantics and rely on dense, well-formed point clouds that egocentric RGB reconstructions do not provide, since these reconstructions are built from monocular depth under narrow field-of-view, irregular viewpoint coverage, and frequent motion blur. Learned scene-graph registration [7, 8, 1] restores the semantic prior, but assumes the scene graph is given, either as ground-truth annotation or from a separately trained front-end, and learns a bespoke matcher that, in our evaluation, does not transfer to the egocentric distribution. In both cases, scene understanding is either discarded or assumed, never produced as part of solving the alignment. This points to a different prior. Geometry may be unreliable in egocentric capture, but objects remain recognizable across time. Our central observation is that, cross-time instance matching can be cast as a visual comparison task that pretrained VLMs already handle well. Recent work has applied VLMs to single-scene 3D understanding [9, 10]; we extend this to the cross-time setting. Prompted appropriately, the same VLM that identifies the objects can also match them across two captures of it. Object understanding and cross-scan matching therefore draw on VLMs as the central engine, and the scene graph built for matching doubles as a reusable scene representation. We realize this in Pro mpted Scene r Egistration, namely PROSE , a training-free pipeline for cross-time egocentric scene alignment. PROSE first lifts RGB into per-subscan point clouds with a ge-ometric foundation model [11], prompts a pretrained VLM [12, 13, 14] to list the objects in each scene, and uses SAM3 [15] to turn those names into temporally consistent instance masks, which a fusion step consolidates into a per-subscan scene graph (Fig. 1). The same VLM is then asked to match instances across the two scans. Naive prompting fails here, the query is intractably large, con-fusable objects at different heights compete, and the VLM frequently hallucinates matches, so we introduce a small set of prompting and filtering steps to make the matching reliable, then estimate the transform from the resulting correspondences via per-instance matching and RANSAC [16]. We evaluate PROSE on the egocentric Aria Digital Twin [17] and Aria Everyday Activities [18] datasets, which capture diverse indoor scenes under realistic motion and scene change. PROSE improves over both geometric and learned scene-graph baselines on registration recall, rotation, and translation, on both ground-truth and RGB-reconstructed point clouds, and ablations isolate the contribution of each stage and each design choice within the pipeline. PROSE also emits an open-vocabulary scene graph alongside the transform, which a simulated agent uses to plan paths over a registered map. Our contributions are: • We introduce PROSE , a training-free, RGB-only pipeline for cross-time egocentric scene registration that jointly recovers cross-scan instance correspondences and a rigid transform while producing an open-vocabulary scene graph in the same pass. • We show that a pretrained VLM, when prompted appropriately, can serve as a cross-scan instance-correspondence engine: height-binned Set-of-Marks prompting with a verification pass is sufficient to drive correspondence without any training. • We show that on egocentric datasets [18, 17], PROSE substantially improves over both geometric and learned scene-graph baselines on registration, and that the scene graphs it produces are reliable to support downstream use. 2Figure 2: Overall pipeline of PROSE. From two egocentric RGB scans of the same scene at dif-ferent times, PROSE parses each into a per-scan 3D scene graph, matches instances across scans, and estimates the rigid transform T ∈ SE (3) by generating one candidate per matched pair and selecting the highest-inlier-ratio hypothesis. The entire pipeline is training-free. 
+
+## 2 Related Work 
+
+Scene graph registration. Cross-time alignment of indoor scenes via scene graphs originates with SGAligner [7], which learns a multi-modal embedding over node labels, points, and structural rela-tions and matches across two pre-segmented graphs. SG-PGM [8] reformulates the task as partial graph matching with a GNN, reusing GeoTransformer point features and adding a learnable top-k
+
+matching layer. SG-Reg [1] targets cross-distribution generalization by fusing BERT label features, GNN topology, and PointNet shape, and pairs the matcher with a robust pose back-end, though its front-end still assumes a fused metric point cloud with semantic labels. All three are learned on a target distribution, presuppose curated 3D inputs, and decouple scene graph construction from matching. PROSE differs on every axis: training-free, RGB-only, and producing the scene graph through the same VLM that drives correspondence. 
+
+Geometric and learned 3D registration. Classical correspondence-based registration pairs a local descriptor with a robust estimator: TEASER++ [2] accepts up to 99% outliers via a truncated least-squares relaxation and is the standard back-end for FPFH [3] and FCGF [4] descriptor matches. GeoTransformer [5] replaces the descriptor-matching pipeline with a coarse-to-fine attention model over superpoints and is the de facto learned baseline for indoor benchmarks. BUFFER-X [6] pushes toward zero-shot generality with patch-level coordinate normalization and distribution-aware down-sampling. While specialized in registration task, none of these methods exploit semantics, and all depend on dense, well-formed point clouds. PROSE instead operates at the object level, where a small set of high-confidence semantic correspondences absorbs the geometric noise that defeats descriptor-based pipelines. 
+
+VLMs and foundation models for 3D scene understanding. A growing literature builds 3D scene representations on top of pretrained vision-language and segmentation models [19, 20, 21, 22]. Con-ceptGraphs [23] and HOV-SG [24] construct open-vocabulary 3D scene graphs from multi-view RGB-D, while OpenScene [25] and OpenMask3D [26] lift CLIP features into dense 3D representa-tions queryable in language. A separate thread prompts VLMs directly on 3D inputs: GPT4Scene [9] grounds VLM reasoning in 3D scene tokens, while others [27, 10] promote spatial reasoning by over-laying marks on multimodal prompts. None of these lines, to our knowledge, targets the cross-scan correspondence task: scene-graph builders represent one scan, and VLM-prompting work reasons within one scene. PROSE composes both threads, using a single pretrained VLM to both build each scan’s graph and match instances across them. 
+
+## 3 Method 
+
+Overview and problem setup. Given two egocentric RGB sequences Vref and Vsrc of the same indoor scene captured at different times, we seek a rigid transform T ∈ SE (3) aligning source to reference. PROSE requires no depth sensor and no externally provided SLAM trajectory as input: camera geometry is estimated from RGB by a geometric foundation backbone (Sec. 3.1). 3Table 1: Object-listing prompt variants. The Base object-listing prompt and the five design choices we ablate on top of it; each variant appends its instruction to the Base prompt.        
+
+> Variant Prompt
+> Base “Identify all objects present in the video. For blurry frames, provide your best guess. Output at most 20 items as concrete, distinct objects you actually observe. Return the output as a Python list of strings.” Landmark-Salience “Prioritize medium-to-large landmark-scale objects (furniture, appliances, built-in fix-tures) that anchor the scene for relocalization, while still listing smaller distinctive items.” Static-Rigid “Focus on static, rigid objects (furniture, appliances, fixtures, containers); skip non-rigid or dynamic entities (people, hands, pets) and bare structural surfaces (walls, floors, ceilings).” Hallucination-Guard “Do not invent, speculate, or enumerate category variations (e.g., generic ‘toy X’ / ‘small X’ taxonomy expansions); never pad the list to reach the 20-item cap, and prefer fewer high-confidence items over many marginal guesses.” Occlusion-Recovery “Include objects even when only briefly seen, partially visible, occluded, or in poor lighting—when in doubt, include them.” Scene-Prior “First identify the room type (e.g., kitchen, living room, bedroom, office), then include functional objects typical of that room that you can directly see.” ]
+
+The sequences may overlap only partially and contain moved or removed objects. As a byproduct of recovering T , we also output an instance-level open-vocabulary scene graph per scan, Gref and 
+
+Gsrc , and the cross-scan instance correspondences C ⊂ V (Gref ) × V (Gsrc ) that drove the alignment. Figure 2 summarizes PROSE: scene parsing (Sec. 3.1), height-binned cross-scan correspondence and scene-graph matching (Sec. 3.2), and pose hypothesis and voting (Sec. 3.3). 
+
+3.1 Scene representation: from RGB to per-instance 3D 
+
+Scene parsing operates on each RGB sequence and produces a scene graph G = ( V, E ) whose nodes 
+
+V are 3D object instances and whose edges E connect instances with nearby centroids. 
+
+Per-frame geometry. A geometric foundation model [11] takes the RGB sequence V and returns per-frame depth, intrinsics, and camera pose. We unproject and concatenate a subscan’s frames into a single per-subscan point cloud with a 2D-to-3D index mapping each pixel to its 3D point, which later stages use to translate between per-frame masks and the unified point cloud. 
+
+Object listing. A pretrained VLM [12] is prompted with a subsampled set of frames and returns a flat list of object names. We use a VLM rather than a closed-vocabulary detector [28, 29] because the relevant object set varies by scene, and because the prompt is designed for selection rather than exhaustive detection: it elicits the objects most useful for cross-time alignment, not every visible object, since many add noise without aiding registration. The base prompt asks for at most 20 concrete, distinct items. On top of it we layer five design choices targeting egocentric failure modes: (i) landmark salience , prioritizing scene-anchoring furniture and fixtures; (ii) static-rigid focus , skipping people, hands, and bare structural surfaces; (iii) a hallucination guard forbidding speculative category variants; (iv) occlusion recovery , retaining briefly or partially seen objects; and (v) a scene prior that infers the room type and then its typical functional objects. The full prompt for each choice is given in Tab. 1 and we merge them all for the final prompt. 
+
+Instance segmentation. Since the correspondence stage matches objects by instance identity rather than pixel-wise [30, 31, 32, 33, 34] or point-wise [35, 36, 37, 38, 39], this step must give each phys-ical object one persistent label across the sequence, not per-frame detections. We use SAM 3 [15], which performs open-vocabulary concept segmentation: from a short noun phrase it aims to detect, segment, and track every instance of that concept across the video, yielding a temporally consistent mask M (j) 
+
+> t
+
+for object j and frame t. Unlike earlier segmenters [40] that accept only spatial prompts and return a single object, it consumes our VLM object names directly, avoiding the separate detec-4tor and tracker [41, 42] that break under egocentric viewpoint change and occlusion. Identities can still split when an object leaves and re-enters the view; the fusion step below merges these back. 
+
+Per-instance fusion. The per-frame SAM 3 masks are not yet consistent across the sequence: the same physical object can take different instance IDs in different frames. To unify them we back-project every masked pixel into 3D through the 2D-to-3D index (when nested masks claim a pixel, the smallest-area mask wins) and voxelize the combined cloud, so each voxel gathers points from many frames and potentially several IDs. We relabel each voxel’s points to the locally majority ID, resolving per-frame ID switching into one label per region; an instance whose points are overwhelm-ingly revoted into another is then absorbed into it. A final scene-wide pass merges near-duplicate instances left by a split, using a geometric overlap test on their point clouds. The result is a scene graph G whose nodes are temporally consistent 3D instances, each carrying a fused point set and a PCA-based oriented bounding box, with edges connecting instances with nearby centroids. We provide full details in the appendix. 
+
+3.2 Cross-scan instance correspondence 
+
+Given the two scene graphs Gref and Gsrc , this stage produces instance correspondences C ⊂
+
+V (Gref ) × V (Gsrc ). We again use a VLM here because indoor scenes contain many visually near-identical instances (multiple chairs, lamps, monitors) that confuse feature-similarity matchers but a VLM can disambiguate by reasoning over surrounding context. Naive prompting still fails: the query is too large, and the VLM hallucinates matches between similar objects at different heights. Our fix is height-based binning : comparing only instances at similar heights removes trivial distrac-tors and constitutes the largest source of improvement in our ablation (Tab. 3b). We measure each instance’s height along the gravity axis and split them into K=5 equal-count quantile bins with 20% 
+
+overlap between adjacent bins to retain object matches on the boundary. Querying the VLM sepa-rately within each bin keeps queries small and rules out implausible matches such as a ceiling lamp against a floor rug; a final pass recovers correspondences that never shared a bin. Within each bin we show the VLM two panels, one per scan, each a grid of that bin’s object crops labeled with numbered Set-of-Marks [27] markers from a single shared-namespace pool: reference crops take markers 1 . . . N and source crops take N +1 . . . N +M . Every marker is unique across both panels, so a pair of marker numbers is already a cross-scan instance pair and the VLM’s output is directly a list of candidate matches. We re-check each candidate with two prompts asking whether the objects are the same and whether they are different , keeping it only if the answers agree; since “same?” carries a yes-bias, the negated check exposes inconsistent hallucinations, sharply cutting false positives at a small recall cost. The surviving pairs form C; examples are visualized in the appendix. 
+
+3.3 Pose hypothesis and voting 
+
+Given the instance correspondences C = {(Ai, A ′
+
+> i
+
+)}Ni=1 , where (Ai, A ′
+
+> i
+
+) is the i-th matched ref-erence/source instance pair, and the per-subscan point clouds, we estimate the rigid transform 
+
+T ∈ SE (3) aligning source to reference. We assume a single dominant rigid motion relates the two scans, so one transform should align the shared, unmoved structure while moved objects act as outliers to be removed for reliable scene reconstructions [43]. Rather than fitting T to all correspon-dences jointly, we generate one transform hypothesis per matched pair and keep the one that best aligns the two point clouds, making the estimate robust to a minority of mismatched pairs. For each matched pair we fit a candidate transform Ti by running RANSAC on the pair’s point-level correspondences for outlier rejection, extracted between the two instances’ fused point sets with an off-the-shelf descriptor [4, 3, 5] under mutual NN matching. We then score each Ti on its own, without pooling correspondences across pairs, by its inlier ratio: the fraction of the source point cloud that, once transformed by Ti, lands within a fixed distance of the reference cloud. The highest-scoring Ti becomes the final T . A transform from a correctly matched pair aligns two scans, whereas one from a mismatched pair aligns little, so this selection is robust to individual bad pairs. 5Table 2: Scene registration results on the ADT and AEA benchmarks. The best and second best results are highlighted within each setting.                                                                                                                                                                                                                                  
+
+> ADT AEA Single-ARIA Multi-ARIA Total Method Type RR ↑
+> (%) RRE ↓
+> (◦)RTE ↓
+> (m) RR ↑
+> (%) RRE ↓
+> (◦)RTE ↓
+> (m) RR ↑
+> (%) RRE ↓
+> (◦)RTE ↓
+> (m) VR ↑
+> (%) RR ↑
+> (%) RRE ↓
+> (◦)RTE ↓
+> (m) VR ↑
+> (%)
+> Using VGGT-Omega predicted point clouds
+> TEASER++ FPFH [2] Scene-level registration 43.6 20.28 1.06 45.3 14.04 0.87 44.4 17.11 0.97 99.7 42.9 18.87 2.55 100
+> TEASER++ FCGF [2] Fail to converge 0Fail to converge 0GeoTransformer [5] Out of Memory (OOM) 0Out of Memory (OOM) 0BUFFER-X [6] 35.3 20.28 1.17 38.9 13.73 0.90 37.1 16.95 1.03 100 34.5 20.35 2.44 100
+> SG-Reg [1] Scene-graph registration 20.7 29.57 3.27 17.1 29.61 3.27 19.1 29.58 3.27 76.3 19.4 27.06 3.52 52.6
+> Ours FPFH 51.2 18.33 0.80 48.8 13.23 0.61 49.9 15.71 0.70 95.5 47.9 17.91 1.84 87.3
+> Ours FCGF 49.3 14.64 0.69 50.6 11.87 0.57 50.0 13.21 0.63 95.5 58.5 9.04 0.99 88.3
+> Ours GeoTrans 55.1 14.71 0.66 57.3 10.49 0.51 56.2 12.55 0.59 96.0 65.5 12.71 1.39 89.6
+> Using ground-truth (GT) point clouds
+> TEASER++ FPFH [2] Scene-level registration 76.2 12.31 0.54 84.3 5.46 0.26 80.3 8.83 0.40 100 ––––TEASER++ FCGF [2] 73.8 13.18 0.59 85.6 5.68 0.27 79.4 9.63 0.44 93.1 ––––GeoTransformer [5] Out of Memory (OOM) 0––––BUFFER-X [6] 56.1 13.24 0.72 67.2 8.01 0.45 61.7 10.57 0.59 100 ––––SG-Reg [1] Scene-graph registration 47.8 20.74 2.24 45.8 18.53 1.97 46.9 19.76 2.12 77.0 ––––
+> Ours FPFH 80.1 9.60 0.38 84.7 5.40 0.22 82.5 7.44 0.30 100 ––––
+> Ours FCGF 87.0 5.38 0.22 91.2 3.01 0.13 89.2 4.16 0.17 100 ––––
+> Ours GeoTrans 76.2 10.84 0.44 81.2 6.96 0.29 78.8 8.85 0.36 100 ––––
+
+## 4 Experiments 
+
+4.1 Implementation details 
+
+We instantiate PROSE with VGGT-Ω [11] as the geometric backbone, Qwen3.6-27B [12] for object listing and cross-scan instance matching, and SAM 3 [15] for text-prompted video segmentation; all are off-the-shelf checkpoints used without fine-tuning. For the final per-instance descriptor we report results with FCGF [4], FPFH [3], and GeoTransformer [5], all pretrained and used as re-leased. In per-instance fusion we voxelize at 5 cm and resolve instance IDs by per-voxel majority vote, absorbing an instance into another when at least 50% of its points are reallocated. For corre-spondence we use K=5 quantile height bands with 20% overlap. Registration uses RANSAC with 10K iterations and an inlier threshold of 3 cm. All experiments run on a single H200 GPU. 
+
+4.2 Experimental Setting Tasks and datasets. We evaluate PROSE on three tasks: registration recovers the SE (3) transform aligning two subscans’ point clouds; instance correspondence forms ground-truth pairs by thresh-olding IoU under mutual nearest neighbors on mask-projected instances; and object listing matches the predicted object list against a ground-truth list via Hungarian matching on CLIP [22] cosine similarity. We use Aria Digital Twin (ADT) [17] and Aria Everyday Activities (AEA) [18], two egocentric benchmarks of diverse indoor scenes. From 184 ADT sequences we derive 6,657 sub-scan pairs, organized into Single-ARIA (one wearer) and Multi-ARIA (multiple wearers) regimes, each further split by capture activity. ADT provides ground-truth clouds, poses, and object lists; AEA provides only poses and semi-dense clouds, so we evaluate AEA with VGGT-Ω-predicted clouds. A simulated path-planning experiment (Sec. 4.4) demonstrates downstream applicability. 
+
+Evaluation metrics. For registration we report Registration Recall (RR), the fraction of pairs with RRE < 5◦ and RTE < 0.2 m; Relative Rotation/Translation Error (RRE/RTE); and Valid Ratio (VR), the fraction of pairs yielding a non-degenerate transform. For correspondence we report macro-averaged node precision, recall (NP, NR), F1, and coverage ratio (CR), defined as the fraction of pairs with ≥ 1 correct matches. Because micro averaging over-rewards dense scenes, we use macro averaging and emphasize precision alongside coverage: precision drives registration quality, while coverage guarantees at least one strong match for the voting scheme (Sec. 3.3) to select. For object listing we report precision, recall, and F1, plus anchor recall, all at a CLIP-similarity threshold of 0.5 (denoted @50); anchor recall is computed over the ground-truth objects shared across both 6Table 3: Ablation studies on PROSE . We isolate the contribution of each stage’s design choices. 
+
+(a) Semantic object listing.                                                            
+
+> Ref Landmark-Salience Static-Rigid Hallucination-Guard Occlusion-Recovery Scene-Prior AR@50 P@50 R@50 F1@50 Base ✗✗✗✗✗71.2 97.2 65.2 72.5 (a) ✓✗✗✗✗78.1 95.8 73.5 77.3 (b) ✓✓✗✗✗87.6 94.1 82.5 85.3 (c) ✓✓✓✗✗90.3 94.8 85.0 88.3 (d) ✓✓✓✓✗91.5 95.5 85.9 89.0
+> Ours ✓✓✓✓✓92.4 95.8 87.0 90.0
+
+(b) Instance matching.                  
+
+> Method F1 ↑CR ↑
+> GPT4Scene [9] 0.24 0.94 GoM [10] 0.39 1.0 Ours 0.45 1.0
+> – cross-bin 0.44 1.0 – 2 ×verif. 0.36 1.0 – cropping 0.34 0.83 – height bins 0.29 0.58
+
+subscans, which are salient landmarks and make the best correspondence targets, while the other three are over all GT objects. 
+
+4.3 Experimental Results Scene registration. We evaluate cross-scan registration on ADT and AEA (Tab. 2), comparing against scene-level baselines [2, 5, 6] and our main comparison, the learned scene-graph baseline SG-Reg [1]. On ADT we report results on both ground-truth point clouds and clouds reconstructed from RGB by VGGT-Ω, the latter being the sensor-free setting PROSE targets. On ground-truth clouds, PROSE attains the best accuracy across all three ARIA splits, improving over the strongest scene-level baseline on rotation and translation error by a wide margin while also leading on recall, whereas SG-Reg, trained on curated indoor RGB-D, transfers poorly to the egocentric distribution and trails every scene-level method. The advantage is most pronounced on reconstructed clouds: as input geometry degrades, the scene-level baselines and SG-Reg drop sharply while PROSE retains usable accuracy and extends its lead, since object-level semantic correspondence is far less sensitive to the noise and partial coverage of predicted clouds than dense geometric descriptor matching. No single descriptor backend dominates across the three “Ours” rows, confirming that the gains come from the correspondence stage rather than the descriptor. GeoTransformer runs out of memory at the scene level, where it must attend over the full point cloud, yet serves as a PROSE backend without issue: operating per instance keeps each registration problem small enough to fit in memory. Table 4: Scene graph correspondence re-sults on ADT and AEA. ADT AEA Methods NP ↑                               
+
+> (%) NR ↑
+> (%) F1 ↑
+> (%) CR ↑
+> (%) NP ↑
+> (%) NR ↑
+> (%) F1 ↑
+> (%) CR ↑
+> (%) GDino+CLIP [29] 14.2 23.6 17.2 89.7 14.6 27.8 18.6 82.7 SG-Reg [1] 20.8 35.2 25.0 76.9 11.0 24.8 14.5 52.6
+> Ours 70.4 49.6 56.9 98.6 73.4 50.6 57.0 93.2
+
+Scene-graph correspondence. We next evaluate the cross-scan instance matching that drives regis-tration as a task in its own right (Tab. 4), against an open-vocabulary detection-and-embedding baseline (GDino+CLIP) [29] and SG-Reg [1]. PROSE pro-duces substantially more precise and higher-F1 cor-respondences than both baselines on ADT and AEA. The gap is largest in precision: matching object instances by VLM reasoning over shared-namespace Set-of-Marks prompts avoids the false matches that embedding-similarity methods make among vi-sually similar objects, which is exactly the regime that dominates indoor scenes with repeated furni-ture. SG-Reg, whose learned matcher assumes curated graphs, produces few correct matches under the egocentric distribution, consistent with its weak registration numbers above. 
+
+Ablation Study. We justify our key design choices in object listing and correspondence in Tab. 3a and Tab. 3b with evaluation on ADT dataset. Table 3a ablates various prompting techniques and reveals the corresponding precision/recall tradeoff. Table 3b compares our method against two es-tablished spatial prompting techniques as well as isolates the contribution of each component in our pipeline. The two main contributors are the double verification and height binning, which sharpen precision and reduce distractors respectively. Additionally, we benchmark our object listing against open-vocabulary object tagging baselines in the appendix. 
+
+4.4 Downstream Application: Path Planning Setup. We assess PROSE’s scene graph by applying it to path planning. We capture a small room with an iPad at 30 FPS, obtain depth and pose from VGGT-Ω, and voxelize the back-projected cloud at 1 cm for geometry and collision. Batched VLM object discoveries, merged into one list by 7Table 5: Path planning results. We compare pairwise trajectory success rate and count statistics. *FM-Fusion has insufficient valid pairs (n=2) to be considered competitive.                                
+
+> Success Rate (%) ↑Count Method SR room SR near SR far SR cross Ninst Npairs Nroom
+> FM Fusion [44] 100* 100* 100* -592ConceptGraphs [23] 46.2 47.1 46.8 38.1 33 379 234
+> Ours 49.6 62.1 47.1 40.4 192 500 244
+
+(a) Robotic demo. Real world assessment with robots can be found in the appendix. table  
+
+> table
+> table
+> chair
+> laptop
+> laptop
+> backpack
+> cabinet
+> cabinet
+> cabinet
+> shelf
+> sofa
+> mug
+> storage bin
+> toolbox
+> wicker basket
+> stool
+> tripod
+> storage bin
+> oven
+> induction cooktop
+> shelf
+> toolbox
+> refrigerator
+> robotic arm
+> robotic arm
+> power cord
+> power cord
+> power cord
+> box
+> cardboard box
+> bookshelf
+> books
+> office chair
+> office chair
+> office chair
+> office chair
+> office chair
+> yellow armchair
+> tools
+> tools
+> cushion
+> power outlet
+> robot
+> robot
+> Room boundary
+> In-room
+> Out-of-room
+
+(b) Birds-eye-view of the open-plan room. 
+
+Figure 3: Visualization of path planning. We show photographs of the experiment (a) alongside the reconstructed environment (b). We exclude objects outside the red box from the SR comparison. a further VLM call, plus segmentation and voxel-revote deduplication, reduces the instance count from 258 (naive union) to 192. We connect each instance to its k=5 nearest neighbors within 1 m and assign spatial relations ( left-of , near , on top of ) from the recovered world frame. We sample node pairs at least 0.5 m apart, project colliding centroids to nearby free space, and plan the trajectory between each pair with Rapidly exploring Random Tree [45] (5 s timeout) on a 2D slice 50 cm above the floor, emulating a quadruped such as Spot. Each query is scored as success , no solution ,or outside room . We display the environment with room constraint and a labeled sub-graph in Fig. 3. 
+
+Results. We report Success Rate (SR) by pair separation (near 0.5–0.75 m, far 0.75 –1.25 m, cross-room > 1.25 m) and an in-room aggregate, with the pair, instance, and valid-instance counts each method yields. As displayed in Tab. 5, PROSE produces far more usable nodes than either base-line: FM-Fusion [44] recovers valid graphs for only a handful of rooms, so its perfect per-room rate reflects negligible coverage rather than planning quality, and ConceptGraphs [23] yields fewer valid targets across every band. The count columns characterize coverage more so than a preferred direction, as ground-truth graphs are unavailable; higher SR is unambiguously better. 
+
+## 5 Conclusion and Limitations 
+
+We presented PROSE, a training-free pipeline for cross-time egocentric scene registration that uses a single pretrained VLM both to build a per-scan 3D scene graph and to match instances across two captures of the same scene. Two ideas make this matching reliable enough to drive registra-tion: comparing only objects at compatible heights, and verifying each proposed match with paired same/different prompts. The final transform is then selected from per-pair candidates by inlier-ratio voting. On Aria Digital Twin and Aria Everyday Activities, PROSE outperforms geometric and learned scene-graph baselines on ground-truth and RGB-reconstructed clouds, and produces an open-vocabulary scene graph that supports a simulated path-planning task. Several limitations remain. VLM spatial reasoning is sensitive to prompt phrasing and preprocess-ing, though we expect this to improve as 3D-pretrained VLMs mature. The method relies on static landmarks and degrades under rapid motion or sparse scenes; a full-cloud registration fallback par-tially addresses this, but tighter coupling of semantic and geometric matching is a natural next step. As a multi-stage pipeline, errors also compound across components. The framework’s modularity, however, lets each stage be upgraded independently, so PROSE stands to improve as foundation models for geometry, segmentation, and language reasoning advance. 8Appendix 
+
+In this appendix, we present additional information and analyses not included in the main paper. The contents are organized as follows: 
+
+Contents 
+
+Section A: Real-Robot Deployment and Path Planning. Scene-graph setup, baseline comparisons, and the Spot navigation experiment. 
+
+Section B: Additional Method and Implementation Details. Per-frame geometry, per-instance fusion, height-binned correspondence, and pairwise same/different verification. 
+
+Section C: Experimental Setup Details. Dataset construction and subscan pairing, task and metric definitions, baseline protocols, and hyperparameters. 
+
+Section D: Additional Quantitative Results. VLM backbone ablation, object-listing abla-tion, and end-to-end inference time. 
+
+Section E: Additional Qualitative Results. Registration and correspondence visualiza-tions. 
+
+## A Real-robot Deployment and Path Planning 
+
+A.1 Extended Path Planning Details A.1.1 Setup Scene graph construction. PROSE’s scene graph is built from the full VGGT-Ω [11] reconstruc-tion (depth maps and camera poses) of 267 iPad frames captured at 30 FPS in an approximately 
+
+2.6 × 2.4 m robotics laboratory. Batched VLM object listing queries discover 38 unique categories. SAM 3 [15] segments 258 instances and the subsequent voxel voting with deduplication yields the final 192 nodes. Edges are formed by connecting each node to its k=5 nearest neighbors within radius r=1 m, producing 651 edges. The open-ended vocabulary includes domain-specific items such as robotic arm , induction cooktop , and wicker basket . An optional VLM relabeling step, which has no effect on the path planning result, corrects SAM 3 errors from its top-4 frame context and the existing object list. 
+
+Depth scale verification. VGGT-Ω predicts depth at an arbitrary scale with no explicit metric su-pervision. We verify that its predicted scale is approximately metric by comparing the bounding diagonal of the VGGT-Ω back-projected cloud (7.2M points, 5 mm voxel stride) against two in-dependent references: a metric-scale cloud from DA3 [46], a monocular depth model trained to predict metric depth directly, and the ground-truth mesh from the iOS 3D Scanner App. The VGGT-
+
+Ω diagonal (12.81 m) matches DA3 (12.81 m) almost exactly and exceeds the GT mesh (12.27 m) by 4%, the latter gap arising because the iOS LiDAR is depth-capped and truncates geometry be-yond the immediate room, whereas VGGT-Ω recovers it. Pairwise centroid distances between the 192 instances common to VGGT-Ω and DA3 correlate at Pearson r=0 .999 , and k=5 neighborhood overlap is 93% (131/192 perfect). We therefore use VGGT-Ω’s predicted depth and poses directly, without post-hoc scale correction. 
+
+TSDF Obstacle Map and Coordinate Frame. The VGGT-Ω depth maps are integrated via Open3D [47] TSDF at 5 mm resolution, producing a colored mesh with 660K vertices and 1.2M triangles. For collision checking, the mesh is voxelized at 2 cm ( ≈150K obstacle voxels). Because the predicted frame is not gravity-aligned, we compute the PCA frame of the mesh vertices and all obstacle voxels and node centroids are transformed to this PCA frame before planning. The 2D obstacle map is constructed by extracting voxels in a z-band around the robot navigation height (z=0 .0 ± 0.05 in PCA coordinates, corresponding to ≈50 cm above the physical floor). This yields 
+
+∼7,500 obstacle voxels for collision queries via a KD-tree. 9Planning Protocol. We wrap OMPL’s [48] bidirectional RRT-Connect [49] with KD-tree–based collision checking. The planner operates in obstacle-avoidance mode: a state is valid if and only if its distance to the nearest obstacle voxel exceeds the inflation radius rinv =0 .06 m. A user-defined room polygon in PCA XY (four corners hand-picked from the BEV) is enforced inside the state-validity checker such that paths that exit the polygon are invalid. After finding a solution, OMPL’s 
+
+simplifySolution() shortens the path. The timeout is 5s per pair. Since node centroids typically lie inside their parent object’s solid geometry, we snap each start/goal to the nearest collision-free point via a radial search (16 angles per ring, 2 cm step, up to 50 cm) constrained to the room polygon. The polygon is expanded by the snap margin (10 cm) for the initial in-room gate, so nodes near walls are not prematurely excluded. Each pair passes through a pre-flight failure cascade before the expensive RRT solve: 1. Outside room : centroid XY falls outside the expanded room polygon → skipped. 2. Unreachable : centroid is in-room but embedded in solid geometry; the snap-to-free-space search fails → skipped. 3. No solution : both endpoints are valid free-space positions, but RRT times out or the path exits the room boundary. 4. Success : collision-free path found entirely within the room. 
+
+A.1.2 Baselines 
+
+All methods use the same protocol: enumerate all  N
+
+> 2
+
+ node pairs, discard pairs whose PCA XY 
+
+centroid distance is below 0.5 m (trivially short). This yields 500 pairs for PROSE, 379 for Con-ceptGraphs and 9 for FM-Fusion [44]. All methods share the same VGGT-Ω TSDF obstacle mesh, room polygon, and planner parameters. 
+
+ConceptGraphs. We run the three-stage ConceptGraphs [23] pipeline: (i) RAM [50] + Ground-ingDINO [29] + SAM (ViT-H) [51] on 267 frames; (ii) cfslam pipeline batch mapping with overlap-based spatial similarity ( sim threshold=1.0 , dbscan eps=0.1 , min detections=3 ); (iii) node extraction at ≥ 50 points, edges via k-NN ( k=5 , r=1 .0 m). This yields 33 nodes and 165 edges. ConceptGraphs uses the same VGGT-Ω depth and poses as PROSE, so node centroids and the TSDF obstacle mesh are in the same coordinate frame. 
+
+FM-Fusion. SG-Reg’s [1] relative underperformance on our benchmarks can be attributed to its scene graph generation backbone, FM-Fusion [44], as highlighted in this experiment. FM-Fusion’s Bayesian label fusion requires frame-to-frame depth consistency for 3D IoU–based instance track-ing. With VGGT-Ω estimates, per-frame depth drift causes nearly all cross-frame associations to fail: only 5 instances survive ( bookshelf , ceiling , couch , floor , fridge ) out of 250+ single-frame fragments created. The label vocabulary is closed to ∼20 NYUv2/ScanNet classes: domain-specific objects are coerced to the nearest category ( robotic arm → robot ) or dropped entirely. 
+
+A.1.3 Coverage Analysis 
+
+FM-Fusion’s [44] 2/2 in-room success rate reflects the fact that its 5 surviving nodes are large objects whose centroids happen to sit in navigable space but 7 of 9 pairs fall outside the room polygon, leaving negligible coverage for routing between arbitrary objects. ConceptGraphs [23] recovers 33 nodes, but its class-agnostic detection plus aggressive spatial merging biases survival toward large, high-confidence objects: the resulting centroids cluster around a few dominant structures (tables , bookshelves , cabinets ), leaving the room interior sparsely covered and domain-specific items (robotic arm , induction cooktop ) absent. PROSE at 192 nodes provides both the densest spatial coverage and the richest semantic target set, yielding the broadest set of navigable routing targets among the three methods. 10 A.2 Real-Robot Experiment 
+
+We validate PROSE in a real-world object navigation scenario using a Boston Dynamics Spot robot equipped with an arm. The experiments are conducted in an indoor environment to evalu-ate PROSE’s ability to support object-level navigation. For each navigation task, we use the PROSE scene graph constructed from the iPad scan, as described previously, and localize the robot within the same map using an image-based localization pipeline [52]. This provides the robot’s current position and orientation in the scene graph. Given a human query specifying a target object in the scene, the planning pipeline introduced earlier computes a path from the robot’s current location to the nearest collision-free waypoint associated with the target object. The resulting path is collision-free by construction. Spot then tracks the interpolated waypoints along the planned path using the built-in velocity controller provided by the official Spot SDK. In addition, Spot’s local collision-avoidance functionality further reduces the risk of collisions during execution. The experiments demonstrate that PROSE enables a mobile robot to successfully navigate to target objects and places in real indoor scenes. 
+
+## B Additional Method/Implementation Details 
+
+This section expands the compressed method description of the main paper (Sec. 3) into the concrete detail needed to re-implement the stages whose implementation choices are non-obvious: per-frame geometry and per-instance fusion within per-scan scene representation (Sec. 3.1), and cross-scan correspondence with its pairwise verification (Sec. 3.2). 
+
+B.1 Details on Per-Frame Geometry 
+
+Here, we detail how PROSE recovers the per-subscan point clouds that every later stage operates on, expanding the per-frame geometry step of Sec. 3.1. PROSE assumes no depth sensor and no externally provided trajectory: all camera geometry is predicted from RGB. 
+
+Figure A1: Per-subscan point cloud example. An example subscan point cloud predicted by VGGT-Ω.Each subscan is a short RGB sequence V.We pass V through the geometric founda-tion backbone VGGT-Ω [11], used off the shelf without fine-tuning, which predicts a dense depth map, the camera intrinsics, and the camera pose for every frame. Writ-ing df for the predicted depth, Kf for the predicted intrinsics, and (u, v ) for a pixel of frame f , the per-frame back-projection produces a point Xcam  
+
+> f
+
+(u, v ) ∈ R3 in that frame’s camera frame: 
+
+Xcam  
+
+> f
+
+(u, v ) = df (u, v ) K−1 
+
+> f
+
+[u, v, 1] ⊤,
+
+(1) applied per pixel. We then concatenate the per-frame clouds of a subscan into a single per-subscan point cloud (Fig. A1). How-ever, this plain concatenation keeps only the 3D coordinates and forgets which frame and pixel each point was projected from, so we retain a 2D-to-3D index that links every 3D point to its source pixel and, conversely, every pixel to the 3D point it produced. Later stages use this index in both direc-tions: to carry per-frame SAM 3 [15] mask labels onto the unified cloud (Sec. B.2), and to trace a 3D instance back to the frames and pixels in which it appears (Sec. B.3). 11 Frame 1 Frame 2 Frame 3 Frame 4 Frame 5 Frame 6 
+
+> Before After
+
+Figure A2: Instance-identity inconsistency across frames, and its resolution by fusion. Top row: the example of per-frame SAM 3 masks from the segmentation stage (Sec. 3.1); the same seat is assigned ID 1: sofa in frames 1-2 and 4-6 but a distinct ID 4: armchair in frame 3 (denoted by red box), so its identity is not consistent over the sequence. Bottom row: fusion relabels every frame to one canonical instance, yielding the temporally consistent 3D instance used in the scene graph G. Note that the fused 3D instance projected back into each RGB frame for better visual understanding. 
+
+B.2 Details on Per-Instance Fusion 
+
+As shown in Fig. A2, the segmentation stage (Sec. 3.1) emits per-frame SAM 3 [15] masks, but their instance identities are not yet consistent across the sequence: the same physical object may receive different IDs in different frames, and a single object may be split when it leaves and re-enters view. Fusion turns these per-frame masks into the temporally consistent 3D instances of the scene graph 
+
+G (Alg. 1). 
+
+Algorithm 1 Per-Instance Fusion: per-frame masks → scene graph G
+
+Input: per-frame masks {Mf }; per-subscan cloud with 2D-to-3D index (Sec. B.1) 
+
+Output: scene graph G = ( V, E ) 
+
+> 1:
+
+for all frame f and masked pixel p do  
+
+> 2:
+
+assign p to the smallest-area mask covering it  
+
+> 3:
+
+back-project p to a 3D point via the 2D-to-3D index  
+
+> 4:
+
+end for  
+
+> 5:
+
+pool the labeled points over all frames into one cloud C (a region may hold several IDs)  
+
+> 6:
+
+voxelize C at 5 cm  
+
+> 7:
+
+for all occupied voxel do  
+
+> 8:
+
+relabel its points to the locally majority instance ID  
+
+> 9:
+
+end for  
+
+> 10:
+
+for all instance a do  
+
+> 11:
+
+if at least 50% of a’s points are revoted to a single instance b then  
+
+> 12:
+
+merge a into b 
+
+> 13:
+
+end if  
+
+> 14:
+
+end for  
+
+> 15:
+
+for all instance pair (a, b ) do  
+
+> 16:
+
+compute ρvox (a, b ) and dcham (a, b ) (Eq. 2 and 3)  
+
+> 17:
+
+if ρvox (a, b ) ≥ 0.6 and dcham (a, b ) ≤ 3 cm then  
+
+> 18:
+
+mark (a, b ) for merging  
+
+> 19:
+
+end if  
+
+> 20:
+
+end for  
+
+> 21:
+
+merge each transitively-connected group of marked pairs into one node  
+
+> 22:
+
+V ← fused instances, each with a PCA oriented bounding box  
+
+> 23:
+
+E ← edges between instances with nearby centroids  
+
+> 24:
+
+return G = ( V, E )
+
+12 Lifting masks to 3D. For each frame we back-project every masked pixel into 3D through the 2D-to-3D index of Sec. B.1. Within a frame, masks can be nested; when several masks claim the same pixel, the smallest-area mask wins, so the more specific object takes the point. Pooling the lifted points across all frames yields one combined cloud in which each surface region carries votes from many frames and, because identities are not yet unified, potentially several instance IDs. 
+
+Per-voxel majority voting. We voxelize the combined cloud at 5 cm. Each occupied voxel thus aggregates points contributed by multiple frames and IDs, and we relabel all points in a voxel to the locally majority instance ID. This collapses per-frame ID switching into a single coherent label per spatial region, the key step that stitches a physical object’s scattered per-frame identities back together. 
+
+Absorption. Majority voting can leave a fragment ID whose points have largely been revoted into a neighbor. When at least 50% of an instance’s points are reallocated to a single other instance, we absorb the former into the latter, removing the redundant label. This cleans up the over-segmentation that remains after voxel voting. 
+
+Scene-wide near-duplicate merge. A final global pass targets duplicates that voxel voting cannot reach: two instances that describe the same object but never co-occupy voxels, typically the two halves of an object split when it left and re-entered the view. For every pair of instances a, b we apply a two-part geometric overlap test on their 5 cm voxelizations Va, V b and on the two one-directional mean nearest-neighbor distances da→b and db→a between their point clouds. The first gate is a voxel-containment test on the smaller instance’s share of shared voxels, 
+
+ρvox (a, b ) = |Va ∩ Vb|
+
+min( |Va|, |Vb|) ≥ τvox , τvox = 0 .6, (2) which catches a fragment contained in its full counterpart while ignoring how the two clouds differ in extent. The second is a Chamfer gate that guards against two distinct objects whose bounding regions merely overlap, 
+
+dcham (a, b ) = min  da→b, d b→a
+
+ ≤ τcham , τcham = 3 cm , (3) requiring at least one cloud to lie on average within 3 cm of the other. A pair is merged only when 
+
+both Eq. (2) and Eq. (3) hold; qualifying pairs are grouped transitively, so one physical object becomes one node. 
+
+Output. The result is the scene graph G = ( V, E ):• Nodes V : temporally consistent 3D instances; each node carries its fused point set. • Edges E: each instance is connected with its k=5 nearest neighbors within 1 m. We visualize reconstructed scene graph examples in Sec. E. 
+
+B.3 Details on Height-Binned Correspondence 
+
+Given the two scene graphs Gref and Gsrc , the correspondence stage (Sec. 3.2) matches object in-stances across scans with the VLM ( e.g., Qwen3.6-27B [12]). A single query over all instances is both too large and prone to hallucinated matches between similar objects at different heights; height-based binning is our fix and the largest single contributor in the correspondence ablation (Tab. 3). Here we provide the details on the binning and the prompt layout. 
+
+Height bins. We measure each instance’s height as the coordinate of its centroid along the gravity axis, and represent it with hv . We form K=5 equal-count quantile bins over the heights pooled from both scans, then expand each bin across its edges so neighbors overlap (Fig. A3). Let 
+
+qk = Quantile( {hv }v∈V ref ∪V src , k/K ) , k = 0 , . . . , K, w k = qk−qk−1, k = 1 , . . . , K, (4) 13 where q0, . . . , q K are the K+1 quantile edges and each wk = qk − qk−1 is the width of the k-th 
+
+native bin [qk−1, q k], i.e., its width before any overlap is added. With overlap fraction α = 0 .2,the buffer applied at each edge is α times the smaller of the two widths meeting at that edge (so a sparse, wide bin cannot engulf a narrow neighbor), and the outermost edges use the bin’s own width and are clipped to the observed height range: 
+
+Bk =
+
+h
+
+max  hmin , q k−1−α e −
+
+> k
+
+, min  hmax , q k+α e +
+
+> k
+
+ i
+
+,e− 
+
+> k
+
+=
+
+w1 k = 1 min( wk, w k−1) k > 1
+
+e+ 
+
+> k
+
+=
+
+wK k = K
+
+min( wk, w k+1 ) k < K, 
+
+(5) 
+
+Figure A3: Height binning on the gravity axis. 
+
+Each object instance is placed on the gravity (hv ) axis at its centroid height (colored mark-ers, linked to the axis). The pooled heights are cut into K=5 equal-count quantile bins, with edges q0=hmin , . . . , q 5=hmax and native widths w1, . . . , w 5 (Eq. 4). Each bin is then ex-panded across its edges by α=0 .2 of the smaller adjacent width into the overlapping bands Bk
+
+(Eq. 5), so an instance near a boundary still falls in a shared bin and stays matchable. where hmin = min v hv and hmax = max v hv .
+
+Before overlap, each native quantile bin [qk−1, q k]
+
+holds roughly the same number of pooled in-stances regardless of how heights are distributed (exact equality is precluded by tied heights). An instance then joins every expanded bin Bk that contains its centroid height and may appear in more than one, so the queried bins deliberately differ in count, and this duplication keeps bound-ary objects from being lost: an object sitting near a bin edge, or one whose two scans place its cen-troid slightly differently, still falls inside a shared bin and remains matchable. 
+
+Per-bin querying. We query the VLM separately within each bin. Comparing only similar-height instances keeps each query small and removes implausible candidates outright, such as a ceiling lamp matched against a floor rug. Because the overlapping quantile bins do not by themselves cover every pair, a final cross-bin pass re-queries the instances that were left unmatched by every per-bin query, whether because they never co-occurred in a shared bin or because the VLM simply missed them, grouping them into one additional catch-all query and recovering correspondences the per-bin queries could not see. 
+
+Shared-namespace Set-of-Marks. Within a bin we present the VLM with three images (Fig. A4) and engineer the prompt layout so that the VLM’s output is directly a list of candidate cross-scan pairs: • A REF crop grid and a SRC crop grid : one zoomed crop per object in that bin, each crop centered on a single instance whose silhouette is outlined in green and whose numeric Set-of-Marks [27] ID is stamped at the crop’s top-left corner. • A context frame : one wide RGB frame per scan (REF on top, SRC on bottom) showing those same objects in their spatial layout, outlined and labelled with the same IDs, so the model can confirm a match from neighbours and arrangement rather than appearance alone. • A single shared marker pool: reference crops take markers 1 . . . N , source crops take mark-ers N +1 . . . N +M ; every marker number is unique across both scans. • A marker pair returned by the VLM is therefore directly a cross-scan instance pair, with no separate alignment step; these candidates are filtered by the verification of Sec. B.4. Tab. A1 reproduces the system and user prompts for this per-bin query verbatim; the reported con-figuration uses the non-thinking-mode, crops-plus-context variant shown here. 14 Bin 1 
+
+Context Frame Source Crop Reference Crop VLM Initial Output 
+
+> Bin 2
+> Bin 3 Bin 4 Bin 5
+> [
+> {"ref": 3, "src": 29},
+> {"ref": 6, "src": 28},
+> {"ref": 9, "src": 25},
+> {"ref": 11, "src": 30}
+> ]
+> [
+> {"ref": 7, "src": 26 },
+> {"ref": 6, "src": 28},
+> {"ref": 4, "src": 38}
+> ]
+> [
+> {"ref": 2, "src": 24},
+> {"ref": 5, "src": 27},
+> {"ref": 13, "src": 31},
+> {"ref": 20, "src": 23}
+> ]
+> [
+> {"ref": 1, "src": 22},
+> {"ref": 2, "src": 24},
+> {"ref": 12, "src": 36},
+> {"ref": 13, "src": 31},
+> {"ref": 18, "src": 37},
+> {"ref": 20, "src": 23}
+> ]
+> [
+> {"ref": 12, "src": 36},
+> {"ref": 14, "src": 32},
+> {"ref": 21, "src": 34}
+> ]
+
+Figure A4: Per-bin correspondence query. For each of the K=5 height bins (rows), the VLM receives three images (a REF crop grid, a SRC crop grid, and a context frame) in which every instance is outlined in green and stamped with a shared-namespace Set-of-Marks ID (REF markers 
+
+1 . . . N , SRC markers N +1 . . . N +M , disjoint across the two scans). From these the model returns its initial list of candidate cross-scan pairs (right column), each a {"ref": id, "src": id }
+
+entry, so that a returned marker pair is directly an instance pair. These candidates are not final: they are filtered by the pairwise verification of Sec. B.4 (Fig. A5). 
+
+B.4 Pairwise Same/Different Verification 
+
+Each marker pair from the binning stage (Sec. B.3) is only a candidate. This subsection details the pairwise verification that filters candidates into the final correspondence set C; together with height binning it is one of the two largest contributors in the correspondence ablation (Tab. 3b). 
+
+Verification gate. For each candidate pair we render the two instances side by side (source crop on the left, reference crop on the right) into a single image and pose two complementary yes/no questions to the VLM: 15 Table A1: Per-bin correspondence prompt. System (top) and user (bottom) sent to the VLM for each bin’s crops-plus-context images. The reported configuration runs the non-thinking-mode variant and presents three images (REF crop grid, SRC crop grid, context frame). 
+
+Role Verbatim text 
+
+SYSTEM “You match objects across two captures of the same room. Every object shown here sits within the SAME narrow height band of the room, so they are mutually plausible matches. You see up to three images: (1) REF crop grid — a grid of zoomed crops, one per REF object. Each crop is centered on ONE object; its silhouette is outlined in green and its numeric ID is stamped white at the top-left corner. (2) SRC crop grid — the same, one zoomed crop per SRC object. (3) Context frame — top = REF, bottom = SRC — one wide RGB frame per capture showing those objects in their spatial layout, each outlined and labelled with the same IDs. REF and SRC IDs are disjoint integers. The outline and label are localization aids — judge the OBJECT itself (color, material, shape, size, and its neighbours in the context frame), never the marker. Pair a REF ID with a SRC ID only when you are confident they tag the SAME physical object. Most objects appear in only one capture — leave those unmatched. A wrong match is worse than a missed one. Output ONLY a JSON array of objects: [{"ref": <id>, "src": <id> }, ...] ; emit [] if nothing matches. No prose, no fences.” USER “Match REF and SRC IDs that tag the SAME physical object. 
+
+REF IDs: [...] SRC IDs: [...] ”• Use only the IDs listed above. • An ID may appear in at most one pair. • Emit [] if nothing matches. • Output ONLY a JSON array of objects, one per match: [{"ref": <id>, "src": <id> }, ...] — no prose, fences, or preamble. 
+
+(The REF IDs: [...] and SRC IDs: [...] lines are filled in per bin with the markers present in that bin.) 
+
+• Affirmative prompt : asks whether the left and right crops are the same physical object; we keep the pair if the answer is “same”. • Negated prompt : asks whether they are different objects; we keep the pair if the answer is “not different”. Let πVLM denote Qwen3.6-27B viewed as a yes/no answerer over the rendered pair. The negated prompt is evaluated only on the pairs that survive the affirmative prompt, and a candidate is retained only when both answers agree, formalized as 
+
+(Ai, A ′
+
+> i
+
+) ∈ C ⇐⇒ πVLM (same ? | Ai, A ′
+
+> i
+
+) = yes ∧ πVLM (different ? | Ai, A ′
+
+> i
+
+) = no . (6) 
+
+Why two prompts. The two prompts are deliberately redundant. A bare “are these the same?” query carries a yes-bias, so the VLM tends to confirm weak matches; the negated phrasing of the second prompt does not share that bias, and a hallucinated match that the affirmative prompt accepts is frequently rejected by the negated one. Requiring agreement therefore exposes inconsistent an-swers and sharply cuts false positives, at a small cost in recall. The pairs that survive both prompts constitute the cross-scan correspondence set C used for pose estimation (Sec. 3.3); Fig. A5 shows example candidate pairs accepted into C and those rejected by this gate. Table A2 reproduces the four prompts verbatim, with the affirmative pair implementing the same? 
+
+query and the negated pair implementing the different? query of Eq. (6). 16 Table A2: Pairwise verification prompts. The affirmative pair (rows 1–2) implements the same? 
+
+query of Eq. (6); the negated pair (rows 3–4) implements the different? query. A candidate pair survives only when both pairs agree. 
+
+Prompt Verbatim text 
+
+Affirmative SYSTEM “You compare two object crops from different captures of the same room. The LEFT crop is from Scene A, the RIGHT crop is from Scene B. Both objects are outlined in green. Decide whether they are the same physical object.” Affirmative USER “Is the object on the LEFT the same physical object as the object on the RIGHT? Consider shape, color, material, and size. A wrong match is worse than a missed one — only say yes if confident. Answer with a single integer: [1] for yes, [0] for no.” Negated SYSTEM “You compare two object crops from different captures of the same room. The LEFT crop is from Scene A, the RIGHT crop is from Scene B. Both objects are outlined in green. Decide whether they are DIFFERENT objects.” Negated USER “Are the object on the LEFT and the object on the RIGHT DIFFERENT physical objects? Consider shape, color, material, and size. A missed mismatch is worse than a false alarm — say yes if in doubt. Answer with a single integer: [1] for yes (different), [0] for no (same).” ✅
+
+# ❌                                                     
+
+> {"ref": 1,"src": 22 }{"ref": 7, "src": 26} {"ref": 13 ,"src": 31 }{"ref": 2,"src": 24 }
+> {"ref": 9,"src": 25 }{"ref": 15 ,"src": 33 }{"ref": 4,"src": 38 }{"ref": 11 ,"src": 30 }
+> {"ref": 20 ,"src": 23 }{"ref": 5,"src": 27 }{"ref": 12 ,"src": 36 }
+> {"ref": 3,"src": 29 }{"ref": 17 ,"src": 35 }{"ref": 18 ,"src": 37 }{"ref": 21,"src": 34 }
+
+Figure A5: Pairwise same/different verification. Each candidate pair produced by the per-bin query (Fig. A4) is rendered as a single side-by-side image of its two crops and passed through the two complementary prompts of Eq. (6). Pairs accepted by both prompts (top block, green check) enter the final cross-scan correspondence set C; pairs the gate rejects (bottom block, red cross) are discarded. Each tile is labelled with its {"ref": id, "src": id } markers from Fig. A4. 17 C Experimental Setup Details 
+
+This section expands the experimental setup compressed into the main paper’s implementation de-tails and experimental setting (Sec. 4.1, Sec. 4.2) into the concrete specifics needed to reproduce the reported results: how the evaluation pairs are constructed, how every metric in the main tables is defined, how the baselines are run, and the exact hyperparameters, checkpoints, and environment. 
+
+C.1 Dataset Construction and Subscan Pairing 
+
+PROSE is evaluated on two egocentric benchmarks of diverse indoor scenes, Aria Digital Twin (ADT) [17] and Aria Everyday Activities (AEA) [18]. Both are RGB-only egocentric captures: PROSE consumes only the head-mounted RGB stream, with no depth sensor and no externally supplied SLAM trajectory. 
+
+Per-frame inputs. Each recording is sampled in time at a fixed interval of 0.5 s, and every retained RGB frame is rectified from the Aria fisheye stream to a 512 -pixel linear-pinhole image. A short, contiguous run of these sampled frames forms a subscan : a partial egocentric observation of the scene at one point in time. 
+
+Subscan pairs. The registration task aligns two subscans of the same scene captured at different times, so the unit of evaluation is a subscan pair . From the 184 ADT sequences we derive 6,657 
+
+subscan pairs, organized into two regimes: Single-ARIA , where the two subscans of a pair come from a single wearer, and Multi-ARIA , where they come from multiple wearers of the same scene. This pairing yields the column groups (Single-ARIA / Multi-ARIA / Total) reported on ADT in the main registration result table (Tab. 2). From the 9 AEA sequences we similarly derive 675 subscan pairs; because every AEA recording comes from a single wearer, AEA has no Multi-ARIA regime and contributes only single-wearer pairs. 
+
+Ground-truth availability and the GT/reconstructed split. The two benchmarks differ in what supervision they provide, which determines the point clouds on which each is evaluated. ADT provides ground-truth point clouds, camera poses, and object lists, so ADT can be evaluated in two settings: on the ground-truth clouds, and on clouds reconstructed from RGB by VGGT-Ω [11] (the sensor-free setting PROSE targets). AEA, by contrast, provides only camera poses and a semi-dense point cloud and no dense ground-truth geometry; we therefore evaluate AEA exclusively on VGGT-Ω-predicted clouds. This asymmetry is reflected in Tab. 2, where AEA appears only under the reconstructed-cloud setting. 
+
+C.2 Task and Metric Definitions 
+
+Here we define the tasks and metrics behind every number in the main result tables; Tab. A3 consol-idates the metric definitions, directions, and thresholds for quick lookup. 
+
+Tasks. We evaluate three tasks. (i) Registration recovers the rigid transform T ∈ SE (3) that aligns the two subscans’ point clouds of a pair. (ii) Instance correspondence matches object instances across the two subscans; its ground-truth pairs are formed by thresholding the intersection-over-union (IoU) of mask-projected instances under point-wise mutual nearest-neighbor matching. (iii) Object listing compares a subscan’s predicted object list against the ground-truth list, matched via Hungarian assignment on CLIP [22] cosine similarity. 
+
+Registration metrics. We report four quantities. Registration Recall (RR) is the fraction of pairs that are jointly accurate in rotation and translation: a pair counts as recalled only when its Relative Rotation Error is below 5◦ and its Relative Translation Error is below 0.2 m. Relative Rotation Error 
+
+(RRE) and Relative Translation Error (RTE) are the angular and Euclidean errors of the estimated transform against ground truth. Valid Ratio (VR) is the fraction of pairs for which the method returns a non-degenerate transform at all; a pair is counted as valid when the estimator yields a usable rigid transform rather than flagging failure (for example failing to converge or producing no transform), 18 Table A3: Reference card for the metrics defined in this subsection. (↑/↓: higher/lower is better)                                              
+
+> Metric Dir. Definition Threshold / note
+> RR ↑Registration Recall RRE <5◦and RTE <0.2mRRE ↓Relative Rotation Error degrees RTE ↓Relative Translation Error meters VR ↑Valid Ratio non-degenerate Treturned NP / NR / F1 ↑Node Precision / Recall / F1 τIoU =0 .3,r=0 .2m; macro over pairs CR ↑Coverage Ratio ≥1correct match per pair P / R / F1 (listing) ↑Precision / Recall / F1 of object names CLIP-sim ≥0.5(@50) AR (listing) ↑Anchor Recall over shared GT objects CLIP-sim ≥0.5(@50)
+
+and invalid otherwise. VR thus separates outright failures ( e.g. non-convergence) from inaccurate-but-produced estimates, so a method can have high VR yet low RR. 
+
+Correspondence metrics. We report Node Precision (NP) and Node Recall (NR), their F1 , and the 
+
+Coverage Ratio (CR), defined as the fraction of pairs for which at least one correct instance match is produced. These node metrics are scored against ground-truth correspondences, which we obtain following SG-Reg [1]: instance segmentation masks are back-projected into 3D and matched by an IoU over radius-r neighborhoods in the global frame. Given back-projected point clouds Pref , P src ,where Br (pi) ∩ Psrc is the set of points in Psrc within radius r of pi, the SG-Reg IoU is IoU SG-Reg = C
+
+|Pref | + |Psrc | − C , for C = {pi ∈ Pref | Br (pi) ∩ Psrc ̸ = ∅} . (7) Because SG-Reg assumes scanned or ground-truth clouds, this formula becomes asymmetric under a large density difference and can yield invalid values (IoU > 1); voxelizing mitigates this in some cases but degrades object segmentation on noisy reconstructions. We therefore use a symmetric mutual-nearest-neighbor IoU that is agnostic to point-cloud density and preserves mask quality: IoU sym = mref, src + msrc, ref 
+
+|Pref | + |Psrc | , for mX,Y = {pi ∈ PX | min 
+
+> q∈PY
+
+|pi − q| ≤ r} . (8) The fixed denominator keeps IoU sym ∈ [0 , 1] , and the metric is symmetric by construction: swapping 
+
+Pref ↔ Psrc leaves the value unchanged. A pair of instances is a ground-truth match when its IoU sym 
+
+exceeds τIoU =0 .3 at radius r=0 .2 m. 
+
+Object-listing metrics. We report Precision (P), Recall (R), F1, and Anchor Recall (AR), all com-puted at a CLIP-similarity threshold of 0.5 (denoted @50), i.e., a predicted label is credited to a ground-truth label only when their CLIP cosine similarity exceeds 0.5. Precision, recall, and F1 are taken over all ground-truth objects; anchor recall is taken over the subset of ground-truth objects 
+
+shared across both subscans of a pair, which are salient landmarks that make up the best correspon-dence targets. 
+
+C.3 Baseline Protocols Registration baselines. We compare against two families. The scene-level family registers the full scene point cloud directly and comprises TEASER++ [2], a certifiable global registration method run with two descriptor variants for its correspondences (handcrafted FPFH and learned FCGF); GeoTransformer [5], a learned coarse-to-fine point-cloud matcher; and BUFFER-X [6], a generaliz-able point-cloud registration pipeline. The scene-graph family is our main comparison, SG-Reg [1], trained on curated indoor RGB-D scene graphs. Every registration baseline is run from the authors’ officially released implementation at its recom-mended default indoor configuration, with no per-dataset re-tuning of the descriptor, matcher, or robust-estimator settings, and the same configuration is used across the GT and reconstructed-cloud settings. Under this protocol, two baselines appear as non-numeric cells in the registration table (Tab. 2): TEASER++ with FCGF descriptors fails to converge on the reconstructed clouds (while still running 19 on the ground-truth clouds), and GeoTransformer exhausts the single-GPU memory budget at the scene level in both settings. Both are reported as observed at the methods’ released configurations. 
+
+Correspondence baselines. For the correspondence comparison (Tab. 4), the open-vocabulary detection-and-embedding baseline matches instances purely by visual-feature similarity, in contrast to PROSE’s VLM reasoning over shared-namespace Set-of-Marks prompts (Sec. B.3). For each instance, we select a representative frame, the frame in which that instance’s segmentation mask has the largest area, and crop the instance’s bounding box from it with a 10% padding margin. Each crop is embedded by concatenating two backends: the Grounding DINO [29] detector’s decoder fea-ture and the CLIP [22] ViT-L/14 image embedding, and the concatenated vector is L2-normalized. Cross-scan instances are then matched by Hungarian assignment on the cosine-similarity matrix between the two subscans’ instance embeddings, keeping an assigned pair only when its cosine similarity is at least 0.5. SG-Reg [1] also appears in the correspondence comparison, reusing the instance matches produced by its learned scene-graph matcher. 
+
+C.4 Hyperparameters, Checkpoints, and Environment Models and checkpoints. PROSE uses three pretrained foundation models off the shelf, without any fine-tuning: VGGT-Ω [11] as the geometric backbone that predicts per-frame depth, intrinsics, and pose from RGB; Qwen3.6-27B [12] as the vision-language model for object listing and cross-scan instance matching; and SAM 3 [15] for text-prompted video segmentation. For the final per-instance point-level matching we report three interchangeable descriptors, all used as released: FCGF [4] and GeoTransformer [5] from the authors’ 3DMatch-trained checkpoints, and the handcrafted FPFH [3], which has no learned weights. Their head-to-head comparison is reported with the registration results. 
+
+Pipeline hyperparameters. The following numeric settings are used unchanged for every reported PROSE result. In per-instance fusion, the pooled cloud is voxelized at 5 cm, each voxel is relabeled to its majority instance ID, and an instance is absorbed into another when at least 50% of its points are reallocated. In correspondence, instances are split into K=5 equal-count quantile height bins with 20% overlap between adjacent bins. In registration, RANSAC is run for 10 K iterations with a 
+
+3 cm inlier threshold. All runs use a fixed random seed of 42 and execute on a single H200 GPU. 
+
+## D Additional Quantitative Results 
+
+D.1 VLM Backbone Ablation 
+
+Table A4: VLM backbone ablation for scene registration. 
+
+The best and second best per column are highlighted.                              
+
+> Model RR ↑
+> (%) RRE ↓
+> (◦)RTE ↓
+> (m) VR ↑
+> (%)
+> Open-source (open-weight)
+> Qwen3.6-27B [12] 83.8 6.30 0.30 99.3
+> Qwen3-VL-32B-Instruct [53] 67.4 13.83 0.63 92.5 InternVL3-14B [54] 55.4 23.17 1.04 84.1 InternVL3-8B [54] 34.6 35.95 1.70 70.1
+> Closed-source (API-only)
+> GPT-5.4 [55] 74.0 8.32 0.43 94.3 GPT-4o [56] 51.5 23.99 1.19 87.9
+
+PROSE delegates two stages to a VLM: open-vocabulary object list-ing and cross-scan instance cor-respondence. To quantify how much this choice matters, we swap the VLM backbone while hold-ing every other stage fixed and re-evaluate registration. All back-bones run on the same point clouds reconstructed from RGB by VGGT-Ω [11], and share Geo-Transformer [5] as the final regis-tration descriptor, so any difference is attributable to the VLM alone. Querying the closed, API-served models over the full benchmark is cost-prohibitive, so this ablation is run on a smaller common subset, the ADT Single-ARIA meal 
+
+split ( 16 sequences, 561 subscan pairs), with every backbone evaluated on that same subset. Table A4 reports the outcome. Registration quality tracks VLM capability across both families: our default backbone, Qwen3.6-27B [12], leads on all four metrics, and the strongest API model, GPT-20 5.4 [55], is second on each. Capability matters more than raw parameter count, as Qwen3.6-27B surpasses the larger Qwen3-VL-32B-Instruct [53]. The weakest backbones, InternVL3-8B [54] and GPT-4o [56], fall off sharply on every metric, including Valid Ratio (VR), so a weaker VLM yields not only less accurate transforms but fewer usable ones. More importantly, because PROSE uses the VLM off the shelf without any training, this trend is a strength rather than a liability: as stronger VLMs are released, the pipeline can adopt them directly and improve with no retraining or architectural change, so its accuracy is positioned to rise with future progress in VLMs at no additional cost. Table A5: Quantitative comparison between open-vocabulary taggers and VLM. 
+
+Each lister is run with every other stage fixed. Evaluated on ADT dataset.                                                  
+
+> Object listing Registration Method AR@50 ↑P@50 ↑R@50 ↑F1@50 ↑RR ↑RRE ↓RTE ↓VR ↑
+> RAM [50] 99.2 72.0 98.2 81.0 55.0 13.54 0.60 94.1 RAM++ [57] 99.2 68.7 97.9 78.8 54.0 14.50 0.63 93.6 Tag2Text [58] 90.1 89.7 86.0 85.1 51.5 16.84 0.72 92.4
+> VLM (Qwen3.6-27B [12]) 92.4 95.8 87.0 90.0 56.2 12.55 0.59 96.0
+
+D.2 Object Listing Ablation 
+
+PROSE builds its object list by prompting the VLM to list the objects in a subscan, an open-vocabulary alternative to dedicated image taggers. To assess this choice, we replace the object lister with three open-vocabulary taggers, RAM [50], RAM++ [57], and Tag2Text [58], holding the rest of the pipeline fixed, including the VGGT-Ω clouds and the GeoTransformer registration back-end. Table A5 reports both the semantic object listing quality and the resulting registration on the reconstructed ADT clouds; the VLM row corresponds to our reported configuration (Tab. 2). On listing quality, PROSE is the most precise: it leads on Precision ( 95 .8) and F1 ( 90 .0). The taggers instead saturate recall, with RAM and RAM++ reaching 98 .2 and 97 .9 Recall and 99 .2
+
+Anchor Recall but only 72 .0 and 68 .7 Precision, as they emit many labels, including objects that are not present. Tag2Text is more balanced but still trails PROSE on Precision and F1. Crucially, this carries through to registration. With every other stage held fixed, PROSE’s lister yields the best registration on all four metrics, ahead of every tagger. The taggers’ near-saturated listing recall does not help; their low precision hurts, since spurious object names become spurious instances that degrade correspondence and pose estimation. Precise object listing, not exhaustive tagging, is what drives downstream registration, which is why PROSE uses a VLM rather than an off-the-shelf tagger. 
+
+D.3 Inference Time 
+
+Table A6: End-to-end inference time of PROSE. Each en-try is the time a stage contributes to one registration. 
+
+Stage Model / component Time 
+
+Per-frame geometry VGGT-Ω [11] 1.06 sObject listing Qwen3.6-27B [12] 4.48 sInstance segmentation SAM 3 [15] 13 .84 sPer-instance fusion geometric 0.18 sCross-scan correspondence Qwen3.6-27B [12] 22 .34 sRegistration GeoTransformer [5] 7.47 s
+
+End-to-end 49.37 s 
+
+Table A6 reports the wall-clock time of each stage of PROSE for one subscan-pair registration, measured on the single H200 GPU used for all our experiments with GeoTrans-former as the registration descriptor. End to end, one registration takes approximately 49 .37 s, dominated by the cross-scan correspondence query (22 .34 s) and instance segmentation (13 .84 s), while the geometric stages are comparatively light. PROSE targets offline registration, aligning two scans of a scene captured at different times rather than running in a real-time loop, so this per-pair latency is acceptable in that 21 setting rather than a real-time bottleneck. The cost also sits almost entirely in off-the-shelf foun-dation models, so it shrinks directly with faster VLMs and standard serving optimizations, at no change to the method. 
+
+## E Qualitative Results 
+
+We visualize PROSE’s quality in terms of registration, correspondence, and scene graph generation in Figs. A6, A7, and A8, respectively. In Fig. A6, PROSE produces visibly superior pose estimates compared to registration baselines on the same subscan pair. Because the point clouds are reconstructed from egocentric RGB, their geometry is noisy and degrades the dense local features that feature-based baselines rely on; PROSE instead anchors on object-level instance correspondences, which remain stable under this noise. Figure A7 shows predicted instance pairings across partially overlapping subscans captured from varying viewpoints. The results demonstrate robustness to large viewpoint changes and occasional erroneous matches: as long as a subset of salient objects is correctly paired, registration remains successful. Finally, Fig. A8 visualizes the scene graph for the environment used for the robot path planning experiment in Sec. 4.4 (Sec. A.1 in supplementary material). Our method produces a large number of instances and captures their semantics through textual labels and spatial locations. Although individual objects may be misplaced or mislabeled, the majority of nodes have realistic centroid placement and category labels, enabling spatial relationship extraction and downstream use. 22 Figure A6: Qualitative registration results. Additional comparisons between registration baselines on the single clean ADT sequence. We display RGB reconstruction from VGGT-Ω (top), colored subscans (middle), and a per point error heatmap (bottom). The error is the distance to the nearest GT point after registration, where green indicates low error and red indicates high error. 23 Figure A7: Qualitative results on correspondence. Additional correspondence visualizations of PROSE on three subscans with instance masked frames and subsequent registration. In (a) and (b) frames are captured from differing views, yet we find multiple correct instance matches leading to successful registration. Likewise in (c), our method anchors on a few correct matches and retrieves the transformation despite many erroneous pairs. 24 Figure A8: Qualitative result on scene graph generation. Additional scene graph visualization of PROSE on the path planning environment with nodes and edges overlayed on the VGGT-Ω re-construction. We furthest sample nodes to highlight their labels and display individual frames from each section of the room with every node in frame labeled and connected with edges. 25 Acknowledgments 
+
+This work was supported under project ID a144 as part of the Swiss AI Initiative, through a grant from the ETH Domain and computational resources provided by the Swiss National Supercomputing Centre (CSCS) under the Alps infrastructure. 
+
+## References 
+
+[1] C. Liu, Z. Qiao, J. Shi, K. Wang, P. Liu, and S. Shen. Sg-reg: Generalizable and efficient scene graph registration. IEEE Transactions on Robotics , 41:3870–3889, 2025. doi:10.1109/TRO. 2025.3577020. [2] H. Yang, J. Shi, and L. Carlone. Teaser: Fast and certifiable point cloud registration. IEEE Transactions on Robotics , 37(2):314–333, 2020. [3] R. B. Rusu, N. Blodow, and M. Beetz. Fast point feature histograms (fpfh) for 3d registration. In 2009 IEEE international conference on robotics and automation , pages 3212–3217. IEEE, 2009. [4] C. Choy, J. Park, and V. Koltun. Fully convolutional geometric features. In ICCV , 2019. [5] Z. Qin, H. Yu, C. Wang, Y. Guo, Y. Peng, and K. Xu. Geometric transformer for fast and robust point cloud registration. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 11143–11152, June 2022. [6] M. Seo, H. Lim, K. Lee, L. Carlone, and J. Park. Buffer-x: Towards zero-shot point cloud registration in diverse scenes. 2503.07940 (arXiv) , 2025. [7] S. D. Sarkar, O. Miksik, M. Pollefeys, D. Barath, and I. Armeni. Sgaligner: 3d scene alignment with scene graphs. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 21927–21937, 2023. [8] Y. Xie, A. Pagani, and D. Stricker. Sg-pgm: Partial graph matching network with semantic geometric fusion for 3d scene graph alignment and its downstream tasks. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 28401–28411, 2024. [9] Z. Qi, Z. Zhang, Y. Fang, J. Wang, and H. Zhao. Gpt4scene: Understand 3d scenes from videos with vision-language models. arXiv preprint arXiv:2501.01428 , 2025. [10] G. Frisoni, L. Molfetta, M. Buzzoni, and G. Moro. Graph-of-mark: Promote spatial reasoning in multimodal language models with graph-based visual prompting. In AAAI-26, Sponsored by the Association for the Advancement of Artificial Intelligence . AAAI Press, 2026. [11] J. Wang, M. Chen, S. Zhang, N. Karaev, J. Sch¨ onberger, P. Labatut, P. Bojanowski, D. Novotny, A. Vedaldi, and C. Rupprecht. VGGT-Ω. arXiv preprint arXiv:2605.15195 , 2026. [12] Qwen Team. Qwen3.6-27B: Flagship-level coding in a 27B dense model, April 2026. URL 
+
+https://qwen.ai/blog?id=qwen3.6-27b .[13] J. Achiam, S. Adler, S. Agarwal, L. Ahmad, I. Akkaya, F. L. Aleman, D. Almeida, J. Altenschmidt, S. Altman, S. Anadkat, et al. Gpt-4 technical report. arXiv preprint arXiv:2303.08774 , 2023. [14] H. Yoon, J. Jung, J. Kim, H. Choi, H. Shin, S. Lim, H. An, C. Kim, J. Han, D. Kim, et al. Visual representation alignment for multimodal large language models. arXiv preprint arXiv:2509.07979 , 2025. 26 [15] N. Carion, L. Gustafson, Y.-T. Hu, S. Debnath, R. Hu, D. Suris, C. Ryali, K. V. Alwala, H. Khedr, A. Huang, et al. Sam 3: Segment anything with concepts. arXiv preprint arXiv:2511.16719 , 2025. [16] M. A. Fischler and R. C. Bolles. Random sample consensus: a paradigm for model fitting with applications to image analysis and automated cartography. Communications of the ACM , 24 (6):381–395, 1981. [17] X. Pan, N. Charron, Y. Yang, S. Peters, T. Whelan, C. Kong, O. Parkhi, R. Newcombe, and Y. C. Ren. Aria digital twin: A new benchmark dataset for egocentric 3d machine perception. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 20133– 20143, 2023. [18] Z. Lv, N. Charron, P. Moulon, A. Gamino, C. Peng, C. Sweeney, E. Miller, H. Tang, J. Meiss-ner, J. Dong, et al. Aria everyday activities dataset. arXiv preprint arXiv:2402.13349 , 2024. [19] S. Cho, H. Shin, S. Hong, A. Arnab, P. H. Seo, and S. Kim. Cat-seg: Cost aggregation for open-vocabulary semantic segmentation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 4113–4123, 2024. [20] C. Kim, H. Shin, E. Hong, H. Yoon, A. Arnab, P. H. Seo, S. Hong, and S. Kim. Seg4diff: Un-veiling open-vocabulary segmentation in text-to-image diffusion transformers. arXiv preprint arXiv:2509.18096 , 2025. [21] H. Shin, C. Kim, S. Hong, S. Cho, A. Arnab, P. H. Seo, and S. Kim. Towards open-vocabulary semantic segmentation without semantic labels. Advances in Neural Information Processing Systems , 37:9153–9177, 2024. [22] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, et al. Learning transferable visual models from natural language supervi-sion. In International conference on machine learning , pages 8748–8763. PmLR, 2021. [23] Q. Gu, A. Kuwajerwala, S. Morin, K. M. Jatavallabhula, B. Sen, A. Agarwal, C. Rivera, W. Paul, K. Ellis, R. Chellappa, et al. Conceptgraphs: Open-vocabulary 3d scene graphs for perception and planning. In 2024 IEEE International Conference on Robotics and Automation (ICRA) , pages 5021–5028. IEEE, 2024. [24] A. Werby, C. Huang, M. B¨ uchner, A. Valada, and W. Burgard. Hierarchical open-vocabulary 3d scene graphs for language-grounded robot navigation. In First Workshop on Vision-Language Models for Navigation and Manipulation at ICRA 2024 , 2024. [25] S. Peng, K. Genova, C. Jiang, A. Tagliasacchi, M. Pollefeys, T. Funkhouser, et al. Openscene: 3d scene understanding with open vocabularies. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 815–824, 2023. [26] A. Takmaz, E. Fedele, R. W. Sumner, M. Pollefeys, F. Tombari, and F. Engelmann. Open-mask3d: Open-vocabulary 3d instance segmentation. arXiv preprint arXiv:2306.13631 , 2023. [27] J. Yang, H. Zhang, F. Li, X. Zou, C. Li, and J. Gao. Set-of-mark prompting unleashes extraor-dinary visual grounding in gpt-4v. arXiv preprint arXiv:2310.11441 , 2023. [28] X. Zhou, R. Girdhar, A. Joulin, P. Kr¨ ahenb¨ uhl, and I. Misra. Detecting twenty-thousand classes using image-level supervision. In European conference on computer vision , pages 350–368. Springer, 2022. [29] S. Liu, Z. Zeng, T. Ren, F. Li, H. Zhang, J. Yang, Q. Jiang, C. Li, J. Yang, H. Su, et al. Grounding dino: Marrying dino with grounded pre-training for open-set object detection. In 
+
+European conference on computer vision , pages 38–55. Springer, 2024. 27 [30] S. Cho, S. Hong, S. Jeon, Y. Lee, K. Sohn, and S. Kim. Cats: Cost aggregation transformers for visual correspondence. Advances in Neural Information Processing Systems , 34:9011–9023, 2021. [31] S. Cho, S. Hong, and S. Kim. Cats++: Boosting cost aggregation with convolutions and transformers. IEEE Transactions on Pattern Analysis and Machine Intelligence , 45(6):7174– 7194, 2022. [32] S. Hong and S. Kim. Deep matching prior: Test-time optimization for dense correspondence. In Proceedings of the IEEE/CVF international conference on computer vision , pages 9907– 9917, 2021. [33] S. Hong, S. Cho, S. Kim, and S. Lin. Unifying feature and cost aggregation with transformers for semantic and visual correspondence. arXiv preprint arXiv:2403.11120 , 2024. [34] H. An, J. H. Kim, S. Park, J. Jung, J. Han, S. Hong, and S. Kim. Cross-view completion models are zero-shot correspondence estimators. In Proceedings of the Computer Vision and Pattern Recognition Conference , pages 1103–1115, 2025. [35] N. Lee, Z. Chen, M. Pollefeys, and S. Hong. Tora: Topological representation alignment for 3d shape assembly. arXiv preprint arXiv:2604.04050 , 2026. [36] Y. Yue, D. Robert, J. Wang, S. Hong, J. D. Wegner, C. Rupprecht, and K. Schindler. Litept: Lighter yet stronger point transformer. arXiv preprint arXiv:2512.13689 , 2025. [37] S. Hong, J. Jung, H. Shin, J. Han, J. Yang, C. Luo, and S. Kim. Pf3plat: Pose-free feed-forward 3d gaussian splatting. arXiv preprint arXiv:2410.22128 , 2024. [38] J. Han, H. An, J. Jung, T. Narihira, J. Seo, K. Fukuda, C. Kim, S. Hong, Y. Mitsufuji, and S. Kim. Dˆ 2ust3r: Enhancing 3d reconstruction with 4d pointmaps for dynamic scenes. arXiv preprint arXiv:2504.06264 , 2025. [39] H. An, J. Jung, M. Kim, S. Hong, C. Kim, K. Fukuda, M. Jeon, J. Han, T. Narihira, H. Ko, et al. C3g: Learning compact 3d representations with 2k gaussians. arXiv preprint arXiv:2512.04021 , 2025. [40] N. Ravi, V. Gabeur, Y.-T. Hu, R. Hu, C. Ryali, T. Ma, H. Khedr, R. R¨ adle, C. Rolland, L. Gustafson, et al. Sam 2: Segment anything in images and videos. In International Confer-ence on Learning Representations , volume 2025, pages 28085–28128, 2025. [41] H. K. Cheng and A. G. Schwing. Xmem: Long-term video object segmentation with an atkinson-shiffrin memory model. In European conference on computer vision , pages 640–658. Springer, 2022. [42] Z. Yang and Y. Yang. Decoupling features in hierarchical propagation for video object seg-mentation. Advances in Neural Information Processing Systems , 35:36324–36336, 2022. [43] J. Han, S. Hong, J. Jung, W. Jang, H. An, Q. Wang, S. Kim, and C. Feng. Emergent outlier view rejection in visual geometry grounded transformers. arXiv preprint arXiv:2512.04012 ,2025. [44] C. Liu, K. Wang, J. Shi, Z. Qiao, and S. Shen. Fm-fusion: Instance-aware semantic mapping boosted by vision-language foundation models. IEEE Robotics and Automation Letters , 9(3): 2232–2239, 2024. [45] S. M. LaValle. Rapidly-exploring random trees: A new tool for path planning. Technical Report 98-11, Iowa State University, 1998. [46] H. Lin, S. Chen, J. Liew, D. Y. Chen, Z. Li, G. Shi, J. Feng, and B. Kang. Depth anything 3: Recovering the visual space from any views. arXiv preprint arXiv:2511.10647 , 2025. 28 [47] Q.-Y. Zhou, J. Park, and V. Koltun. Open3d: A modern library for 3d data processing. arXiv preprint arXiv:1801.09847 , 2018. [48] I. A. Sucan, M. Moll, and L. E. Kavraki. The open motion planning library. IEEE Robotics & Automation Magazine , 19(4):72–82, 2012. [49] J. J. Kuffner and S. M. LaValle. Rrt-connect: An efficient approach to single-query path planning. In Proceedings 2000 ICRA. Millennium conference. IEEE international conference on robotics and automation. Symposia proceedings (Cat. No. 00CH37065) , volume 2, pages 995–1001. IEEE, 2000. [50] Y. Zhang, X. Huang, J. Ma, Z. Li, Z. Luo, Y. Xie, Y. Qin, T. Luo, Y. Li, S. Liu, et al. Recognize anything: A strong image tagging model. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 1724–1732, 2024. [51] A. Kirillov, E. Mintun, N. Ravi, H. Mao, C. Rolland, L. Gustafson, T. Xiao, S. Whitehead, A. C. Berg, W.-Y. Lo, et al. Segment anything. In Proceedings of the IEEE/CVF international conference on computer vision , pages 4015–4026, 2023. [52] P.-E. Sarlin, C. Cadena, R. Siegwart, and M. Dymczyk. From coarse to fine: Robust hierarchi-cal localization at large scale. In CVPR , 2019. [53] S. Bai, Y. Cai, R. Chen, K. Chen, X. Chen, Z. Cheng, L. Deng, W. Ding, C. Gao, C. Ge, et al. Qwen3-vl technical report. arXiv preprint arXiv:2511.21631 , 2025. [54] J. Zhu, W. Wang, Z. Chen, Z. Liu, S. Ye, L. Gu, H. Tian, Y. Duan, W. Su, J. Shao, et al. In-ternvl3: Exploring advanced training and test-time recipes for open-source multimodal models. 
+
+arXiv preprint arXiv:2504.10479 , 2025. [55] OpenAI. Introducing GPT-5.4. https://openai.com/index/introducing-gpt-5-4/ ,2026. Accessed: 2026-06-05. [56] A. Hurst, A. Lerer, A. P. Goucher, A. Perelman, A. Ramesh, A. Clark, A. Ostrow, A. Welihinda, A. Hayes, A. Radford, et al. Gpt-4o system card. arXiv preprint arXiv:2410.21276 , 2024. [57] X. Huang, Y.-J. Huang, Y. Zhang, W. Tian, R. Feng, Y. Zhang, Y. Xie, Y. Li, and L. Zhang. Open-set image tagging with multi-grained text supervision. In Proceedings of the 33rd ACM International Conference on Multimedia , pages 4117–4126, 2025. [58] X. Huang, Y. Zhang, J. Ma, W. Tian, R. Feng, Y. Zhang, Y. Li, Y. Guo, and L. Zhang. Tag2text: Guiding vision-language model via image tagging. In International Conference on Learning Representations , volume 2024, pages 6264–6283, 2024. 29
