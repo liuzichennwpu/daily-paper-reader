@@ -1,0 +1,219 @@
+Title: FireDataForge: A Unified Framework for Multi-Source Wildfire Data Retrieval and Integration
+
+URL Source: https://arxiv.org/pdf/2606.21198v1
+
+Published Time: Tue, 23 Jun 2026 00:44:46 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# FireDataForge: A Unified Framework for Multi-Source Wildfire Data Retrieval and Integration 
+
+Zeyu Xia * , Lexie Chen * , Ye Liu † , Huilin Huang *
+
+> *
+
+University of Virginia , Charlottesville, VA, USA 
+
+> †
+
+Pacific Northwest National Laboratory , Richland, WA, USA zeyu.xia@virginia.edu, dkt4kr@virginia.edu, ye.liu@pnnl.gov, mgh4rc@virginia.edu 
+
+Abstract —Wildfire research, modeling, and education require geospatial data from multiple sources that vary in formats, coordinate systems, spatial resolutions, and temporal cadences. This preprocessing burden limits reproducible reuse. We present FireDataForge, an open-source Python framework that auto-mates retrieval and harmonization of 11 wildfire-related sources spanning fire behavior, weather, land cover, vegetation, elevation, built environment, wildland-urban interface, fire history, and satellite imagery. Given an MTBS Event ID, FireDataForge retrieves relevant datasets, aligns them to a common grid, and outputs analysis-ready NumPy arrays with embedded metadata. Batch processing of historical fires demonstrates support for fire behavior simulation, educational visualization, machine learning, and AI-assisted wildfire analysis. 
+
+Index Terms —Wildfire research, Geospatial data fusion, Fire behavior simulation, Data reuse, Information retrieval 
+
+I. I NTRODUCTION 
+
+Across the United States, increasingly warm and dry con-ditions have contributed to rising wildfire frequency, intensity, burned area, and rates of spread [1], [2]. Expanding develop-ment in fire-prone landscapes has also increased ignition risks and Wildland-Urban Interface (WUI) exposure. Understanding and predicting wildfire behavior requires integrating geospatial data on fuel conditions, meteorology, topography, and human activity [3], [4]. These datasets are fragmented across agencies (e.g., Na-tional Aeronautics and Space Administration (NASA), United States Geological Survey (USGS), National Oceanic and At-mospheric Administration (NOAA)), stored in heterogeneous formats, and provided at different spatial and temporal resolu-tions. 1 Researchers must therefore manually retrieve, prepro-cess, and align data before analysis, limiting reproducibility, scalability, and accessibility. We present FireDataForge , a Python framework that auto-mates multi-source wildfire data retrieval, harmonization, and integration for research, education, and model development. Given a Monitoring Trends in Burn Severity (MTBS) Event ID [5], FireDataForge retrieves relevant datasets, reprojects 
+
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works. 
+
+> 1
+
+NASA Earth Science Data Systems, “Data Formats,” Earthdata, https: //www.earthdata.nasa.gov/learn/earth-observation-data-basics/data-formats. 
+
+and resamples them to a common grid, aligns them tempo-rally, and outputs metadata-rich NumPy arrays. These outputs support physics-based and data-driven fire-spread modeling, 2D/3D visualization of fire progression and WUI exposure, machine learning, and AI-assisted historical-event analysis. This work contributes (1) a unified pipeline integrating heterogeneous wildfire datasets, (2) automated spatial and tem-poral alignment with configurable resolution and coordinate systems, and (3) standardized, reusable outputs supporting these downstream uses. II. R ELATED WORK 
+
+Cloud platforms and access libraries improve retrieval of geospatial inputs: Google Earth Engine (GEE) [6] and geemap [7] support satellite and derived products, while Herbie [8] retrieves numerical weather archives such as High-Resolution Rapid Refresh (HRRR) on Amazon Web Services (AWS). These tools remain source-oriented and require cus-tom workflow scripts to produce event-centered, model-ready wildfire datasets. Application systems include visualization platforms [4] and multimodal fire-risk fusion frameworks [9]. In parallel, deep learning models increasingly fuse remote sensing and envi-ronmental data for wildfire risk and spread prediction [10], [11]. Curated ML datasets such as BCWildfire [12], Next Day Wildfire Spread [13], and Mesogeos [14] align topography, vegetation, weather, and fire data for fixed domains, periods, grids, and cadences. FireDataForge is complementary: it gen-erates analysis-ready data on demand from an MTBS Event ID, maps sources to a user-specified Coordinate Reference System (CRS) and grid spacing ( ∼30 m here), and preserves native temporal cadence for sub-daily fire and weather obser-vations. III. S YSTEM ARCHITECTURE 
+
+FireDataForge provides an event-centered workflow (Fig. 1). Users provide a target CRS, spatial resolution, and an MTBS Event ID 2; the framework resolves the fire duration and domain, derives a default grid extent and temporal window, and allows both to be customized. Querying by exact Event ID 
+
+> 2
+
+An MTBS Event ID can be looked up by fire name, year, and state through the MTBS Data Explorer at https://www.mtbs.gov/viewer/.  
+
+> arXiv:2606.21198v1 [cs.CE] 19 Jun 2026 User Input
+> MTBS event ID
+> target CRS
+> grid resolution
+> Event Resolver
+> spatial extent
+> temporal window
+> common grid
+> Data Retrieval
+> Fire Events
+> - FEDS-MTBS - VIIRS Active Fire - NIFC IFPH
+> Vegetation Fuels
+> - LANDFIRE - Global LAI
+> Surface Terrain
+> - 3DEP
+> Weather Driver
+> - HRRR
+> Built Environment
+> - Global Building Atlas - Global WUI
+> Land Cover
+> - WorldCover
+> Visualization
+> - Sentinel-2
+> Harmonization Engine
+> reproject to common CRS
+> de fi ned common grid
+> rasterize polygons
+> rasterize points
+> resample layers to grid
+> temporal alignment
+> attach metadata
+> normalize units and mask
+> Uni fi ed Output
+> NumPy arrays with time series
+> metadata
+> Applications
+> Fire modeling
+> Education
+> ML / AI work fl ow Fig. 1. FireDataForge workflow from an MTBS Event ID to harmonized, metadata-rich NumPy outputs.
+
+makes event matching unambiguous and reproducible because one ID resolves to one fire. The framework retrieves data through category-specific pro-cessing components for fire behavior, weather, vegetation and land surface characteristics, terrain, built environment, and satellite imagery. New sources such as MODIS products or ERA5-Land reanalysis can be integrated without altering the overall pipeline. Retrieval tasks are parallelized when possible, while rate-limited sources are processed sequentially. In the final stage, all datasets are harmonized spatially and temporally. Spatially, each source is reprojected, resampled by data type (Table I), and rasterized when needed; all layers use the target grid except HRRR, which is kept on a ∼500 m out-put grid with the same extent and projection because upsam-pling would add no detail. Temporally, Fire Event Data Suite (FEDS)/Visible Infrared Imaging Radiometer Suite (VIIRS) fire observations remain 12-hourly, HRRR weather hourly, and static layers single-frame. At consumption time, a loader advances each source’s datetime cursor to the latest valid frame whose timestamp does not exceed the simulation clock, otherwise holding the previous frame. Independent cursors let hourly weather update between 12-hour fire snapshots while keeping static layers fixed and skipping missing observations without interpolation, temporal resampling, or future-looking access. Output metadata records CRS, resolution, units, nodata values, per-frame timestamps, and source attribution; the full schema is documented in the released repository. IV. D ATA SOURCES AND PROCESSING 
+
+Table I summarizes the integrated sources, native spatial and temporal resolutions, output layers, and resampling methods; below we describe only processing details not captured there. 
+
+Fire behavior (FEDS). FireDataForge identifies the active fire-progression window from changes between consecutive perimeters and filters timesteps with no perimeter growth, which can occur when no expansion is detected between satellite overpasses. For each active fireline segment, it com-putes fireline_max_frp as the maximum VIIRS Fire Radiative Power (FRP) within a 360 m buffer (12 pixels on the 30 m grid), linking fire-front geometry with observed radiative intensity. 
+
+Active fire hotspots (VIIRS via NASA FIRMS). VIIRS active-fire detections from NASA Fire Information for Re-source Management System (FIRMS) [26] provide point ob-servations of radiative power. FireDataForge separates detec-tions into frp_daytime and frp_nighttime channels according to daytime and nighttime overpasses and maps each detection to the target grid with a sensor-footprint Gaussian splat normalized to conserve total FRP, so summing the rasterized footprint recovers the observed value. The footprint matches the VIIRS 375 m pixel using σ equal to half the source-to-target pixel ratio ( 6.25 px, or ≈ 441 m full width at half maximum on the 30 m grid) and is truncated at ±3σ.
+
+Terrain (3DEP). In addition to the bilinearly resampled elevation, a colored hillshade terrain_rgb is computed from the elevation using standard cartographic illumination (azimuth 315°, elevation 45°). The remaining sources are processed per Table I without source-specific post-processing. 
+
+Resampling and target resolution. Resampling is data-type specific and applied whether a source is finer or coarser than the target: nearest-neighbor preserves categorical classes without inventing mixed labels, bilinear handles continu-ous layers, and area-weighted averaging summarizes building height. Resampling never creates information, so overly coarse targets discard fine variation in terrain, fuels, buildings, and WUI; users should set the target near the finest source their analysis requires. Per-layer native_resolution metadata keeps this scale mismatch explicit. V. E VALUATION 
+
+We validated FireDataForge on 8 historical fire events from 2013–2025: 5 in California (MTBS IDs CA3432611848120191010, CA3859812261820171009, CA3982012144020181108, CA3419211810520250108, and the 2025 Palisades Fire CA3406811855120250107) and 3 in Colorado (CO3749610529120180627, CO3901210474920130611, CO4020310623920201014). The events span chaparral, conifer forest, grassland, varied wind and ignition conditions, built-environment contexts, durations, and spatial scales, testing integration across heterogeneous fire contexts rather than national climatology. Per-event metadata—fire name, year, state, MTBS ID, grid size, and temporal window—is released for exact reproduction. We use the Palisades Fire to illustrate harmonized multi-layer outputs (Fig. 2). TABLE I INTEGRATED DATA SOURCES AND HARMONIZATION METHODS .
+
+Dataset Description Spatial Cadence Output layer(s) Resampling 
+
+FEDS [15], [16] VIIRS-derived perimeter and fireline snapshots 375 m 12-hourly burn_perimeter ,
+
+fireline 
+
+Polygon raster VIIRS Active Fire [17] Hotspot Fire Radiative Power (FRP) observations 375 m 12-hourly frp_daytime ,
+
+frp_nighttime 
+
+Gaussian splat 3DEP [18] Elevation and RGB hillshade 1 m Static elevation ,
+
+terrain_rgb 
+
+Bilinear LANDFIRE [19] Canopy bulk density and cover 30 m Static canopy_bulk_density ,
+
+canopy_cover 
+
+Bilinear HRRR [20] 2 m relative humidity and 10 m winds 3 km Hourly r2 , u10 , v10 Bilinear Global Building Atlas [21] Building-height grid 3 m Static building_height Area-weighted mean WorldCover [22] 11-class global land cover 10 m Static landcover Nearest neighbor Sentinel-2 LAI [23] Leaf Area Index (LAI) 10 m Static lai Bilinear Sentinel-2 Cloudless Mosaic [24] Annual cloud-free RGB mosaic 10 m Annual sentinel2_rgb Nearest neighbor Global WUI [25] Building-vegetation WUI classes 10 m Static wui Nearest neighbor NIFC IFPH Prior-5-year burn polygons Vector Static recent_burn Polygon raster Sentinel-2 RGB  
+
+> Native 10 m
+> (a)
+> Elevation
+> Native 1 m
+> (b)
+> 0
+> 200
+> 400
+> 600
+> 800
+> m
+> Leaf Area Index
+> Native 10 m
+> (c)
+> 0
+> 1
+> 2
+> 3
+> m2/m 2
+> Land Cover
+> Native 10 m
+> Tree
+> Shrub
+> Grass
+> Crop
+> Built-up
+> Bare
+> Water
+> Wetland
+> (d)
+> Building Height
+> Native 3 m
+> (e)
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> m
+> 10 m Wind
+> Native 3000 m
+> (f)
+> 2025-01-07 13:00 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> m/s
+> Active Fire FRP (day)
+> Native 375 m
+> (g)
+> 2025-01-08 20:45
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 1.2
+> MW
+> Burn Perimeters
+> Native 375 m
+> (h)
+> Jan 7
+> 12:00
+> Jan 9
+> 12:00
+> Jan 11
+> 12:00
+> Snapshot
+> 2025 Palisades Fire | MTBS ID CA3406811855120250107 | EPSG:5070, 30 m grid (572×716) | 2025-01-07 to 2025-01-11
+
+Fig. 2. Representative multi-source FireDataForge output for the 2025 Palisades Fire [27]: context imagery (a), terrain (b), vegetation and fuels (c, d), built environment (e), weather (f), and fire behavior (g, h). Panel subtitles report native source resolution; all layers share the event extent and projection, with HRRR weather retained on its coarser grid. 
+
+A. Data Quality and Alignment 
+
+For evaluation, datasets were aligned to EPSG:5070 (NAD83 / CONUS Albers Equal Area) at 30 m, with HRRR retained on its coarser grid. Fire perimeters, FRP fields, and weather variables showed consistent spatial and temporal alignment across native projections including Lambert Con-formal Conic, WGS84, and Universal Transverse Mercator (UTM). End-to-end runtime was dominated by network I/O. Each event was processed single-threaded ( --workers 1 ) inside an 8-core, 32 GB SLURM allocation on a node with dual Intel Xeon Gold 6248 CPUs @ 2.50 GHz. Grids of 361 × 388 
+
+to 1397 × 1448 px (0.14–2.0 M pixels) and 5–24 perimeter timesteps processed in 13 .5–269 .1 s with a cold cache (median 
+
+≈ 125 s) and 12 .7–221 .7 s with a warm cache (HRRR GRIB2, WUI tiles, FIRMS slices, and the MTBS fire list from local disk, with GEE and NIFC still accessed over the network; median ≈ 86 s). Cold runs were driven mainly by 49–294 hourly HRRR GRIB2 downloads from NOAA AWS S3, so wall time tracks upstream latency more than grid size. All 48 timed runs completed with zero failed layers; all events produced 20 layers except the 2013 fire, which predates HRRR and Sentinel-2 and produced 15. We report per-event medians over three repetitions, as upstream latency occasionally inflates a single run; per-event timings are released in the reproducibil-ity bundle. 
+
+B. Quantitative Validation 
+
+We quantified harmonization fidelity against independently constructed native-resolution references aggregated to the tar-get grid by data type (majority vote for categorical layers, mean for continuous). Across the 8 events, coordinate round-trip error was negligible ( 3.0 × 10 −9 m), indicating internally consistent CRS and axis-order handling; FRP was conserved within 0.004% after Gaussian splatting; elevation RMSE was 
+
+4.27 m against mean-aggregated 3DEP; and land-cover/WUI accuracies were 0.944 /0.998 respectively against majority-aggregated references. These tests do not measure independent cross-source registration or upstream-product accuracy, but they show that reprojection, rasterization, and resampling pre-serve key source characteristics. Per-event values are provided in the released bundle. VI. C ONCLUSION 
+
+FireDataForge automates retrieval and spatiotemporal har-monization of wildfire-related geospatial data spanning satel-lite observations, terrain, vegetation, weather, and the built en-vironment. Its analysis-ready outputs lower preprocessing bar-riers for fire behavior research, educational visualization, ma-chine learning, and Artificial Intelligence (AI)-assisted wild-fire analysis while preserving source attribution and native-resolution context. Because outputs include arrays plus timestamps, units, no-data values, CRS, and source attribution, users can reuse layers without source-specific retrieval code. Its modular architecture supports new data sources, and batch processing demonstrates scalability. Future work will add web-based visualization, integrate with fire-spread models like PyTorchFire [28], and incorporate human-system dimensions such as evacuation dy-namics. CODE AND ARTIFACT AVAILABILITY 
+
+Source code is available at https://github.com/xiazeyu/Fir eDataForge and archived on Zenodo (https://doi.org/10.5281/ zenodo.20744740). The reproducibility bundle is archived at https://doi.org/10.5281/zenodo.20743743. ACKNOWLEDGMENT 
+
+This work is supported by the University of Virginia’s En-vironmental Institute. PNNL is operated for DOE by Battelle Memorial Institute under contract DE-AC05-76RL01830. This product contains modified Copernicus Sentinel data (2017– 2025), used to derive the Sentinel-2 surface-reflectance im-agery and Leaf Area Index (LAI) layers. REFERENCES [1] C. Burton, S. Lampe, D. I. Kelley, W. Thiery, S. Hantson, N. Christidis, L. Gudmundsson, M. Forrest, E. Burke, J. Chang, H. Huang, A. Ito, S. Kou-Giesbrecht, G. Lasslop, W. Li, L. Nieradzik, F. Li, Y. Chen, J. Randerson, C. P. O. Reyer, and M. Mengel, “Global burned area increasingly explained by climate change,” Nature Climate Change ,vol. 14, no. 11, pp. 1186–1192, Nov. 2024. [Online]. Available: https://doi.org/10.1038/s41558-024-02140-w [2] C. Y. Park, K. Takahashi, S. Fujimori, T. Jansakoo, C. Burton, H. Huang, S. Kou-Giesbrecht, C. P. O. Reyer, M. Mengel, E. Burke, F. Li, S. Hantson, J. Takakura, D. K. Lee, and T. Hasegawa, “Attributing human mortality from fire PM2.5 to climate change,” 
+
+Nature Climate Change , vol. 14, no. 11, pp. 1193–1200, Nov. 2024. [Online]. Available: https://doi.org/10.1038/s41558-024-02149-1 [3] J. H. Scott, M. P. Thompson, and D. E. Calkin, “A wildfire risk assessment framework for land and resource management,” U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station, Ft. Collins, CO, Tech. Rep. RMRS-GTR-315, 2013. [Online]. Available: https://doi.org/10.2737/RMRS-GTR-315 [4] I. Altintas, S. Purawat, D. Crawl, J. Block, J. Lee, A. Breland, I. Perez, J. Combs, R. A. Rawaf, C. Lautenberger, G. W. Johnson, and D. Saah, “Actionable Fire Modeling in Firemap for Extended Attack Decision Support,” in Computational Science – ICCS 2025 Workshops , M. Paszynski, A. S. Barnard, and Y. J. Zhang, Eds. Cham: Springer Nature Switzerland, 2025, pp. 327–335. [Online]. Available: https://doi.org/10.1007/978-3-031-97567-7 26 [5] J. Eidenshink, B. Schwind, K. Brewer, Z.-L. Zhu, B. Quayle, and S. Howard, “A Project for Monitoring Trends in Burn Severity,” Fire Ecology , vol. 3, no. 1, pp. 3–21, Jun. 2007. [Online]. Available: https://doi.org/10.4996/fireecology.0301003 [6] N. Gorelick, M. Hancher, M. Dixon, S. Ilyushchenko, D. Thau, and R. Moore, “Google Earth Engine: Planetary-scale geospatial analysis for everyone,” Remote Sensing of Environment , vol. 202, pp. 18–27, Dec. 2017. [Online]. Available: https://doi.org/10.1016/j.rse.2017.06.031 [7] Q. Wu, “geemap: A Python package for interactive mapping with Google Earth Engine,” Journal of Open Source Software , vol. 5, no. 51, p. 2305, Jul. 2020. [Online]. Available: https://doi.org/10.21105/joss.02305 [8] B. K. Blaylock, “Herbie: Retrieve Numerical Weather Prediction Model Data,” Zenodo, Mar. 2026. [Online]. Available: https: //doi.org/10.5281/zenodo.18902673 [9] K. Yuan, Z. Zhu, Y. Pang, J. Pang, C. Hou, and Q. Tang, “FireRisk-Multi: A Dynamic Multimodal Fusion Framework for High-Precision Wildfire Risk Assessment,” ISPRS International Journal of Geo-Information , vol. 14, no. 11, p. 426, Nov. 2025. [Online]. Available: https://doi.org/10.3390/ijgi14110426 [10] Z. Xu, J. Li, S. Cheng, X. Rui, Y. Zhao, H. He, H. Guan, A. Sharma, M. Erxleben, R. Chang, and L. L. Xu, “Deep learning for wildfire risk prediction: Integrating remote sensing and environmental data,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 227, pp. 632–677, Sep. 2025. [Online]. Available: https://doi.org/10.1016/j.isprsjprs.2025.06.002 [11] Y. Zhou, R. Kong, Z. Xu, L. Xu, and S. Cheng, “Comparative and Interpretative Analysis of CNN and Transformer Models in Predicting Wildfire Spread Using Remote Sensing Data,” Journal of Geophysical Research: Machine Learning and Computation ,vol. 2, no. 2, p. e2024JH000409, 2025. [Online]. Available: https://doi.org/10.1029/2024JH000409 [12] Z. Xu, S. Cheng, L. Wang, H. He, W. Sun, J. Li, and L. L. Xu, “BCWildfire: A Long-term Multi-factor Dataset and Deep Learning Benchmark for Boreal Wildfire Risk Prediction,” in Proceedings of the AAAI Conference on Artificial Intelligence ,vol. 40, Mar. 2026, pp. 39 486–39 494. [Online]. Available: https: //doi.org/10.1609/aaai.v40i46.41299 [13] F. Huot, R. L. Hu, N. Goyal, T. Sankar, M. Ihme, and Y.-F. Chen, “Next Day Wildfire Spread: A Machine Learning Dataset to Predict Wildfire Spreading From Remote-Sensing Data,” IEEE Transactions on Geoscience and Remote Sensing , vol. 60, pp. 1–13, 2022. [Online]. Available: https://doi.org/10.1109/TGRS.2022.3192974 [14] S. Kondylatos, I. Prapas, G. Camps-Valls, and I. Papoutsis, “Mesogeos: A multi-purpose dataset for data-driven wildfire modeling in the Mediterranean,” in Advances in Neural Information Processing Systems , vol. 36, Dec. 2023, pp. 50 661–50 676. [Online]. Available: https://proceedings.neurips.cc/paper/2023/hash/9ee3ed2dd656402f954ef 9dc37e39f48-Abstract-Datasets and Benchmarks.html [15] Y. Chen, S. Hantson, N. Andela, S. R. Coffield, C. A. Graff, D. C. Morton, L. E. Ott, E. Foufoula-Georgiou, P. Smyth, M. L. Goulden, and J. T. Randerson, “California wildfire spread derived using VIIRS satellite observations and an object-based tracking system,” 
+
+Scientific Data , vol. 9, no. 1, p. 249, May 2022. [Online]. Available: https://doi.org/10.1038/s41597-022-01343-0 [16] Y. Chen, S. Hantson, N. Andela, S. Coffield, C. Graff, D. Morton, L. Ott, E. Foufoula-Georgiou, P. Smyth, M. Goulden, and J. Randerson, “FEDS-MTBS: an MTBS-constrained FEDS dataset in U.S.” Zenodo, May 2026. [Online]. Available: https://doi.org/10.5281/zenodo.20187963 [17] W. Schroeder, P. Oliva, L. Giglio, and I. A. Csiszar, “The New VIIRS 375 m active fire detection data product: Algorithm description and initial assessment,” Remote Sensing of Environment , vol. 143, pp. 85–96, Mar. 2014. [Online]. Available: https://doi.org/10.1016/j.rse.2013.12.008 [18] U.S. Geological Survey, “3D Elevation Program 1-Meter Resolution Digital Elevation Model,” 2015. [Online]. Available: https://www.usgs .gov/3d-elevation-program [19] U.S. Department of the Interior, Geological Survey and U.S. Department of Agriculture, “LANDFIRE 2.4.0,” 2025. [Online]. Available: https: //lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer [20] D. C. Dowell, C. R. Alexander, E. P. James, S. S. Weygandt, S. G. Benjamin, G. S. Manikin, B. T. Blake, J. M. Brown, J. B. Olson, M. Hu, T. G. Smirnova, T. Ladwig, J. S. Kenyon, R. Ahmadov, D. D. Turner, J. D. Duda, and T. I. Alcott, “The High-Resolution Rapid Refresh (HRRR): An Hourly Updating Convection-Allowing Forecast Model. Part I: Motivation and System Description,” Weather and Forecasting , vol. 37, no. 8, pp. 1371–1395, Aug. 2022. [Online]. Available: https://doi.org/10.1175/WAF-D-21-0151.1 [21] X. X. Zhu, S. Chen, F. Zhang, Y. Shi, and Y. Wang, “GlobalBuildingAtlas: an open global and complete dataset of building polygons, heights and LoD1 3D models,” Earth System Science Data , vol. 17, no. 12, pp. 6647–6668, Dec. 2025. [Online]. Available: https://doi.org/10.5194/essd-17-6647-2025 [22] D. Zanaga, R. Van De Kerchove, D. Daems, W. De Keersmaecker, C. Brockmann, G. Kirches, J. Wevers, O. Cartus, M. Santoro, S. Fritz, M. Lesiv, M. Herold, N.-E. Tsendbazar, P. Xu, F. Ramoino, and O. Arino, “ESA WorldCover 10 m 2021 v200,” Zenodo, Oct. 2022. [Online]. Available: https://doi.org/10.5281/zenodo.7254221 [23] R. Mukherjee and T. C. Chakraborty, “Background climate and socioeconomic conditions constrain global urban–rural contrasts in vegetation amount, subtype, and structure,” Research Square, Feb. 2026. [Online]. Available: https://doi.org/10.21203/rs.3.rs-8970245/v1 [24] M. Drusch, U. Del Bello, S. Carlier, O. Colin, V. Fernandez, F. Gascon, B. Hoersch, C. Isola, P. Laberinti, P. Martimort, A. Meygret, F. Spoto, O. Sy, F. Marchese, and P. Bargellini, “Sentinel-2: ESA’s Optical High-Resolution Mission for GMES Operational Services,” Remote Sensing of Environment , vol. 120, pp. 25–36, May 2012. [Online]. Available: https://doi.org/10.1016/j.rse.2011.11.026 [25] F. Schug, A. Bar-Massada, A. R. Carlson, H. Cox, T. J. Hawbaker, D. Helmers, P. Hostert, D. Kaim, N. K. Kasraee, S. Martinuzzi, M. H. Mockrin, K. A. Pfoch, and V. C. Radeloff, “The global wildland–urban interface,” Nature , vol. 621, no. 7977, pp. 94–99, Sep. 2023. [Online]. Available: https://doi.org/10.1038/s41586-023-06320-0 [26] D. K. Davies, S. Ilavajhala, M. M. Wong, and C. O. Justice, “Fire Information for Resource Management System: Archiving and Distributing MODIS Active Fire Data,” IEEE Transactions on Geoscience and Remote Sensing , vol. 47, no. 1, pp. 72–79, Jan. 2009. [Online]. Available: https://doi.org/10.1109/TGRS.2008.2002076 [27] O. O. Woolcott, “Los Angeles County in flames: responsibilities on fire,” The Lancet Regional Health – Americas , vol. 42, p. 101005, Feb. 2025. [Online]. Available: https://doi.org/10.1016/j.lana.2025.101005 [28] Z. Xia and S. Cheng, “PyTorchFire: A GPU-accelerated wildfire simulator with Differentiable Cellular Automata,” Environmental Modelling & Software , vol. 188, p. 106401, Apr. 2025. [Online]. Available: https://doi.org/10.1016/j.envsoft.2025.106401
