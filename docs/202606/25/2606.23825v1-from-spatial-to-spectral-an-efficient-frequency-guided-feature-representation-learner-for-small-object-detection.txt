@@ -1,0 +1,1460 @@
+Title: From Spatial to Spectral: An Efficient, Frequency-Guided Feature Representation Learner for Small Object Detection
+
+URL Source: https://arxiv.org/pdf/2606.23825v1
+
+Published Time: Wed, 24 Jun 2026 00:08:48 GMT
+
+Number of Pages: 28
+
+Markdown Content:
+# From Spatial to Spectral: An Efficient, Frequency-Guided Feature Representation Learner for Small Object Detection 
+
+Yuhan Rui * 1 Shihan Qiao * 1 Yibin Lou * 1 Mingxi Yu * 1 Yutong Wan 1 Yanqiao Chen 1 Dongsheng Hou 1
+
+Zhen Cao 1 Athena Zhuoming Zhong 2 Qi Hao † 1
+
+Abstract 
+
+Efficient small object detection is bottlenecked by the inherent feature scarcity of tiny targets, which is further aggravated by operations of spatial-domain detectors that indiscriminately discard critical high-frequency details. Recovering these fragile cues within the spatial domain is notori-ously difficult, as it often requires computation-ally expensive architectural upscaling that inad-vertently amplifies background noise. To bridge this gap, we propose a paradigm shift from spa-tial to spectral feature processing, introducing a holistic solution with the following novelty: (1) A versatile Frequency-Guided Feature Rep-resentation framework that generalizes across diverse detector architectures (both CNN and Transformer-based), offering a robust alternative to spatial-only feature extraction; (2) The unified 
+
+Decompose–Enhance–Reconstruct (DER) oper-ator, instantiated via three lightweight, plug-and-play modules—Wavelet-Difference Gate (WDG), Log-Gabor Enhancer (LGE), and Frequency-Driven Head (FDHead)—to systematically in-ject frequency-aware modulation into the back-bone, neck, and head. This mechanism decou-ples feature modeling from resolution reduction, capturing discriminative high-frequency compo-nents to enable accurate localization with signif-icantly reduced parameter redundancy; (3) Ex-tensive validation on multi-domain benchmarks (VisDrone2019, UAVDT, TinyPerson, DOTAv1) demonstrating consistent gains. Notably, our proposed DERNet series outperforms YOLOv11 models under the same scale while requiring only 1/6 of the parameters , backed by rigorous spec-
+
+> *
+
+Equal contribution †Corresponding author. 1Southern University of Science and Technology, Shenzhen, China 2University of Pennsylvania. Correspondence to: Yuhan Rui <12310520@mail.sustech.edu.cn >, Qi Hao 
+
+<hao.q@sustech.edu.cn >.Preprint. June 24, 2026 
+
+tral diagnostics and error decomposition analysis. 
+
+1. Introduction Original Figure   
+
+> Image
+> Tiny
+> Small
+> Middle
+> HF ratio
+> Down Sampling
+> Feature Map HF ratio
+> Fusion
+> Feature Map HF ratio
+> Object
+> Size
+
+Figure 1. Motivation of frequency-domain bias in small-object detection. High-frequency energy ratio (HF/total) across object scales, where HF is defined by 2D FFT components whose radial distance from the spectrum center exceeds 33% of the maximum radius. 
+
+Small object detection underpins critical applications rang-ing from aerial surveillance to autonomous navigation (Tong et al., 2020). Despite advances in general-purpose detec-tors, performance degrades sharply on extreme scales (e.g., 
+
+< 32 2 pixels)(Lin et al., 2014). We attribute this failure not merely to resolution limits, but to compounding spectral degradation across the entire detection pipeline. As shown in Fig. 1, high-frequency components dominate tiny objects yet decay rapidly after downsampling and fu-sion, leading to compounding spectral degradation across the backbone , neck , and head stages of the detection pipeline. (i) In the backbone , strided downsampling is rarely anti-aliased, which induces spectral aliasing and mixes attenu-ated high-frequency cues into low-frequency components, causing contaminated features that propagate downstream (Zhang, 2019); (ii) in the neck , multi-scale fusion (e.g., summation/concatenation) further favors dominant low-frequency semantics, diluting the already fragile detail resid-uals; and (iii) in the head , box regression operates on over-smoothed representations without explicit mechanisms to emphasize boundary evidence, which can lead to unstable 1
+
+> arXiv:2606.23825v1 [cs.CV] 22 Jun 2026 Frequency-Guided Representation Learning for Small Object Detection
+
+localization for tiny targets (Wang et al., 2020). This motivates a key question : can we preserve and reinject 
+
+stage-specific spectral cues without spatial upscaling , while remaining plug-and-play across detector architectures ?
+
+Prior remedies largely rely on spatial restoration (e.g., di-lation or denser pyramids) (Yu & Koltun, 2016; Lin et al., 2017b), which is often compute-heavy and may amplify background noise (Tan et al., 2020). Meanwhile, frequency-domain learning (Rao et al., 2023; Qin et al., 2021) has mostly been explored for classification and lacks a unified mechanism tailored to detection. In this paper, we propose a paradigm shift from spatial restoration to Frequency-Guided Feature Representa-tion . Central to our approach is the unified Decompose– Enhance–Reconstruct (DER) operator, which decouples feature modeling from resolution reduction by explicitly separating and enhancing detail-relevant spectral cues. We instantiate this philosophy via three stage-adaptive mod-ules: (1) a Wavelet-Difference Gate (WDG) in the back-bone to refine the low-frequency approximation while using high-frequency subbands as a content-adaptive gate, thereby reducing low-frequency contamination without amplifying high-frequency noise; (2) a Log-Gabor Enhancer (LGE) 
+
+in the neck to re-activate directional high-frequency resid-uals before multi-scale fusion, mitigating the tendency of fusion to bias toward dominant semantics and dilute fine de-tails; and (3) a Frequency-Driven Head (FDHead) to inject boundary-sensitive gains (estimated from high-frequency energy) into dense regression, stabilizing localization for tiny targets. Our contributions are summarized as follows: • A unified frequency-guided abstraction. We propose the Decompose–Enhance–Reconstruct (DER) oper-ator as a stage-agnostic interface for frequency-aware feature modeling, enabling explicit manipulation of high-frequency cues before irreversible operations such as downsampling, fusion, and regression. • Stage-adaptive instantiation and universality. We allow DER to be flexibly instantiated as WDG, LGE, and FDHead to address specific spectral needs across the backbone, neck, and head. This design enables 
+
+plug-and-play integration into diverse CNN- and Transformer-based detectors via functionally equiv-alent insertion points without architectural overhaul. • Rigorous validation, mechanism verification, and performance. Beyond extensive standard benchmark-ing, we employ rigorous spectral analysis to explicitly prove the restoration of boundary details. These mech-anisms culminate in DERNet , which delivers competi-tive accuracy with a fraction of the computational cost (Fig. 2).  
+
+> Figure 2. Performance comparison of DERNet with state-of-the-art methods on the VisDrone2019 test set.
+
+2. Related Work 
+
+We review prior work from three angles that are most rele-vant to our goal. 
+
+2.1. Efficient Detector Architectures 
+
+Real-time detection advances largely through architectural optimizations in backbones and feature pyramids. One-stage YOLO-style detectors (Redmon et al., 2016; Khanam & Hussain, 2024; Sapkota et al., 2026) balance accuracy and latency via advanced block designs and multi-scale prediction, while lightweight enhancements often employ multi-kernel perception or large-receptive-field modeling to boost representational diversity in cluttered scenes (Xiao et al., 2025; Zhang et al., 2022b). Concurrently, Transformer-based detectors (Carion et al., 2020) eliminate hand-crafted anchors for end-to-end predic-tion, with recent efficient variants (e.g., RT-DETR (Zhao et al., 2024), DINO (Zhang et al., 2022a)) achieving compet-itive performance under constrained budgets. Despite these strides, a common tension persists for small objects across both families: enhancing fine-detail sensitivity typically in-curs significant computational overhead or requires specific architectural intrusions (e.g., large kernels or U-shaped de-signs (Tang et al., 2025)), complicating the deployment of a uniformly effective solution. 
+
+2.2. Small Object Detection 
+
+Small objects suffer from inherent information scarcity, oc-cupying minimal pixel area and easily vanishing during downsampling and coarse fusion. Classical detectors like Faster R-CNN and SSD (Ren et al., 2015; Liu et al., 2016) revealed the difficulty of preserving these weak cues under deep feature hierarchies. To mitigate this, extensive research has focused on strengthening multi-scale fusion (e.g., FPN and its variants (Lin et al., 2017b; Liu et al., 2018; Li, 2024)), introducing finer pyramid levels, and designing cross-layer pyramid interaction modules to enhance small-scale feature representation (Du et al., 2024). 2Frequency-Guided Representation Learning for Small Object Detection LGE/ LGE-W 
+
+> C3_WDC/ C3_Fast
+
+High Frequency Enhancer  
+
+> Conv Conv
+> WDG
+> WDG
+> Concat
+> Conv
+> C3_Faster/C3_WDC
+> FDHead (P4)
+
+# Backbone Neck Head  
+
+> FDHead (P3)
+> FDHead (P2)
+> C3_WDC C3_WDC
+> C3_Faster C3_Faster
+> HFE
+> HFE HFE
+> Channel Alignment
+> Shared Prediction Stem
+> Spectral Haar Gate
+> Frequency Driven Head
+> Prediction
+> Log-Gabor Enhanced Aggregator
+> Wavelet Transform Convolution
+> Normal Convolution
+> Faster_Block
+> Faster_Block
+> Haar DWT
+> High-freq Concationation RepCDC
+> Gated Module
+> Haar IDWT
+
+Figure 3. Overall framework of our Frequency-Guided Feature Representation Learner. This architecture instantiates the Decompose– Enhance–Reconstruct (DER) operator via WDG, LGE, and FDHead to systematically decouple feature modeling from resolution reduction , ensuring that discriminative high-frequency cues are explicitly preserved and amplified across the entire feature stream. 
+
+Recently, the focus has shifted toward detail-aware enrich-ment. For instance, HS-FPN utilizes high-frequency re-sponses as mask weights to highlight tiny objects (Shi et al., 2025), while context modeling techniques employ large re-ceptive fields to distinguish targets from background clutter (Wang et al., 2025; Xiao et al., 2025). However, many of these approaches focus on either spatial fusion or receptive-field engineering, while the mechanism of how fine details are suppressed and should be reconstructed is often left im-plicit, and portability across heterogeneous detector designs is not always validated(Appendix L). 
+
+2.3. Frequency-Domain Modeling for Dense Prediction 
+
+Frequency-domain analysis provides efficient tools for rep-resentation learning. For instance, GFNet leverages FFT for efficient global token mixing with log-linear complex-ity (Rao et al., 2023), while FcaNet reinterprets channel attention as multi-spectral compression (Qin et al., 2021). Recently, spectral methods have advanced dense prediction: FDConv enhances dynamic convolutions by constructing frequency-diverse kernels (Chen et al., 2025), and FreqFu-sion utilizes adaptive filtering to sharpen boundaries during upsampling (Chen et al., 2024). Wavelet-based approaches further expand receptive fields or preserve downsampling fidelity via sub-band transforms (Finder et al., 2025; Xu et al., 2023; Li et al., 2025). Despite these advances, existing designs remain task- or component-specific —often restricted to classification back-bones or fusion layers. Critically, they typically overlook the stage-dependent nature of frequency perception (i.e., the varying spectral needs across the architecture) and lack mechanisms to explicitly decouple and differentially pro-cess low- versus high-frequency components, even in recent frequency-aware detection frameworks (Chen et al., 2026). We bridge this gap with a stage-aware frequency-guided operator that is compatible with heterogeneous detectors. 
+
+3. Method 
+
+3.1. Overall Framework 
+
+Rather than proposing isolated frequency modules, we for-mulate a single operator interface (DER) whose instantia-tions are tailored to the functional role of each stage. We propose a Frequency-Guided Feature Representation 
+
+framework that injects spectral inductive bias into detec-tors without changing their macro-architecture . The frame-work is architecture-agnostic because it targets functionally equivalent insertion points across detector families (Ap-pendix C, Table 11): high-resolution backbone bottlenecks before stride, designated fusion outputs in the neck, and the 3Frequency-Guided Representation Learning for Small Object Detection HH 
+
+Haar DWT  
+
+> -
+> +
+> +
+> -
+> -
+> +
+> -
+> +
+> +
+> +
+> -
+> -
+> +
+> +
+> +
+> +
+> HL LH LL
+> Center pick
+
+!" 
+
+> Concat
+
+!# 
+
+> BatchNorm
+> SiLU
+
+Haar IDWT 
+
+> smooth region edge region
+
+Frequency Gate (G) 
+
+> large G
+
+RepCDC !"#   
+
+> !"# $"
+> !"# $"
+
+High-frequency Concatenation 
+
+> Input
+> small G
+
+Gated Module 
+
+> 1x1 conv
+> BatchNorm  HH HL LH LL’
+> Subband Grouping  -
+> +
+> +
+> -
+> -
+> +
+> -
+> +
+> +
+> +
+> -
+> -
+> +
+> +
+> +
+> +
+> 1x1 conv
+> Input
+> skip
+> 1x1 conv
+
+Figure 4. Architecture of the Wavelet-Difference Gate (WDG) . WDG decomposes features via Haar DWT, refines the low-frequency subband with RepCDC, predicts a content-adaptive gate from high-frequency subbands, and reconstructs via IDWT with a skip connection. 
+
+Algorithm 1 DER insertion across the architecture.                                                 
+
+> Input: image I; detector (B,N,H)
+> Output: enhanced prediction bY
+> Definitions:
+> B: backbone, N: neck, H: detection head
+> {Cℓ}: backbone feature maps, {Pℓ}: neck feature maps
+> (XL,XH): low/high-frequency components of a generic feature X
+> Goals:
+> backbone: anti-aliasing and low-frequency cleaning before stride neck: directional high-frequency residual recovery before fusion smoothing head: boundary-aligned regression gain at the finest level
+> DER interface:
+> (XL,XH)← D (X){decompose into low/high-frequency }
+> X+
+> L← E L(XL),X+
+> H← E H(XH){stage-specific enhancement }
+> X+← R (X+
+> L,X+
+> H){reconstruct enhanced feature }
+> Backbone module (WDG).
+> {Cℓ} ← B (I){compute backbone features }
+> for each high-resolution bottleneck Cℓdo
+> Cℓ←DER WDG (Cℓ){apply WDG before stride }
+> end for Neck module (LGE).
+> {Pℓ} ← N ({Cℓ}){compute neck features }
+> for each designated fusion output Pℓdo
+> Pℓ←DER LGE (Pℓ){apply LGE before fusion smoothing }
+> end for Head module (FDHead).
+> bY←DER FDHead (H({Pℓ})) {apply FDHead at finest-level regression }
+
+finest-level regression pathway in the head (Fig. 3). Our key idea is stage-wise spectral objectives : backbone anti-aliasing / low-frequency contamination suppression, neck directional residual recovery, and head boundary-aligned regression gain. These objectives are realized by 
+
+DER and its stage-specific instantiations. Given an input feature tensor X ∈ RC×H×W , DER is defined as a unified interface: 
+
+DER( X) = R EL(XL), EH (XH )
+
+(XL, XH ) = D(X) (1) 
+
+Here D decomposes X, EL/EH perform stage-specific enhancement, and R reinjects the enhanced components through a stable base path. WDG/LGE/FDHead should be read as stage-specific realizations of this DER interface, rather than independent add-on modules. 
+
+DER Instantiations Across Backbone, Neck, and Head. 
+
+We instantiate DER under two verifiable principles (Ap-pendix D): (i) directional spectral selectivity , i.e., the de-composition isolates boundary-aligned responses instead of amplifying global textures; and (ii) low-cost reinjection com-patibility , i.e., the enhanced signals can be injected through invertible reconstruction or re-parameterizable blocks with negligible inference overhead. It is therefore reasonable that 
+
+D differs across stages: wavelets (invertible, local, multi-resolution) support reconstruction and energy-based confi-dence for repeated use in the backbone/head, while Log-Gabor filters (zero-DC, orientation-selective, fixed kernels) better match the neck’s role of restoring anisotropic residu-als that fusion tends to average out. Alg. 1 summarizes the insertion procedure. 
+
+Design intuition (Operational Decoupling). DER struc-turally decouples feature modeling from resolution reduc-tion by intervening prior to stride, fusion, and regression. This allows spectral cues to be explicitly shaped while high-resolution details remain intact, preventing discriminative information from being passively determined or discarded by subsequent irreversible operations. 
+
+Principle (Stage-compatible decomposition). The de-composition operator D adheres to a stage-dependent yet interface-consistent design. By selecting from a fam-ily of operators that are local, directionally selective, and reconstruction-compatible, we render the heterogeneous use of Wavelets and Log-Gabor filters principled rather than ad hoc. This formulation reconciles unified architectural insertion points (Appendix C) with stage-specific operator tailoring (Appendix D). 
+
+3.2. Wavelet-Difference Gate (WDG) Design rationale. Backbone bottlenecks are where small object boundaries are most vulnerable: subsequent strided convolutions attenuate high-frequency cues and contaminate 4Frequency-Guided Representation Learning for Small Object Detection 
+
+low-frequency features with aliased residuals. WDG inter-venes at this juncture by refining the low-frequency subband with an edge-aware operator while using high-frequency subbands as a self-derived gating prior , thereby reinforc-ing boundary-relevant regions before irreversible resolution reduction (Fig. 4). 
+
+Wavelet decomposition. WDG projects the input x ∈
+
+RC×H×W to a hidden space and applies 2D Haar DWT: 
+
+(xLL , xLH , xHL , xHH ) = DWT  f1×1(x), (2) 
+
+yielding a low-freq approximation xLL and three directional high-freq subbands at half resolution (see Appendix I). 
+
+Edge-aware low-frequency refinement via RepCDC. The LL subband inherits smoothing bias that suppresses fine gra-dients critical for small object boundaries. We compensate with a Re-parameterized Central-Difference Convolution 
+
+(RepCDC). Let W ∈ RCout ×Cin ×3×3 be the base kernel and θ ∈ RCout ×Cin a learnable center-difference parameter; the output is: 
+
+y(o) 
+
+> p,q
+
+=
+
+> Cin
+
+X
+
+> c=1 1
+
+X
+
+> i=−11
+
+X
+
+> j=−1
+
+W(o,c ) 
+
+> i,j
+
+z(c) 
+
+> p+i,q +j
+
+−
+
+> Cin
+
+X
+
+> c=1
+
+θ(o,c ) z(c) 
+
+> p,q
+
+, (3) 
+
+where z = xLL . By subtracting the center re-sponse, RepCDC embeds a learned edge detector into the convolution—unlike standard or depthwise kernels that weight all positions uniformly. This synergizes with the wavelet decomposition: the LL subband provides a denoised canvas free of high-frequency noise, while RepCDC re-injects the gradient information that was attenuated during averaging. At inference, the modified kernel fuses into a single 3×3 convolution with zero additional latency .
+
+High-frequency gated modulation. Rather than treating high-frequency subbands as auxiliary features to be fused, WDG repurposes them as a self-derived attention prior . We concatenate {xLH , xHL , xHH } and project to a scalar gate per location: 
+
+g = σ BN  f1×1([ xLH ; xHL ; xHH ])  ∈ (0 , 1) H   
+
+> 2×W
+> 2
+
+. (4) 
+
+Crucially, g is computed from the same decomposition used for refinement, forming a closed-loop where boundary evi-dence directly steers low-frequency enhancement: 
+
+exLL = yLL ⊙ (1 + g). (5) 
+
+The additive form (1 + g) preserves baseline magnitude while amplifying boundary-critical regions—no external at-tention module or additional feature stream is required. Po-sitioned at the backbone bottleneck, this gating mechanism ensures that before any resolution-reducing stride, the net-work has already allocated extra representational capacity to locations with strong edge evidence, directly counteracting the information loss that would otherwise disproportionately harm small objects. …     
+
+> K×S
+> Log-Gabor Filter
+> Reshape
+> Aggregation
+> Softmax
+> Orientation Weight
+> Scale Weight
+> Log-Gabor Filter Bank
+> !"
+> High Freq
+> Wavelet Transform Convolution
+> Haar IDWT
+> Haar DWT
+> Concat
+> Scale
+> Reshape DWConv WTConv
+> HH HL LH LL
+> Repeat n levels on LL
+> DWConv
+> Softmax
+> Input
+> Scale
+> Normal Convolution
+> DWConv
+> Input
+> low
+> Orientation(K)
+> middle high
+> Scale(S)
+> …………………………
+> Log-Gabor Enhanced Aggregator
+
+Figure 5. Architecture of Log-Gabor Enhancer (LGE) and its WTConv variant (LGE-W). LGE captures directional high-frequency residuals via log-gabor filters and learnable aggregation, injecting them through a skip pathway to prevent feature dilution. 
+
+Reconstruction and residual output. We keep the original HF subbands unchanged and reconstruct via inverse Haar transform: 
+
+y = f out 1×1(IDWT( exLL , xLH , xHL , xHH )) . (6) 
+
+A residual connection y ← x + y is applied when channels match. All refinement operates at H 
+
+> 2
+
+× W 
+
+> 2
+
+, adding <5% FLOPs; WDG thus serves as a drop-in bottleneck at high-resolution stages (C2/C3) where small objects occupy the largest relative area. 
+
+3.3. Log-Gabor Enhancer (LGE) and WTConv Variant (LGE-W) Design rationale. Top-down fusion averages out orientation-specific high-frequency components, diluting the directional edge cues that small objects rely on for dis-crimination. LGE restores this lost anisotropy by decompos-ing features with Log-Gabor filter bank and re-weighting orientations via learnable importance, amplifying boundary-aligned responses before downstream processing (Fig. 5). 
+
+Log-Gabor filter bank. Given x ∈ RC×H×W , we apply a fixed Log-Gabor filter bank via depthwise convolution: 
+
+h(c) 
+
+> s,k
+
+= x(c) ∗ gs,k , (7) 
+
+where gs,k is a non-learnable kernel indexed by scale s
+
+and orientation k (see Appendix J). Log-Gabor kernels exhibit zero DC response and optimal bandwidth in the log-frequency domain, making them more robust to scale variation than single-order edge filters (Sobel, Laplacian). Fixed filters make LGE add no learnable filter parameters, preventing memorization of dataset-specific textures. 
+
+Learnable aggregation. LGE aggregates the K×S sub-bands with learnable orientation/scale importance: 
+
+h(c) =
+
+> S
+
+X
+
+> s=1
+> K
+
+X
+
+> k=1
+
+softmax( α)s softmax( β)k h(c) 
+
+> s,k
+
+, (8) 
+
+where α ∈ RS and β ∈ RK are learnable logits. A sigmoid-gated global scale γ and a local mixing operator fmix (depth-wise 3×3 conv) produce the final residual: 5Frequency-Guided Representation Learning for Small Object Detection DEConv 
+
+> GroupNorm
+> SiLU
+> 1x1 conv
+> P2 only
+> Pi
+
+Channel Alignment 
+
+> Channel Split
+> Haar DWT
+> HH
+> Aggregation
+> W!! , W !" , W "!
+> Softmax
+> GAP
+> SiLU
+> !"
+> Concat
+
+Spectral Haar Gate     
+
+> Rest Part Freq Part
+> Applied per level i
+> GroupNorm
+> SiLU
+> Difference Enhanced Convolution
+> cd hd vd ad std
+> DWConv
+
+··· 
+
+> Depthwise Convolution
+> 1x1 conv
+
+Shared Prediction Stem 
+
+!  
+
+> HL LH LL
+> High Freq Weights High Freq Fusion
+> 1x1 conv 1x1 conv
+
+g
+
+> P3,P4,P5
+
+Figure 6. Architecture of the Frequency-Driven Head (FDHead). 
+
+y = xskip + fmix 
+
+ σ(γ) h. (9) 
+
+We adopt small K=2 orientations and S=1 scale as a lightweight default; ablations (Appendix E) confirm that gains saturate quickly while cost grows super-linearly on high-resolution maps, making this configuration an effective efficiency–accuracy trade-off for a neck-stage plug-in. 
+
+Wavelet variant (LGE-W). At the highest-resolution neck layer (P3 →P2), feature maps are 4× larger and small ob-jects occupy the largest area—yet a standard 3×3 mixing conv sees only a tiny fraction of each object’s context. We therefore replace fmix with a Wavelet-Transform Convolu-tion (WTConv): 
+
+WTConv( z) = S0D0(z)+ PLi=1 Si IDWT i(D4,i (DWT i(z))) .
+
+(10) 
+
+where D0 is a spatial depthwise conv and {S i} are learnable scales (see Appendix J). By operating in the wavelet do-main, WTConv aggregates multi-scale context with a larger effective receptive field while keeping parameters compact— critical for capturing the sparse but informative boundary pixels of small objects. We apply LGE-W only at this single layer to balance overhead and benefit. 
+
+3.4. Frequency-Driven Head (FDHead) Design rationale. FDHead extends the frequency-guided paradigm to the detection head by using wavelet subband en-ergy as a boundary-confidence prior : high-frequency mag-nitude indicates where edges are sharp, and we amplify box predictions at those locations while leaving classification untouched. This injects a boundary-sensitive bias into re-gression without adding frequency transforms to the dense prediction path (Fig. 6). 
+
+Shared prediction stem. Each level xi (P 2–P 4) is aligned to Ch channels and refined by a shared stack: 
+
+fi = DW -PW  DEConv(Conv 1×1(xi)) , (11) 
+
+where DEConv is a re-parameterizable 3×3 conv fusing five directional-difference kernels into one at inference, em-bedding edge-detection priors with no extra latency (Ap-pendix K). 
+
+Spectral Haar Gate (SHG, P2 box branch only). At P 2,we split fi into a frequency subset fa and the remainder fb. A fixed Haar DWT extracts high-frequency subbands, whose energy is aggregated into a channel-wise gate that amplifies boundary-sensitive features for more precise localization: 
+
+h = P 
+
+> k∈{ LH,HL,HH }
+
+softmax( ω)k |fk |,
+
+s = GAP( h), g = Gate( s), efa = fa ⊙ (1 + α g), (12) 
+
+where GAP( ·) is global average pooling and Gate( ·) is a lightweight channel gate implemented as 1 × 1 conv →
+
+SiLU → 1 × 1 conv → sigmoid. The gated [efa, fb] is fed 
+
+only to the box branch ; classification uses fi directly. 
+
+· Box-only modulation. We keep classification on the un-gated feature to preserve stable low-frequency semantics, while injecting SHG only into the regression stream where boundary sharpness is the dominant cue for precise offsets. 
+
+· P2-only application. SHG is applied only at the finest level where high-frequency energy is still informative and spatially aligned to tiny boundaries; on coarser levels, such signals are largely attenuated and gating becomes redundant. 
+
+Box/class prediction and decoding. FDHead predicts per-location class logits and distributional box offsets (DFL) as 
+
+bi = Scale i
+
+ Hbox (efi), pi = Hcls (fi), (13) 
+
+and decodes boxes by bB = dist2bbox(DFL( b), A)·s with anchors A and strides s. This design targets small objects by frequency-gating only the finest level while keeping the remaining head computation shared and lightweight. 
+
+4. Experiment 
+
+4.1. Datasets and Metrics 
+
+We evaluate our framework on four benchmarks to demon-strate its robustness and cross-domain generalization: Vis-Drone2019 (Du et al., 2019), TinyPerson (Yu et al., 2020), UAVDT (Du et al., 2018), and DOTAv1 (Xia et al., 2018). 
+
+VisDrone2019 is our primary benchmark and is particularly challenging due to dense small objects and severe scale vari-ation, where most targets are smaller than 50 × 50 pixels. We report both accuracy and efficiency, including precision, recall, mAP50, APs, as well as the number of parameters, 6Frequency-Guided Representation Learning for Small Object Detection 
+
+Table 1. Across-architecture study on VisDrone2019, UAVDT, TinyPerson, and DOTAv1. Superscript + denotes modified versions. Progressively deeper colors highlight improvements ( ∆ ≥ 0.005 ), indicating larger gains over the unenhanced architecture. 
+
+Architecture Performance/mAP50 Efficiency 
+
+VisDrone2019 UAVDT TinyPerson DOTAv1 
+
+Val Test Val Test Val Test Val Input Params/M GFLOPs Size/MB 
+
+YOLOv11-S 0.384 0.311 0.875 0.910 0.264 0.222 0.447 640 9.4 21.6 18.3 
+
+DERNet-S 0.398 (+0.014) 0.316 (+0.005) 0.844 0.909 0.298 (+0.034) 0.252 (+0.030) 0.420 640 1.3 (↓86.2% ) 13.3 (↓38.4% ) 3.4 (↓81.4% )
+
+YOLOv11-M 0.442 0.353 0.889 0.926 0.283 0.239 0.470 640 20.0 67.7 38.7 
+
+DERNet-M 0.447 (+0.005) 0.362 (+0.009) 0.875 0.903 0.324 (+0.041) 0.274 (+0.035) 0.452 640 2.9 (↓85.5% ) 29.4 (↓56.6% ) 7.1 (↓81.7% )
+
+RTMDet-R2-T 0.375 0.309 0.817 0.859 0.275 0.240 0.497 1024 6.2 27.7 37.1 
+
+RTMDet-R2-T + 0.448 (+0.073) 0.358 (+0.049) 0.828 (+0.011) 0.866 (+0.007) 0.292 (+0.017) 0.304 (+0.064) 0.496 1024 4.5 (↓27.4% ) 20.8 (↓24.9% ) 29.0 (↓21.8% )
+
+RTMDet-R2-S 0.391 0.325 0.853 0.884 0.290 0.244 0.527 1024 11.2 50.5 59.9 
+
+RTMDet-R2-S + 0.485 (+0.094) 0.394 (+0.069) 0.846 0.881 0.333 (+0.043) 0.320 (+0.076) 0.567 (+0.040) 1024 7.3 (↓34.8% ) 38.3 (↓24.2% ) 40.8 (↓31.9% )
+
+PP-PicoDet-S 0.282 0.245 0.591 0.611 0.151 0.132 0.169 416 3.5 2.2 13.4 
+
+PP-PicoDet-S + 0.274 0.251 (+0.006) 0.583 0.605 0.175 (+0.024) 0.149 (+0.017) 0.183 (+0.014) 416 2.7 (↓22.9% ) 1.6 (↓27.3% ) 11.1 (↓17.2% )
+
+PP-PicoDet-L 0.357 0.334 0.631 0.614 0.213 0.189 0.205 640 5.9 8.4 22.3 
+
+PP-PicoDet-L + 0.361 (+0.004) 0.339 (+0.005) 0.628 0.617 (+0.003) 0.237 (+0.024) 0.202 (+0.013) 0.212 (+0.007) 640 4.5 (↓23.7% ) 6.6 (↓21.4% ) 17.3 (↓22.4% )
+
+RT-DETR-R18 0.362 0.301 0.717 0.691 0.127 0.117 0.204 640 20.1 61.2 307.8 
+
+RT-DETR-R18 + 0.358 0.299 0.792 (+0.075) 0.749 (+0.058) 0.147 (+0.020) 0.162 (+0.045) 0.213 (+0.009) 640 13.8 (↓31.3% ) 45.4 (↓25.8% ) 213.0 (↓30.8% )
+
+RT-DETR-R50 0.467 0.395 0.837 0.843 0.214 0.181 0.209 640 42.8 137.5 654.9 
+
+RT-DETR-R50 + 0.465 0.392 0.884 (+0.047) 0.882 (+0.039) 0.243 (+0.029) 0.227 (+0.046) 0.220 (+0.011) 640 32.0 (↓25.2% ) 89.1 (↓35.2% ) 459.4 (↓29.8% )
+
+Table 2. Ablation study on YOLO-style architectures. 
+
+P W L F Performance Efficiency 
+
+2 D G D Val Test 
+
+H G E H P R mAP50 P R mAP50 Params/M GFLOPs Model size/MB 
+
+× × × × 0.496 0.377 0.384 0.421 0.337 0.311 9.4 21.6 18.3 
+
+✓ × × × 0.516 0.408 0.423 0.453 0.354 0.337 6.4 24.7 12.5 
+
+✓ ✓ × × 0.543 0.420 0.438 (+0.015) 0.455 0.371 0.354 (+0.017) 6.6 23.5 13.2 
+
+✓ × ✓ × 0.547 0.412 0.436 (+0.013) 0.465 0.373 0.355 (+0.018) 6.5 25.4 12.8 
+
+✓ × × ✓ 0.551 0.435 0.454 (+0.031) 0.478 0.375 0.364 (+0.027) 3.8 30.5 8.4 
+
+✓ ✓ ✓ × 0.547 0.419 0.445 (+0.022) 0.466 0.376 0.360 (+0.023) 3.9 25.5 8.2 
+
+✓ ✓ × ✓ 0.559 0.435 0.464 (+0.041) 0.487 0.383 0.370 (+0.033) 3.9 28.5 8.6 
+
+✓ × ✓ ✓ 0.549 0.437 0.457 (+0.034) 0.470 0.378 0.365 (+0.028) 3.8 28.3 8.4 
+
+✓ ✓ ✓ ✓ 0.552 0.429 0.458 (+0.035) 0.484 0.381 0.370 (+0.033) 3.8 26.3 8.6 
+
+DERNet-S 0.503 0.382 0.398 (+0.014) 0.420 0.344 0.316 (+0.005) 1.3 13.3 3.4 
+
+GFLOPs, model size, and FPS in the following tables. 
+
+4.2. Configuration 
+
+Training and primary accuracy evaluation are conducted on an NVIDIA A100 GPU (40 GB VRAM), while full training hyperparameters and hardware configurations for all archi-tectures, including FPS evaluation on NVIDIA A100 and Jetson Nano (batch size 1, post-warm-up), are provided in Appendix H, Tables 15 and 17. 
+
+5. Main Results 
+
+5.1. Ablation Study on YOLO-style architectures 
+
+Table 2 details the stepwise integration of our proposed modules into YOLOv11-S baseline ( 0.384 /0.311 mAP 50 on val/test). Each component contributes consistent gains ( >
+
+0.013 ), with FDHead yielding the most significant boost ( >
+
+0.03 ). The full integration culminates in a peak performance of 0.458/0.370 mAP 50 , validating the cumulative efficacy of our design. Notably, the DERNet-S variant, optimized with C3 Faster and channel reduction, still outperforms the baseline while slashing parameters to just 1.3M. 
+
+5.2. Across-architecture Study 
+
+As shown in Table 1, for CNN-based models, YOLO-style detectors achieve comparable or superior performance to baseline while reducing parameters by over 85%; RTMDet-R2 variants exceed original versions on most datasets, with RTMDet-R2-S + achieving a notable 0.076 mAP 50 gain on TinyPerson test set and 0.04 on both TinyPerson and DOTAv1 val set. Transformer-based detectors also show 7Frequency-Guided Representation Learning for Small Object Detection 
+
+Table 3. TIDE error decomposition. Values are reported as A/B for paired settings in each row. 
+
+Architecture Main Errors Special Errors Small bbox 
+
+Cls Loc Both Dupe Bkg Miss FalsePos FalseNeg APs 
+
+YOLOv11-S/M 22.03/22.04 3.97/4.51 0.27/0.32 0.09/0.08 3.07/3.65 7.06/8.08 13.47/13.77 29.13/32.96 12.57/16.13 
+
+DERNet-S/M 21.84/21.95( ↓) 3.53/3.88( ↓) 0.36/0.43 0.28/0.25 2.46/2.88( ↓) 6.72/6.90( ↓) 17.95/18.23 25.10/26.34( ↓) 15.72/18.40 (+3.15/+2.27) 
+
+RT-DETR-R18/R50 16.54/15.87 3.39/3.98 0.67/0.75 0.50/0.45 2.68/3.16 15.02/14.94 15.85/16.79 30.24/30.01 23.85/30.04 
+
+RT-DETR-R18 +
+
+/R50 +
+
+16.23/15.26( ↓) 3.26/3.54( ↓) 0.70/0.77 0.77/0.73 2.45/2.87( ↓) 13.90/13.62( ↓) 16.22/16.91 29.55/29.34( ↓) 25.60/32.37 (+1.75/+2.33) 
+
+RTMDet-R2-T/S 8.56/10.72 6.66/6.69 0.55/0.59 0.00/0.00 3.99/4.27 6.82/6.50 27.60/27.11 19.47/19.98 16.06/17.45 
+
+RTMDet-R2-T +
+
+/S +
+
+10.30/10.91 6.60/6.60( ↓) 0.53/0.57( ↓) 0.00/0.00 4.28/4.55 6.71/6.44( ↓) 28.31/27.86 18.22/19.18( ↓) 20.10/23.61 (+4.04/+6.16) 
+
+PP-PicoDet-S/L 13.04/8.34 3.42/2.86 0.19/0.13 0.02/0.01 1.82/1.62 11.84/13.79 14.33/14.99 29.99/30.56 8.67/9.13 
+
+PP-PicoDet-S +
+
+/L +
+
+10.01/7.29( ↓) 3.28/2.28( ↓) 0.28/0.15 0.02/0.01 1.60/1.57( ↓) 10.92/12.32( ↓) 11.10/10.48( ↓) 27.32/28.71( ↓) 10.91/11.75 (+2.24/+2.62) 
+
+significant improvements, with RT-DETR-R18 + reducing parameters by 31.3% and achieving a 0.075 accuracy gain on UAVDT val set. These results indicate that our frequency-guided design offers consistent accuracy gains under tight parameter and GFLOPs budgets across both CNN and Trans-former architectures. 
+
+5.3. Comparison with State-of-the-art 
+
+We benchmark DERNet against state-of-the-art detectors in Table 4. DERNet establishes a superior efficiency-accuracy trade-off: it matches YOLOv11 performance with ∼85% fewer parameters and, notably, outperforms the recent FBRT-YOLO (AAAI 2025) across all key metrics (Xiao et al., 2025) (mAP 50 , AP S , and GFLOPs), validating the efficacy of our design. 
+
+Table 4. Comparison with state-of-the-art methods on Vis-Drone2019. 
+
+Models mAP50 APs Params/M GFLOPs 
+
+ATSS-R50-FPN-DyHead (Dai et al., 2021) 0.338 16.0 38.91 110 
+
+GFL (Li et al., 2020) 0.321 16.4 32.28 206 
+
+TOOD-R50 (Feng et al., 2021) 0.338 16.2 32.04 199 
+
+Cascade-RCNN-R50-FPN (Cai & Vasconcelos, 2017) 0.326 14.9 69.29 236 
+
+Faster-RCNN-R50-FPN-CIOU 0.329 15.5 41.39 208 
+
+RetinaNet-R50-FPN (Lin et al., 2017a) 0.276 12.0 36.52 210 
+
+RT-DETR-R18 0.301 14.85 20.1 61.2 
+
+YOLOX-Tiny (Ge et al., 2021) 0.278 11.6 5.035 7.578 
+
+YOLOv11-N 0.258 13.8 2.59 6.3 
+
+YOLOv11-S 0.311 14.57 9.4 21.6 
+
+YOLOv11-M 0.353 16.13 20.0 67.7 
+
+YOLOv12-N (Tian et al., 2025) 0.259 13.5 2.56 6.3 
+
+YOLOv12-S 0.312 15.8 9.23 21.2 
+
+YOLOv12-M 0.336 17.4 9.23 21.2 
+
+YOLOv26-N 0.247 11.8 2.5 5.2 
+
+YOLOv26-S 0.304 14.57 10.0 20.5 
+
+YOLOv26-M 0.365 19.15 21.8 67.9 
+
+D-Fine-N (Peng et al., 2024) 0.334 16.3 3.73 7.1238 
+
+DEIM-D-Fine-N (Huang et al., 2025) 0.322 16.0 3.73 7.1238 
+
+DEIM-D-Fine-S 0.384 23.2 10.18 24.8595 
+
+FBRT-YOLO-N 0.265 12.2 0.8 6.7 
+
+FBRT-YOLO-S 0.323 16.2 2.9 22.9 
+
+FBRT-YOLO-M 0.344 17.5 7.36 58.7 
+
+DERNet-S 0.316 15.72 1.3 13.3 
+
+DERNet-M 0.362 18.40 2.9 29.4 
+
+5.4. Real-world inference efficiency 
+
+Table 5. Real-world efficiency and accuracy comparison on Vis-Drone2019 validation set. FPS is evaluated on both NVIDIA A100 GPU and NVIDIA Jetson Nano.       
+
+> Model Params/M GFLOPs mAP 50 A100 FPS Nano FPS
+> WDFS-DETR
+
+(Liu & Xie, 2025) 19.9 53.7 47.5 117 10 WCDB-YOLO (Luan et al., 2026) 19.8 60.1 45.5 114 9FBRT-YOLO-S (Xiao et al., 2025) 2.9 22.9 42.4 143 22 D-FINE-S 10.18 24.86 45.4 140 20           
+
+> DERNet-S 1.3 13.3 39.8 162 22 DERNet-M 2.9 29.4 44.7 134 16
+
+As shown in Table 5 and Appendix H, DERNet offers a fa-vorable accuracy-efficiency trade-off for real-world deploy-ment, particularly compared with prior frequency-domain methods that often improve representation quality at the cost of additional computation. DERNet-S achieves 162/22 FPS on A100/Jetson Nano, while DERNet-M reaches 44.7 val mAP 50 with 134/16 FPS, showing that our stage-aware frequency-guided design translates spectral enhancement into consistent accuracy gains without compromising practi-cal inference efficiency, even on resource-constrained edge hardware. 
+
+6. Analyses and Discussion 
+
+6.1. Error Decomposition with TIDE: Disentangling Miss, Localization, and False Positives 
+
+We employ TIDE (Bolya et al., 2020) to decompose detec-tion errors (Table 3). Beyond substantial AP S gains (e.g., 
+
++4.04%/6.16% for RTMDet-R2 variants), the error distribu-tion reveals a clear causal link: improved high-frequency preservation correlates directly with reduced Miss and Localization errors . Recovering faint spectral signatures helps distinguish tiny targets from background clutter (low-ering Miss/FalseNeg ), while sharpening boundary-aligned energy explicitly refines box regression (lowering Loc ). This supports a causal interpretation: spectral recovery pri-marily reduces detection errors by restoring faint signatures and sharpening boundary evidence. 8Frequency-Guided Representation Learning for Small Object Detection         
+
+> GT Heatmaps (Baseline) Heatmaps (DERNet-S) Feature (Baseline) Feature (DERNet-S) Spectrum (Baseline) Spectrum (DERNet-S) Results (Baseline) Results (DERNet-S)
+
+Figure 8. Visualization comparison between baseline and improved models on VisDrone2019 (top row) and TinyPerson (bottom row). 
+
+Figure 7. High-Frequency Ratio Analysis on VisDrone2019 vali-dation set (Left) and TinyPerson validation set (Right). 
+
+6.2. Spectral Diagnostics: Layer-wise High-Frequency Preservation and Reconstruction 
+
+We analyze high-frequency preservation across stages on VisDrone2019 and TinyPerson via 2D FFT, averaging spec-tral magnitude, and partitioning frequency bands at 1/6 and 
+
+1/3 of the maximum frequency radius to compute the high-frequency energy ratio. Fig. 7 shows that DER operator demonstrates a progressive high-frequency enrichment from Backbone-C3 to the Head, culminating in an energy ratio increase of over 0.05 at the final prediction stage, suggest-ing that DER prevents the spectral collapse phenomenon typically observed in deep CNNs. 
+
+7. Conclusion 
+
+We present DER, a unified frequency-guided operator interface for small-object detection, and show that its stage-specific instantiations (WDG/LGE/FDHead) improve accuracy-efficiency trade-offs across heterogeneous detec-tors. By decoupling feature modeling from resolution reduc-tion in the backbone, neck, and head, DER provides a plug-and-play abstraction that consistently boosts small-object AP across four benchmarks without expensive architectural overhauls. DERNet delivers cleaner predictions in dense scenes (Fig. 8) while using substantially fewer parameters. Severely occluded, tightly clustered, and extremely small targets remain challenging (Appendix G, Fig. 12). Future work will pursue system-aware implementations (e.g., operator fusion, re-parameterization, and kernel-level optimization) to better align DER-style modules with mod-ern accelerators, and extend frequency-guided representa-tion learning to broader small-object-dense vision tasks such as instance segmentation, tracking, and counting. We also view DER as a step toward a more principled spectral theory of detection, where architectural choices can be com-pared and optimized directly in terms of how they preserve, re-distribute, or destroy high-frequency evidence. 9Frequency-Guided Representation Learning for Small Object Detection 
+
+References 
+
+Bolya, D., Foley, S., Hays, J., and Hoffman, J. Tide: A gen-eral toolbox for identifying object detection errors, 2020. URL https://arxiv.org/abs/2008.08115 .Cai, Z. and Vasconcelos, N. Cascade R-CNN: delv-ing into high quality object detection. CoRR ,abs/1712.00726, 2017. URL http://arxiv.org/ abs/1712.00726 .Carion, N., Massa, F., Synnaeve, G., Usunier, N., Kirillov, A., and Zagoruyko, S. End-to-end object detection with transformers. arXiv preprint arXiv:2005.12872 , 2020. Chen, J., Liu, N., Sun, H., and Wang, Y. Freq-detr: Frequency-aware transformer for real-time small object detection in unmanned aerial vehicle imagery. Expert Sys-tems with Applications , 298:129710, 2026. ISSN 0957-4174. doi: https://doi.org/10.1016/j.eswa.2025.129710. URL https://www.sciencedirect.com/ science/article/pii/S0957417425033251 .Chen, L., Fu, Y., Gu, L., Yan, C., Harada, T., and Huang, G. Frequency-aware feature fusion for dense image predic-tion. IEEE Transactions on Pattern Analysis and Machine Intelligence , 2024. doi: 10.48550/arXiv.2408.12879. Ac-cepted by TPAMI, 2024. Chen, L., Gu, L., Li, L., Yan, C., and Fu, Y. Frequency dynamic convolution for dense image prediction. arXiv preprint arXiv:2503.18783 , 2025. Dai, X., Chen, Y., Xiao, B., Chen, D., Liu, M., Yuan, L., and Zhang, L. Dynamic head: Unifying object detection heads with attentions. CoRR , abs/2106.08322, 2021. URL 
+
+https://arxiv.org/abs/2106.08322 .Du, D., Qi, Y., Yu, H., Yang, Y., Duan, K., Li, G., Zhang, W., Huang, Q., and Tian, Q. The unmanned aerial vehicle benchmark: Object detection and tracking. In Proceed-ings of the European Conference on Computer Vision (ECCV) , pp. 370–386, 2018. Du, D., Zhu, P., Wen, L., Bian, X., Lin, H., Hu, Q., Peng, T., Zheng, J., Wang, X., Zhang, Y., et al. Visdrone-det2019: The vision meets drone object detection in image chal-lenge results. In Proceedings of the IEEE/CVF Interna-tional Conference on Computer Vision Workshops , pp. 0–0, 2019. Du, Z., Hu, Z., Zhao, G., Jin, Y., and Ma, H. Cross-layer feature pyramid transformer for small object detection in aerial images, 2024. URL https://arxiv.org/ abs/2407.19696 .Feng, C., Zhong, Y., Gao, Y., Scott, M. R., and Huang, W. TOOD: task-aligned one-stage object detection. CoRR ,abs/2108.07755, 2021. URL https://arxiv.org/ abs/2108.07755 .Finder, S. E., Amoyal, R., Treister, E., and Freifeld, O. Wavelet convolutions for large receptive fields. In Leonardis, A., Ricci, E., Roth, S., Russakovsky, O., Sat-tler, T., and Varol, G. (eds.), Computer Vision – ECCV 2024 , pp. 363–380, Cham, 2025. Springer Nature Switzer-land. ISBN 978-3-031-72949-2. Ge, Z., Liu, S., Wang, F., Li, Z., and Sun, J. YOLOX: ex-ceeding YOLO series in 2021. CoRR , abs/2107.08430, 2021. URL https://arxiv.org/abs/2107. 08430 .Huang, S., Lu, Z., Cun, X., Yu, Y., Zhou, X., and Shen, X. Deim: Detr with improved matching for fast con-vergence, 2025. URL https://arxiv.org/abs/ 2412.04234 .Khanam, R. and Hussain, M. YOLOv11: An overview of the key architectural enhancements. arXiv preprint arXiv:2410.17725 , 2024. Li, H. Rethinking features-fused-pyramid-neck for object detection. In European Conference on Computer Vision (ECCV) . Springer, 2024. Li, X., Wang, W., Wu, L., Chen, S., Hu, X., Li, J., Tang, J., and Yang, J. Generalized focal loss: Learning qualified and distributed bounding boxes for dense object detection. 
+
+CoRR , abs/2006.04388, 2020. URL https://arxiv. org/abs/2006.04388 .Li, X., Jiao, L., Liu, F., Yang, S., Zhu, H., Liu, X., Li, L., and Ma, W. Adaptive complex wavelet informed transformer operator. IEEE Transactions on Multimedia ,27:3513–3526, 2025. doi: 10.1109/TMM.2025.3535392. Lin, T., Goyal, P., Girshick, R. B., He, K., and Doll ´ar, P. Focal loss for dense object detection. CoRR ,abs/1708.02002, 2017a. URL http://arxiv.org/ abs/1708.02002 .Lin, T.-Y., Maire, M., Belongie, S., Bourdev, L., Girshick, R., Hays, J., Perona, P., Ramanan, D., Zitnick, C. L., and Doll ´ar, P. Microsoft coco: Common objects in context. In European Conference on Computer Vision (ECCV) , pp. 740–755. Springer, 2014. Lin, T.-Y., Doll ´ar, P., Girshick, R., He, K., Hariharan, B., and Belongie, S. Feature pyramid networks for object detection. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) , pp. 2117–2125, 2017b. 10 Frequency-Guided Representation Learning for Small Object Detection 
+
+Liu, J. and Xie, Y. Wdfs-detr: A transformer-based framework with multi-scale attention for small ob-ject detection in uav engineering tasks. Results in Engineering , 27:105930, 2025. ISSN 2590-1230. doi: https://doi.org/10.1016/j.rineng.2025.105930. URL https://www.sciencedirect.com/ science/article/pii/S2590123025020018 .Liu, S., Qi, L., Qin, H., Shi, J., and Jia, J. Path aggregation network for instance segmentation, 2018. URL https: //arxiv.org/abs/1803.01534 .Liu, W., Anguelov, D., Erhan, D., Szegedy, C., Reed, S., Fu, C.-Y., and Berg, A. C. SSD: Single shot multibox detector. In Computer Vision–ECCV 2016: 14th Euro-pean Conference, Amsterdam, The Netherlands, October 11-14, 2016, Proceedings, Part I , pp. 21–37. Springer, 2016. Luan, D., Dong, Y., Zhou, J., Li, A., Xie, L., Liu, H., and Zhu, J. WCDB-YOLO: Wavelet-enhanced contextual dual-backbone network for small object detection in uav aerial imagery. Drones , 10(3):155, 2026. doi: 10.3390/ drones10030155. URL https://www.mdpi.com/ 2504-446X/10/3/155 .Peng, Y., Li, H., Wu, P., Zhang, Y., Sun, X., and Wu, F. D-FINE: Redefine regression task in DETRs as fine-grained distribution refinement. arXiv preprint arXiv:2410.13842 ,2024. doi: 10.48550/arXiv.2410.13842. URL https: //arxiv.org/abs/2410.13842 .Qin, Z., Zhang, P., Wu, F., and Li, X. Fcanet: Fre-quency channel attention networks. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) , pp. 783–792, 2021. Rao, Y., Zhao, W., Zhu, Z., Zhou, J., and Lu, J. GFNet: Global filter networks for visual recognition. IEEE Trans-actions on Pattern Analysis and Machine Intelligence (TPAMI) , 45(9):10960–10973, September 2023. doi: 10.1109/TPAMI.2023.3263824. Redmon, J., Divvala, S., Girshick, R., and Farhadi, A. You only look once: Unified, real-time object detection, 2016. URL https://arxiv.org/abs/1506.02640 .Ren, S., He, K., Girshick, R., and Sun, J. Faster R-CNN: Towards real-time object detection with region proposal networks. In Advances in Neural Information Processing Systems (NeurIPS) , volume 28, 2015. Sapkota, R., Cheppally, R. H., Sharda, A., and Karkee, M. Yolo26: Key architectural enhancements and perfor-mance benchmarking for real-time object detection, 2026. URL https://arxiv.org/abs/2509.25164 .Shi, Z., Hu, J., Ren, J., Ye, H., Yuan, X., Ouyang, Y., He, J., Ji, B., and Guo, J. HS-FPN: High frequency and spatial perception fpn for tiny object detection. arXiv preprint arXiv:2412.10116 , 2025. Tan, M., Pang, R., and Le, Q. V. Efficientdet: Scalable and efficient object detection, 2020. URL https:// arxiv.org/abs/1911.09070 .Tang, F., Nian, B., Ding, J., Ma, W., Quan, Q., Dong, C., Yang, J., Liu, W., and Zhou, S. K. Mobile U-ViT: Revis-iting large kernel and U-shaped vit for efficient medical image segmentation. arXiv preprint arXiv:2508.01064 ,2025. Tian, Y., Ye, Q., and Doermann, D. Yolov12: Attention-centric real-time object detectors, 2025. URL https: //arxiv.org/abs/2502.12524 .Tong, K., Wu, Y., and Zhou, F. Recent advances in small object detection based on deep learning: A review. Image and Vision Computing , 97:103910, 2020. ISSN 0262-8856. doi: https://doi.org/10.1016/j.imavis.2020.103910. URL https://www.sciencedirect.com/ science/article/pii/S0262885620300421 .Wang, A., Chen, H., Lin, Z., Han, J., and Ding, G. LSNet: See large, focus small. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2025. Wang, J., Zhang, W., Cao, Y., Chen, K., Pang, J., Gong, T., Shi, J., Loy, C. C., and Lin, D. Side-aware boundary localization for more precise object detection, 2020. URL 
+
+https://arxiv.org/abs/1912.04260 .Xia, G.-S., Bai, X., Ding, J., Zhu, Z., Belongie, S., Luo, J., Datcu, M., Pelillo, M., and Zhang, L. Dota: A large-scale dataset for object detection in aerial images. In 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , pp. 3974–3983, 2018. Xiao, Y., Xu, T., Xin, Y., and Li, J. FBRT-YOLO: Faster and better for real-time aerial image detection. arXiv preprint arXiv:2504.20670 , 2025. Xu, G., Liao, W., Zhang, X., Li, C., He, X., and Wu, X. Haar wavelet downsampling: A simple but effective downsampling module for semantic segmentation. 
+
+Pattern Recognition , 143:109819, 2023. ISSN 0031-3203. doi: https://doi.org/10.1016/j.patcog.2023.109819. URL https://www.sciencedirect.com/ science/article/pii/S0031320323005174 .Yu, F. and Koltun, V. Multi-scale context aggregation by dilated convolutions, 2016. URL https://arxiv. org/abs/1511.07122 .11 Frequency-Guided Representation Learning for Small Object Detection 
+
+Yu, X., Gong, Y., Jiang, N., Ye, Q., and Han, Z. Scale match for tiny person detection. In Proceedings of the IEEE/CVF Winter Conference on Applications of Com-puter Vision , pp. 1257–1265, 2020. Zhang, H., Li, F., Liu, S., Zhang, L., Su, H., Zhu, J., Ni, L. M., and Shum, H.-Y. DINO: DETR with improved denoising anchor boxes for end-to-end object detection. 
+
+arXiv preprint arXiv:2203.03605 , 2022a. Zhang, R. Making convolutional networks shift-invariant again, 2019. URL https://arxiv.org/abs/ 1904.11486 .Zhang, X., Zeng, H., Guo, S., and Zhang, L. Efficient long-range attention network for image super-resolution. In 
+
+European Conference on Computer Vision , pp. 649–667. Springer, 2022b. Zhao, Y., Lv, W., Xu, S., Wei, J., Wang, G., Dang, Q., Liu, Y., and Chen, J. Detrs beat yolos on real-time object detection. arXiv preprint arXiv:2304.08069 , 2024. 12 Frequency-Guided Representation Learning for Small Object Detection 
+
+A. Appendix A: Stability Analysis 
+
+We evaluate the training stability and reproducibility of DER-enhanced models by monitoring loss convergence and gradient statistics across multiple training runs with different random seeds. To assess reproducibility, we conduct three independent training runs for YOLOv11-S/M and DERNet-S/M models on VisDrone2019 validation set, reporting the mean and standard deviation of key metrics including precision (P), recall (R), small object AP (AP S ), and AP at IoU=0.5 (AP 50 ). Our experiments demonstrate that the frequency-guided representation learner maintains stable training dynamics with consistent convergence patterns.                                     
+
+> Table 6. Reproducibility analysis of YOLOv11 and DERNet models with different random seeds on VisDrone2019 validation set. Results are reported as mean ±std over three runs.
+> Model Val P Test P Val R Test R Val AP 50 Test AP 50 AP S
+> YOLOv11-S 0.485 ±0.011 0.410 ±0.007 0.368 ±0.008 0.330 ±0.006 0.375 ±0.007 0.303 ±0.005 12 .0±1.1
+> DERNet-S 0.502 ±0.011 0.419 ±0.007 0.381 ±0.008 0.341 ±0.005 0.393 ±0.007 0.314 ±0.004 15 .12 ±1.4
+> YOLOv11-M 0.515 ±0.012 0.415 ±0.008 0.452 ±0.010 0.363 ±0.006 0.432 ±0.008 0.345 ±0.005 15 .5±1.4
+> DERNet-M 0.548 ±0.014 0.426 ±0.008 0.466 ±0.012 0.375 ±0.006 0.444 ±0.008 0.359 ±0.005 17 .99 ±1.6
+
+The low standard deviations across all metrics validate the reliability of our experimental results and demonstrate the robustness of our frequency-guided approach for small object detection. 
+
+B. Appendix B: Computational Cost Breakdown 
+
+We provide a detailed breakdown of the parameter counts and GFLOPs for the key modules in the baseline YOLOv11 models and the substituted/inserted modules in our DERNet variants. The comparison highlights the efficiency of our frequency-guided modules. 
+
+B.1. Small-Scale Models (S-Series) 
+
+Tables 7 and 8 present the layer-wise cost breakdown for YOLOv11-S and DERNet-S, where DERNet-S reduces the overall parameter count and computational cost by shrinking channel widths in non-critical modules and using C3 Faster in backbone, while the proposed frequency-guided enhancement blocks compensate for the resulting capacity reduction and preserve detection accuracy (from 9.4M / 21.6 GFLOPs to 1.3M / 13.3 GFLOPs).  
+
+> Table 7. Cost breakdown for key modules in YOLOv11-S (Baseline).
+
+Layer Type Params GFLOPs Input Shape 
+
+2 C3k2 26,080 1.3599 (1, 64, 160, 160) 4 C3k2 103,360 1.3353 (1, 128, 80, 80) 6 C3k2 346,112 1.1141 (1, 256, 40, 40) 8 C3k2 1,380,352 1.1076 (1, 512, 20, 20) 13 C3k2 443,776 1.4246 (1, 768, 40, 40) 16 C3k2 127,680 1.6433 (1, 512, 80, 80) 19 C3k2 345,472 1.1100 (1, 384, 40, 40) 22 C3k2 1,511,424 1.2124 (1, 768, 20, 20) 23 Detect head 850,368 3.2460 (1,144,80,80), (1,144,40,40), (1,144,20,20) 
+
+B.2. Medium-Scale Models (M-Series) 
+
+Tables 9 and 10 present the layer-wise cost breakdown for YOLOv11-M and DERNet-M, where DERNet-M reduces the overall parameter count and computational cost by shrinking channel widths in non-critical modules and using C3 Faster in backbone, while the proposed frequency-guided enhancement blocks compensate for the resulting capacity reduction and preserve detection accuracy (from 20.0M / 67.7 GFLOPs to 2.9M / 29.4 GFLOPs). 13 Frequency-Guided Representation Learning for Small Object Detection  
+
+> Table 8. Cost breakdown for substituted/inserted modules in DERNet-S.
+
+Layer Type Params GFLOPs Input Shape 
+
+2 C3 WDC 18,336 0.6611 (1, 48, 160, 160) 4 C3 WDC 51,680 0.4639 (1, 96, 80, 80) 12 LGE 3,843 0.0135 (1, 192, 40, 40) 16 LGE 3,203 0.0451 (1, 160, 80, 80) 20 LGE-W 8,835 0.1327 (1, 96, 160, 160) 22 C3 WDC 18,880 0.7762 (1, 192, 160, 160) 26 FDHead 346,705 7.4027 (1, 144, 160, 160), (1, 144, 80, 80)                                           
+
+> Table 9. Cost breakdown for key modules in YOLOv11-M (Baseline).
+> Layer Type Params GFLOPs Input Shape
+> 2C3k2 111,872 5.7934 (1, 128, 160, 160) 4C3k2 444,928 5.7278 (1, 256, 80, 80) 6C3k2 1,380,352 4.4302 (1, 512, 40, 40) 8C3k2 1,380,352 1.1076 (1, 512, 20, 20) 13 C3k2 1,642,496 5.2691 (1, 1024, 40, 40) 16 C3k2 542,720 6.9730 (1, 1024, 80, 80) 19 C3k2 1,511,424 4.8497 (1, 768, 40, 40) 22 C3k2 1,642,496 1.3173 (1, 1024, 20, 20) 23 Detect head 1,472,704 6.7326 (1,144,80,80), (1,144,40,40), (1,144,20,20)
+> Table 10. Cost breakdown for substituted/inserted modules in DERNet-M.
+
+Layer Type Params GFLOPs Input Shape 
+
+2 C3 WDC 40,896 1.4561 (1, 72, 160, 160) 4 C3 WDC 115,680 1.0307 (1, 144, 80, 80) 12 LGE 5,763 0.0203 (1, 288, 40, 40) 16 LGE 4,803 0.0676 (1, 240, 80, 80) 20 LGE-W 13,251 0.1991 (1, 144, 160, 160) 22 C3 WDC 42,180 1.7203 (1, 288, 160, 160) 26 FDHead 767,690 15.9091 (1, 144, 160, 160), (1, 144, 80, 80) 
+
+C. Appendix C: Implementation Details 
+
+Across all four detector families (YOLOv11/DERNet, RT-DETR, RTMDet-R2, PP-PicoDet), our frequency-guided modules are implemented as plug-and-play, configuration-controlled refinements of baseline operators, enabling reproducible and isolated ablations without source-code changes. We adopt a unified spectral design: in the backbone, Wavelet-Difference Gate (WDG) modules are placed at downsampling bottlenecks to decompose features into low- and high-frequency components and use the latter to gate the former, suppressing aliasing of small-object details into low-frequency channels; in the neck, Log-Gabor Enhancer (LGE/LGE-W) modules are attached to multi-scale fusion stages to restore and amplify directional high-frequency components that would otherwise be smoothed by top-down aggregation; and in the detection head, Frequency-Driven Head (FDHead) modules gate regression features with high-frequency responses so that localization is biased toward boundary-consistent regions. The concrete insertion points and module names for each detector family are summarized in Table 11. 
+
+YOLOv11/DERNet-S/M , RTMDet-R2-T/S , and PP-PicoDet-S/L share a consistent three-point pattern: WDG-style blocks replace high-resolution backbone bottlenecks (C2/C3 or C4/C5) to preserve small-object boundaries and reduce aliasing, LGE-style modules are inserted at neck fusion paths to restore directional high-frequency cues, and FDHead-style heads apply P2-level high-frequency gating so that regression gradients concentrate on boundary-supported locations. For 
+
+RT-DETR-R18/R50 , the same spectral roles are realized at functionally equivalent positions: WDG in the CNN backbone before tokens enter the encoder, LGE at the encoder input projection to shape the spectrum mixed by self-attention, and high-frequency gating before decoder query selection to focus queries on boundary-sharp regions, demonstrating that our 14 Frequency-Guided Representation Learning for Small Object Detection 
+
+Table 11. Unified insertion points of WDG-, LGE-, and FDHead-style modules across different detector families.                
+
+> Model family Backbone (WDG) Neck (LGE) Head (FDHead) YOLOv11 / DERNet-S/M WDG replaces bottlenecks @ C2/C3 LGE filtering in FPN neck FDHead gating @ P2 head
+> RTMDet-R2-T/S WDG replaces bottlenecks @ C4/C5 LGE modules @ upsampling paths FDHead gating @ P2 level
+> PP-PicoDet-S/L WDG replaces bottlenecks @ C2/C3 (LCNet) LGE filters @ FPN outputs FDHead gating @ P2 reg branch
+> RT-DETR-R18/R50 WDG replaces bottlenecks in CNN backbone LGE filtering @ encoder input proj HF gating @ decoder query selection
+
+design seamlessly transfers from CNNs to Transformer-based detectors. 
+
+D. Appendix D: Justification of Frequency-Domain Method Choices    
+
+> (a) Original (b) FFT (c) Log-Gabor (d) Wavelet
+
+Figure 9. Qualitative comparison of frequency-domain methods on a VisDrone2019 image. (a) Original image; (b) FFT magnitude spectrum (global, no spatial localization); (c) Log-Gabor final enhanced response (spatially localized, emphasizes edges and textures); (d) Wavelet high-frequency energy map (spatially localized, highlights structured regions).    
+
+> (a) 0° orientation (b) 45° orientation (c) Log-Gabor aggregated (d) Wavelet high-freq
+
+Figure 10. Log-Gabor directional selectivity demonstration. (a-b) Responses at two orientations illustrate directional edge detection; (c) Aggregated Log-Gabor response across orientations; (d) Wavelet high-frequency energy map for comparison. 
+
+We justify using wavelet in the backbone (WDG) and head (FDHead) and Log-Gabor in the neck (LGE/LGE-W) via qualitative visualizations and quantitative analyses on VisDrone2019 images. 
+
+D.1. Qualitative Visualization Results 
+
+Fig. 9 shows that FFT operates with globally coupled frequency responses and therefore lacks spatial localization, whereas both wavelet and Log-Gabor maintain spatial correspondence that is crucial for boundary alignment. Within this localized regime, wavelet yields region-level high-frequency energy that highlights structured areas and provides compact, stable edge-aware cues suited to backbone and head stages under tight computational budgets, while Log-Gabor produces smoother band-pass responses that more selectively concentrate on edges and textures (Fig. 10), making it better aligned with the neck’s role in multi-scale feature aggregation and small-object detail enhancement. 
+
+D.2. Quantitative Analysis Results 
+
+Table 12 shows that wavelet has the lowest computational cost and latency, substantially lower than both FFT and especially Log-Gabor. This efficiency gap makes wavelet preferable in the backbone and head, where frequency-domain operators are invoked repeatedly across many layers, while the higher cost of Log-Gabor restricts its use to a few neck stages rather than pervasive deployment throughout the network. Table 13 summarizes the key properties of each method, justifying our design choices: Wavelet is used in the backbone (WDG) and head (FDHead) because, in these deep and frequently reused stages, it provides fast, spatially localized, region-level high-frequency cues that can be applied repeatedly with low overhead to indicate “where structure is present,” while Log-Gabor is reserved for the neck (LGE/LGE-W) because this shallower, multi-scale fusion part of the network 15 Frequency-Guided Representation Learning for Small Object Detection 
+
+Table 12. Quantitative comparison of frequency-domain methods on multiple VisDrone2019 images (1080×1920). Time (ms) is per single forward pass. 
+
+Method GFLOPs Time (ms) 
+
+FFT 0.218 0.050 ± 0.020 
+
+Wavelet 0.015 0.007 ± 0.002 
+
+Log-Gabor 0.933 0.940 ± 0.090 
+
+benefits more from its more selective, edge- and texture-focused high-frequency modeling, allowing a few stages to trade higher per-layer cost for sharper boundaries and richer small-object details. 
+
+Table 13. Qualitative comparison of key properties of frequency-domain methods. 
+
+Property FFT Wavelet Log-Gabor 
+
+Spatial Localization No Yes Yes Directional Selectivity None Limited Strong Multi-Scale Response None Limited Strong Computational Efficiency Moderate High Moderate Invertibility Yes Yes No 
+
+E. Appendix E: Top-K Frequency Band/Orientation Ablation 
+
+We further analyze the computational cost of varying the number of orientations (K) and number of frequency bands / scales (S) in the Log-Gabor based neck enhancer. We report the module-only parameter count and GFLOPs when inserting a single module at each target neck layer. Table 14 summarizes the results. 
+
+Table 14. Top-K frequency band/orientation ablation (single-module setting). K is the number of orientations and S is the number of scales. Each cell reports Params and GFLOPs, with + ∆mAP50 shown in parentheses. 
+
+Target Layer K=1 K=2 K=4 S=1 S=2 S=3 S=1 S=2 S=3 S=1 S=2 S=3 
+
+Layer12 (P5 →P4) 
+
+3,843 (+0.001) 
+
+0.0135 5,572 (+0.002) 
+
+0.0191 7,301 (+0.002) 
+
+0.0246 5,572 (+0.004) 
+
+0.0191 9,029 (+0.005) 
+
+0.0301 12,486 (+0.005) 
+
+0.0412 9,030 (+0.005) 
+
+0.0301 15,943 (+0.005) 
+
+0.0522 22,856 (+0.007) 
+
+0.0743 
+
+Layer16 (P4 →P3) 
+
+3,203 (+0.002) 
+
+0.0451 4,644 (+0.002) 
+
+0.0635 6,085 (+0.003) 
+
+0.0819 4,644 (+0.006) 
+
+0.0635 7,525 (+0.006) 
+
+0.1004 10,406 (+0.007) 
+
+0.1372 7,526 (+0.007) 
+
+0.1004 13,287 (+0.008) 
+
+0.1741 19,048 (+0.008) 
+
+0.2478 
+
+Layer20 (P3 →P2) 
+
+8,835 (+0.002) 
+
+0.1327 9,700 (+0.003) 
+
+0.1770 10,565 (+0.005) 
+
+0.2212 9,700 (+0.006) 
+
+0.1770 11,429 (+0.009) 
+
+0.2654 13,158 (+0.008) 
+
+0.3539 11,430 (+0.007) 
+
+0.2654 14,887 (+0.009) 
+
+0.4424 18,344 (+0.009) 
+
+0.6193 
+
+Overall, increasing either K or S consistently increases compute and parameters, with the steepest GFLOPs growth observed at the highest-resolution neck layer (P3 →P2). In our main configuration, we adopt small K and S (e.g., S=1 with limited orientations) to balance efficiency and detail enhancement. 
+
+F. Appendix F: Successful Detection Cases 
+
+Figure 11 showcases a series of inherently challenging small-object detection cases: some images contain distant and low-resolution targets that occupy only a few pixels; others exhibit strong background clutter or low contrast between objects and their surroundings; yet others involve partially occluded or densely packed instances that are hard to distinguish. Despite these difficulties, DERNet-S consistently produces accurate detections with tight bounding boxes around the objects of interest. This demonstrates that our frequency-guided representation learner is able to robustly capture and localize small and distant targets even under adverse imaging conditions. 16 Frequency-Guided Representation Learning for Small Object Detection 
+
+Figure 11. Successful detection cases where DERNet-S accurately detects and localizes small and distant objects.     
+
+> (a) Distant objects (b) Incorrect segmentation (c) Extremely small objects (d) Tightly-clustered objects (e) Occluded objects
+
+Figure 12. Qualitative comparison between ground truth and DERNet-S predictions on challenging small object detection scenarios. The first row shows ground truth annotations, while the second row shows DERNet-S model predictions. 
+
+G. Appendix G: Error Analysis of Small Object Detection 
+
+Fig. 12 reveals several challenging scenarios in small object detection: (a) shows distant objects that are difficult to detect due to their small size and distance; (b) demonstrates incorrect segmentation where objects are improperly divided due to color variations; (c) illustrates extremely small objects that challenge detection algorithms; (d) depicts tightly-clustered objects where individual elements are hard to distinguish; (e) shows occluded objects that are partially hidden by other elements, making complete detection difficult. These persistent errors highlight that while our model advances in frequency-guided representation, it still faces challenges in robustly handling extreme scale variations and complex occlusion. Further efforts are needed to enhance its precision in these intricate scenarios. 
+
+H. Appendix H: Training Configurations for Other Architectures 
+
+Table 15 summarizes the configuration of experiment environments. Table 16 summarizes the edge hardware used for Jetson Nano FPS evaluation. And Table 17 summarizes the training hyperparameters used for PP-PicoDet, RTMDet-R2, and RT-DETR models, ensuring a fair and comparable experimental setup across all models. 
+
+Table 15. Configuration of Experiment Environments. 
+
+Environment Parameter 
+
+CPU Intel(R) Xeon(R) Gold 5218R CPU @ 2.10GHz GPU NVIDIA A100-PCIE-40GB VRAM 40 GB RAM 46 GB Operating System Rocky Linux 8.5 (Green Obsidian) Language Python 3.10.14 Frame PyTorch 2.1.0 CUDA Version 12.6 
+
+17 Frequency-Guided Representation Learning for Small Object Detection 
+
+Table 16. Configuration of Edge Inference Environment. 
+
+Environment Parameter 
+
+Device NVIDIA Jetson Nano CPU Quad-core ARM Cortex-A57 MPCore processor GPU NVIDIA Maxwell architecture with 128 NVIDIA CUDA cores Memory 4 GB 64-bit LPDDR4, 1600 MHz Memory Bandwidth 25.6 GB/s Storage microSD card Software Stack NVIDIA JetPack SDK Frame PyTorch 
+
+Table 17. Training configurations for YOLOv11, PP-PicoDet, RTMDet-R2, and RT-DETR architectures. 
+
+Architecture Epochs Input Size Batch Size Optimizer LR Schedule Augmentation Workers 
+
+YOLOv11-S 300 640 16 SGD Cosine Mosaic 4
+
+YOLOv11-M 300 640 16 SGD Cosine Mosaic 4
+
+PP-PicoDet-S 300 416 12 Momentum Cosine Crop+Flip+Color 8
+
+PP-PicoDet-L 300 640 12 Momentum Cosine Crop+Flip+Color 8
+
+RTMDet-R2-T 200 1024 8 AdamW Cosine Flip+Rotation 8
+
+RTMDet-R2-S 200 1024 8 AdamW Cosine Flip+Rotation 8
+
+RT-DETR-R18 72 640 16 AdamW Warmup+Constant Photo+Zoom+Crop 4
+
+RT-DETR-R50 72 640 16 AdamW Warmup+Constant Photo+Zoom+Crop 4
+
+I. Appendix I: Detailed Formulations for WDG 
+
+This appendix provides the complete mathematical formulations for the Wavelet-Difference Gate (WDG) module, including the Haar wavelet transform and the Re-parameterized Central-Difference Convolution (RepCDC). 
+
+I.1. Haar Discrete Wavelet Transform 
+
+The 2D Haar DWT decomposes each spatial 2×2 block into four subbands using the Haar matrix H2 =
+
+1 11 −1
+
+
+
+. For each channel c and spatial location (u, v ), the forward and inverse transforms are: 
+
+S(c) 
+
+> u,v
+
+= 12 H2 X(c) 
+
+> u,v
+
+H⊤ 
+
+> 2
+
+(DWT) ,
+
+X(c) 
+
+> u,v
+
+= 12 H⊤ 
+
+> 2
+
+S(c) 
+
+> u,v
+
+H2 (IDWT) , (14) 
+
+where X(c) 
+
+> u,v
+
+∈ R2×2 is the local spatial block and S(c) 
+
+> u,v
+
+= x(c) 
+
+> LL,u,v
+
+x(c)
+
+> LH,u,v
+
+x(c) 
+
+> HL,u,v
+
+x(c)
+
+> HH,u,v
+
+!
+
+collects the four subbands. Expanding the matrix multiplication yields the element-wise expressions: 
+
+xLL = 12 (x00 + x01 + x10 + x11 ),
+
+xLH = 12 (x00 − x01 + x10 − x11 ),
+
+xHL = 12 (x00 + x01 − x10 − x11 ),
+
+xHH = 12 (x00 − x01 − x10 + x11 ),
+
+(15) 
+
+where xij denotes the pixel at row i, column j within the 2×2 block. The LL subband is a local average (low-pass), while LH, HL, and HH capture horizontal, vertical, and diagonal gradients (high-pass) respectively. 
+
+I.2. Re-parameterized Central-Difference Convolution (RepCDC) 
+
+RepCDC enhances edge sensitivity by modifying the center coefficient of a standard 3×3 convolution kernel. Let W ∈
+
+RCout ×Cin ×3×3 be the base kernel and θ ∈ RCout ×Cin be a learnable center-difference parameter. The output at spatial location (p, q ) for output channel o is: 
+
+y(o) 
+
+> p,q
+
+=
+
+> Cin
+
+X
+
+> c=1 1
+
+X
+
+> i=−11
+
+X
+
+> j=−1
+
+W(o,c ) 
+
+> i,j
+
+z(c) 
+
+> p+i,q +j
+
+−
+
+> Cin
+
+X
+
+> c=1
+
+θ(o,c ) z(c) 
+
+> p,q
+
+, (16) 
+
+18 Frequency-Guided Representation Learning for Small Object Detection 
+
+where z is the input feature map. This is equivalent to constructing an effective kernel fW where: 
+
+fW(o,c ) 
+
+> i,j
+
+=
+
+(
+
+W(o,c )0,0 − θ(o,c ), if i = j = 0 ,
+
+W(o,c ) 
+
+> i,j
+
+, otherwise . (17) 
+
+By subtracting the center value, RepCDC emphasizes the difference between the center pixel and its neighbors, effectively embedding a gradient operator into the convolution. During deployment, fW is precomputed and used as a standard convolution kernel, incurring no additional inference cost. 
+
+I.3. WDG Pseudo-code Algorithm 2 WDG forward pass (Wavelet-Difference Gate).                                                        
+
+> Input: x∈RC×H×W, expansion ratio e
+> Output: y∈RC×H×W
+> x′←f1×1(x){project to C′=⌊eC ⌋}
+> Align H, W to even size by cropping/padding if needed
+> (xLL ,xLH ,xHL ,xHH )←DWT( x′)
+> yLL ←RepCDC( xLL ); apply norm+activation
+> g←σ fg
+>  Concat( xLH ,xHL ,xHH ) exLL ←yLL ⊙(1+g)
+> bx′←IDWT( exLL ,xLH ,xHL ,xHH ); restore original size
+> y←fout 1×1(bx′)
+> if channels match then y←x+y
+> return y
+
+J. Appendix J: Detailed Formulations for LGE 
+
+This appendix provides the complete mathematical formulations for the Log-Gabor Enhancer (LGE) module, including the Log-Gabor filter construction and the WTConv variant. 
+
+J.1. Log-Gabor Filter Construction 
+
+The Log-Gabor kernel gs,k is constructed in the spatial domain by rotating a centered coordinate grid and applying a log-normal radial envelope with a cosine angular term. For orientation index k ∈ { 0, . . . , K −1} and scale index 
+
+s ∈ { 0, . . . , S −1}: (u′, v ′) = ( u cos ϕk + v sin ϕk , −u sin ϕk + v cos ϕk ),r =
+
+p
+
+u′2 + v′2 + ε, θ = atan2( v′, u ′),
+
+gs,k (u, v ) = exp 
+
+
+
+− [log( r/ρ s)] 2
+
+2 [log 2] 2
+
+
+
+cos θ, 
+
+(18) 
+
+where ϕk = kπ/K is the orientation angle, ρs = 0 .5 + s · 0.3 is the scale parameter, and ε is a small constant for numerical stability. The denominator 2[log 2] 2 ≈ 0.961 arises from setting the bandwidth parameter σ = 2 ρs, which yields one octave of frequency coverage per scale. The Log-Gabor function has two key properties that distinguish it from hand-crafted edge filters: • Zero DC response : The log-normal envelope naturally excludes the DC component, preventing the filter from responding to uniform regions. • Optimal bandwidth : The symmetric Gaussian profile in log-frequency space provides uniform coverage across scales, avoiding the bandwidth asymmetry of standard Gabor filters. 
+
+J.2. Wavelet-Transform Convolution (WTConv) 
+
+LGE-W replaces the local mixing operator fmix with a Wavelet-Transform Convolution (WTConv), which performs multi-level subband mixing in the Haar domain: 
+
+WTConv( z) = S0 D0(z) + IDWT 
+
+> L
+
+X
+
+> i=1
+
+Si D4,i (DWT i(z)) 
+
+!
+
+, (19) 
+
+where the notation is summarized in Table 18. 19 Frequency-Guided Representation Learning for Small Object Detection 
+
+Table 18. Notation for WTConv. 
+
+Notation Description 
+
+D0 Depthwise conv in spatial domain ( 5×5)
+
+D4,i Grouped depthwise conv over four subbands at level iL Number of wavelet decomposition levels 
+
+S0 Learnable scale for base path (init 1.0)
+
+Si Learnable scales for wavelet levels (init 0.1)The base path provides direct spatial-domain processing, while the wavelet path enables frequency-selective refinement with adaptive scaling. By operating in the wavelet domain, WTConv achieves a larger effective receptive field than a standard convolution of the same kernel size, making it particularly effective at the highest-resolution neck layer where context aggregation is most beneficial for small object detection. 
+
+J.3. LGE Pseudo-code Algorithm 3 LGE / LGE-W forward pass (Log-Gabor Enhancer and WTConv variant). 
+
+Input: x ∈ RC×H×W , orientations K, scales S
+
+Learnable: logits α ∈ RS , β ∈ RK , gate γ
+
+Output: y ∈ RC×H×W
+
+xskip ← x {or 1 × 1 projection if channels change }
+
+Compute Log-Gabor subbands {hs,k }s=1 ..S,k =1 ..K per channel (fixed filter bank; grouped/depthwise conv) 
+
+w(S) ← softmax( α), w(K) ← softmax( β)
+
+h ← PSs=1 
+
+PKk=1 w(S) 
+
+> s
+
+w(K) 
+
+> k
+
+hs,k 
+
+h ← σ(γ) h {global gate }
+
+if LGE then u ← DWConv 3×3(h)
+
+else {LGE-W } u ← WTConv( h) when C preserved; otherwise use standard 3 × 3 conv 
+
+y ← xskip + u
+
+return y
+
+Algorithm 4 WTConv forward pass (used in LGE-W). 
+
+Input: z ∈ RC×H×W , levels L (default 1)
+
+Output: WTConv( z) ∈ RC×H×W
+
+zbase ← S 0 D0(z) {spatial depthwise conv + learnable scale }
+
+Initialize zLL ← z; stacks L ← [ ] , H ← [ ] , shapes S ← [ ] 
+
+for i = 1 to L do 
+
+Record shape; pad to even size if needed; save shape to S
+
+(zraw  
+
+> LL
+
+, zLH , zHL , zHH ) ← DWT( zLL )
+
+zLL ← zraw  
+
+> LL
+
+{recurse on raw LL }
+
+Apply Si D4,i over the 4-subband tensor (reshape to 4C, grouped depthwise conv, reshape back) Push processed LL to L and processed (LH, HL, HH ) to H
+
+end for 
+
+znext  
+
+> LL
+
+← 0
+
+for i = L down to 1 do 
+
+Pop processed LL from L and processed (LH, HL, HH ) from H
+
+zLL ← zLL + znext  
+
+> LL
+
+{level-wise LL accumulation }
+
+znext  
+
+> LL
+
+← IDWT( zLL , zLH , zHL , zHH ); crop to saved shape 
+
+end for 
+
+zwav ← znext 
+
+> LL
+
+return zbase + zwav 
+
+K. Appendix K: Detailed Formulations for FDHead 
+
+This appendix provides the complete mathematical formulations for the Frequency-Driven Head (FDHead), including the DEConv re-parameterization and the P2 high-frequency gate. 
+
+K.1. DEConv Re-parameterization 
+
+The DEConv block aggregates five directional-difference kernels into a single convolution at inference: 
+
+DEConv( u) = φ
+
+  5X
+
+> m=1
+
+Km
+
+ ∗ u +
+
+> 5
+
+X
+
+> m=1
+
+bm
+
+
+
+, (20) 
+
+20 Frequency-Guided Representation Learning for Small Object Detection 
+
+where φ(·) denotes normalization and activation. The five kernels Km ∈ RC×C×3×3 are summarized in Table 19. 
+
+Table 19. DEConv kernel descriptions. 
+
+Kernel Description 
+
+K1 (cd) Center-difference: center vs. surrounding context 
+
+K2 (hd) Horizontal-difference: horizontal edges 
+
+K3 (vd) Vertical-difference: vertical edges 
+
+K4 (ad) Adaptive-difference: rotation-invariant patterns 
+
+K5 (std) Standard convolution: general features At inference, all five kernels are merged into a single 3×3 convolution, enabling efficient computation while preserving directional sensitivity. 
+
+K.2. P2 High-Frequency Gate 
+
+The P2 gate estimates boundary confidence from wavelet subband energy. Let f1 = [ fa, fb] with fa ∈ RCf ×H×W being the gated channel subset. The complete formulation is: 
+
+(fLH , fHL , fHH ) = DWT HF (fa),
+
+h = X
+
+> k∈{ LH,HL,HH }
+
+softmax( ω)k |fk |,
+
+s = GAP( h), g = σ Conv (2) 1×1(SiLU(Conv (1) 1×1(s))) ,
+
+efa = fa ⊙ (1 + α g),
+
+(21) 
+
+where ω ∈ R3 are learnable logits weighting the three high-frequency subbands, GAP( ·) averages over spatial dimensions, and the channel gate uses two 1×1 convolutions with a SiLU nonlinearity and sigmoid output. The gated feature ef1 = [ efa, fb]
+
+is then fed only to the box branch. 
+
+K.3. FDHead Pseudo-code Algorithm 5 FDHead forward pass (Frequency-Driven Head).                                                                                            
+
+> Input: multi-level features {xi}Ni=1 (with i= 1 being P2)
+> Output: box logits {bi}and class logits {pi}
+> for each level i= 1 ..N do
+> ui←Conv 1×1(xi); apply normalization
+> fi←DW −PW(DEConv( ui)) {shared tower }
+> if i= 1 {P2, box branch only }then
+> Split channels f1= [ fa,fb]with gated subset width Cf
+> (fLH ,fHL ,fHH )←DWT HF (fa)
+> w←softmax( ω);h←wLH |fLH |+wHL |fHL |+wHH |fHH |
+> s←GAP( h);g←Gate( s){1×1conv →SiLU →1×1conv →sigmoid }
+> efa←fa⊙(1 + αg);fbox 1←[efa,fb]
+> b1←Scale 1(Hbox (fbox 1)) ;p1← H cls (f1)
+> else
+> bi←Scale i(Hbox (fi)) ;pi← H cls (fi)
+> end if end for return {bi}and {pi} { decode boxes as in main text }
+
+21 Frequency-Guided Representation Learning for Small Object Detection 
+
+L. Appendix M: Comparison of Frequency-Domain Methods in Object Detection 
+
+Table 20 positions our work relative to existing frequency-domain approaches in object detection. We compare methods at the level of frequency-domain enhancement operators , focusing on where and how frequency information is injected into detection pipelines. 
+
+Clarification on comparison criteria. All attributes are evaluated at the level of frequency-domain enhancement operators .
+
+Invertible refers to the reversibility of the employed frequency transform (e.g., FFT/IFFT, WT/IWT), rather than end-to-end network invertibility. Extra Branch indicates explicit parallel computational pathways introduced by the frequency operator, which incur additional architectural and optimization overhead. 
+
+Table 20. Comparison of frequency-domain methods in object detection. The comments emphasize the limitations implied by each design choice. Our DERNet framework is highlighted in the last row.                                                         
+
+> Method Domain Op. Stage Localized Invertible Learn Filters Extra Branch Comment
+> GFNet FFT BNo Yes Yes Partial No localization FDConv Frequency-aware B/N Yes No Yes No Implicit only FreqFusion Adaptive Filter NYes No Yes Yes Generator overhead WTConv Wavelet B/N Yes Yes Partial No No adaptivity HS-FPN HF Response NYes No Yes Yes Extra branch Wavelet Transformer Complex Wavelet BYes Yes Partial No Single-stage only
+> DERNet (Ours) Wavelet/Log-Gabor B/N/H Yes Yes/No Yes No Full-stage adaptive
+
+Positioning of Our Work: Unlike prior approaches that introduce frequency-domain enhancement operators at isolated stages, DERNet provides a stage-adaptive frequency modeling framework spanning backbone, neck, and head. • Spatial Localization: We employ wavelet transforms in backbone and head stages to preserve spatial-frequency correspondence, while using directional Log-Gabor filters in the neck to enhance edge and texture sensitivity. This contrasts with global FFT-based methods (e.g., GFNet) that discard spatial locality. • Invertibility: DERNet preserves transform-level invertibility where structural fidelity is critical (B/H), and deliberately relaxes invertibility in the neck where directional discrimination is more beneficial, reflecting a stage-aware trade-off rather than a uniform design constraint. • Learnable Filters: By combining fixed analytical filter banks with learnable aggregation weights, DERNet achieves adaptability with reduced parameter redundancy, avoiding the heavy reliance on fully learnable spectral filters. • Architectural Overhead (Extra Branches): Many frequency-based methods (e.g., FreqFusion, HS-FPN) introduce explicit parallel branches to inject spectral cues. While effective, such designs increase architectural complexity, parameter coupling, and optimization difficulty, particularly in multi-stage detectors. In contrast, DERNet integrates frequency-domain operators inline within existing B/N/H pathways, achieving frequency awareness without introducing extra branches , thereby improving scalability, stability, and plug-and-play compatibility. This design highlights that effective frequency modeling in detection is not only a matter of what operator is used, but also 
+
+where and how it is integrated across stages. 22 Frequency-Guided Representation Learning for Small Object Detection 
+
+M. Appendix N: Per-Class Performance Visualization 
+
+Figure 13. Per-class performance comparison on VisDrone2019 validation set and test set. 
+
+23 Frequency-Guided Representation Learning for Small Object Detection 
+
+Figure 14. Per-class performance comparison on TinyPerson validation set and test set. 
+
+24 Frequency-Guided Representation Learning for Small Object Detection 
+
+Figure 15. Per-class performance comparison on UAVDT validation set and test set. 
+
+25 Frequency-Guided Representation Learning for Small Object Detection 
+
+Figure 16. Per-class performance comparison on Dotav1 validation set. 
+
+26 Frequency-Guided Representation Learning for Small Object Detection 
+
+N. Dataset-dependent Benefit Analysis  
+
+> Figure 17. Dataset-dependent overall distribution comparison across four benchmarks.
+
+The dataset-dependent trend in Table 1 supports DER’s spectral motivation. As shown in Fig. 17, DER yields the largest gains in information-starved scenes with extremely small, dense, or low-contrast targets, such as TinyPerson and distant crowded regions in VisDrone2019, where fragile high-frequency cues are easily lost. For semantically richer objects, such as UAVDT vehicles category and DOTAv1 planes/ships category, baselines already capture reliable low-frequency semantics, so DER mainly provides boundary refinement and yields moderate but consistent gains. Thus, DER is most beneficial when spectral degradation is the dominant bottleneck, while remaining robust across easier regimes. 
+
+O. Fixed versus Learnable Log-Gabor Filters 
+
+Fixed Log-Gabor filters preserve the intended zero-DC, frequency-selective bandpass prior for directional high-frequency recovery. If these filters are made fully learnable without explicit spectral constraints, this prior is no longer guaranteed: the filters may drift away from the Log-Gabor form and effectively become Log-Gabor-initialized unconstrained depthwise convolutions, potentially fitting dataset-specific spatial texture patterns. As shown in Table 21, learnable filters bring no measurable GFLOPs increase, but increase parameters, cause a large module-level parameter surge, and consistently reduce mAP 50 . These results empirically support the fixed-filter design, which preserves the intended spectral prior while avoiding unnecessary parameters. 27 Frequency-Guided Representation Learning for Small Object Detection 
+
+Table 21. Fixed versus learnable Log-Gabor filters on VisDrone2019 val. K and S denote orientations and scales. Learnable filters increase module parameters but consistently degrade mAP 50 , supporting the fixed LGE design. 
+
+Configuration Total Params LGE Module Params Inference GFLOPs mAP 50 
+
+(Learnable vs. Fixed) Increase Surge Increase Change 
+
+K = 1 , S = 2 +0 .045 M +115% to +276% +0 .0 −0.004 
+
+K = 2 , S = 1 +0 .045 M +115% to +276% +0 .0 −0.006 
+
+K = 2 , S = 2 +0 .090 M +142% to +448% +0 .0 −0.007 
+
+28

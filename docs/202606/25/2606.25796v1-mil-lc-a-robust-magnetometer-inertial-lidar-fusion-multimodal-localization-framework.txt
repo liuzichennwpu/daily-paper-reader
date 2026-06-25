@@ -1,0 +1,844 @@
+Title: MIL-LC: A Robust Magnetometer-Inertial-LiDAR Fusion Multimodal Localization Framework
+
+URL Source: https://arxiv.org/pdf/2606.25796v1
+
+Published Time: Thu, 25 Jun 2026 01:07:46 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+> MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 1
+
+# MIL-LC: A Robust Magnetometer-Inertial-LiDAR Fusion Multimodal Localization Framework 
+
+Qiyang Lyu ∗, Zhenyu Wu ∗, Wei Wang, Hongming Shen, and Danwei Wang, Life Fellow, IEEE 
+
+Abstract —Localization in challenging environments, such as GNSS-denied, geometrically repetitive, or textureless scenes commonly found in offices, hotels, and underground parking facilities, remains an open problem for reliable autonomous mobile robot (AMR) deployment. Single-modality localization methods are inherently limited by the constraints of individual sensors. Although multimodal fusion frameworks have shown improved robustness, most existing approaches still rely heavily on geometric or texture features, or on infrastructure-based beacons, which increase installation and maintenance costs while reducing deployment flexibility. Recently, ambient magnetic field (AMF)-based localization has attracted growing attention because it does not depend on geometric or texture features, nor does it require additional infrastructure, making it a promising complementary modality for AMR localization. However, existing studies have only explored such fusion in pedestrian scenarios using smartphone-mounted sensor suites, and practical solutions for AMR systems remain largely unexplored. To address this gap, this article proposes a magnetometer-inertial-LiDAR fused mul-timodal localization framework with a custom-designed sensor suite, termed MIL-LC, which provides reliable localization even when LiDAR suffers from geometric degeneration or when the magnetic map changes during long-term deployment. Extensive experiments in both simulation and real-world environments demonstrate that the proposed MIL-LC framework achieves robust and accurate localization performance. 
+
+I. I NTRODUCTION 
+
+The widespread deployment of robotics across diverse ap-plication scenarios [1], [2] has increased the demand for robots to perceive, understand, and interact with their environments reliably before executing downstream tasks. These scenarios range from relatively structured environments, where abundant geometric and texture information supports localization [3], [4], to highly challenging settings, such as geometrically degenerate or repetitive environments for LiDAR and cameras [5], GNSS-denied environments [6], and obstacle-cluttered en-vironments that degrade UWB-based localization. Such condi-tions are common in real-world applications, yet robots are still expected to operate robustly within them. Under these circum-stances, localization methods that rely on a single sensor often have limited generalizability, making multi-sensor fusion a more practical solution. Existing studies have explored various multimodal fusion strategies [6]–[10], improving robustness by leveraging complementary sensing modalities. However, 
+
+This research is supported by the National Research Foundation, Singapore under its Medium Sized Centre for Advanced Robotics Technology Innovation (CARTIN). ( Corresponding author: Danwei Wang )The authors are with the School of Electrical and Electronic En-gineering, Nanyang Technological University, Singapore 639798 (e-mail: {qiyang001, zhenyu002, wei013 }@e.ntu.edu.sg; {hongming.shen, ed-wwang }@ntu.edu.sg). 
+
+> ∗
+
+Co-first authorship 
+
+Fig. 1. The high-fidelity simulated seaport environments and the localization results using our proposed MIL-LC method (white) compared with the ground truth path (red). 
+
+most existing fusion frameworks still rely heavily either on environmental geometric or texture information, or on external infrastructure such as beacons, which restricts deployment flexibility and increases maintenance cost. Inspired by the ability of birds to navigate using the Earth’s magnetic field [11], the ambient magnetic field (AMF) has emerged as a promising modality for robust and flexible fusion-based local-ization [1], [5]. Distorted by nearby ferromagnetic objects, the AMF exhibits location-dependent patterns that can serve as fin-gerprints [12]. Such magnetic signatures are commonly found in enclosed or semi-enclosed environments, including office and hospital corridors, supermarkets, and car parks because of the widespread presence of built-in ferromagnetic objects (e.g., steel bars, power cables, pipes). Previous studies have shown that magnetic-based localization can provide localization cues similar to GNSS [13], [14]. However, single-modal magnetic-based localization usually suffers from limited accuracy. Exist-ing multimodal methods using magnetic information, such as radio-magnetic and visual-magnetic fusion [15]–[19], are still mainly restricted to pedestrian and smartphone applications. In contrast, magnetic fusion for AMRs localization, particularly with LiDAR, remains largely unexplored, and its long-term robustness has yet to be sufficiently validated. To address these limitations, this article proposes a loosely coupled and easy-to-implement magnetometer-inertial-LiDAR multimodal localization framework. The proposed framework can adaptively balance localization accuracy and robustness according to environmental conditions, while also maintaining long-term stability. The main contributions are summarized as follows:  
+
+> •
+
+A novel multimodal localization framework named MIL-LC that fuses magnetic and LiDAR information while incorporating inertial measurements for AMRs’ robust  
+
+> arXiv:2606.25796v1 [cs.RO] 24 Jun 2026 MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 2
+
+localization in challenging degenerate environments.  
+
+> •
+
+A newly-designed novel standalone sensor suite with mul-tiple complementary modalities and onboard computing unit.  
+
+> •
+
+Adaptive multimodal balancing strategies, including de-generacy detection, outlier rejection, and adaptive weight-ing, to improve the system’s robustness and adaptability under varying environmental conditions.  
+
+> •
+
+Extensive experiments in both simulated and real-world environments demonstrate strong robustness and accuracy across various scenarios, including long-term resilience to magnetic disturbance. The remainder of this article is organized as follows. Sec-tion II reviews related work. Section III and IV build up the system model and presents the proposed methodology, including undistortion and state update. Section V evaluates the framework through extensive simulated and real-world experiments. Finally, Section VI concludes this article. II. L ITERATURE REVIEW 
+
+Multimodal localization is motivated by the complementary failure modes of individual sensors. Cameras are sensitive to illumination change, occlusion, and weak texture; LiDAR can degenerate in geometrically repetitive environments; IMUs drift over time; GNSS is vulnerable to blockage and multi-path; UWB suffers under NLOS conditions and poor anchor geometry; and RFID often depends on prior tag deployment or external references. Fusing multiple modalities is therefore a natural strategy for improving localization robustness. Conventional multimodal fusion systems often combine vision with geometric sensing, particularly LiDAR, to com-pensate for the limitations of pure vision-based localization. In such systems, LiDAR improves robustness under poor illu-mination and weak texture, while cameras enhance target as-sociation [7], [8]. Other studies further integrate infrastructure-based positioning sensors. Camera-UWB fusion has been explored through constrained filtering and tightly coupled optimization to reduce long-term drift [9], [20]. LiDAR-GNSS fusion commonly switches between GNSS-assisted and LiDAR-dominant modes, applies confidence-aware strategies to smooth transitions under varying GNSS quality, or incor-porates adaptive filtering and graph optimization to mitigate drift in urban environments [6], [21], [22]. LiDAR-IMU-UWB fusion has also shown strong performance in GNSS-denied or geometrically degenerate settings such as tunnels, where LiDAR is weakly observable along the tunnel axis and UWB provides complementary absolute ranging [23], [24]. Beyond these mainstream combinations, RFID-based fusion has been investigated for warehouse localization, where RFID phase and odometry constraints are jointly optimized in a graph framework [10]. Overall, multimodal fusion generally im-proves localization accuracy and robustness, but at the cost of higher calibration effort, greater system complexity, increased computation, and stronger dependence on scenario-specific assumptions such as anchor deployment and maintenance [25]. On the other hand, early studies on magnetic-based localiza-tion as a standalone modality demonstrated its feasibility, but also revealed inherent limitations, including limited spatial dis-criminability of magnetic signals and low signal-to-noise ratio, which generally lead to lower localization accuracy [14], [16], [17]. To address these limitations, increasing attention has been given to fusing magnetic sensing with other modalities. Jung et al. [15] combined magnetic and radio measurements within a Rao-Blackwellized particle filter SLAM framework, improving global relocalization performance. VMag [18] fur-ther integrated geomagnetic and visual information through a context-aware particle filter, where magnetic measurements provided locally stable signatures while visual features con-tributed richer spatial constraints. MaLoc [17] and Magicol [16] also demonstrated that combining magnetic observations with auxiliary cues such as pedestrian motion information or WiFi can improve localization robustness. More recently, mag-netic measurements are fused with inertial motion estimates on a magnetic map, enabling large-scale infrastructure-free localization with stronger robustness [26], [27]. Yang et al. [19] built up a multi-sensor fusion system with IMU, magne-tometer, Bluetooth and so on, but the magnetic information is only partially utilized for heading estimation. In summary, although these studies indicate that magnetic sensing is particularly valuable as a complementary modality, most of them still depend on sequential matching or particle-filter-style inference, which can be computationally expensive and often requires sufficient temporal history or a constrained search space to avoid mismatching, and many fusion systems remain closer to pedestrian or smartphone localization than to tightly coupled robot localization. This paper therefore focuses on addressing this limitation by investigating a fusion framework for robust localization for AMRs. III. S YSTEM MODELING 
+
+The overall framework of the multimodal localization sys-tem is illustrated in Fig. 2. Measurements from different sen-sors are first synchronized and corrected for motion distortion through IMU-based forward and backward propagation, as indicated in the blue block. The preprocessed data are then fed into their respective localization modules for pose estimation, as shown in the pink and orange blocks. Notably, the pose estimate obtained from the magnetometer is utilized as the initial guess for LiDAR scan matching. After the LiDAR-based iterated error-state Kalman filter (IESKF) converges, the refined pose estimate is output as system odometry. 
+
+A. Kinematic Model 
+
+In the kinematic model, the IMU frame is adopted as the body frame for state estimation, and a state vector and kinematic model are employed. In this work, the global frame is aligned with the coordinate frame of the pre-built global map. Accordingly, the IMU-based kinematic model is defined as follows:                                  
+
+> M˙RI=MRI⌊ωm−bω−nω⌋∧,M˙vI=MRI(am−ba−na) + Mg
+> M˙pI=MvI,˙bω=nbω,˙ba=nba ,M˙g=0
+> (1)
+
+where MRI , MpI and MvI are the orientation position, and linear velocity of IMU in the global map frame, and Mg
+
+is the gravity vector, nω and na are the measurement noise MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 3 
+
+> Fig. 2. Flowchart of the proposed framework. The overall framework can be divided into three parts: (a) Data synchronization and motion undistortion, (b) Magnetic-based localization and robust kernel filtering, and (c) LiDAR-based degeneration detection and IESKF update.
+
+of accelerometer and gyroscope, ba and bω are the IMU measurement bias with the random walk as nba and nbω .Finally, ⌊·⌋ denotes the skew-symmetric cross product. According to the IMU kinematic model, the system state vector x, input vector u, and noise vector w can be defined as: x =
+
+hMR⊤ 
+
+> IM
+
+p⊤ 
+
+> IM
+
+v⊤ 
+
+> I
+
+b⊤ 
+
+> ω
+
+b⊤ 
+
+> aM
+
+g⊤i⊤
+
+u =
+
+h
+
+ω⊤ 
+
+> m
+
+a⊤
+
+> m
+
+i⊤
+
+, w =
+
+h
+
+n⊤ 
+
+> ω
+
+n⊤ 
+
+> a
+
+n⊤ 
+
+> bω
+
+n⊤
+
+> ba
+
+i⊤ (2) 
+
+B. State Transition and Forward Propagation 
+
+Before incorporating the sensor measurements, the system first propagates the state from tk−1 to tk using IMU readings. Based on the discretization of the continuous-time kinematic model with an IMU sampling interval of ∆t, the state propa-gation can be expressed as follows: 
+
+ˆxti = ˆxti−1 ⊞
+
+
+
+(ωm − bω − nω )∆t
+
+> M
+
+vI ∆t + 12 (MRI (am − ba − na) + Mg)∆t2
+
+(( am − ba − na) + Mg)∆t
+
+nbω ∆t
+
+nba ∆t
+
+03×1
+
+
+
+(3) 
+
+Between two consecutive state updates, multiple IMU mea-surements may be received. Starting from the last updated state, ˆxt0 = ¯xtk−1 , the state is propagated using these IMU readings until reaching the end time of the scan window. This forward propagation is illustrated in Fig. 3 as the blue triangles between two dashed lines. During this stage, the state covariance accumulates due to the absence of observations: ˆPti = F˜xti−1
+
+ˆPti−1 F⊤ 
+
+> ˜xti−1
+
++ Fwti−1 Qti−1 F⊤ 
+
+> wti−1
+
+where Qti−1 is the covariance of noise. If the IMU is properly manufactured, the random walks can be neglected by setting w = 0, and F˜xti−1
+
+and Fwti−1 can be calculated as 
+
+F˜xti−1 = ∂ δ ˆxti
+
+∂ δ xti−1 ˜xti−1 =0,wti−1 =0
+
+, Fwti−1 = ∂ δ ˆxti
+
+∂ wti−1 ˜xti−1 =0,wti−1 =0
+
+(4) 
+
+IV. M ETHODOLOGY OF MULTIMODAL LOCALIZATION 
+
+A. LiDAR Undistortion and Localization 
+
+We adopt the widely accepted framework FAST-LIO2 [28] as the backbone for LiDAR localization with some modifica-
+
+> Fig. 3. Data synchronization and motion undistortion of magnetic and LiDAR data using forward and backward propagation during the state prediction.
+
+tions. Since LiDAR systems may acquire points sequentially, the sampling time of each point will differ from the scan end time tk. As a result, platform motion during the scan can introduce distortion into the full point cloud. To improve scan quality, this distortion is compensated through backward propagation of the predicted state. As illustrated in Fig. 3, the backward propagation is initialized from the end of the scan window.  
+
+> Itk
+
+ˇvIti−1 = Itk ˇvIti − Itk ˇRIti (amti−1 − ˆbatk )∆t − Itk ˆgtk ∆t 
+
+> Itk
+
+ˇpIti−1 = Itk ˇpIti − Itk ˇvIti ∆t, Itk ˇRIti−1 = Itk ˇRIti exp (( ˆbωtk − ωmti−1 )∆t)
+
+(5) 
+
+where Itk ˇTIti = ( Itk ˇRIti , Itk ˇpIti ) is the desired relative transfor-mation between time ti and tk. Then the LiDAR point can be synchronized from ti to tk with Lptk = I T−1  
+
+> LItk
+
+ˇTIti 
+
+> I
+
+TLLpti where  
+
+> I
+
+TL denotes the extrinsic transformation from the LiDAR frame to the IMU frame, as the LiDAR scan points are expressed in the LiDAR body frame rather than the IMU body frame. After all points are undistorted to a common coordinate frame at the scan end time, a complete undistorted LiDAR scan is obtained. Different from the scan-to-local matching strategy in [28], a scan-to-global approach is adopted in this work since a global map is pre-built. To reduce computational cost, a local sliding-window map is maintained, where an initial local map cube is constructed and centered at the current body pose, and is shifted when the body pose approaches the boundary to ensure that the body pose remains near the center. Subsequently, the LiDAR scan points are aligned with the global map using a point-to-plane fitting strategy, and more detailed formulations of the residual computation and the iterated state update between the LiDAR scan and the local map can be found in [28]. 
+
+B. Magnetometer Synchronization and Localization 
+
+We propose a localization method for magnetic-based local-ization. Due to the high-frequency output of the magnetometer (≈ 200 Hz ), multiple measurements may be received within a single LiDAR scan window. Therefore, a similar back-ward propagation procedure is applied to the magnetometer observations to synchronize them to a common time frame at the end of the LiDAR scan, as illustrated in Fig. 3. This backward propagation provides several advantages to the system: (1) given the relatively lower accuracy of magnetic-based localization, aggregating multiple observations enables a more robust update by solving a weighted least squares problem; (2) multiple observations aligned at the scan end MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 4
+
+time allow the estimation uncertainty to be quantified, enabling adaptive adjustment of the measurement noise during the filter update; and (3) LiDAR point undistortionrelies solely on IMU which ensure the quality. The magnetic-field based localization is introduced as follows: 
+
+a) AMF Mapping: Our magnetometer sensor suite con-sists of a tri-axis magnetometer array, in which magnetome-ters’ readings at time tk will be a sequence of magnetic measurements Btk = {B jtk }Nj=1 with B jtk = [ B jx,tk , B jy,tk , B jz,tk ]⊤
+
+which are the measurements of jth magnetometer and N is the number of magnetometers contained in this array. The 
+
+N magnetometers are hardware-synchronized so there is no timing difference among them. For the magnetic-based local-ization, the goal is to estimate the robot state according to the matching of a given pre-built magnetic map M(·), which is a dense grid map describing the magnetic value at each point within a pre-defined area. To obtain such a prebuilt dense grid map, we adopt our previous research in [29] about sliding Gaussian Process Regression (s-GPR). A brief recap is given here. Let S = {(p1, B1), (p2, B2), ..., (pn, Bn)} denote the set of magnetic fingerprints collected, where p ∈ Rn×3 rep-resents the corresponding three-dimensional positions where the fingerprint is sampled. GPR can then be used to infer the posterior distribution of the latent magnetic field function f (p)
+
+conditioned on the training dataset S with Eq. (6) and Eq. (7). 
+
+f (p j) ∼ GP (m(p j), k(pm, pn)) 
+
+B j = f (p j) + ε (6) 
+
+and the covariance (kernel) function, which is expressed as: 
+
+cov (pm, pn) = k(pm, pn) + σ 2 
+
+> n
+
+δmn (7) 
+
+Since conventional GPR exhibits high computational com-plexity, the s-GPR strategy proposed in [29] is employed to accelerate the magnetic map construction process by using sliding windows. After obtaining the dense magnetic grid map, magnetic field values at arbitrary query points are computed via bilinear interpolation on the grid, producing continuous spatial estimates. To use such a map, the magnetic map value at a given query position p within the mapped region is defined as P = {p | p ∈ R3 and within the mapped region },
+
+M : P ⊂ R3 → R3, Bmap = M(p) (8) 
+
+b) Synchronization: In practice, the sampling times of the magnetometer and the IMU are generally asynchronous, which introduces additional motion distortion between the IMU sampling time ti−1 and the magnetometer sampling time 
+
+tγ . Fortunately, since the full IMU states during the scan window have already been predicted, this motion distortion can be compensated using a formulation similar to those in Eq. 3 and Eq. 5, yielding M ˆTItγ = ( M ˆRItγ , M ˆpItγ ) which provides the IMU prediction at time tγ and transformation to the scan end time Itk ˇTItγ = ( Itk ˇRItγ , Itk ˇpItγ ).
+
+c) AMF-based Localization: To incorporate magnetome-ter observations into the system, a two-step strategy is adopted. (1) First, purely magnetometer-based localization is performed, with the initial prediction provided by backward propagation. (2) The resulting poses are then propagated to the scan end time using backward propagation and subsequently fused into the system through the IESKF update. To achieve magnetic-based localization, given the magne-tometer measurement at time tγ , it can be expressed as follows: 
+
+[ ˆBmeas ] jtγ = RMtγ
+
+> ⊤
+
+M(p jMtγ ) + n jtγ (9) 
+
+where [ ˆBmeas ] jtγ is the magnetometer readings, (·) j means the 
+
+j-th magnetometers on an array, and n jtγ is the measurement noise. Then, the localization problem is to find the optimal state RMtγ and p jMtγ to minimize the cost function 
+
+x∗ 
+
+> tγ
+
+:= arg min 
+
+> xtγ
+> N
+
+## ∑
+
+> j=1
+
+r j(xtγ ) 2
+
+= arg min 
+
+> xtγ
+> N
+
+## ∑
+
+> j=1
+
+[ ˆBmeas ] jtγ − R⊤ 
+
+> Mtγ
+
+M(p jMtγ ) 2 (10) 
+
+To find the optimal solution, we apply the Gauss-Newton optimization. The optimization is offered with the initial value given at the IMU state prediction M ˆTItγ = ( M ˆRItγ , M ˆpItγ )
+
+and extrinsic parameters between the magnetometers and the IMU I T jM = ( I R jM ,I p jM ) yielding M ˆTMtγ = ( M ˆRMtγ , M ˆpMtγ ) = (M ˆRItγ 
+
+> I
+
+R jM , M ˆRItγ 
+
+> I
+
+p jM + M ˆpItγ ). Define the small update on rotation and translation as ∆x = [ ∆ϕ⊤ ∆p⊤ 0]. The new residual after small update: 
+
+r j(ˆxtγ ⊞ ∆x) = [ ˆBmeas ] jtγ −
+
+ ˆRMtγ exp (∆ϕ)
+
+⊤
+
+M( ˆp jMtγ + ∆p) (11) 
+
+Taking the first-order Taylor expansion approximation is 
+
+r j(ˆxtγ ⊞ ∆x) ≈ r j(ˆxtγ ) + J j∆x. Here, J j denotes the Jacobian matrix of the j-th magnetometer observation with respect to the state perturbation. It is given by 
+
+J j = −
+
+h ˆR⊤ 
+
+> Mtγ
+
+∇M( ˆp jMtγ )  ˆR⊤ 
+
+> Mtγ
+
+M( ˆp jMtγ )
+
+> ×
+
+i
+
+(12) 
+
+where ∇M( ˆp jMtγ ) denotes the spatial gradient of the magnetic grid map evaluated at the current position, and [·]× represents the skew-symmetric matrix operator. The Gauss–Newton state update is then obtained as ˆ xtγ ⊞ ∆x with the perturbation ∆x
+
+computed by 
+
+∆x = −(
+
+> N
+
+## ∑
+
+> j=1
+
+J j⊤J j)−1 N
+
+## ∑
+
+> j=1
+
+J j⊤r j (13) 
+
+Note that the localization output using the magnetometer array’s measurements is in the global map frame M. Thus, the transformed measured localization of IMU body pose at time 
+
+tk can be derived as MpItk = M ˆTItk 
+
+> Itk
+
+ˇTItγ 
+
+> M
+
+ˆT⊤
+
+> Itγ
+> M
+
+TMtγ 
+
+> M
+
+pI and 
+
+> M
+
+RItk = M ˆRItk 
+
+> Itk
+
+ˇRItγ 
+
+> M
+
+ˆR⊤
+
+> Itγ
+> M
+
+RMtγ 
+
+> I
+
+R⊤ 
+
+> M
+
+where I RM and M pI are the extrinsic parameters between the magnetometer array and the IMU. This transformed observation eventually provides a direct measurement over the state MpI and MRI .
+
+C. State Update 
+
+Based on Eq. 10, the system state can be updated using a sequence of magnetic observations {(MRn, Mpn) | n =
+
+1, 2, . . . , L}, where L denotes the number of magnetometer measurements received within a LiDAR scan window. Since the observations are directly defined on the state space, a similar IESKF formulation as in the LiDAR update can be adopted. The residual at iteration κ is then defined as 
+
+rκ 
+
+> n
+
+(ˆxtk ) = 
+
+"
+
+rκ 
+
+> pn
+
+(ˆxtk )
+
+rκ 
+
+> θn
+
+(ˆxtk )
+
+#
+
+=
+
+
+
+> M
+
+pn − M ˆpItk
+
+log 
+
+M ˆR⊤
+
+> Itk
+> M
+
+Rn
+
+ ∈ R6 (14) 
+
+Adding the right perturbation δ x to the residual and taking the first order approximation results in MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 5
+
+≈ rκ 
+
+> n
+
+(ˆxκ 
+
+> tk
+
+) + M Hκ 
+
+> n
+
+δ x (15) 
+
+where Hκ 
+
+> n
+
+∈ R6×6 is the partial derivative with respect to δ xκ : 
+
+> M
+
+Hκ 
+
+> n
+
+=
+
+"
+
+−I3 00 −J−1(rκ 
+
+> θn
+
+)
+
+#
+
+≈ − 
+
+"
+
+I3 00 I3
+
+#
+
+(16) 
+
+if the residual is small. Then, the maximum a-posteriori estimate (MAP) becomes 
+
+arg min  
+
+> δx
+
+"
+
+12 ∥ˆxκ 
+
+> tk
+
+⊟ ˆxtk ∥2ˆP−1
+
+> tk
+
++ 12
+
+> L
+
+## ∑
+
+> n=1
+
+∥rκ 
+
+> n
+
+(ˆxκ 
+
+> tk
+
+) + M Hκ 
+
+> n
+
+δ x∥2
+
+> R−1
+> n
+
+#
+
+(17) 
+
+where ∥x∥A = x⊤Ax . It can be observed that the contribution of each observation is governed by the observation noise covariance matrix R. Therefore, by appropriately designing 
+
+R, the confidence assigned to each observation can be adap-tively adjusted. The subsequent steps follow the standard iterated Kalman filter gain computation and state update procedure. Suppose M Hκ 
+
+> tk
+
+= [ M Hκ
+
+> 1
+> ⊤
+
+, M Hκ
+
+> 2
+> ⊤
+
+, ..., M Hκ
+
+> m⊤
+
+]⊤, R =
+
+diag (R1, R2, ..., Rn), and rκ 
+
+> tk
+
+= [ rκ
+
+> 1
+> ⊤
+
+, rκ
+
+> 2
+> ⊤
+
+, ..., rκ 
+
+> n⊤
+
+], then 
+
+Kκ 
+
+> tk
+
+= ˆPtk Hκ
+
+> tk
+> ⊤
+
+Sκ
+
+> tk
+> −1
+
+δ x∗ = −Kκ 
+
+> tk
+
+rκ 
+
+> tk
+
+− (I − Kκ 
+
+> tk
+> M
+
+Hκ 
+
+> tk
+
+)( ˆxκ 
+
+> tk
+
+⊟ ˆxtk )
+
+ˆxκ+1 
+
+> tk
+
+= ˆxκ 
+
+> tk
+
+⊞ δ x∗
+
+(18) 
+
+where Sκ 
+
+> tk
+
+= Hκ
+
+> tk
+
+ˆPtk Hκ 
+
+> tk
+> ⊤
+
++ R. Eventually, if the IESKF suc-cessfully converges, the optimal estimation will be: 
+
+¯xtk = ˆxκ+1 
+
+> tk
+
+(19) 
+
+Then, the updated state will be used as the initial value for LiDAR scan-to-map matching before the LiDAR update. 
+
+D. Degeneration Detection and Outlier Filtering 
+
+It is important to analyze the degeneracy and reliability conditions of each sensing modality in the fused system to achieve optimal performance. Specifically, the filter should assign higher confidence to reliable observations while re-jecting outliers. Therefore, both LiDAR and magnetometer measurements are evaluated in the proposed fusion framework. 
+
+a) LiDAR Degeneration Detection: For LiDAR, degen-eracy occurs when certain state directions are insufficiently constrained by the observed data. This is analyzed through the Hessian matrix, following the approach of Zhang et al. [30]. The key difference in this work is that the projection is performed directly on the Hessian matrix rather than on the so-lution δ x, since the estimated solution under degeneracy may already contain amplified noise from the measurements [31]. By projecting the Hessian onto well-constrained directions, the influence of degenerate components can be effectively mitigated. This is achieved by performing eigenvalue decom-position on the Hessian matrix, 
+
+> L
+
+H⊤R−1LH = UΣV⊤ (20) 
+
+where LH = [ LHκ
+
+> 1
+> ⊤
+
+, LHκ
+
+> 2
+> ⊤
+
+, ..., LHκ
+
+> m⊤
+
+]⊤ is the Hessian matrix which is constructed from LiDAR features, where each row corresponds to a feature point in the LiDAR scan. The degen-eracy analysis is performed only on the leftmost six columns of H, which correspond to the pose states. The diagonal matrix Σ contains the eigenvalues, i.e. , diag (σ1, σ2, . . . , σ6).In degenerate directions, the corresponding eigenvalues tend to be small. Therefore, these small eigenvalues are truncated, and the Hessian matrix is reprojected accordingly: 
+
+di =
+
+(
+
+1, if σi > τ
+
+0, if σi < τ (21) 
+
+where τ is the threshold for degenerate eigenvalue, which was chosen as 15 in this case, and D = diag (d1, d2, ..., d6). Then the reprojected Hessian matrix LHg is equivalent to 
+
+> L
+
+Hg = LHVDV ⊤ (22) 
+
+b) Magnetometer Outlier Rejection: For the magnetome-ter, a different strategy is adopted. Due to the relatively lower accuracy of magnetic-based localization compared with LiDAR ( e.g. , approximately 10 cm versus 3 cm, as reported in [32]), the proposed multimodal system is designed to rely on LiDAR for accuracy when it is reliable, while using magnetic information to constrain the degenerate directions of LiDAR. To achieve this, two strategies are employed: 1) when no LiDAR degeneracy is detected, the magnetometer residual rtk
+
+is manually scaled down to prevent magnetic observations from dominating the update ˜ rtk = β rtk where β denotes the shrinkage factor. This scaling is applied instead of inflating the measurement covariance to avoid unintended inflation of Ptk
+
+prior to the LiDAR-based update; 2) when LiDAR degeneracy is detected in certain directions, the Hessian matrix associated with the magnetic residual is inversely reprojected to enhance constraints along those degenerate directions:  
+
+> M
+
+Hu = M HV (I − D)V⊤ (23) 
+
+where the reprojected M Hu can be put into Eq. 17 and Eq. 18 for estimation. To further ensure the reliability of magnetic-based local-ization, outliers corresponding to unreliable magnetic pose estimates are removed from the observations. To achieve this, a robust kernel is applied to the magnetic observations prior to the update. Consistent with the IESKF framework, the robust kernel is defined on the Mahalanobis distance 
+
+stk = [ s1, s2, ..., sn] with sn =
+
+q
+
+rtk ⊤Stk rtk where rtk is the residual between the magnetic-based localization result xtk and the predicted pose from IMU forward propagation ˆ xtk , and Stk
+
+is the innovation covariance. Applying the Huber kernel to the Mahalanobis distance results in 
+
+w =
+
+(
+
+1, if s ⩽ c 
+
+> cs
+
+, if s > c (24) 
+
+where c is the threshold, and is chosen to be 3.55 in this case. Suppose 
+
+Wtk =
+
+
+
+w1I 0 . . . 00 w2I . . . 0... ... . . . ...0 0 . . . wnI
+
+
+
+(25) 
+
+Finally, ˜Rtk = W−1 
+
+> tk
+
+R (26) 
+
+where Eq. 26 can be substituted back to Eq. 18 as an adaptive observation noise in the Kalman gain calculation. V. E XPERIMENTS AND ANALYSIS 
+
+A. Evaluation Overview 
+
+In this section, multiple experiments are conducted in both high-fidelity simulated environments and real-world scenarios to evaluate the performance of the proposed method. In all experiments, the algorithms are executed on the same desktop computer equipped with an Intel i7 processor at 2.3GHz and 64GB of RAM. An autonomous robot with an identical configuration is deployed in both simulated and real-world MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 6    
+
+> Fig. 4. Left side: Visualization of different experimental environments, including simulated (a) industrial warehouse, (b) vehicle tunnel, (c) logistics seaport, and real-world (d) semi-indoor walkway, (e) indoor office corridor, and (f) vehicle carpark. The top-left corner presents an overview of each environment. Right side: Examples of the trajectory used for the experiments in different scenarios and the visualization of the magnetic field intensity at different positions.
+> (a) Sensor Suite (b) Real Scout Mini (c) Simulated Scout Mini Fig. 5. The Scout Mini AMR is employed in both real-world and simulated environments to collect experimental data.
+
+environments, ensuring consistency of experimental results across different scenarios. In the simulation environments, ground-truth odometry is directly available. The details of the experimental environments are as follows:  
+
+> •
+
+High-fidelity Simulated Environments: The Gazebo 1
+
+simulation platform is employed to emulate multiple realistic environments, including (a) an industrial ware-house, (b) a vehicle tunnel, and (c) a logistics seaport. As shown in Fig. 4, the industrial warehouse has a size of 90 m × 80 m and contains repetitive storage racks, reinforced concrete pillars, and conveyor belts, with fea-tureless open spaces between the racks. The logistics seaport spans 300 m × 300 m and consists of multiple container yards, with traffic lanes for AMRs of width 18 m between them. The tunnel environment simulates a realistic featureless tunnel of length 200 m with slight curvature. In all environments, a simulated Scout Mini mobile robot is deployed to collect data, as shown in Fig. 5c, equipped with one Ouster OS-32 LiDAR and a total of eight idealized magnetometers mounted at the front and rear of the robot chassis. The magnetic measurements are corrupted with zero-mean Gaussian noise with a standard deviation of σ = 1 μT.  
+
+> •
+
+Real-world Environments: Three representative real-world environments, including (d) a semi-indoor walk-
+
+> 1https://gazebosim.org/home
+
+way, (e) an indoor office corridor, and (f) a vehicle carpark, are evaluated using both geometric information from LiDAR and magnetic information from magnetome-ters collected by a real Scout Mini AMR platform, as shown in Fig. 5b. As illustrated in Fig. 4, the semi-indoor office walkway has a size of 181 m × 23 m, while the indoor corridor measures 15 m × 65 m. Both environ-ments contain either repetitive geometric structures or featureless regions. The carpark, with a size of 56 m ×7 m, exhibits time-varying magnetic fields caused by the pres-ence and movement of vehicles. The platform is equipped with our self-designed sensor suite (Fig. 5a) with a Mid-360 LiDAR and eight RM3100 magnetometers mounted on the AMR chassis. All sensors are calibrated both intrinsically and extrinsically. The magnetic map is con-structed with the assistance of a modified version of CTE-MLO [33] based on a Leica total-station-based pre-built map, and the two maps are aligned to the same global frame. 
+
+B. Evaluation Protocol 1) Comparison Baseline: Quantitative analysis is con-ducted to evaluate the robustness and effectiveness of the pro-posed method compared with state-of-the-art approaches for localization in various degenerate environments. In LiDAR-degenerate scenarios, the compared methods include: (1) HDL Localization [34], an NDT-based LiDAR-inertial localization method; (2) CTE-MLO [33], a continuous-time LiDAR-only localization approach with Gaussian process-based trajectory representation; and (3) FAST-LIO2 [28], a robust tightly cou-pled LiDAR-inertial system based on point-to-plane matching, modified to support localization on a pre-built map 2. All methods are evaluated under their default configurations, with a maximum LiDAR sensing range limited to 100 m. In scenarios with magnetic map disturbances, the compar-ison includes: (1) RoSLAC, a robust magnetic-based local-                                                                            
+
+> 2https://github.com/iDonghq/FAST LIO LOCALIZATION PLUS MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 7
+> TABLE I LOCALIZATION ABSOLUTE TRAJECTORY ERROR (ATE) OF MULTIPLE METHODS UNDER DIFFERENT TEST ENVIRONMENTS . T HE FAILED ESTIMATION (POSE ESTIMATED BEYOND MAP BOUNDARY )IS MARKED AS
+> /,AND THE BEST RESULTS ARE MARKED BOLD
+> Scenarios Seq HDL CTE-MLO FAST-LIO2 Proposed FAST-LIO2-10 Proposed-10 Warehouse 10.038 0.036 0.024 0.024 /0.024 20.036 0.040 0.025 0.025 /0.030 Tunnel 3/61.991 /0.029 /0.029 459.594 62.822 59.694 0.040 /0.040 Seaport 558.207 /0.053 0.052 /0.056 Walkway 6//0.064 0.067 0.063 0.067 7//0.121 0.123 0.123 0.128 Corridor 80.246 /0.113 0.178 /0.192 90.248 /0.106 0.128 /0.141
+
+ization method with online calibration capability as intro-duced in [32]; (2) IDF-MFL [13], a stochastic optimization and sampling-based magnetic localization approach; and (3) PF [35], a Monte Carlo sampling-based magnetic localization method. 
+
+2) Evaluation Metrics: The localization accuracy is evalu-ated differently in simulated and real-world environments. In simulated environments, the ground-truth trajectory is directly obtained from the simulator. In real-world environments, the reference trajectory is generated using a modified version of CTE-MLO [33], which performs relocalization on a Leica total-station-based pre-built point cloud map. The localization performance is evaluated using the Absolute Trajectory Error (ATE). A lower ATE generally indicates better localization performance. 
+
+C. Accuracy Evaluation 
+
+The localization robustness and accuracy across different scenarios are first evaluated. For each scenario, one or two sequences are collected using the Scout Mini platform, with trajectories of varying shapes or collection speeds, as shown in Fig. 4(a)-(f). The ATE with respect to the reference trajectories is reported in Table I. The results indicate that all five environments are challenging, where both HDL Localization and CTE-MLO fail in most cases. FAST-LIO2 demonstrates higher robustness, with more success sequences, but still en-counters difficulties in tunnel environments due to insufficient geometric features. In contrast, the proposed method, which incorporates magnetic-based localization, achieves 100% lo-calization success across all tests. In the −10 setting (last two columns of Table I), where the LiDAR sensing range is re-stricted to 10 m, leading to severe geometric degeneration, the proposed method maintains stable localization performance across all scenarios. This demonstrates the effectiveness of integrating magnetic information and highlights the improved robustness of the proposed multimodal system compared to single-modality approaches, particularly in environments with insufficient geometric features. In terms of localization accuracy, the pure LiDAR-based method using FAST-LIO2 achieves the highest accuracy in non-degenerate scenarios (0 .024 m–0 .121 m), while the pro-posed fused system exhibits slightly lower accuracy (0 .024 m– 0.178 m). This behavior is expected, as magnetic-based lo-calization generally has lower accuracy than LiDAR. In the proposed framework, when LiDAR degeneration is detected,  
+
+> (a) Well-constrained Environment (b) LiDAR Degenerated Environment
+> Fig. 6. Comparison of ATE (m) of Seq 1 in simulated warehouse environment of FAST-LIO2, RoSLAC, and the proposed MIL-LC method: (a) LiDAR estimation is well constrained, and (b) LiDAR estimation become degenerate. The confidence region represents the standard deviation within each window.
+
+magnetic observations contribute more significantly to the state estimation, which may lead to reduced overall accuracy. This observation is further supported by the results in the two −10 columns. Under this configuration, the system relies predominantly on magnetic-based localization due to severe LiDAR degeneration, which leads to a further reduction in ac-curacy. Nevertheless, even in this case, the system maintains an ATE of at most 0 .192 m. More importantly, in scenarios where pure LiDAR-based methods completely fail, the proposed system continues to provide reliable pose estimation. There-fore, although the proposed multimodal fusion framework demonstrates a slight trade-off between localization accuracy and robustness, it significantly improves system reliability in challenging environments. 
+
+D. Robustness Evaluation 
+
+To further illustrate the robustness of the proposed method, the localization ATE of Seq 6 is visualized over time in Fig. 6, where the x-axis represents time and the y-axis represents ATE. In this comparison, purely LiDAR-based localization, purely magnetic-based localization (RoSLAC [32]), and the proposed multimodal fusion method are evaluated. For a fair comparison, the LiDAR settings are kept identical across each column of subfigures, and the RoSLAC method is evaluated without any auxiliary odometry (e.g. , wheel odometry or sequence accumulation). Without loss of generality, a constant-time window mean filter with a duration of 1 s is applied to the ATE of all methods for improved visualization. To ensure fairness, the same filtering is applied to all methods, and the standard deviation within each window is plotted as a confidence region, where a larger region indicates higher instability in the localization results. The left column in Fig. 6a illustrates the scenario in which LiDAR does not exhibit degeneracy. It can be observed that, under this condition, the ATE of the proposed method al-most overlaps with that of FAST-LIO2, indicating comparable performance. This is attributed to the degeneracy detection mechanism that when LiDAR measurements are reliable, the system suppresses magnetic-based updates and relies primarily on LiDAR for better accuracy. Consequently, although the purely magnetic-based localization exhibits significant jitter, MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 8  
+
+> Fig. 7. Cumulative probability of the Absolute Trajectory Error (ATE, m) of different localization methods in different scenarios.
+> Fig. 8. An illustration of the change of vehicles in the carpark environments. The pictures of the carpark are taken at three different timeslots, where it can be observed that sometimes there are more vehicles and sometimes the carpark is empty.
+
+the fused localization remains stable and accurate. For each row of the subfigure, different levels of additional Gaussian noise are injected into the magnetometer measurements to degrade their localization performance. It can be observed that the RoSLAC method, which relies solely on magnetic information, is significantly affected by a much higher mean error in the 5 .0 μT noise scenario compared to the 1 .0 μT case. In contrast, the proposed method shows negligible sensitivity to the magnetic noise level, as LiDAR dominates the pose estimation in this well-constrained scenario. The right column in Fig. 6b illustrates the scenario in which LiDAR becomes degenerate when the robot traverses a large featureless region between shelves (the LiDAR range is limited to 10 m to enforce this degeneration), departing from the left-side shelves at approximately 60 s and reaching the right-side shelves at around 80 s. As expected, LiDAR degeneracy occurs, with a significant increase in ATE observed at 60 s. In contrast, the proposed fused system maintains a low ATE, remaining below 0 .1 m during this period. This is because magnetic-based localization dominates the pose estimation under LiDAR degeneration, although it introduces slightly increased jitter, and this jitter becomes more pronounced as additional noise is introduced into the magnetometer mea-surements. Notably, after 80 s, when LiDAR becomes well-constrained again, the overall ATE rapidly decreases and stabilizes below 0 .05 m. This indicates that, upon re-entering a geometrically rich region, magnetic-based localization pro-vides a reliable initial estimate for LiDAR-based localization, after which the system can successfully transition back to a LiDAR-dominant regime. Additional sequences are further visualized in Fig. 7 to evaluate robustness. In the cumulative distribution function (CDF) plot, the x-axis represents the localization ATE divided into multiple intervals, while the y-axis shows the proportion of localization results within each sequence that fall below a given error threshold. A curve raising more steeply and reach-ing 1.0 more quickly indicates better localization performance. The evaluation is conducted on a per-scenario basis. It can be observed that, across all scenarios, the CDF curve                                                 
+
+> TABLE II THE LONG -TERM LOCALIZATION ACCURACY UNDER MAGNETIC MAPS BUILT ON DIFFERENT DAYS EVALUATED IN ABSOLUTE TRAJECTORY
+> ERROR (ATE, M). T HE BEST RESULT IS HIGHLIGHTED IN BOLD
+> Configuration Absolute Trajectory Error (ATE, m) Mapping Date Collection Time Max Mag-Disturb ( μT)RoSLAC IDF-MFL PF Proposed 20 Dec 2025 Night 30.47 0.145 0.193 0.159 0.043
+> 06 Feb 2026 Afternoon 80.04 0.223 10.128 0.146 0.043
+> 07 Feb 2026 Morning 18.90 0.120 16.976 0.137 0.043
+> 18 Mar 2026 Night 28.50 0.145 0.198 0.147 0.043
+> 19 Mar 2026 Afternoon 53.73 27.033 55.905 0.187 0.043
+> 20 Mar 2026 Afternoon 0.00 0.112 0.117 0.119 0.043
+> 1The maximum disturbance is compared with map data collected on 20 Mar 2026.
+
+of the proposed multimodal fusion method converges to 1.0 the fastest, indicating superior overall accuracy and robustness. According to the CDF results, more than 95% of the localiza-tion errors are below 0 .1 m in simulated environments. In real-world environments, the performance slightly degrades but remains consistently high despite the challenging conditions. 
+
+E. Long-term Localization Stability 
+
+To further illustrate the robustness of the proposed MIL-LC method, a long-term localization stability test is conducted. The experiments span a period of three months, with data collected at six different time slots ranging from morning to evening. As shown in Fig. 8, the number, type, and positions of vehicles in the carpark vary over time. Typically, more vehicles are present during weekday mornings and afternoons, while fewer vehicles are observed in the evenings and on weekends. Since vehicles contain ferromagnetic materials, they can distort the local AMF. Consequently, these changes in temporal make the environment highly dynamic, leading the magnetic field distribution to vary across different data collection sessions. To further visualize these variations in the magnetic field, all collected magnetic maps generated using the method in [29] are compared against a reference map collected on 20 March 2026. The comparison is performed by querying the predicted magnetic field Bpred from the reference map at the grid locations of other datasets, and then comparing it with the corresponding measured map values Bmap .
+
+Bdi f f = ∥Bpred − Bmap ∥ (27) 
+
+The comparison results are illustrated in Fig. 9. The color encodes the difference in total magnetic intensity computed using Eq. 27, where red indicates negligible difference (as expected when comparing the map of 20 March 2026 with itself), and blue or purple indicates significant discrepancy. From the figure, it is evident that regions surrounding parked vehicles exhibit larger differences, with the maximum vari-ation reaching 80 μT in the map collected on 06 Feb 2026, while central areas experience relatively smaller disturbances. Additional results are summarized in Table II. Based on these observations, a testing trajectory is designed, as shown in Fig. 4(f), which primarily traverses regions with significant magnetic disturbances, thereby evaluating system robustness. Specifically, magnetometer measurements collected on 20 March 2026 using the sensor array mounted on the Scout Mini are used, while the pre-built maps for localiza-tion are taken from different dates within the preceding three MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 9 
+
+> Fig. 9. An illustration of the effect of vehicles on disturbances in the carpark magnetic field. The red regions indicate areas with minor disturbance, whereas the purple regions correspond to areas with severe disturbance. It can be observed that regions in closer proximity to vehicles exhibit stronger magnetic disturbances.
+
+months. The four aforementioned methods are then applied for localization using these maps. The ground-truth trajectory is generated using CTE-MLO [33] through relocalization on a Leica total-station-based map. Finally, the ATE is computed and reported in the right columns of Table II. From Table II, it can be observed that the last row, corre-sponding to localization on the pre-built map collected on 20 March 2026, generally achieves the best performance across all four methods. This is expected, as both mapping and localization data are collected within a short time interval, resulting in minimal discrepancy between the magnetic map and the measurements, thereby ensuring high localization accuracy. However, when older pre-built maps are used, the accuracy of purely magnetic-based localization degrades. This degradation becomes more pronounced for maps with larger differences, such as 19 March 2026, where two of the com-pared methods fail to produce valid localization results. In contrast, the proposed multimodal fusion method demonstrates negligible degradation in localization accuracy, maintaining an ATE of approximately 0 .043 m. This highlights the advantage of the proposed approach in achieving robust and accurate localization under significant magnetic map disturbances over long-term deployment. Given the stable accuracy over long-term localization, the proposed method demonstrates the capability to detect dis-turbances in the magnetic map. As shown in Fig. 10, the background field visualizes the magnetic discrepancy obtained by directly comparing two prebuilt magnetic maps (the map from 20 Mar 2026 compared with that from 06 Feb 2026). The overlaid colored trajectory represents the current absolute magnetic error, computed using Eq. 27, where the online magnetometer measurements are compared with the magnetic values predicted from the prebuilt map at the corresponding positions. The red part of trajectory denotes regions with larger differences, and purely magnetic-based localization becomes unreliable; whereas green denotes regions with smaller differ-ences, where localization remains stable. The bottom figure, which employs the fused multimodal localization trajectory, provides a more precise delineation of disturbed regions while maintaining stable pose estimation. In contrast, the top figure, based on magnetic-only localization, is less effective in high-lighting these disturbed areas. This is expected, as magnetic-only localization inherently minimizes the discrepancy be-tween measurements and the map, even when the underlying map has been perturbed.  
+
+> Fig. 10. An illustration of the capability to highlight magnetically disturbed regions. In the top figure, pose estimation is performed using magnetic-only localization. The bottom figure employs the proposed multimodal localization framework for pose estimation.
+
+VI. C ONCLUSION 
+
+This article presents a multimodal localization framework MIL-LC that fuses information from magnetometers and Li-DAR as well as inertial measurements to achieve reliable localization in challenging degenerate and disturbed environ-ments. The framework first establishes a unified approach to synchronize and integrate measurements from both sensors. To balance the high accuracy of LiDAR and the robustness of magnetic sensing, several strategies are incorporated, in-cluding degeneracy detection, outlier rejection, and adaptive weighting. Extensive experiments conducted in both simulated and real-world environments demonstrate that the proposed method achieves high reliability and accuracy across a vari-ety of degenerate and challenging scenarios, highlighting the advantages of the multimodal fusion approach. REFERENCES [1] Z. Wu, W. Wang, H. Shen, Q. Lyu, T. Deng, G. Peng, H. Zhou, and D. Wang, “Mc-mapping: Magnetic-aware collaborative mapping in perceptually degraded environments,” IEEE Transactions on Industrial Electronics , 2026. [2] Y. Li, L. Jiang, B. Lei, B. Tang, J. Zhu, and H. Liu, “Simsl: A semantic instance-based multisensor fusion localization system for challenging dynamic and degraded environments,” IEEE Transactions on Industrial Electronics , 2025. [3] T. Qin, P. Li, and S. Shen, “Vins-mono: A robust and versatile monocular visual-inertial state estimator,” IEEE Transactions on Robotics , vol. 34, no. 4, pp. 1004–1020, 2018. [4] W. Xu and F. Zhang, “Fast-lio: A fast, robust lidar-inertial odometry package by tightly-coupled iterated kalman filter,” IEEE Robotics and Automation Letters , vol. 6, no. 2, pp. 3317–3324, 2021. [5] Z. Wu, W. Wang, J. Zhang, Y. Wang, G. Peng, and D. Wang, “Mglt: Magnetic-lead global localization and tracking in degenerated repetitive environments,” IEEE/ASME Transactions on Mechatronics , vol. 29, no. 6, pp. 4687–4698, 2024. [6] G. He, X. Yuan, Y. Zhuang, and H. Hu, “An integrated gnss/lidar-slam pose estimation framework for large-scale map building in partially gnss-denied environments,” IEEE Transactions on Instrumentation and Measurement , vol. 70, pp. 1–9, 2020. [7] Y. Xu, Z. Chen, C. Deng, S. Wang, and J. Wang, “Lcdl: toward dynamic localization for autonomous landing of unmanned aerial vehicle based on lidar–camera fusion,” IEEE Sensors Journal , vol. 24, no. 16, pp. 26407– 26415, 2024. [8] C. Debeunne and D. Vivet, “A review of visual-lidar fusion based simultaneous localization and mapping,” sensors , vol. 20, no. 7, p. 2068, 2020. [9] T. H. Nguyen, T.-M. Nguyen, and L. Xie, “Range-focused fusion of camera-imu-uwb for accurate and drift-reduced localization,” IEEE Robotics and Automation Letters , vol. 6, no. 2, pp. 1678–1685, 2021. [10] C. Wu, Z. Gong, B. Tao, K. Tan, Z. Gu, and Z.-P. Yin, “Rf-slam: Uhf-rfid based simultaneous tags mapping and robot localization algorithm for smart warehouse position service,” IEEE Transactions on Industrial Informatics , vol. 19, no. 12, pp. 11765–11775, 2023. [11] H. Mouritsen, “Long-distance navigation and magnetoreception in mi-gratory animals,” Nature , vol. 558, no. 7708, pp. 50–59, 2018. MANUSCRIPT PREPARED FOR IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS 10 
+
+[12] B. Li, T. Gallagher, A. G. Dempster, and C. Rizos, “How he use of magnetic field alone for indoor positioning?,” in 2012 Internatfeasible is tional Conference on Indoor Positioning and Indoor Navigation (IPIN) ,pp. 1–9, 2012. [13] H. Shen, Z. Wu, W. Wang, Q. Lyu, H. Zhou, and D. Wang, “Idf-mfl: Infrastructure-free and drift-free magnetic field localization for mobile robot,” in 2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , pp. 2278–2285, 2024. [14] K. P. Subbu, B. Gozick, and R. Dantu, “Locateme: Magnetic-fields-based indoor localization using smartphones,” ACM Transactions on Intelligent Systems and Technology (TIST) , vol. 4, no. 4, pp. 1–27, 2013. [15] J. Jung, S.-M. Lee, and H. Myung, “Indoor mobile robot localization and mapping based on ambient magnetic fields and aiding radio sources,” 
+
+IEEE Transactions on Instrumentation and Measurement , vol. 64, no. 7, pp. 1922–1934, 2015. [16] Y. Shu, C. Bo, G. Shen, C. Zhao, L. Li, and F. Zhao, “Magicol: Indoor localization using pervasive magnetic field and opportunistic wifi sensing,” IEEE Journal on Selected Areas in Communications , vol. 33, no. 7, pp. 1443–1457, 2015. [17] G. Wang, X. Wang, J. Nie, and L. Lin, “Magnetic-based indoor localiza-tion using smartphone via a fusion algorithm,” IEEE Sensors Journal ,vol. 19, no. 15, pp. 6477–6485, 2019. [18] Z. Liu, L. Zhang, Q. Liu, Y. Yin, L. Cheng, and R. Zimmer-mann, “Fusion of magnetic and visual sensors for indoor localization: Infrastructure-free and more effective,” IEEE Transactions on Multime-dia , vol. 19, no. 4, pp. 874–888, 2017. [19] X. Yang, X. Huang, Y. Zhang, Z. Liu, and Y. Pang, “Multi-sensor fusion and semantic map-based particle filtering for robust indoor localization,” 
+
+Measurement , vol. 242, p. 115874, 2025. [20] X. Hao, H. Yang, and Y. Xu, “Information fusion for positioning system with location constraint of camera and uwb,” IEEE Transactions on Automation Science and Engineering , 2025. [21] L. Gao, X. Xia, Z. Zheng, and J. Ma, “Gnss/imu/lidar fusion for vehicle localization in urban driving environments within a consensus frame-work,” Mechanical Systems and Signal Processing , vol. 205, p. 110862, 2023. [22] Z. Shen, J. Wang, C. Pang, Z. Lan, and Z. Fang, “A lidar-imu-gnss fused mapping method for large-scale and high-speed scenarios,” 
+
+Measurement , vol. 225, p. 113961, 2024. [23] H. Zhou, Z. Yao, and M. Lu, “Lidar/uwb fusion based slam with anti-degeneration capability,” IEEE Transactions on Vehicular Technology ,vol. 70, no. 1, pp. 820–830, 2020. [24] Y. Kuang, T. Hu, M. Ouyang, Y. Yang, and X. Zhang, “Tightly coupled lidar/imu/uwb fusion via resilient factor graph for quadruped robot positioning,” Remote Sensing , vol. 16, no. 22, p. 4171, 2024. [25] Z. Fan, L. Zhang, X. Wang, Y. Shen, and F. Deng, “Lidar, imu, and camera fusion for simultaneous localization and mapping: A systematic review,” Artificial Intelligence Review , vol. 58, no. 6, p. 174, 2025. [26] H. Liu, H. Xue, L. Zhao, D. Chen, Z. Peng, and G. Zhang, “Magloc-ar: Magnetic-based localization for visual-free augmented reality in large-scale indoor environments,” IEEE Transactions on Visualization and Computer Graphics , vol. 29, no. 11, pp. 4383–4393, 2023. [27] M. Deshpande, M. Majji, and J. H. Ramos, “Magnetic field aided vehicle localization with acceleration correction,” in 2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) ,pp. 3234–3239, IEEE, 2024. [28] W. Xu, Y. Cai, D. He, J. Lin, and F. Zhang, “Fast-lio2: Fast direct lidar-inertial odometry,” IEEE Transactions on Robotics , vol. 38, no. 4, pp. 2053–2073, 2022. [29] Q. Lyu, Z. Wu, H. Shen, W. Wang, J. Zhang, H. Zhou, and D. Wang, “S-gpr: Sliding gaussian process regression-based magnetic mapping and evaluation of different magnetic mapping methods,” in IECON 2024-50th Annual Conference of the IEEE Industrial Electronics Society ,pp. 1–7, IEEE, 2024. [30] J. Zhang, M. Kaess, and S. Singh, “On degeneracy of optimization-based state estimation problems,” in 2016 IEEE international conference on robotics and automation (ICRA) , pp. 809–816, IEEE, 2016. [31] T. Tuna, J. Nubert, P. Pfreundschuh, C. Cadena, S. Khattak, and M. Hut-ter, “Informed, constrained, aligned: A field analysis on degeneracy-aware point cloud registration in the wild,” IEEE Transactions on Field Robotics , 2025. [32] Q. Lyu, Z. Wu, W. Wang, H. Shen, and D. Wang, “Roslac: Robust simultaneous localization and calibration of multiple magnetometers,” 
+
+arXiv preprint arXiv:2604.14353 , 2026. [33] H. Shen, Z. Wu, Y. Hui, W. Wang, Q. Lyu, T. Deng, Y. Zhu, B. Tian, and D. Wang, “Cte-mlo: Continuous-time and efficient multi-lidar odometry with localizability-aware point cloud sampling,” IEEE Transactions on Field Robotics , vol. 2, pp. 165–187, 2025. [34] K. Koide, J. Miura, and E. Menegatti, “A portable three-dimensional lidar-based system for long-term and wide-area people behavior mea-surement,” International Journal of Advanced Robotic Systems , vol. 16, no. 2, p. 1729881419841532, 2019. [35] L.-F. Shi, M.-X. Yu, and W. Yin, “Pdr/geomagnetic fusion localization method based on aofa-improved particle filter,” IEEE Transactions on Instrumentation and Measurement , vol. 71, pp. 1–9, 2022. 
+
+Qiyang Lyu received his B.Eng degree of Electronic Information Engineering from University of Elec-tronic Science and Technology of China, China, in 2020, and the M.Sc. degrees of Computer Control and Automation from Nanyang Technological Uni-versity, Singapore, in 2021. Now he is pursuing the Ph.D. degree with the School of Electrical and Elec-tronic Engineering, Nanyang Technological Univer-sity, Singapore. His research interests include sensor calibration, multi-modal mapping, and localization for autonomous robots in real complex scenarios. 
+
+Zhenyu Wu received his B.Eng. degree of Electrical Engineering and Automation from Wuhan Univer-sity, China, in 2016, the M.Sc. and Ph.D. degrees from Nanyang Technological University (NTU), Sin-gapore, in 2017 and 2022, respectively. He is cur-rently a Research Assistant Professor with the Cen-tre for Advanced Robotics Technology Innovation (CARTIN), NTU. He served as an Associate Editor for the IEEE/RSJ IROS in 2025 and is serving as an editorial board member for Robot Learning. His research interests include intelligent perception, localization, and navigation for autonomous systems in complex environments. 
+
+Wei Wang received his B.Eng degree of Automation from Zhejiang University, China, in 2020, and the M.Sc. degrees of Computer Control and Automation from Nanyang Technological University, Singapore, in 2021. Now he is pursuing the Ph.D. degree with the School of Electrical and Electronic Engineer-ing, Nanyang Technological University, Singapore. His research interests include autonomous robots localization and navigation in complex terrains, and intelligent transportation systems. 
+
+Hongming Shen received the B.S. degree in Flight Vehicle Design and Engineering from Central North University, Taiyuan, China, in 2015, and the M.S. degree in Aerospace Transportation and Control from the Beijing Institute of Technology, Beijing, China, in 2017. He received the Ph.D. degree in Control Theory and Control Engineering from Tianjin University, Tianjin, China, in 2023. He is currently a Postdoctoral Research Fellow with the Centre for Advanced Robotics Technology Innova-tion (CARTIN), NTU. His current research interests include state estimation, multisensor fusion, localization and mapping, and aerial Robotics. 
+
+Danwei Wang (Life Fellow, IEEE) received his Ph.D. and M.S.E. degrees from the University of Michigan, Ann Arbor, USA, in 1989 and 1984, respectively. He received his B.E degree from the South China University of Technology, China, in 1982. Since 1989, he has been with the School of Electrical and Electronic Engineering, Nanyang Technological University, Singapore. Currently, he is Emeritus Professor and was the Director of the ST Engineering-NTU Robotics Corporate Lab. He is the Chair of IEEE Singapore Robotics and Automation Chapter and a senator in NTU Academics Council. He has served as general chairman, technical chairman and various positions in international robotics and control conferences, such as ICRA, IROS, and ICARCV conferences. He was a recipient of Alexander von Humboldt Fellowship, Germany, and ST Engineering Distinguished Professor Award, Singapore. He is a Fellow of the Academy of Engineering, Singapore (SAEng) and Life Fellow of the IEEE. His research interests include robotics, control theory and applications.

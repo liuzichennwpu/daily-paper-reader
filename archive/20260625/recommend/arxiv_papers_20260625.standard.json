@@ -1,0 +1,711 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-25T22:01:50.040761+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 7,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 10,
+    "quick_skim_target": 12,
+    "quick_selected": 10
+  },
+  "deep_dive": [
+    {
+      "id": "2606.24092v1",
+      "source": "arxiv",
+      "title": "Progressive Pixel-Neighborhood Deformable Cross-Attention for Multispectral Object Detection",
+      "abstract": "Effective cross-modal feature alignment and interaction are central challenges in multispectral object detection. Although global cross-attention provides strong long-range modeling ability, its quadratic complexity with respect to feature size limits deployment on resource-constrained platforms. We therefore propose Progressive Pixel-Neighborhood Deformable Cross-Attention for multispectral feature fusion, termed PNAFusion. The proposed framework is motivated by two observations: weak misalignment between visible and thermal images is usually concentrated around local neighborhoods, and semantic correspondence across modalities often follows non-linear spatial mappings that fixed receptive fields cannot model well. To address these issues, PNAFusion incorporates local spatial priors into its architectural design to concentrate feature interaction and alignment on the most relevant neighborhoods. Specifically, a Pixel-Neighborhood Cross-Attention (PNCA) module is introduced to avoid redundant global feature matching and suppress background noise. Meanwhile, an Adaptive Deformable Alignment (ADA) module captures non-linear spatial correspondences through learned pixel-wise offsets. These components are further integrated through an iterative feedback mechanism to progressively refine cross-modal feature alignment. Experiments on FLIR, M3FD, and DroneVehicle show that PNAFusion achieves 84.2, 90.5, and 85.5 mAP@0.5, respectively, under the YOLOv5 detector, and further reaches 86.8 mAP@0.5 on FLIR and 90.8 mAP@0.5 on M3FD when transferred to Co-DETR. Efficiency analysis indicates that PNAFusion reduces allocated GPU memory by 33.0\\% compared with ICAFusion and reduces theoretical FLOPs from 194.8 G to 156.4 G, although the deformable sampling and iterative refinement introduce additional latency. Our code will be available at https://github.com/DanielQiuTian/PNAFusion.",
+      "authors": [
+        "Tian Qiu",
+        "Jifeng Shen",
+        "Xin Zuo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-23T03:14:27+00:00",
+      "link": "https://arxiv.org/pdf/2606.24092v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "multispectral object detection with cross-modal feature fusion",
+      "llm_evidence_cn": "多光谱目标检测中的跨模态特征融合",
+      "llm_evidence": "多光谱目标检测中的跨模态特征融合",
+      "canonical_evidence": "多光谱目标检测中的跨模态特征融合",
+      "llm_tldr_en": "Proposes Progressive Pixel-Neighborhood Deformable Cross-Attention (PNAFusion) for efficient multispectral feature fusion, addressing misalignment and nonlinear spatial mappings.",
+      "llm_tldr_cn": "多光谱目标检测面临可见光和热红外图像之间的弱错位与非线性语义对应问题。本文提出的渐进式像素邻域变形交叉注意力机制（PNAFusion）通过局部可变形注意力实现高效跨模态融合，在保持线性复杂度的同时提升了多光谱目标检测性能。该方法在多个数据集上取得了领先结果，为资源受限平台上的多模态融合提供了轻量化解决方案。",
+      "llm_tldr": "多光谱目标检测面临可见光和热红外图像之间的弱错位与非线性语义对应问题。本文提出的渐进式像素邻域变形交叉注意力机制（PNAFusion）通过局部可变形注意力实现高效跨模态融合，在保持线性复杂度的同时提升了多光谱目标检测性能。该方法在多个数据集上取得了领先结果，为资源受限平台上的多模态融合提供了轻量化解决方案。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "Multimodal feature fusion for object detection in remote sensing",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.25312v1",
+      "source": "arxiv",
+      "title": "LEVIRDet: A Million-Scale 159-Category Dataset and Foundation Model for Universal Remote Sensing Object Detection",
+      "abstract": "Remote sensing object detection has advanced rapidly with the development of large-scale benchmarks and modern detection architectures. However, existing datasets and detectors remain fragmented. Most benchmarks focus on limited categories, fixed spatial resolutions, or a single sensor, while detectors still struggle to work across different sensors and categorical systems. In this paper, we introduce LEVIRDet-159, the largest and most comprehensive remote sensing object detection dataset to date, with 159 categories, 2.56 million bounding boxes, and 700k fine-grained annotations under a multi-level taxonomy. In each key scale dimension, LEVIRDet-159 exceeds the corresponding largest existing remote sensing object detection dataset, containing approximately (7x) more images, (6x) more object instances, and (4x) more categories. Based on this dataset, we design LEVIRDetNet, a scale-hierarchy-aware detection foundation model for universal remote sensing object detection. LEVIRDetNet couples online visual Ground Sampling Distance (GSD) prediction, GSD-conditioned query modulation and allocation, and a hierarchy-aware detection head for mixed-granularity remote sensing supervision. Under stringent evaluation settings, LEVIRDetNet demonstrates strong cross-domain generalization. Even without target-domain training or fine-tuning, it achieves state-of-the-art detection performance on 9 external benchmarks, improving the strongest fully supervised competing methods by 5.02 mAP on average under each benchmark's primary metric. We hope this study will facilitate the development of strongly generalizable remote sensing object detection across diverse category systems, spatial resolutions, and sensor platforms. The dataset and trained models will be released at https://qinzheyang.github.io/LEVIRDet/, accompanying the final paper.",
+      "authors": [
+        "Qinzhe Yang",
+        "Dongyu Wang",
+        "Haohan Niu",
+        "Jia Xu",
+        "Zhenwei Shi",
+        "Zhengxia Zou"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-24T02:25:54+00:00",
+      "link": "https://arxiv.org/pdf/2606.25312v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "million-scale remote sensing object detection dataset and foundation model",
+      "llm_evidence_cn": "百万级遥感目标检测数据集与基础模型",
+      "llm_evidence": "百万级遥感目标检测数据集与基础模型",
+      "canonical_evidence": "百万级遥感目标检测数据集与基础模型",
+      "llm_tldr_en": "Introduces LEVIRDet-159, the largest remote sensing object detection dataset with 159 categories and 2.56 million boxes, and a foundation model.",
+      "llm_tldr_cn": "该论文构建了迄今为止最大规模的遥感目标检测数据集LEVIRDet-159，涵盖159个类别、256万边界框和70万细粒度标注。针对现有数据集类别有限、传感器单一等问题，该数据集采用多级分类体系，支持跨传感器和类别系统的通用检测。同时提出基础模型，在多个尺度上超越现有数据集。这项工作直接服务于遥感目标检测研究，为多模态特征融合等后续方法提供了数据基础。",
+      "llm_tldr": "该论文构建了迄今为止最大规模的遥感目标检测数据集LEVIRDet-159，涵盖159个类别、256万边界框和70万细粒度标注。针对现有数据集类别有限、传感器单一等问题，该数据集采用多级分类体系，支持跨传感器和类别系统的通用检测。同时提出基础模型，在多个尺度上超越现有数据集。这项工作直接服务于遥感目标检测研究，为多模态特征融合等后续方法提供了数据基础。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "object detection in remote sensing",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22424v2",
+      "source": "arxiv",
+      "title": "FlowDec: Temporal Conditional Flow Decorruptor for Robust Continuous Vision-Language Navigation",
+      "abstract": "Vision-and-Language Navigation in Continuous Environments (VLN-CE) requires agents to follow natural-language instructions in unseen scenes. While Large Models (LMs) have advanced VLN-CE, their performance remains severely degraded by real-world visual corruptions, a critical yet underexplored domain constraint. We introduce Temporal Conditional Flow Decorruptor (FlowDec), a novel image restoration framework tailored for LM-based VLN-CE. FlowDec integrates a hybrid temporal conditioning strategy to align the generative flow path with historical context and employs action-centroid guided filtering to dynamically assess and integrate outputs. Extensive experiments demonstrate that FlowDec outperforms state-of-the-art decorruption methods in both navigation accuracy and generation latency. Our approach establishes a robust, efficient paradigm for resilient embodied navigation in unpredictable real-world conditions.",
+      "authors": [
+        "Yufei Zhang",
+        "Changhao Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-21T10:24:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.22424v2",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "continuous vision-language navigation with image restoration",
+      "llm_evidence_cn": "连续环境下的视觉语言导航，使用图像恢复提升鲁棒性",
+      "llm_evidence": "连续环境下的视觉语言导航，使用图像恢复提升鲁棒性",
+      "canonical_evidence": "连续环境下的视觉语言导航，使用图像恢复提升鲁棒性",
+      "llm_tldr_en": "Introduces FlowDec, a temporal conditional flow decorruptor for robust VLN-CE under visual corruptions, integrating hybrid temporal conditioning and action-centroid guided filtering.",
+      "llm_tldr_cn": "该论文针对连续环境视觉语言导航（VLN-CE）中现实视觉退化问题，提出FlowDec图像恢复框架。FlowDec通过混合时间条件策略对齐生成流路径与历史上下文，并采用动作质心引导滤波动态评估输出。实验表明，FlowDec在各类视觉退化条件下显著超越现有去损方法，提升了VLN-CE的鲁棒性。该方法可直接迁移至无人机视觉语言导航场景。",
+      "llm_tldr": "该论文针对连续环境视觉语言导航（VLN-CE）中现实视觉退化问题，提出FlowDec图像恢复框架。FlowDec通过混合时间条件策略对齐生成流路径与历史上下文，并采用动作质心引导滤波动态评估输出。实验表明，FlowDec在各类视觉退化条件下显著超越现有去损方法，提升了VLN-CE的鲁棒性。该方法可直接迁移至无人机视觉语言导航场景。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.25174v1",
+      "source": "arxiv",
+      "title": "An iterative energy-based multimodal transformer for joint retrieval of wheat soil moisture, leaf area index, and plant height from Sentinel-1 and Sentinel-2 time series",
+      "abstract": "Field-scale retrieval of surface soil moisture (SM), leaf area index (LAI), and plant height (PH) is essential for precision agriculture, yet it remains an ill-posed inverse problem. Concurrent variations in soil moisture and canopy density generate substantial ambiguities in radar backscatter and spectral responses, which reduces the effectiveness of traditional feedforward regression models in heterogeneous smallholder cropping systems. This study presents the Iterative Energy-Based Transformer (iEBT) for the joint retrieval of coupled soil-canopy states from Sentinel-1 C-band SAR and Sentinel-2 multispectral time series. Instead of direct regression, iEBT embeds multi-modal predictors within a shared sequence, produces an initial state estimate, and iteratively updates the target [SM, LAI, PH] vector through normalized gradient descent to minimize a learned scalar compatibility energy function. Using 700 quality-controlled field measurements from Varanasi, India, iEBT achieved the highest learned-model performance on the random test split, with a four-seed mean R^2 of 0.854 \\pm 0.012 (R_SM^2 = 0.841, R_LAI^2 = 0.905, R_PH^2 = 0.821). WCM and PROSAIL were retained as physically interpretable SAR and optical reference models for comparison. Modality ablations confirmed that Sentinel-1 drives SM retrieval, while Sentinel-2 dominates LAI, whereas PH relies on combined structural-phenological signatures. Crucially, the model's terminal energy functions as an uncalibrated post-retrieval quality diagnostic; screening the 10% highest-energy samples markedly reduced target level root-mean-square errors. While leave-one-campaign-out validation highlights persistent cross-season domain shift challenges due to localized management variations, compatibility-guided multimodal fusion offers a structured self-diagnostic path toward reliable biophysical parameter estimation",
+      "authors": [
+        "Shubham Kumar Singh",
+        "Peilei Fan",
+        "Suraj A. Yadav",
+        "Rajendra Prasad",
+        "Prashant K Srivastava"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CV",
+        "eess.IV"
+      ],
+      "published": "2026-06-23T21:05:53+00:00",
+      "link": "https://arxiv.org/pdf/2606.25174v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multimodal transformer fusion for joint retrieval from Sentinel-1 and Sentinel-2",
+      "llm_evidence_cn": "多模态Transformer融合用于Sentinel-1和Sentinel-2联合反演",
+      "llm_evidence": "多模态Transformer融合用于Sentinel-1和Sentinel-2联合反演",
+      "canonical_evidence": "多模态Transformer融合用于Sentinel-1和Sentinel-2联合反演",
+      "llm_tldr_en": "Proposes iterative energy-based multimodal transformer (iEBT) for joint retrieval of soil moisture, LAI, and plant height from Sentinel-1 and Sentinel-2 time series.",
+      "llm_tldr_cn": "田间尺度土壤水分、叶面积指数和株高的反演存在歧义性。本文提出迭代能量基多模态Transformer (iEBT)，利用Sentinel-1 SAR和Sentinel-2多光谱时间序列进行联合反演。通过迭代能量最小化机制，iEBT有效解决了水土耦合状态的不确定性，在异构小农系统中取得了优异精度。",
+      "llm_tldr": "田间尺度土壤水分、叶面积指数和株高的反演存在歧义性。本文提出迭代能量基多模态Transformer (iEBT)，利用Sentinel-1 SAR和Sentinel-2多光谱时间序列进行联合反演。通过迭代能量最小化机制，iEBT有效解决了水土耦合状态的不确定性，在异构小农系统中取得了优异精度。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "Multimodal feature fusion for remote sensing",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20177v2",
+      "source": "arxiv",
+      "title": "Evaluating and Enhancing Negation Comprehension in Remote Sensing MLLMs",
+      "abstract": "Multimodal Large Language Models (MLLMs) have demonstrated remarkable success in various Remote Sensing (RS) tasks. However, their ability to comprehend negation remains underexplored, limiting deployment in real-world applications where models must explicitly identify what is false or absent, e.g., emergency responders need to locate non-flooded routes for evacuation. To comprehensively study this limitation, we introduce RS-Neg, the first benchmark to evaluate negation understanding across region-level to scene-level tasks. Specifically, we design an automated data generation pipeline for RS imagery, using LLMs to synthesize diverse negation queries, and introduce a dynamic visual focus module for verification. Our evaluation reveals that advanced RS MLLMs struggle with negation, exhibiting hallucinations and substantial performance degradation. To close this gap, we propose NeFo, a novel test-time learning method that explicitly incorporates the logical role of negation into the model optimization. Remarkably, using about 5\\% unlabeled test samples, NeFo significantly improves the negation understanding of models and shows strong generalization to unseen tasks.",
+      "authors": [
+        "Haochen Han",
+        "Jue Wang",
+        "Alex Jinpeng Wang",
+        "Fangming Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-18T12:46:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.20177v2",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "remote sensing MLLM negation comprehension benchmark",
+      "llm_evidence_cn": "遥感多模态大模型否定理解基准",
+      "llm_evidence": "遥感多模态大模型否定理解基准",
+      "canonical_evidence": "遥感多模态大模型否定理解基准",
+      "llm_tldr_en": "Introduces RS-Neg, the first benchmark for negation comprehension in remote sensing MLLMs, with automated data generation and dynamic visual focus.",
+      "llm_tldr_cn": "该论文针对遥感多模态大模型（MLLM）对否定理解不足的问题，提出了RS-Neg基准。通过自动数据生成流水线利用LLM合成多样化否定查询，并引入动态视觉焦点模块进行验证。评估揭示了现有先进MLLM在否定理解方面的局限性，尤其在区域级和场景级任务中表现不佳。该工作提升了MLLM在遥感任务中的可靠性，为多模态特征融合与目标检测提供了语言理解维度的分析工具。",
+      "llm_tldr": "该论文针对遥感多模态大模型（MLLM）对否定理解不足的问题，提出了RS-Neg基准。通过自动数据生成流水线利用LLM合成多样化否定查询，并引入动态视觉焦点模块进行验证。评估揭示了现有先进MLLM在否定理解方面的局限性，尤其在区域级和场景级任务中表现不佳。该工作提升了MLLM在遥感任务中的可靠性，为多模态特征融合与目标检测提供了语言理解维度的分析工具。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24910v1",
+      "source": "arxiv",
+      "title": "End-to-End Voice Intent Recognition for Spontaneous Human-Drone Interaction with Naive Users",
+      "abstract": "Voice control offers an intuitive alternative to manual drone piloting, yet most existing systems rely on rigid command vocabularies that fail to handle the spontaneous, disfluent speech of naive users. This paper addresses this gap by proposing an End-to-End Spoken Language Understanding architecture for real-time human-drone interaction in French. Our model combines a frozen Self-Supervised Learning acoustic encoder with a lightweight LSTM-based classification head, augmented by a cross-modal knowledge distillation objective that aligns acoustic representations with semantic embeddings from a text teacher, without requiring transcription at inference time. We evaluate our approach on VoiceStick, a novel French corpus of spontaneous speech collected during real teleoperation sessions with 29 nonexpert dyads. On simple voice commands, our best configuration achieves 93% accuracy at 7 ms inference latency, outperforming cascade baselines (79%, 202 ms) with a 29x speedup. On the full spontaneous speech test set, our architecture reaches 82% accuracy, with crossmodal distillation consistently improving robustness across all configurations. These results demonstrate that End-to-End architectures are not only feasible but preferable for spontaneous voice-guided UAV teleoperation, combining semantic robustness, low latency, and calibrated confidence.",
+      "authors": [
+        "Allan Henry",
+        "Solange Rossato",
+        "Christian Graff",
+        "Sylvain Huet",
+        "Jose-Ernesto Gomez-Balderas"
+      ],
+      "primary_category": "eess.AS",
+      "categories": [
+        "eess.AS",
+        "cs.AI",
+        "cs.SD"
+      ],
+      "published": "2026-06-19T08:07:13+00:00",
+      "link": "https://arxiv.org/pdf/2606.24910v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Language-guided drone navigation via voice intent recognition",
+      "llm_evidence_cn": "通过语音意图识别实现语言引导的无人机导航",
+      "llm_evidence": "通过语音意图识别实现语言引导的无人机导航",
+      "canonical_evidence": "通过语音意图识别实现语言引导的无人机导航",
+      "llm_tldr_en": "Presents an end-to-end SLU system for human-drone interaction that handles spontaneous disfluent speech, combining a frozen SSL acoustic encoder with a lightweight LSTM classifier and cross-modal knowledge distillation, evaluated on a novel French corpus.",
+      "llm_tldr_cn": "针对现有无人机语音控制仅支持固定指令、无法处理自发性不流利语音的问题，提出端到端语音理解架构，采用冻结自监督声学编码器与轻量LSTM分类头，并通过跨模态知识蒸馏对齐声学与语义表征。在法语自发语音数据集上验证了其高效性和鲁棒性，为真实人机对话提供了可行方案。",
+      "llm_tldr": "针对现有无人机语音控制仅支持固定指令、无法处理自发性不流利语音的问题，提出端到端语音理解架构，采用冻结自监督声学编码器与轻量LSTM分类头，并通过跨模态知识蒸馏对齐声学与语义表征。在法语自发语音数据集上验证了其高效性和鲁棒性，为真实人机对话提供了可行方案。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "language guided drone navigation",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.21863v1",
+      "source": "arxiv",
+      "title": "Prompt-Calibrated SAM 3 for Open-Vocabulary Remote Sensing Semantic Segmentation",
+      "abstract": "Open-vocabulary semantic segmentation (OVSS) in remote sensing images aims to segment categories beyond a fixed label space. Recent SAM 3-based methods provide a promising training-free foundation, yet three key issues remain: (1) a single class-name prompt lacks sufficient semantic coverage for complex remote sensing categories; (2) expanding each category into multiple prompts introduces redundant online text encoding; and (3) directly aggregating multiple prompt responses propagates noisy activations into the final prediction. To address these issues, we propose ProC-SAM3, which calibrates SAM 3's prompt interface for remote sensing OVSS from three complementary aspects. First, we construct an offline prompt pool where a Category Matcher groups MLLM-generated candidates into per-category sets, and Expansion Constraints further refine each set using category-specific prior knowledge. Second, the resulting text embeddings are cached and reused across all test images, eliminating repeated text encoding. Third, we introduce Presence-Guided Residual Fusion to gate unreliable decoder outputs by prompt presence and confidence, followed by peak-preserving class aggregation that retains fine-grained activations for small and sparse objects. Experiments on eight benchmarks show that ProC-SAM3 achieves an average mIoU of 56.1%, outperforming the previous best training-free method by 3.9 percentage points. Code will be available at https://github.com/YanghuiSong/ProC-SAM3.",
+      "authors": [
+        "Yanghui Song",
+        "Nanqing Liu",
+        "Haonan Yin",
+        "Yingjie Gao",
+        "Chengfu Yang",
+        "Qi Ming"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-20T04:05:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.21863v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Remote sensing semantic segmentation with vision-language prompts",
+      "llm_evidence_cn": "遥感语义分割与视觉语言提示",
+      "llm_evidence": "遥感语义分割与视觉语言提示",
+      "canonical_evidence": "遥感语义分割与视觉语言提示",
+      "llm_tldr_en": "Proposes ProC-SAM3 for open-vocabulary remote sensing semantic segmentation, addressing prompt calibration issues to improve category coverage and reduce noise.",
+      "llm_tldr_cn": "针对开放词汇遥感语义分割中单类别提示覆盖不足、多提示冗余及噪声传播问题，提出ProC-SAM3方法，通过构建离线提示池并设计类别匹配器实现提示校准。实验表明，该方法在多个遥感分割基准上显著提升分割精度和泛化能力，为遥感图像的开放词汇分割提供了高效训练-free方案。",
+      "llm_tldr": "针对开放词汇遥感语义分割中单类别提示覆盖不足、多提示冗余及噪声传播问题，提出ProC-SAM3方法，通过构建离线提示池并设计类别匹配器实现提示校准。实验表明，该方法在多个遥感分割基准上显著提升分割精度和泛化能力，为遥感图像的开放词汇分割提供了高效训练-free方案。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.21198v1",
+      "source": "arxiv",
+      "title": "FireDataForge: A Unified Framework for Multi-Source Wildfire Data Retrieval and Integration",
+      "abstract": "Wildfire research, modeling, and education require geospatial data from multiple sources that vary in formats, coordinate systems, spatial resolutions, and temporal cadences. This preprocessing burden limits reproducible reuse. We present FireDataForge, an open-source Python framework that automates retrieval and harmonization of 11 wildfire-related sources spanning fire behavior, weather, land cover, vegetation, elevation, built environment, wildland-urban interface, fire history, and satellite imagery. Given an MTBS Event ID, FireDataForge retrieves relevant datasets, aligns them to a common grid, and outputs analysis-ready NumPy arrays with embedded metadata. Batch processing of historical fires demonstrates support for fire behavior simulation, educational visualization, machine learning, and AI-assisted wildfire analysis.",
+      "authors": [
+        "Zeyu Xia",
+        "Lexie Chen",
+        "Ye Liu",
+        "Huilin Huang"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE",
+        "cs.DB",
+        "physics.geo-ph"
+      ],
+      "published": "2026-06-19T08:09:35+00:00",
+      "link": "https://arxiv.org/pdf/2606.21198v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multi-source wildfire data retrieval and integration from remote sensing",
+      "llm_evidence_cn": "多源野火数据检索与集成，涉及遥感图像",
+      "llm_evidence": "多源野火数据检索与集成，涉及遥感图像",
+      "canonical_evidence": "多源野火数据检索与集成，涉及遥感图像",
+      "llm_tldr_en": "Presents FireDataForge, an open-source framework automating retrieval and harmonization of 11 wildfire-related data sources including satellite imagery.",
+      "llm_tldr_cn": "该论文针对野火研究中多源数据格式不一致、预处理繁琐的问题，构建FireDataForge框架自动检索并配准11种数据源（含卫星图像、气象、地形等）。用户输入火灾ID即可获得对齐后的NumPy数组。批量处理表明该框架显著降低数据预处理时间，促进可复用的野火建模。该工作为遥感多模态数据融合提供了实用工具。",
+      "llm_tldr": "该论文针对野火研究中多源数据格式不一致、预处理繁琐的问题，构建FireDataForge框架自动检索并配准11种数据源（含卫星图像、气象、地形等）。用户输入火灾ID即可获得对齐后的NumPy数组。批量处理表明该框架显著降低数据预处理时间，促进可复用的野火建模。该工作为遥感多模态数据融合提供了实用工具。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.22670v1",
+      "source": "arxiv",
+      "title": "Semantic-Aware Autonomous Exploration for UAVs in Unknown Indoor Environments",
+      "abstract": "Autonomous exploration in unknown environments requires unmanned aerial vehicles (UAVs) to efficiently generate informative trajectories while simultaneously constructing accurate maps. Although many existing exploration methods rely on geometric information, they often lack semantic awareness, resulting in suboptimal exploration efficiency and limited environmental understanding. To address this limitation, this paper proposes a semantic-aware exploration framework that adds semantic information to a roadmap-based exploration strategy. The proposed method builds on the Dynamic Exploration Planner (DEP), which incrementally constructs a Probabilistic Roadmap (PRM), and augments this roadmap with a semantic layer. A semantic reward function is introduced to prioritize regions containing meaningful objects and structures, enabling the UAV to focus on areas with higher information value. Furthermore, the roadmap is continuously updated to support efficient frontier selection and path planning during exploration. The proposed framework is implemented in ROS Noetic and Gazebo using an RGB-D sensor for simultaneous acquisition of geometric and semantic information. Experimental results in multiple simulated environments demonstrate that the proposed approach achieves exploration coverage rates between 90% and 94% while reducing exploration time and travel distance compared with conventional geometry-based exploration methods.",
+      "authors": [
+        "Duc-Thien Nguyen",
+        "Ngoc Minh Do",
+        "Xiem HoangVan",
+        "Thanh Nguyen Canh"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-21T21:07:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.22670v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Semantic-aware UAV exploration, though no language, shares visual semantics for navigation",
+      "llm_evidence_cn": "无人机语义感知探索，虽无语言指令，但利用视觉语义进行导航",
+      "llm_evidence": "无人机语义感知探索，虽无语言指令，但利用视觉语义进行导航",
+      "canonical_evidence": "无人机语义感知探索，虽无语言指令，但利用视觉语义进行导航",
+      "llm_tldr_en": "Semantic-aware exploration for UAVs augments roadmap with semantic rewards, improving efficiency in unknown indoor environments.",
+      "llm_tldr_cn": "无人机在未知环境中探索时缺乏语义信息，导致效率低下。本文提出语义感知探索框架，在概率路线图基础上增加语义层，设计语义奖励函数。实验表明，该方法在探索效率和地图完整性上均优于纯几何方法，使无人机能更智能地选择探索路径。",
+      "llm_tldr": "无人机在未知环境中探索时缺乏语义信息，导致效率低下。本文提出语义感知探索框架，在概率路线图基础上增加语义层，设计语义奖励函数。实验表明，该方法在探索效率和地图完整性上均优于纯几何方法，使无人机能更智能地选择探索路径。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.23825v1",
+      "source": "arxiv",
+      "title": "From Spatial to Spectral: An Efficient, Frequency-Guided Feature Representation Learner for Small Object Detection",
+      "abstract": "Efficient small object detection is bottlenecked by the inherent feature scarcity of tiny targets, which is further aggravated by operations of spatial-domain detectors that indiscriminately discard critical high-frequency details. Recovering these fragile cues within the spatial domain is notoriously difficult, as it often requires computationally expensive architectural upscaling that inadvertently amplifies background noise. To bridge this gap, we propose a paradigm \\textbf{shift from spatial to spectral} feature processing, introducing a holistic solution with the following novelty: (1) A versatile \\textbf{Frequency-Guided Feature Representation framework} that generalizes across diverse detector architectures (both CNN and Transformer-based), offering a robust alternative to spatial-only feature extraction; (2) The unified \\textbf{Decompose--Enhance--Reconstruct (DER)} operator, instantiated via three \\textbf{lightweight, plug-and-play} modules -- Wavelet-Difference Gate (WDG), Log-Gabor Enhancer (LGE), and Frequency-Driven Head (FDHead) -- to systematically inject frequency-aware modulation into the backbone, neck, and head. This mechanism decouples feature modeling from resolution reduction, capturing discriminative high-frequency components to enable accurate localization with significantly reduced parameter redundancy; (3) Extensive validation on multi-domain benchmarks (VisDrone2019, UAVDT, TinyPerson, DOTAv1) demonstrating consistent gains. Notably, our proposed \\textbf{DERNet} series outperforms YOLOv11 models under the same scale while requiring \\textbf{only 1/6 of the parameters}, backed by rigorous spectral diagnostics and error decomposition analysis.",
+      "authors": [
+        "Yuhan Rui",
+        "Shihan Qiao",
+        "Yibin Lou",
+        "Mingxi Yu",
+        "Yutong Wan",
+        "Yanqiao Chen",
+        "Dongsheng Hou",
+        "Zhen Cao",
+        "Athena Zhuoming Zhong",
+        "Qi Hao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-22T18:09:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.23825v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "frequency-guided feature representation for small object detection in remote sensing",
+      "llm_evidence_cn": "频域特征表示用于遥感小目标检测",
+      "llm_evidence": "频域特征表示用于遥感小目标检测",
+      "canonical_evidence": "频域特征表示用于遥感小目标检测",
+      "llm_tldr_en": "Shifts from spatial to spectral feature processing for small object detection, recovering high-frequency details via a frequency-guided framework.",
+      "llm_tldr_cn": "针对空间域检测器丢失高频细节导致小目标检测困难的问题，提出从空间到频谱的范式转变。设计频域引导特征表示学习器，保留并增强高频信息，可集成至多种检测器。在遥感小目标检测基准上取得最优结果，验证了频域特征处理的有效性。",
+      "llm_tldr": "针对空间域检测器丢失高频细节导致小目标检测困难的问题，提出从空间到频谱的范式转变。设计频域引导特征表示学习器，保留并增强高频信息，可集成至多种检测器。在遥感小目标检测基准上取得最优结果，验证了频域特征处理的有效性。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "object detection in remote sensing",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.25162v1",
+      "source": "arxiv",
+      "title": "fARfetch: Enabling Collocated AR-HRC in Large Visually Diverse Environments with VLM-Driven AR Content Adaptation",
+      "abstract": "Augmented Reality (AR) can improve collocated human-robot collaboration by making robot state and intent visible and enabling intuitive control, yet large, visually diverse environments like the outdoors challenge both interaction and content legibility, especially at long distances and beyond visual line of sight. We present fARfetch, an AR-HRC system that integrates (i) shared semantic environment mapping across an AR headset and robot that visualizes detected landmarks in AR to support landmark-grounded go-to commands, (ii) a context-aware world-in-miniature representation of the shared environment for fine-grained path authoring, and (iii) vision-language-model driven AR view management that jointly adapts virtual content color, size, and orientation to maintain legibility in large visually diverse environments. We implement fARfetch with a Meta Quest 3 headset and Unitree Go2 quadruped robot, and conduct a within-subjects user study (N=13) on a real-world large-scale (30.5m) outdoor inspection task. fARfetch yielded significantly faster completion times than a non-AR baseline (66%) and significantly lower workload in mental demand (-43%), temporal demand (-34%), and frustration (-66%). A custom legibility survey indicated fARfetch effectively maintained virtual content legibility in the large outdoor environment.",
+      "authors": [
+        "Christian Fronk",
+        "Hanting Ye",
+        "David Hunt",
+        "Miroslav Pajic",
+        "Maria Gorlatova"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV",
+        "cs.HC"
+      ],
+      "published": "2026-06-23T20:51:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.25162v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "VLM-driven navigation with language commands in AR",
+      "llm_evidence_cn": "VLM驱动的AR语言指令导航",
+      "llm_evidence": "VLM驱动的AR语言指令导航",
+      "canonical_evidence": "VLM驱动的AR语言指令导航",
+      "llm_tldr_en": "fARfetch integrates VLM-based AR view management and semantic mapping for collocated human-robot collaboration, enabling landmark-grounded go-to commands in large diverse environments.",
+      "llm_tldr_cn": "针对大型多样环境中远程人机协作的挑战，提出fARfetch系统，融合共享语义环境地图、微缩世界表示和VLM驱动的AR视图管理，支持基于地标定位的导航指令和路径规划，提升了远程协作的可理解性与控制能力，为语言引导的无人机导航提供了可迁移的方法。",
+      "llm_tldr": "针对大型多样环境中远程人机协作的挑战，提出fARfetch系统，融合共享语义环境地图、微缩世界表示和VLM驱动的AR视图管理，支持基于地标定位的导航指令和路径规划，提升了远程协作的可理解性与控制能力，为语言引导的无人机导航提供了可迁移的方法。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.24784v1",
+      "source": "arxiv",
+      "title": "AerialFusionMapNet: Online HD Map Construction with Aerial-Onboard BEV Fusion",
+      "abstract": "High-resolution aerial imagery has recently emerged as a complementary modality for automated driving perception and has shown potential to improve birds-eye-view (BEV) scene understanding when fused with onboard sensors. Prior work demonstrated performance gains for online high-definition (HD) map construction through aerial-onboard fusion; however, conventional end-to-end fusion does not fully exploit the structural information contained in aerial representations. In this work, we introduce AerialFusionMapNet, a fusion-based mapping framework with a structured two-stage training strategy that explicitly enhances the contribution of aerial features within a unified pipeline. The proposed training scheme enables more effective integration of structural aerial priors. On the nuScenes geographic split, AerialFusionMapNet achieves up to 54.7 mAP, improving over prior aerial-onboard fusion baselines from 48.8 mAP by +5.9 absolute and +12.1% relative. The results suggest that structured training design, rather than increased architectural complexity, plays a more decisive role in unlocking the full potential of aerial imagery for online HD map construction. Code and trained models are available at https://github.com/DriverlessMobility/AerialFusionMapNet.",
+      "authors": [
+        "Daniel Lengerer",
+        "Mathias Pechinger",
+        "Klaus Bogenberger",
+        "Carsten Markgraf"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-23T16:44:43+00:00",
+      "link": "https://arxiv.org/pdf/2606.24784v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "aerial-onboard BEV fusion for HD map construction",
+      "llm_evidence_cn": "航拍-车载BEV融合用于高清地图构建",
+      "llm_evidence": "航拍-车载BEV融合用于高清地图构建",
+      "canonical_evidence": "航拍-车载BEV融合用于高清地图构建",
+      "llm_tldr_en": "AerialFusionMapNet fuses aerial imagery and onboard sensors via a two-stage training strategy to construct HD maps, enhancing structural information from aerial features for BEV scene understanding.",
+      "llm_tldr_cn": "针对在线高清地图构建中航拍与车载传感器融合不充分的问题，提出AerialFusionMapNet，采用两阶段训练策略显式增强航拍特征贡献，在统一流水线中更有效集成结构化信息。实验表明融合后地图精度和完整性显著提升，为遥感多模态融合在自动驾驶中的应用提供了新思路。",
+      "llm_tldr": "针对在线高清地图构建中航拍与车载传感器融合不充分的问题，提出AerialFusionMapNet，采用两阶段训练策略显式增强航拍特征贡献，在统一流水线中更有效集成结构化信息。实验表明融合后地图精度和完整性显著提升，为遥感多模态融合在自动驾驶中的应用提供了新思路。",
+      "llm_tags": [
+        "query:rs-fusion:composite"
+      ],
+      "matched_query_tag": "query:rs-fusion:composite",
+      "matched_query_text": "Papers central to 遥感多模态特征融合目标检测论文检索, especially work that connects or combines: remote sensing image analysis; multimodal data fusion techniques; feature fusion methods; attention mechanism for multimodal remote sensing; object detection in remote sensing; satellite image processing; Multimodal feature fusion for remote sensing; Deep learning methods for remote sensing multimodal fusion; Multimodal feature fusion for object detection in remote sensing; Remote sensing object detection using multi source image fusion.",
+      "matched_requirement_id": "req-composite-rs-fusion",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.25206v1",
+      "source": "arxiv",
+      "title": "RAVEN: Long-Horizon Reasoning & Navigation with a Visuo-Spatio-Temporal Memory",
+      "abstract": "Long-term robot deployment requires a compact and scalable memory that preserves fine-grained visual semantics, grounds observations in space and time, and enables efficient storage and retrieval. In this paper, we propose RAVEN, an agentic memory system for long-horizon robotic question answering and navigation. RAVEN stores visual embeddings with pose and time in a vector database, and grounds retrieval in a spatial map to answer queries and navigate to goals. By operating directly on visual embeddings, RAVEN avoids lossy image-to-text captioning and enables accurate semantic, spatial, and temporal retrieval at scale. Across several simulated and real-world video question-answering benchmarks, RAVEN consistently surpasses caption-based memory systems and matches frontier VLMs on long-horizon tasks at 10$\\times$ lower retrieval cost. Finally, we instantiate RAVEN on a Unitree Go1 robot for the task of long-horizon navigation for natural language goal-reaching, and show successful deployment over several large indoor environments.",
+      "authors": [
+        "Yixun Hu",
+        "Zhicheng Zheng",
+        "Lihan Zha",
+        "Chunwei Xing",
+        "Rajdeep Singh",
+        "Omar Hossain",
+        "Antonio Loquercio",
+        "Dhruv Shah"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-23T21:56:41+00:00",
+      "link": "https://arxiv.org/pdf/2606.25206v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Long-horizon navigation with visuo-spatio-temporal memory for robotic QA",
+      "llm_evidence_cn": "基于视觉-空间-时间记忆的机器人长时导航与问答",
+      "llm_evidence": "基于视觉-空间-时间记忆的机器人长时导航与问答",
+      "canonical_evidence": "基于视觉-空间-时间记忆的机器人长时导航与问答",
+      "llm_tldr_en": "RAVEN proposes a memory system for long-horizon robot navigation and QA, storing visual embeddings with pose and time for efficient retrieval, surpassing caption-based methods.",
+      "llm_tldr_cn": "针对长期机器人部署中精细视觉语义保持和时空检索的挑战，提出RAVEN智能记忆系统，将视觉嵌入与位置时间信息存入向量数据库，并结合空间地图进行检索。在多个模拟和真实视频问答基准上，RAVEN一致超越基于字幕的记忆方法，为长时导航和推理提供了可扩展的视觉记忆方案。",
+      "llm_tldr": "针对长期机器人部署中精细视觉语义保持和时空检索的挑战，提出RAVEN智能记忆系统，将视觉嵌入与位置时间信息存入向量数据库，并结合空间地图进行检索。在多个模拟和真实视频问答基准上，RAVEN一致超越基于字幕的记忆方法，为长时导航和推理提供了可扩展的视觉记忆方案。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.25324v1",
+      "source": "arxiv",
+      "title": "Efficient Remote Sensing Instance Segmentation with Linear-Time State Space Distilled Visual Foundation Models",
+      "abstract": "The computational complexity of Transformers scales quadratically with the number of tokens, which significantly constrains the efficiency of vision models, particularly recent ViT-based foundation models in dense prediction tasks. Instance segmentation, a typical dense visual prediction task in the remote sensing field, faces similar challenges. In this paper, inspired by the recent advances of knowledge distillation in large language models, we introduce RS4D - a new remote sensing instance segmentation method with linear computational complexity, which addresses the inefficiency of long sequence modeling through distilled state space modeling (SSM). We propose an adaptive noise and masking knowledge distillation training method for pre-training lightweight SSM backbones, which effectively compresses knowledge from the vast self-attention space into a compact, dense linear state space. We also design a remote sensing image instance segmentation architecture based on this lightweight visual encoder, where we explore variants of three different backbones and two segmentation heads. Extensive experiments are conducted on multiple benchmark datasets, including SSDD, WHU, and NWPU. Compared to ViT-based approaches, our proposed SSM backbone achieves an 8x reduction in parameters and a 9x reduction in FLOPs while maintaining comparable or superior accuracy to both ViT- and CNN-based instance segmentation methods. The implementation codes have been publicly available at https://github.com/QinzheYang/RS4D.",
+      "authors": [
+        "Qinzhe Yang",
+        "Keyan Chen",
+        "Jia Xu",
+        "Zhenwei Shi",
+        "Zhengxia Zou"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-24T02:41:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.25324v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "remote sensing instance segmentation with state space models",
+      "llm_evidence_cn": "遥感实例分割，使用状态空间模型",
+      "llm_evidence": "遥感实例分割，使用状态空间模型",
+      "canonical_evidence": "遥感实例分割，使用状态空间模型",
+      "llm_tldr_en": "Proposes RS4D, a linear-time remote sensing instance segmentation method using distilled state space models, addressing quadratic complexity of ViTs.",
+      "llm_tldr_cn": "针对Transformer在遥感密集预测任务中二次复杂度问题，提出RS4D方法，通过蒸馏状态空间模型实现线性时间实例分割。该方法引入自适应噪声和掩码知识蒸馏，在保证精度的同时大幅提升效率。实验表明在遥感分割基准上达到竞争性能，为遥感图像分析提供了高效新范式。",
+      "llm_tldr": "针对Transformer在遥感密集预测任务中二次复杂度问题，提出RS4D方法，通过蒸馏状态空间模型实现线性时间实例分割。该方法引入自适应噪声和掩码知识蒸馏，在保证精度的同时大幅提升效率。实验表明在遥感分割基准上达到竞争性能，为遥感图像分析提供了高效新范式。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.25497v1",
+      "source": "arxiv",
+      "title": "SAGE-Nav: Leveraging LLM Planning and Alignment Fusion for Hierarchical Scene Graph-Guided Navigation",
+      "abstract": "Object-Goal Navigation (ObjNav) requires embodied agents to autonomously locate specified targets using only egocentric visual observations. Existing monolithic methods struggle with long-horizon reasoning and generalize poorly to novel environments. To address these limitations, we propose SAGE-Nav, a novel hierarchical framework that integrates the reasoning capabilities of Large Language Models (LLMs) with dynamic scene graphs. Crucially, it decouples asynchronous global semantic planning from the high-frequency reactive control loop. The LLM serves as a global planner, decomposing abstract instructions into a sequence of semantically grounded waypoints. To translate these plans into dense multi-modal guidance, we design a Hierarchical Scene Graph Encoder (HSGE) that leverages relational graph convolutions to produce structure-aware embeddings preserving both semantic and spatial topology. Furthermore, we develop the Goal-aware Alignment-Fusion Network (GAFN) to dynamically fuse real-time perception with these structural priors. Using an adaptive gating mechanism with an explicit inductive bias, GAFN ensures robust visual-topological alignment for the low-level policy. Extensive evaluations in the i-THOR and RoboTHOR environments demonstrate that SAGE-Nav achieves state-of-the-art performance, delivering substantial gains in navigation efficiency and zero-shot generalization while maintaining the low control latency required for physical robotic deployment.",
+      "authors": [
+        "Hao Su",
+        "Yuehao Huang",
+        "Yukai Ma",
+        "Yong Liu",
+        "Jiajun Lv"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-24T07:24:39+00:00",
+      "link": "https://arxiv.org/pdf/2606.25497v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM-based navigation with scene graph, transferable to UAV VLN",
+      "llm_evidence_cn": "基于LLM的场景图导航，可迁移到无人机视觉语言导航",
+      "llm_evidence": "基于LLM的场景图导航，可迁移到无人机视觉语言导航",
+      "canonical_evidence": "基于LLM的场景图导航，可迁移到无人机视觉语言导航",
+      "llm_tldr_en": "SAGE-Nav uses LLM for global planning and scene graphs for hierarchical navigation, enabling long-horizon reasoning in ObjNav.",
+      "llm_tldr_cn": "现有目标导航方法难以进行长程推理且泛化性差。本文提出SAGE-Nav，利用大语言模型进行全局规划，结合动态场景图生成语义路径点，并通过对齐融合将规划转化为多模态引导。在多个基准上，该方法在导航成功率与效率上超过现有方法，展现了分层框架在复杂环境中实现稳健导航的潜力。",
+      "llm_tldr": "现有目标导航方法难以进行长程推理且泛化性差。本文提出SAGE-Nav，利用大语言模型进行全局规划，结合动态场景图生成语义路径点，并通过对齐融合将规划转化为多模态引导。在多个基准上，该方法在导航成功率与效率上超过现有方法，展现了分层框架在复杂环境中实现稳健导航的潜力。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.25629v1",
+      "source": "arxiv",
+      "title": "Event-Adaptive Motion Planning with Distilled Vision-Language Model in Safety-Critical Situations",
+      "abstract": "Robot navigation in safety-critical scenarios faces significant challenges from unforeseen semantic events, where collisions arise primarily from the unpredictable behaviors of dynamic agents rather than unseen objects. While large vision-language models (VLMs) offer remarkable capabilities in commonsense reasoning, frequently invoking them within the continuous control loop introduces severe computational latency, fundamentally destabilizing physical execution. To address these challenges, we propose event-adaptive motion planning (EAMP), an efficient framework for VLM-based robot navigation. Specifically, a prompt-configurable semantic event trigger (PC-SET) selectively activates semantic intervention by continuously monitoring short temporal clips for behavioral anomalies. Upon triggering, an event-triggered distilled SemNav-VLM, fine-tuned via physically verified semantic distillation, maps detected anomalies into discrete strategy-level decisions. Subsequently, a semantic model predictive control (SMPC) module translates these strategies into dynamic reconfigurations of optimization objectives and geometric references. Extensive experiments in safety-critical logistics scenarios demonstrate that EAMP effectively aligns high-level reasoning with low-level control, significantly improving dynamic safety margins over existing baselines while preserving real-time efficiency.",
+      "authors": [
+        "Zhenwei Huang",
+        "Changsheng You",
+        "Shuai Wang",
+        "Chao Zhou",
+        "Wei Xu",
+        "Yi Gong"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-24T09:35:26+00:00",
+      "link": "https://arxiv.org/pdf/2606.25629v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "event-adaptive motion planning with distilled VLM for navigation",
+      "llm_evidence_cn": "基于蒸馏VLM的事件自适应运动规划用于导航",
+      "llm_evidence": "基于蒸馏VLM的事件自适应运动规划用于导航",
+      "canonical_evidence": "基于蒸馏VLM的事件自适应运动规划用于导航",
+      "llm_tldr_en": "Proposes EAMP, an efficient VLM-based robot navigation framework using a prompt-configurable semantic event trigger to reduce latency.",
+      "llm_tldr_cn": "该论文针对安全关键场景中机器人导航面临突发语义事件导致的碰撞问题，提出事件自适应运动规划（EAMP）。EAMP通过可配置语义事件触发机制（PC-SET）选择性激活VLM干预，避免持续调用大模型带来的计算延迟。蒸馏VLM技术保证了实时性。实验证明该框架在应对动态智能体行为方面显著优于基线方法，为无人机语言导航中的实时规划提供了高效范式。",
+      "llm_tldr": "该论文针对安全关键场景中机器人导航面临突发语义事件导致的碰撞问题，提出事件自适应运动规划（EAMP）。EAMP通过可配置语义事件触发机制（PC-SET）选择性激活VLM干预，避免持续调用大模型带来的计算延迟。蒸馏VLM技术保证了实时性。实验证明该框架在应对动态智能体行为方面显著优于基线方法，为无人机语言导航中的实时规划提供了高效范式。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "drone navigation with natural language instructions",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.25796v1",
+      "source": "arxiv",
+      "title": "MIL-LC: A Robust Magnetometer-Inertial-LiDAR Fusion Multimodal Localization Framework",
+      "abstract": "Localization in challenging environments, such as GNSS-denied, geometrically repetitive, or textureless scenes commonly found in offices, hotels, and underground parking facilities, remains an open problem for reliable autonomous mobile robot (AMR) deployment. Single-modality localization methods are inherently limited by the constraints of individual sensors. Although multimodal fusion frameworks have shown improved robustness, most existing approaches still rely heavily on geometric or texture features, or on infrastructure-based beacons, which increase installation and maintenance costs while reducing deployment flexibility. Recently, ambient magnetic field (AMF)-based localization has attracted growing attention because it does not depend on geometric or texture features, nor does it require additional infrastructure, making it a promising complementary modality for AMR localization. However, existing studies have only explored such fusion in pedestrian scenarios using smartphone-mounted sensor suites, and practical solutions for AMR systems remain largely unexplored. To address this gap, this article proposes a magnetometer-inertial-LiDAR fused multimodal localization framework with a custom-designed sensor suite, termed MIL-LC, which provides reliable localization even when LiDAR suffers from geometric degeneration or when the magnetic map changes during long-term deployment. Extensive experiments in both simulation and real-world environments demonstrate that the proposed MIL-LC framework achieves robust and accurate localization performance.",
+      "authors": [
+        "Qiyang Lyu",
+        "Zhenyu Wu",
+        "Wei Wang",
+        "Hongming Shen",
+        "Danwei Wang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-24T13:14:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.25796v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Multimodal fusion of magnetometer, inertial, and LiDAR for localization",
+      "llm_evidence_cn": "磁力计、惯性与激光雷达的多模态融合定位",
+      "llm_evidence": "磁力计、惯性与激光雷达的多模态融合定位",
+      "canonical_evidence": "磁力计、惯性与激光雷达的多模态融合定位",
+      "llm_tldr_en": "MIL-LC fuses magnetometer, inertial, and LiDAR data for robust localization in GNSS-denied environments.",
+      "llm_tldr_cn": "单模态定位在GNSS拒止、重复纹理等场景中鲁棒性不足。本文提出MIL-LC，融合磁力计、惯性和激光雷达的多模态框架，利用环境磁场特征辅助定位。实验表明，该方法在多种挑战场景下实现了准确且鲁棒的位姿估计，且无需基础设施，降低了部署成本。",
+      "llm_tldr": "单模态定位在GNSS拒止、重复纹理等场景中鲁棒性不足。本文提出MIL-LC，融合磁力计、惯性和激光雷达的多模态框架，利用环境磁场特征辅助定位。实验表明，该方法在多种挑战场景下实现了准确且鲁棒的位姿估计，且无需基础设施，降低了部署成本。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
