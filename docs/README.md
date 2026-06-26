@@ -6,71 +6,63 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-25
-- 运行时间：2026-06-25 22:11:48 UTC
+- 最新运行日期：2026-06-26
+- 运行时间：2026-06-26 22:14:38 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：7
-- 速读区：10
+- 本次总论文数：13
+- 精读区：5
+- 速读区：8
 
 ### 今日简报（AI）
-今日精读两篇满分论文，聚焦多光谱目标检测与遥感通用检测基础模型。像素邻域可变形交叉注意力机制和百万级159类LEVIRDet数据集是最大亮点。普通读者可重点关注大规模数据集构建与跨模态特征融合方法。
-- 详情：[/202606/25/README](/202606/25/README)
+今日聚焦遥感分割领域，两篇高分精读论文均达到9.0分，分别提出基于Prompt校准的开放词汇语义分割方法和利用多模态深度学习进行高光谱甲烷羽流分割。
+
+最值得关注的方向是：开放词汇遥感语义分割与多模态高光谱分析，两者在精度和泛化性上均有突破性贡献。
+
+建议普通读者优先精读这两篇高分论文，深入理解Prompt校准机制和多模态融合策略，为遥感场景的自动化分析提供新思路。
+- 详情：[/202606/26/README](/202606/26/README)
 
 ### 精读区论文标签
-1. [Progressive Pixel-Neighborhood Deformable Cross-Attention for Multispectral Object Detection](/202606/25/2606.24092v1-progressive-pixel-neighborhood-deformable-cross-attention-for-multispectral-object-detection)  
-   标签：评分：10.0/10、query:rs-fusion
-   evidence：多光谱目标检测中的跨模态特征融合
-2. [LEVIRDet: A Million-Scale 159-Category Dataset and Foundation Model for Universal Remote Sensing Object Detection](/202606/25/2606.25312v1-levirdet-a-million-scale-159-category-dataset-and-foundation-model-for-universal-remote-sensing-object-detection)  
-   标签：评分：10.0/10、query:rs-fusion
-   evidence：百万级遥感目标检测数据集与基础模型
-3. [FlowDec: Temporal Conditional Flow Decorruptor for Robust Continuous Vision-Language Navigation](/202606/25/2606.22424v2-flowdec-temporal-conditional-flow-decorruptor-for-robust-continuous-vision-language-navigation)  
-   标签：评分：9.0/10、query:uav-vln
-   evidence：连续环境下的视觉语言导航，使用图像恢复提升鲁棒性
-4. [An iterative energy-based multimodal transformer for joint retrieval of wheat soil moisture, leaf area index, and plant height from Sentinel-1 and Sentinel-2 time series](/202606/25/2606.25174v1-an-iterative-energy-based-multimodal-transformer-for-joint-retrieval-of-wheat-soil-moisture-leaf-area-index-and-plant-height-from-sentinel-1-and-sentinel-2-time-series)  
+1. [Prompt-Calibrated SAM 3 for Open-Vocabulary Remote Sensing Semantic Segmentation](/202606/26/2606.21863v1-prompt-calibrated-sam-3-for-open-vocabulary-remote-sensing-semantic-segmentation)  
    标签：评分：9.0/10、query:rs-fusion
-   evidence：多模态Transformer融合用于Sentinel-1和Sentinel-2联合反演
-5. [Evaluating and Enhancing Negation Comprehension in Remote Sensing MLLMs](/202606/25/2606.20177v2-evaluating-and-enhancing-negation-comprehension-in-remote-sensing-mllms)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：遥感多模态大模型否定理解基准
-6. [Prompt-Calibrated SAM 3 for Open-Vocabulary Remote Sensing Semantic Segmentation](/202606/25/2606.21863v1-prompt-calibrated-sam-3-for-open-vocabulary-remote-sensing-semantic-segmentation)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：遥感语义分割与视觉语言提示
-7. [End-to-End Voice Intent Recognition for Spontaneous Human-Drone Interaction with Naive Users](/202606/25/2606.24910v1-end-to-end-voice-intent-recognition-for-spontaneous-human-drone-interaction-with-naive-users)  
+   evidence：基于视觉语言模型SAM3的遥感开放词汇语义分割
+2. [Methane-Plume Segmentation From Hyperspectral Satellite Imagery Via Multimodal Deep Learning](/202606/26/2606.26416v1-methane-plume-segmentation-from-hyperspectral-satellite-imagery-via-multimodal-deep-learning)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：遥感图像中的多模态深度学习分割
+3. [Semi-Supervised Vision-Language-Action Model](/202606/26/2606.21493v1-semi-supervised-vision-language-action-model)  
    标签：评分：8.0/10、query:uav-vln
-   evidence：通过语音意图识别实现语言引导的无人机导航
+   evidence：半监督视觉-语言-动作模型用于机器人导航
+4. [FlowDec: Temporal Conditional Flow Decorruptor for Robust Continuous Vision-Language Navigation](/202606/26/2606.22424v2-flowdec-temporal-conditional-flow-decorruptor-for-robust-continuous-vision-language-navigation)  
+   标签：评分：8.0/10、query:uav-vln
+   evidence：连续环境中的视觉语言导航（VLN-CE）
+5. [Semantic-Aware Autonomous Exploration for UAVs in Unknown Indoor Environments](/202606/26/2606.22670v1-semantic-aware-autonomous-exploration-for-uavs-in-unknown-indoor-environments)  
+   标签：评分：8.0/10、query:uav-vln
+   evidence：针对UAV的语义感知自主探索
 
 ### 速读区论文标签
-1. [FireDataForge: A Unified Framework for Multi-Source Wildfire Data Retrieval and Integration](/202606/25/2606.21198v1-firedataforge-a-unified-framework-for-multi-source-wildfire-data-retrieval-and-integration)  
+1. [AerialFusionMapNet: Online HD Map Construction with Aerial-Onboard BEV Fusion](/202606/26/2606.24784v1-aerialfusionmapnet-online-hd-map-construction-with-aerial-onboard-bev-fusion)  
    标签：评分：7.0/10、query:rs-fusion
-   evidence：多源野火数据检索与集成，涉及遥感图像
-2. [From Spatial to Spectral: An Efficient, Frequency-Guided Feature Representation Learner for Small Object Detection](/202606/25/2606.23825v1-from-spatial-to-spectral-an-efficient-frequency-guided-feature-representation-learner-for-small-object-detection)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：频域特征表示用于遥感小目标检测
-3. [AerialFusionMapNet: Online HD Map Construction with Aerial-Onboard BEV Fusion](/202606/25/2606.24784v1-aerialfusionmapnet-online-hd-map-construction-with-aerial-onboard-bev-fusion)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：航拍-车载BEV融合用于高清地图构建
-4. [Efficient Remote Sensing Instance Segmentation with Linear-Time State Space Distilled Visual Foundation Models](/202606/25/2606.25324v1-efficient-remote-sensing-instance-segmentation-with-linear-time-state-space-distilled-visual-foundation-models)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：遥感实例分割，使用状态空间模型
-5. [SAGE-Nav: Leveraging LLM Planning and Alignment Fusion for Hierarchical Scene Graph-Guided Navigation](/202606/25/2606.25497v1-sage-nav-leveraging-llm-planning-and-alignment-fusion-for-hierarchical-scene-graph-guided-navigation)  
+   evidence：航空与车载BEV融合用于高精地图构建
+2. [RAVEN: Long-Horizon Reasoning & Navigation with a Visuo-Spatio-Temporal Memory](/202606/26/2606.25206v1-raven-long-horizon-reasoning--navigation-with-a-visuo-spatio-temporal-memory)  
    标签：评分：7.0/10、query:uav-vln
-   evidence：基于LLM的场景图导航，可迁移到无人机视觉语言导航
-6. [Event-Adaptive Motion Planning with Distilled Vision-Language Model in Safety-Critical Situations](/202606/25/2606.25629v1-event-adaptive-motion-planning-with-distilled-vision-language-model-in-safety-critical-situations)  
+   evidence：长期导航结合视觉语言记忆
+3. [SAGE-Nav: Leveraging LLM Planning and Alignment Fusion for Hierarchical Scene Graph-Guided Navigation](/202606/26/2606.25497v1-sage-nav-leveraging-llm-planning-and-alignment-fusion-for-hierarchical-scene-graph-guided-navigation)  
    标签：评分：7.0/10、query:uav-vln
-   evidence：基于蒸馏VLM的事件自适应运动规划用于导航
-7. [MIL-LC: A Robust Magnetometer-Inertial-LiDAR Fusion Multimodal Localization Framework](/202606/25/2606.25796v1-mil-lc-a-robust-magnetometer-inertial-lidar-fusion-multimodal-localization-framework)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：磁力计、惯性与激光雷达的多模态融合定位
-8. [Semantic-Aware Autonomous Exploration for UAVs in Unknown Indoor Environments](/202606/25/2606.22670v1-semantic-aware-autonomous-exploration-for-uavs-in-unknown-indoor-environments)  
+   evidence：利用大语言模型规划和对齐融合的场景图导航，与语言引导的无人机导航相关
+4. [Evaluating and Enhancing Negation Comprehension in Remote Sensing MLLMs](/202606/26/2606.20177v2-evaluating-and-enhancing-negation-comprehension-in-remote-sensing-mllms)  
+   标签：评分：6.0/10、query:rs-fusion
+   evidence：遥感多模态大语言模型否定理解评测
+5. [FireDataForge: A Unified Framework for Multi-Source Wildfire Data Retrieval and Integration](/202606/26/2606.21198v1-firedataforge-a-unified-framework-for-multi-source-wildfire-data-retrieval-and-integration)  
+   标签：评分：6.0/10、query:rs-fusion
+   evidence：多源遥感数据融合
+6. [Vision-Language Model Reasoning for Contextual Semantic Mapping in Intralogistics](/202606/26/2606.24814v1-vision-language-model-reasoning-for-contextual-semantic-mapping-in-intralogistics)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：无人机语义感知探索，虽无语言指令，但利用视觉语义进行导航
-9. [fARfetch: Enabling Collocated AR-HRC in Large Visually Diverse Environments with VLM-Driven AR Content Adaptation](/202606/25/2606.25162v1-farfetch-enabling-collocated-ar-hrc-in-large-visually-diverse-environments-with-vlm-driven-ar-content-adaptation)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：VLM驱动的AR语言指令导航
-10. [RAVEN: Long-Horizon Reasoning & Navigation with a Visuo-Spatio-Temporal Memory](/202606/25/2606.25206v1-raven-long-horizon-reasoning--navigation-with-a-visuo-spatio-temporal-memory)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：基于视觉-空间-时间记忆的机器人长时导航与问答
+   evidence：基于VLM的上下文语义地图构建用于导航
+7. [OrthoTrack: Continuous 6-DoF UAV Trajectory Estimation Anchored in Public Orthophotos](/202606/26/2606.25245v1-orthotrack-continuous-6-dof-uav-trajectory-estimation-anchored-in-public-orthophotos)  
+   标签：评分：6.0/10、query:rs-fusion
+   evidence：利用正射影像和表面模型进行无人机轨迹估计
+8. [SpaceRipple: Lightweight Semantic Delivery for Mission-Oriented LEO Earth Observation Satellite Networks](/202606/26/2606.26559v1-spaceripple-lightweight-semantic-delivery-for-mission-oriented-leo-earth-observation-satellite-networks)  
+   标签：评分：6.0/10、query:rs-fusion
+   evidence：卫星遥感与语义传输
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,1097 @@
+Title: OrthoTrack: Continuous 6-DoF UAV Trajectory Estimation Anchored in Public Orthophotos
+
+URL Source: https://arxiv.org/pdf/2606.25245v1
+
+Published Time: Thu, 25 Jun 2026 00:23:11 GMT
+
+Number of Pages: 37
+
+Markdown Content:
+# OrthoTrack: Continuous 6-DoF UAV Trajectory Estimation Anchored in Public Orthophotos 
+
+Oussema Dhaouadi 1,2,3,4⋆ , Zuria Bauer 1 , Johannes Meier 2,4
+
+Olaf Wysocki 3 , Marc Pollefeys 1,5 , and Daniel Cremers 2,4 
+
+> 1
+
+ETH Zurich 2 TU Munich 3 University of Cambridge 4 MCML 5 Microsoft 
+
+https://orthotrack.ethz.ch 
+
+Abstract. Continuous 6-DoF pose estimation is essential for au-tonomous UAV operations. Yet, existing visual odometry and SLAM methods accumulate drift and yield only relative, up-to-scale trajecto-ries. Single-frame geo-localization, in turn, discards temporal continu-ity and remains too slow for real-time use. We present OrthoTrack, a training-free system that estimates continuous 6-DoF UAV trajectories using only publicly available orthophotos and surface models as a map prior. OrthoTrack matches keyframes against the orthophoto and lifts correspondences to metric 3D via the surface model. It then propagates these map-anchored correspondences to intermediate frames with optical flow, producing absolute, metrically scaled poses at every frame with-out GPS or post-hoc alignment. We also introduce the MovingDrone Dataset, a large-scale benchmark pairing photorealistic UAV sequences with dense 6-DoF ground truth and co-registered multi-modal geodata including multi-temporal orthophotos. On MovingDrone and real-world benchmarks, OrthoTrack runs in real time on a single GPU. It outper-forms all baselines by a large margin, even those receiving oracle scale and alignment. By relying on publicly available geodata, OrthoTrack enables deployment to new regions without site-specific adaptation. 
+
+Keywords: UAV localization · 6-DoF pose estimation · geodata-based tracking · benchmark dataset 
+
+1 Introduction 
+
+Autonomous  Unmanned Aerial Vehicle s ( UAV s) are increasingly deployed for infrastructure inspection [17], emergency response [34], and environmental mon-itoring [13], all requiring accurate, continuous 6-degrees of freedom  (DoF ) pose estimation. While  Global Navigation Satellite System  (GNSS ) provides coarse position, it offers no orientation and degrades or fails in urban canyons and signal-denied environments. Vision-based localization is a natural alternative, yet existing paradigms have fundamental limitations. For instance,  Visual Odome-try  (VO ) and  Simultaneous Localization and Mapping  (SLAM ) [3, 39, 40] track  
+
+> ⋆
+
+oussema.dhaouadi@tum.de 
+
+> arXiv:2606.25245v1 [cs.CV] 24 Jun 2026
+
+2 O. Dhaouadi et al. Continous 6-DoF Trajectory Intrinsics LiDAR (classified) LoD1 LoD2 RGB Stream Normals / Depth Streams OrthoTrack (a) MovingDrone Dataset (b) 6-DoF Trajectory Estimation DSM ... 2025 2011 DOP 
+
+Fig. 1: OrthoTrack Estimates Continuous 6-DoF UAV Trajectories From Public Geodata. (a) Our MovingDrone Dataset pairs photorealistic UAV sequences with dense 6-DoF ground truth and multi-modal geodata supporting diverse aerial per-ception tasks (LiDAR, LoD1/2 meshes, DSM, multi-year DOPs, depth, and normals). (b) OrthoTrack matches UAV frames against the DOP, lifts correspondences to 3D via the DSM, and outputs metrically scaled poses at every frame. 
+
+features but accumulate unbounded drift without global anchors. Image re-trieval [37,56, 59] provides limited metric accuracy and requires large databases. Mesh-based methods [30, 54] achieve high accuracy but depend on dense 3D models that are costly to maintain and prohibitive for continuous video. Fur-thermore,  Level of Detail  (LoD ) city-model approaches [60, 61] are compact and privacy-preserving yet restricted to structured urban geometry. A practical alternative is to localize against publicly available  Digital Or-thophoto s ( DOP s) and  Digital Surface Model s ( DSM s), which are metrically accurate, globally registered geodata that government agencies publish at cen-timeter resolution [6, 56]. Recent dense matchers [10, 48] have made cross-view matching between oblique  UAV  imagery and top-down orthophotos feasible, achieving sub-meter accuracy on individual frames [6, 56]. However, extending this to continuous video exposes two shortcomings: each dense match is too com-putationally expensive for frame-rate operation, and independent frames can produce isolated outliers with no mechanism for temporal recovery. To address both shortcomings, we present OrthoTrack, a training-free system for continuous 6-DoF  UAV  trajectory estimation from publicly available  DOP 
+
+and  DSM  data (Fig. 1). The key insight is that geodata-based localization and optical flow tracking are complementary: the former provides drift-free absolute anchoring, the latter temporal continuity at frame-rate speed. OrthoTrack geo-localizes sparse keyframes against the  DOP  and lifts correspondences to metric 3D positions via the  DSM . It then propagates these anchored 2D-3D correspon-dences to intermediate frames using optical flow. Every pose is thereby globally registered and metrically scaled by construction, without the post-hoc alignment that  VO /SLAM  methods require. We also introduce the MovingDrone Dataset, a large-scale benchmark for continuous  UAV  localization with dense 6-DoF  ground truth (Fig. 1). To our knowledge, it is the first to combine continuous video with per-frame metric poses and multi-temporal geodata. Prior datasets offer only single-frame evaluation [6] or at most two map years [56]. We render photorealistic video from a government-OrthoTrack 3
+
+grade textured mesh, yielding pixel-perfect poses with a genuine cross-domain gap since the mesh and reference geodata stem from independent surveys. It covers 21 Berlin regions with  DOP  imagery from up to 14 years, and the pipeline extends to any city with publicly available geodata. Our contributions are threefold. (1) OrthoTrack, a training-free, matcher-and flow-agnostic system for continuous 6-DoF  UAV  trajectory estimation that produces metrically scaled absolute poses without GPS, task-specific training, or post-hoc alignment. (2) The MovingDrone Dataset, a large-scale benchmark with dense ground truth, co-registered multi-modal geodata, and a scalable generation pipeline. (3) State-of-the-art results against  VO /SLAM , 3D foundation models, and  UAV  localization baselines at real-time throughput. 
+
+2 Related Work 
+
+UAV Sparse Localization. Single-image UAV localization estimates the 6-
+
+DoF  camera pose of an individual aerial frame against a pre-existing map. Structure-based approaches match against  Structure from Motion  (SfM ) point clouds or textured meshes [30, 54]. UAVD4L [51] renders synthetic views from a textured city model for coarse retrieval and 6-DoF  estimation, but such recon-structions are expensive.  LoD  city-model approaches exploit structured building geometries: LoD-Loc [61] aligns neural wireframes against  LoD 3 models, while LoD-Loc v2 [60] uses silhouette alignment on more widely available  LoD 1/2 data. OrthoLoC [6] localizes against  DOP s and  DSM s, demonstrating that lightweight public geodata suffices for accurate 6-DoF  estimation. All these methods pro-cess frames independently and do not exploit temporal continuity. The cross-view matching they rely on has been advanced by dense matchers [7,10,11], especially with cross-domain training [48] and aerial-ground data [43]. OrthoTrack adopts RoMa-v2 [10] for this step. 
+
+Visual Odometry and SLAM. Monocular  VO  and  SLAM  recover camera motion from frame-to-frame correspondences but produce trajectories with un-known metric scale. While loop closure and relocalization, as in ORB-SLAM3 [3], can reduce accumulated drift, they require revisiting previously observed geome-try, which is rare in typical  UAV  forward-flight scenarios. Recent learning-based methods address some of these shortcomings: DROID-SLAM [39] performs dif-ferentiable dense bundle adjustment and DPVO [40] offers a competitive speed-accuracy trade-off via recurrent patch updates, yet both still suffer from un-bounded drift without loop closures and lack absolute metric scale. OrthoTrack addresses both by periodically re-anchoring to  DSM -derived georeferenced 3D positions, producing globally consistent, metrically scaled trajectories. 
+
+Feed-Forward 3D Foundation Models. Recent feed-forward models pre-dict 3D geometry directly from images, bypassing classical multi-view pipelines. While designed for general-purpose 3D understanding, they can in principle es-timate camera trajectories from video, making them relevant baselines for  UAV 
+
+pose estimation. DUSt3R [46] pioneered pairwise point-map prediction from uncalibrated image pairs; follow-ups extend the paradigm to dense matching 4 O. Dhaouadi et al. 
+
+Table 1: Comparison With Existing UAV Localization Benchmarks.                                                                                                                                                                          
+
+> Dataset Year Data Scene #Loc Frames View Alt. fps Depth 6-DoF DOP DSM LiDAR Mesh LoD University-1652 [59] 2020 Re+Sy RC72 50k OB–✗✗1†✗✗✗✗
+> VPAIR [35] 2022 Re M12.7k NH1✓✓1✗✓✗✗
+> ALTO [5] 2022 Re M115.4k NH20 §✗✓1✗✓✗✗
+> CrossLoc [53] 2022 Re+Sy U/N 224k BL–✓✓✗✗✗✗✓‡
+> UAVD4L [51] 2024 Re+Sy U219k BL0.5 ✓✓✗✓✗✓✓‡
+> UAV-VisLoc [52] 2024 Re M11 6.7k NH0.2 ✗✗1†✗✗✗✗
+> GTA-UAV [16] 2025 Sy GM133k NB–✗✓✗✗✗✗✗
+> OrthoLoC [6] 2025 Re M47 16.4k BB–✓✓2✓✗✓✗
+> AnyVisLoc [56] 2025 Re M25 18k BB–✗✗1+1 †✓✗✗✗
+> UAVScenes [47] 2025 Re M4120k BL10 ✗✓✗✗✓✓✗
+> MovingDrone (Ours) 2026 Sy RM21 343k BB30 ✓✓≤14 ✓✓✓✓
+> Re=real, Sy R=synthetic (photorealistic), Sy G=synthetic (game engine); U=urban, C=campus, M=mixed, N=nature; N=nadir, O=oblique, B=both; L=low ( ≤150 m), H=high ( >150 m).
+> †Satellite tiles, not surveyed orthophotos. ‡Datasets extended to UAVD4L-LoD and Swiss-EPFL with LoD models in [60, 61]. §Full dataset never publicly released; only sparse competition subsets available.
+
+(MASt3R [22]), feed-forward multi-view inference (MUSt3R [2]), joint camera-depth-track prediction (VGGT [44]), and metric-scale reconstruction (Pow3R [15], DA3 [25], MapAnything [19], Pi3 [49]). Despite their generality, all these mod-els produce local-frame reconstructions that require a similarity transform for georeferenced alignment, limiting their applicability to absolute  UAV  pose esti-mation. In contrast, OrthoTrack directly anchors every prediction to the geodata reference frame, avoiding post-hoc alignment entirely. 
+
+UAV Localization Datasets. Existing benchmarks cover only a subset of the requirements for evaluating continuous map-based localization (Tab. 1). Several benchmarks [5,16,35,52,59] target geo-localization or place recognition but pro-vide either no metric 6-DoF  poses [52,59] or only sparse imagery [6,16,53,56,59] unsuitable for sequential tracking. Among datasets with 6-DoF  annotations, CrossLoc [53] ships no geodata, UAVD4L [51] pairs mesh-derived geodata with only 0.5 fps imagery, and AnyVisLoc [56] provides single images with two map resolutions. Closest to our setting, OrthoLoC [6] pairs  DOP s/ DSM s with 6-DoF 
+
+poses across 47 locations but supplies only sparse, independent frames, while UAVScenes [47] offers dense video with  Light Detection and Ranging  (LiDAR )but ships neither  DOP s nor  DSM s. To our knowledge, MovingDrone is the first dataset to combine dense video with a jointly aligned, multi-temporal suite of geodata modalities. 
+
+3 Method 
+
+Given a  UAV  video and a georeferenced map consisting of a  DOP  and a  DSM ,OrthoTrack estimates a 6-DoF  pose for every frame (Fig. 2). The system first localizes itself on the map without any external sensor. It then enters a loop that alternates between two modes: at keyframes, a dense cross-view match against the  DOP  produces a globally anchored pose. Between keyframes, optical flow propagates the existing correspondences for lightweight pose updates. An OrthoTrack 5DOP 𝒟         
+
+> DSM 𝒮
+> {( 𝐮 i,𝐮 i,𝑐 i)} 𝒟 k
+> 𝐼 k
+> 𝒟 k
+> Cropped
+> 𝒮 k
+> 𝒦 ={( 𝐮 i,𝐗 i)}
+> k
+> 𝐼 k
+> 𝒮 k
+> Correspondence Propagation
+> {( 𝐮 i,𝐗 i)}
+> t
+> 𝐼 t
+> 𝒟 k
+> Point Count M tSpatial Spread σ
+> Quality Check
+> Reprojection Error e t
+> Keyframe Tracked Correspondences
+> {( 𝐮 i,𝐗 i)}
+> t-1
+> 𝒟 k
+> 𝐼 t-1
+> Optical Flow Tracking 𝒪
+> Keyframe Localization
+> 𝐓 t
+> 𝐼 t-1
+> 𝐼 t
+> 𝐓 k-1 𝐊
+> Inter-Frame Tracking
+> 𝐓 k
+> PnP RANSAC 3D Lifting Cross-View Matching ℳ
+> Visibility-aware Crop Selection
+> PnP RANSAC
+
+Fig. 2: OrthoTrack Pipeline. Keyframe localization (top): a visibility-aware crop selects  DOP  Dk and  DSM  Sk from the previous pose. The dense matcher M matches keyframe Ik against Dk , correspondences are lifted to 3D via Sk , and PnP-RANSAC re-covers the keyframe pose Tk . Inter-frame tracking (bottom): optical flow O propagates keyframe-anchored correspondences from previous frame It−1 to current frame It for a lightweight PnP solve. The adaptive quality monitor (center) triggers re-localization when point count, spatial spread, or reprojection error degrades. 
+
+adaptive quality monitor triggers new keyframes when tracking degrades. We begin with notation and then detail each component. 
+
+3.1 Preliminaries Notation. We denote the  UAV  video as {It}Tt=1 with known pinhole intrinsics 
+
+K ∈ R3×3. All poses are world-to-camera: Tt = [ Rt | tt] ∈ SE(3) maps a world point X to the camera frame as RtX + tt, with projection u = π(K(RtX +
+
+tt)) where π([ x, y, z ]⊤) = [ x/z, y/z ]⊤. The camera center is Ct = −R⊤ 
+
+> t
+
+tt. All coordinates use a metric Universal Transverse Mercator (UTM) frame. 
+
+Map Representation. The reference map consists of two georeferenced rasters: (1) the  DOP  D : R2 → R3, an orthorectified aerial photograph providing top-down RGB at each position (x, y ), and (2) the  DSM  S : R2 → R encoding surface elevation z = S(x, y ). Together, any DOP pixel at (x, y ) corresponds to the 3D point X = [ ξ(x), η (y), S(x, y )] ⊤, where ξ and η define the pixel-to-UTM affine transformation. 
+
+Dense Feature Matching. We employ a pre-trained dense matcher M (e.g., RoMa-v2 [10]) that, given images A and B, produces N correspondences {(uAi , uBi , c i)}6 O. Dhaouadi et al. 
+
+with confidence ci ∈ [0 , 1] . In our pipeline, A is the UAV frame and B is a DOP crop. 
+
+Problem Formulation. Given video {It}, a georeferenced map (D, S), and intrinsics K, we aim to estimate the 6-DoF pose Tt for every frame in metric world coordinates, without GPS or IMU. 
+
+3.2 First-Frame Initialization 
+
+OrthoTrack is fully self-initializing and requires neither GPS nor IMU at any stage. The only input beyond the video and intrinsics is a search area over the reference map, which can span the entire available  DOP  coverage. We match the first UAV image against the full  DOP  at reduced resolution to obtain cross-view correspondences whose DOP-side positions we convert to UTM. The median of these UTM positions serves as an approximate center around which we seed a multi-scale refinement: several  DOP  crops (we use 3 crops) of increasing extent are matched independently at full resolution, and the merged 2D–3D correspon-dences are passed to a single PnP solve for the initial pose. When the coarse match fails to produce a reliable position (fewer than Ngs 
+
+correspondences), we fall back to a coarse-to-fine pyramid tiling strategy: we partition the search area into overlapping tiles with 50% overlap and match each tile independently. The search terminates early once a tile yields Nstop PnP inliers, and its position seeds the same multi-scale refinement. 
+
+3.3 Keyframe Localization 
+
+Each keyframe yields an absolute pose following the single-frame localization principle of OrthoLoC [6], which matches a  UAV  frame against a  DOP  crop and solves PnP from  DSM -lifted correspondences. However, OrthoLoC assumes a pre-cropped  DOP /DSM  pair with high co-visibility, which is unavailable in a sequential tracking setting. We address this with a visibility-aware crop selec-tion that handles oblique views, a two-phase matching strategy with multi-scale fallback for difficult frames, and an adaptive triggering mechanism that embeds the localizer within a tracking loop. 
+
+Visibility-Aware Crop Selection. Matching the full  DOP  at every keyframe is prohibitively expensive and degrades precision, since the matcher must compress a large area into a fixed-resolution input. Instead, we crop a local region around the expected camera position to preserve spatial detail. A naive nadir-centered crop fails for oblique views where the visible ground may lie far from the point directly below the  UAV . Given the previous pose Tk−1, we project a dense grid of 
+
+DSM  points into the image, retaining those that (i) are in front of the camera, (ii) fall within image bounds, and (iii) are not occluded, as determined by a coarse depth buffer that discards points behind nearer surfaces. Let V denote the surviving visible points with camera-frame depths dj . For oblique views (θ > 15 ◦), we compute the crop center as an inverse-depth-weighted mean 
+
+¯X =
+
+P 
+
+> j∈V
+
+d−1 
+
+> j
+
+Xj
+
+P 
+
+> j∈V
+
+d−1
+
+> j
+
+, (1) OrthoTrack 7
+
+which biases the crop toward the near-ground region that occupies the largest image area and where the matcher resolves detail best, rather than toward dis-tant terrain that projects to few pixels. For near-nadir views ( θ ≤ 15 ◦), where depth variation is small, we simply use the bounding-box center of V. The re-sulting crop defines the local  DOP  region Dk and its co-registered  DSM  region 
+
+Sk, both used in the subsequent matching and lifting steps. We set the crop size proportional to the spatial extent of V.
+
+Cross-View Matching and 3D Lifting. We match the local  DOP  crop Dk
+
+against the UAV frame using M, yielding correspondences {(uki , uDk 
+
+> i
+
+, c i)}. Each DOP-side match is converted to a UTM coordinate via the known georeferencing transform and lifted to 3D: Xi = [ ξ(xi), η (yi), S(xi, y i)] ⊤ using bilinear interpo-lation of the full-resolution DSM. We discard correspondences with ci < c min 
+
+and, if fewer than Nmin points remain, relax the threshold to c′ 
+
+> min
+
+to retain sufficient coverage. As a fast path, we first attempt PnP on this single crop. If it yields enough inliers, we accept the pose immediately. Otherwise, we match additional crops of increasing extent centered on the initial matches, merge the resulting correspondences, and re-run PnP. 
+
+PnP Pose Estimation. We pass the resulting 2D–3D correspondences to PnP-RANSAC (SQPnP solver [41]), which jointly rejects outliers and recovers Tk.To avoid conditioning issues with large UTM coordinates, we subtract the 3D centroid before solving and restore it in the recovered translation. Because every 3D point is sampled from the georeferenced DSM, the resulting pose is metric and globally anchored by construction. 
+
+3.4 Inter-Frame Tracking 
+
+Once a keyframe pose is established, subsequent frames are processed online by propagating the existing 2D–3D correspondences forward via optical flow O,avoiding the cost of repeated cross-view matching. 
+
+Correspondence Propagation. Let Ck = {(uki , Xi)} be the set of 2D–3D correspondences established at keyframe k. For each subsequent frame t > k , we track each 2D keypoint from It−1 to It using O. We apply a forward-backward consistency check and discard points whose round-trip displacement exceeds τfb 
+
+pixels. Because the 3D points are anchored in the static map, the propagated pairs {(uti, Xi)} directly yield a pose via PnP-RANSAC. 
+
+Keyframe Triggering. In principle, keyframes could be triggered at fixed in-tervals based on pre-defined thresholds. However, the optimal interval varies with scene content and camera motion, making a fixed schedule either wasteful dur-ing stable flight or insufficient during rapid changes. Instead, we trigger a new keyframe only when tracking quality degrades. Let Mt be the number of surviv-ing correspondences at frame t, Mk the count at keyframe k, and ∆t = t−k the elapsed frames. We trigger a new keyframe when any of the following conditions is met: (1) Mt < N min (insufficient points for reliable PnP), (2) Mt < α M k (large fraction of correspondences lost since the last keyframe), (3) min( σx, σ y ) < σ min 
+
+where σx and σy are the spatial standard deviations of ut (spatial collapse: re-8 O. Dhaouadi et al. 0 20 40 60 80 100 120 Frames since keyframe ( t)             
+
+> 1234Reproj. error (px)
+> Triggered Keyframe Triggered Keyframe
+> warmup ebase
+> ek(1+ m)
+> ¯eabs
+> t(absolute)
+> ek·¯ft(relative)
+> et(fast drift)
+> et(slow drift)
+
+Fig. 3: Adaptive Reprojection Thresholds. The absolute threshold (blue) starts relaxed during warmup, then settles at ebase . The relative threshold (red) tightens over 
+
+D frames. Rapid drift is caught by the absolute bound, slow drift by the tightening relative bound. 
+
+maining points cluster in a small image region, making PnP ill-conditioned), or (4) reprojection error et exceeds an adaptive threshold. A fixed reprojection threshold for condition (4) is problematic: cross-view matching produces a variable initial error at each keyframe, so a tight thresh-old triggers an infinite re-triggering loop, while a loose one misses slow drift. We therefore combine two adaptive thresholds that adjust to each keyframe’s matching quality (Fig. 3), making the criterion robust across scenes without per-dataset tuning. The first is an absolute threshold that relaxes the bound during a warmup window after each keyframe: 
+
+¯e abs  
+
+> t
+
+= ebase + δ · max  0, 1 − ∆t G
+
+, (2) where ebase is the steady-state bound, δ the initial tolerance, and G the warmup duration in frames. The second is a relative threshold, active for ∆t ≥ G, that detects slow drift by comparing et to the keyframe’s baseline error ek. It triggers when et > ¯ft · ek, where 
+
+¯ft = 1 + ( f0−1)(1 −ρ) + m ρ, ρ = min  1, ∆t −GD
+
+, (3) decreases from f0 to 1+ m over D frames. Since this threshold scales with ek,it adapts to each keyframe’s matching quality: a noisier keyframe permits more absolute error, while the decaying factor ensures gradual drift eventually triggers re-localization. 
+
+4 The MovingDrone Dataset 
+
+We present MovingDrone, a large-scale UAV localization benchmark that ren-ders photorealistic video from the Berlin VirtualCityMap [42], a high-precision textured photogrammetric mesh reconstructed from real aerial imagery (cross-validated to 0.18 m median vertical accuracy) that covers Germany’s largest city. We select 21 regions to span Berlin’s full architectural and landscape diversity, from dense historical centers and modern high-rises to parks, waterways, air-ports, and stadiums. The fully automated pipeline can generate arbitrarily many OrthoTrack 9Train / Val / Test in-place Test out-of-place 
+
+Fig. 4: MovingDrone Locations. 194 sequences across 21 Berlin regions. Insets show representative trajectories over satellite imagery. The heatmap encodes sequence density. 
+
+sequences anywhere within the city’s coverage at negligible cost, circumventing the airspace restrictions, privacy regulations, and expensive RTK-GNSS super-vision that make real UAV data collection impractical at metropolitan scale. Be-cause the mesh preserves authentic textures, lighting, and geometric detail from the original survey, the synthetic-to-real domain gap is substantially smaller than in game-engine datasets such as GTA-UAV [16]. The underlying reconstruction stems from a comprehensive campaign, yielding a watertight, gap-free surface, unlike meshes in other benchmarks [47, 51] that suffer from holes in areas due to insufficient image coverage. Each sequence is paired with the same publicly available geodata that a practitioner would use in the field, ensuring that ev-ery label is by construction spatially consistent with operational map assets at sub-pixel accuracy. 
+
+Scale and Diversity. MovingDrone comprises 194 sequences totaling 343,114 frames across 21 regions (Fig. 4). Camera tilt ranges from near-nadir ( 0◦) to highly oblique ( 83 ◦), with 92% of frames exceeding 20 ◦, reflecting the oblique-view regime common in inspection and monitoring applications. On average, each sequence is paired with 13.19 DOP years (2011–2025), enabling analysis of localization robustness to map age (Fig. 5). 
+
+Generation Pipeline. Camera trajectories are designed in Google Earth Stu-dio across 21 Berlin regions covering four archetypes (orbital, linear, oblique descent, multi-turn) at 64–1,183 m altitude, inspired by the trajectories of pub-lic drone footages. The exported trajectories are resampled via cubic splines to bound speeds to 10–100 km/h. Although the base trajectories are designed rather than recorded from a physical drone, three physically motivated aug-mentations inject realistic flight dynamics: (i) multi-band trajectory noise com-10 O. Dhaouadi et al. 1 2     
+
+> 3
+> 4
+> 5
+> -5
+> 32
+> 68
+> 169
+> 302
+> 434
+> Visible
+> Occluded
+> FoV
+> Camera
+> 1
+> 2
+> 3
+> 4
+> 5
+> LoD
+> P1
+> P2
+> P3
+> P4
+> P5
+> UAV Image + LoD2
+> DOP (2025) + LoD2 DSM DOP Visibility Mask DOP (2011) DOP (2020) UAV Visibility Mask Normals LiDAR Points
+> Depth (m) Elevation (m)
+> Depth
+
+Fig. 5: MovingDrone Multi-Modal Data Per Frame. Each rendered UAV frame is paired with depth, surface normals from the mesh, LiDAR, multi-year DOPs, a DSM, and LoD1/2 building meshes. Comparing the three DOPs reveals the temporal domain gap: lighting, vegetation, and even building footprints change across years. 
+
+bining GPS drift with motor vibration, (ii) stochastic wind-gust events, and (iii) velocity-dependent directional motion blur. Photorealistic video is rendered from the Berlin VirtualCityMap [42] textured mesh, with per-frame depth ob-tained through ray casting for pixel-exact consistency. Each sequence is auto-matically paired with open geodata from Berlin and Brandenburg portals [21,36] (Fig. 5): multi-year DOPs and a DSM (both at 0.2 m resolution), classified airborne LiDAR (5–20 pts/m 2, ASPRS classes), the textured photogrammet-ric mesh used for rendering, and CityGML building meshes (LoD1/LoD2). Full details on the generation pipeline, augmentations, and data splits are provided in the supplement. 
+
+5 Experiments 
+
+In the following, we evaluate OrthoTrack’s trajectory estimation accuracy on MovingDrone and the real-world UAVScenes [47] benchmark against  VO /SLAM 
+
+systems, 3D foundation models, and geodata-based localization methods, and validate each design choice through ablation studies. 
+
+5.1 Experimental Setup Datasets. We evaluate on the 10 MovingDrone test sequences (with  DOP  from year 2025) and all 20 real-world UAVScenes [47] sequences (121 k real-world frames at 10 fps) across Armenia and Hong Kong. Since UAVScenes ships neither 
+
+DOP s nor  DSM s, we render both from the provided  LiDAR -reconstructed mesh at 0.10 m GSD. In contrast, MovingDrone uses independently surveyed geodata, producing a genuine cross-domain gap, while the cross-domain gap in UAVScenes is small. No dataset-specific adaptation is applied. OrthoTrack 11 
+
+Table 2: 6-DoF UAV Trajectory Estimation on UAVScenes and Moving-Drone. Bold : best; underline: second best. Metrics: ATE and TE in meters [m] ↓, RE in degrees [ ◦]↓, R@ k in percent [%] ↑.
+
+Method Align. UAVScenes [47] MovingDrone (Ours) ATE ↓ TE ↓ RE ↓ R@1 ↑ R@2 ↑ ATE ↓ TE ↓ RE ↓ R@1 ↑ R@2 ↑ FPS ↑
+
+VO / SLAM 
+
+Five-Point VO [29] Sim(3) 76.08 61.98 28.53 0.0 0.2 55.89 45.25 36.76 0.0 0.0 2.0 ORB-SLAM3 [3] ff+s 84.39 56.48 29.25 5.6 8.5 29.20 25.45 10.25 12.1 27.6 22.3 
+
+ORB-SLAM3 [3] Sim(3) 36.90 20.58 14.61 1.3 6.3 13.14 9.11 14.30 5.9 22.9 22.3 
+
+ORB-SLAM3 [3] G, pw 6.98 1.47 108.83 0.6 3.6 5.24 2.37 48.90 0.8 5.7 22.3 
+
+ORB-SLAM3 [3] G+M, pw 6.98 1.47 99.47 2.7 8.7 5.24 2.37 42.82 0.8 7.6 22.3 
+
+DROID-SLAM [39] ff+s 147.52 126.52 51.49 3.4 4.4 0.89 0.75 0.14 72.7 89.6 4.7 DROID-SLAM [39] Sim(3) 103.96 86.81 59.85 0.5 3.0 0.34 0.22 0.47 88.8 89.7 4.7 DROID-SLAM [39] pw 8.03 2.53 0.80 5.4 32.1 0.63 0.35 0.08 93.7 99.1 4.7 DROID-SLAM [39] G, pw 1.04 0.08 46.63 1.7 6.1 0.13 0.05 4.57 24.1 37.5 4.7 DROID-SLAM [39] G+M, pw 1.04 0.08 35.02 5.0 12.2 0.13 0.05 4.30 25.7 41.2 4.7 DPVO [40] ff+s 151.06 128.21 49.78 3.1 3.5 4.01 2.06 0.37 63.8 82.2 4.5 DPVO [40] Sim(3) 100.92 85.78 53.88 0.1 0.9 2.43 1.04 0.68 72.7 84.1 4.5 
+
+Foundation models 
+
+DUSt3R [46] § Sim(3) 84.14 63.37 37.84 0.0 0.0 53.43 43.60 81.32 0.0 0.0 0.2 DA3-Nested [25] Sim(3) 58.27 38.74 16.47 0.2 1.1 2.74 1.83 2.57 28.7 51.4 11.3 VGGT-SLAM v2 [44] Sim(3) 57.17 34.57 9.47 0.0 0.0 11.94 9.28 15.88 0.0 0.0 3.1 Pi3 [49] ¶ Sim(3) 102.80 80.39 53.75 0.0 0.0 23.98 19.30 39.46 0.2 14.2 25.2 
+
+UAV localization (GPS/IMU prior) 
+
+LoD-Loc [61] none no LoD models 17.12 9.52 1.49 4.0 11.5 3.0 LoD-Loc [61] (retrained) none no LoD models 10.04 5.25 1.10 10.8 30.3 3.3 OrthoLoC [6] ∗ none 38.24 1.26 0.43 23.5 93.8 19.78 0.50 0.08 85.4 95.4 0.5 OrthoTrack – loc. only none 1.89 1.28 0.43 20.5 91.7 4.83 0.30 0.06 95.8 99.2 1.9 OrthoTrack – track only none 102.64 19.53 7.75 12.3 15.0 27.70 16.36 5.20 3.0 7.7 13.4 OrthoTrack (Ours) none 1.51 1.38 0.49 20.6 88.0 0.67 0.33 0.06 90.9 97.9 23.8 
+
+Align.: Sim(3) = oracle 7-DoF, ff+s = first-frame anchor + scale, pw = piecewise Sim(3) to geodata anchors, none = absolute poses (no alignment). † windowed; ‡ sometimes windowed;  
+
+> ∗
+
+GIM(DKM)+AdHoP, same DOP/DSM inputs as OrthoTrack. 
+
+Metrics. We report six metrics, all computed per sequence and averaged: ATE (RMSE of 3D position errors), TE (median translation error), RE (median ro-tation error), and joint recall R@ k (percentage of frames with TE <k m and RE <k ◦). All timing is measured on a single NVIDIA L40S GPU. 
+
+Baselines. We compare in Tab. 2 against monocular  VO /SLAM  systems, recent 3D foundation models, and geodata-based localization methods. All baselines and models in the ablation studies use official code with default hyperparameters. 
+
+Evaluation Protocol.  VO /SLAM  systems receive raw video under oracle Sim(3) alignment and first-frame anchoring with scale correction (ff+s). Foun-dation models not fitting to GPU memory use sliding-window inference with per-window Sim(3) stitching. OrthoLoC [6] and LoD-Loc [61] receive simulated sensor priors (noisy GPS + orientation). Piecewise-aligned DROID-SLAM (pw) aligns a pre-computed trajectory every 50 frames via Sim(3) using the same matcher and pose solver as OrthoTrack keyframes. 
+
+Implementation Details. We use RoMa-v2 [10] Precise as the dense matcher, selected for its strong cross-domain performance, and GPU-accelerated Lucas-Kanade [28] for inter-frame optical flow. The design choice is justified in Tab. 3. The PnP-RANSAC pose solver uses SQPnP [41]. The remaining hyperparame-ters and timing details are in the supplementary. 12 O. Dhaouadi et al. Berliner Dom (MovingDrone)                      
+
+> 150 100 50 050 100 150
+> 200
+> 100
+> 0
+> 100
+> Northing (m)
+> AMvalley (UAVScenes)
+> 400 200 0200 400
+> Easting (m)
+> HKisland Eve. (UAVScenes)
+> 200 150 100 50 050 100
+> GT DROID-SLAM DPVO DA3-N. DROID-SLAM (pw) OrthoTrack
+
+Fig. 6: Trajectory Comparison. VO/SLAM baselines receive oracle Sim(3) align-ment yet drift or collapse on long flights. Piecewise-anchored DROID-SLAM (pw) re-duces drift but accumulates errors between anchors. OrthoTrack produces absolute poses without alignment and remains accurate. 
+
+5.2 Comparison with State of the Art 
+
+Tab. 2 presents results on MovingDrone and on real-world UAVScenes [47]. Or-thoTrack is the only method to maintain sub-metre ATE on both benchmarks without oracle alignment or sensor priors, while operating at real-time speed. Representative trajectories are shown in Fig. 6 and per-frame localization qual-ity is visualized in Fig. 7. Among  VO /SLAM  methods, DROID-SLAM [39] achieves the lowest ATE on MovingDrone under oracle Sim(3) (0.34 m), yet collapses to 104 m on UAVScenes (a 69 × gap to OrthoTrack). We attribute this to the near-planar scene geometry at high altitude: monocular parallax cannot resolve depth when the baseline-to-depth ratio is negligible, causing the reconstructed trajectory to compress and accumulate drift that no post-hoc alignment can recover. Piecewise geo-data anchoring (pw) even slightly outperforms OrthoTrack on MovingDrone (0.63 vs. 0.67 m ATE). On UAVScenes, however, the VO collapse propagates between anchors (8.03 vs. 1.51 m, >5× above OrthoTrack). Providing piecewise alignment with oracle  GNSS  (G) and magnetometer (M) significantly improves the  VO  baselines by continuously re-anchoring the scale and heading, allowing DROID-SLAM to reach 1.04 m ATE on UAVScenes. However, the addition of the magnetometer (+M) does not significantly reduce the overall rotation error (RE). This is because a magnetometer provides only a global yaw reference and cannot correct accumulated drift in pitch and roll, leaving the 3D orientation de-graded. Furthermore, this piecewise approach relies on perfect continuous sensor OrthoTrack 13 Berliner Dom      
+
+> Ground Truth GT
+> DROID-SLAM
+> XY: 4.5m Z: 0.4m R: 0.6°
+> DPVO
+> XY: 4.4m Z: 2.0m R: 0.9°
+> OrthoLoC
+> XY: 1.3m Z: 0.5m R: 4.3°
+> OrthoTrack (Ours)
+> XY: 1.4m Z: 0.1m R: 0.2°
+> Lohmühlenbrücke
+> GT XY: 0.3m Z: 0.1m R: 0.4° XY: 31.4m Z: 21.6m R: 4.1° XY: 1.0m Z: 0.1m R: 60.2° XY: 0.2m Z: 0.3m R: 0.1°
+
+Fig. 7: Per-Frame Localization Quality.  LoD 2 building wireframes (red) overlaid on the orthophoto are shifted by each method’s position error, making misalignment directly visible. 
+
+priors, which are often unavailable or unreliable in real-world aerial scenarios. DPVO [40] and ORB-SLAM3 [3] exhibit the same degeneracy, confirming a fun-damental limitation of relative-pose methods on aerial scenes. Moreover, DROID runs at 4.7 FPS vs. OrthoTrack’s 23.8 FPS, making it 5× slower even before ac-counting for the alignment oracle it requires. Foundation models fare similarly: despite oracle alignment, even the strongest variant cannot approach OrthoTrack’s performance. This gap is primarily driven by out-of-distribution bias, as these models were trained predominately on ground-level images and struggle with the aerial perspective. Furthermore, be-cause they predict geometry in a local frame, they rely on a similarity transform that breaks down when the reconstruction drifts over long sequences without any mechanism for external re-anchoring. Among geodata-based methods that use prior sensor data (GPS/IMU) to identify the region of interest, LoD-Loc [61] reaches only 10 m ATE on Mov-ingDrone even after retraining, likely because wireframe alignment is less dis-criminative than dense texture matching on complex urban scenes or due to degenerate results in regions with limited buildings. OrthoLoC [6] achieves com-petitive single-frame TE (0.50 vs. 0.33 m on MovingDrone and 1.26 vs. 1.38 m on UAVScenes), confirming per-frame localizer accuracy, yet without temporal consistency sporadic failures propagate directly into ATE (19.78 m and 38.24 m). OrthoTrack cuts ATE by 30 × and by 25 × on the respective datasets, invoking the matcher at only ∼1% of frames and propagating correspondences via optical flow, effectively filtering isolated outliers without GPS or IMU. 
+
+5.3 Ablation Studies Localization vs. Tracking. The ablation variants in Tab. 2 isolate each com-ponent. Localizing (loc. only) every frame via matching, similar to OrthoLoC but with RomaV2 and visibility-aware crop selection and without AdHoP strat-egy [6], achieves the lowest TE but at prohibitive cost (1.9 FPS). Tracking alone 14 O. Dhaouadi et al. 
+
+Table 3: Ablation Studies on MovingDrone. Each section varies one pipeline component while fixing all others. Bold : best; underline: second best (per section).                                                                                                                                                                                               
+
+> Config ATE ↓TE ↓RE ↓R@1 ↑R@2 ↑R@5 ↑#KF FPS c↑FPS s↑
+> Flow backend (matcher = RoMa-v2 Precise, 30 fps)
+> LK [28] 0.67 0.33 0.06 90.9 97.9 99.3 15 30.3 23.8
+> RAFT [38] 0.66 0.37 0.08 91.9 98.4 99.6 10 11.9 10.0 SEA-RAFT [50] 1.93 0.37 0.08 93.5 97.9 99.4 12 17.4 14.1 NeuFlow v2 [58] 0.82 0.33 0.06 92.9 97.9 98.7 11 24.4 17.6
+> Keyframe matcher (flow = LK, 30 fps)
+> RoMa-v2 (Precise) 0.67 0.33 0.06 90.9 97.9 99.3 15 1.3 23.8 RoMa-v2 (Base) 0.90 0.49 0.10 86.4 95.9 99.0 13 2.3 26.3
+> RoMa-v2 (Fast) 0.88 0.58 0.11 79.9 96.9 99.1 13 2.6 25.4 GIM(DKM) [48] 2.56 0.52 0.10 89.1 97.9 99.4 13 0.7 21.7 L2M [24] 6.23 0.29 0.06 94.9 96.4 98.3 15 0.4 15.0 MASt3R [22] 5.74 2.10 0.46 20.4 56.3 85.6 11 0.3 5.5
+> Input frame rate (matcher = RoMa-v2 Precise, flow = LK)
+> 30 fps (1 ×)0.67 0.33 0.06 90.9 97.9 99.3 15 –23.8
+> 10 fps (3 ×)0.58 0.39 0.08 91.0 97.9 99.7 11 –19.2 3 fps (10 ×)0.68 0.42 0.08 90.6 97.8 99.0 8–11.1 2 fps (15 ×)0.71 0.38 0.07 90.9 97.3 99.4 8–8.7
+> Keyframe triggering (matcher = RoMa-v2 Precise, flow = LK, 30 fps)
+> Adaptive (Ours) 0.67 0.33 0.06 90.9 97.9 99.3 15 –23.8 Fixed reproj ( e=2 px) 0.79 0.46 0.08 85.2 94.9 99.7 9–21.4 Fixed interval ( K=50 )0.53 0.35 0.06 93.3 99.3 99.7 28 –19.0 Fixed interval ( K=50 , 2 fps) 12.26 1.30 0.07 54.3 71.0 85.8 3–6.8 Fixed interval ( K=150 )0.82 0.41 0.06 90.7 96.9 99.3 10 –24.2
+> Point-count only 1.69 0.93 0.06 61.1 80.8 96.0 4–22.5 FPS c: isolated throughput of the varied component (flow tracking or matching rate). FPS s: end-to-end system throughput.
+
+(track only) by initializing the first keyframe and iteratively creating a new set tracking points at each frame without global re-anchoring drifts. The full pipeline combines both: flow-based tracking suppresses per-frame outliers while periodic keyframe localization corrects accumulated drift. On UAVScenes, loc-only achieves lower TE (1.28 vs. 1.38 m) but higher ATE (1.89 vs. 1.51 m), con-firming that trajectory consistency requires temporal filtering beyond per-frame accuracy. 
+
+Optical Flow Backend. Tab. 3 compares four flow backends. LK [28], RAFT [38], and NeuFlow v2 [58] achieve sub-metre ATE. We attribute LK’s parity with learned methods to the pipeline’s regime: at 30 fps, inter-frame dis-placements are small enough for a classical pyramid tracker, and keyframe resets bound drift before it affects accuracy. We select LK for its best accuracy-speed trade-off. 
+
+Matching Method. Tab. 3 compares matchers spanning dense and standalone methods. RoMa-v2 [10] Precise achieves the best ATE (0.67 m), which we at-tribute to its training on AerialMegaDepth [43] that targets the air-to-ground domain gap. Five of six matchers produce sub-metre TE, confirming that the pipeline could be designed with any matcher. The end-to-end throughput stays similar because keyframes constitute only ∼1% of frames. 
+
+Input Frame Rate. Tab. 3 evaluates robustness from 30 down to 2 fps. Accu-racy remains stable because the adaptive monitor self-regulates: at lower rates it triggers re-localization more often ( ∼0.6% at 30 fps to ∼5% at 2 fps), automati-cally trading throughput for accuracy. 
+
+Keyframe Triggering Strategy. Tab. 3 compares the adaptive dual-threshold against simpler heuristics. Fixing a threshold for the reprojection error does not OrthoTrack 15 
+
+outperform our adaptive strategy since the reprojection error alone does not sufficiently reflect the quality of the estimated pose. Using a regular interval of keyframes show different results: For small intervals ( K = 50 ), the results are slightly better than our adaptive strategy as keyframes are triggered more of-ten. However, this degradates with lower frame rate (2 fps instead of 30 fps), indicating the sensitivity of this parameter to the camera motion. Yet, our adap-tive strategy captures both early and slow drifts: the grace ramp prevents re-triggering loops when cross-view reprojection error is initially high, while the decaying relative bound catches slow geometric drift. Further evaluation on UAVD4L [51], additional analysis and details are pro-vided in the supplementary material. 
+
+6 Conclusion 
+
+We present OrthoTrack, a training-free pipeline that matches UAV frames against publicly available orthophotos and surface models, yielding drift-free, metrically scaled 6-DoF poses without GPS or training. We also introduce Mov-ingDrone, a multi-modal benchmark of 194 sequences across 21 Berlin regions whose scalable generation pipeline and paired geodata support broader aerial perception research. On MovingDrone, OrthoTrack achieves 0.67 m ATE and 0.33 m median translation error without any alignment or sensor prior. On the external real-world UAVScenes benchmark it reduces ATE by 69 × over the best sim(3)-aligned VO system. Unlike VO/SLAM systems that drift or foundation models bound to a local frame, OrthoTrack anchors every pose in public geodata, enabling deployment to new regions without site-specific data. 
+
+Acknowledgments. This research was partially funded by the ETH Foundation Project 2025-FS-352, the SNSF Advanced Grant 216260. 
+
+References   
+
+> 1. Bochkovskiy, A., Delaunoy, A., Germain, H., Santos, M., Zhou, Y., Richter, S., Koltun, V.: Depth pro: Sharp monocular metric depth in less than a second. In: The Thirteenth International Conference on Learning Representations (2025), https: //openreview.net/forum?id=aueXfY0Clv
+> 2. Cabon, Y., Stoffl, L., Antsfeld, L., Csurka, G., Chidlovskii, B., Revaud, J., Leroy, V.: Must3r: Multi-view network for stereo 3d reconstruction. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 1050– 1060 (2025) 3. Campos, C., Elvira, R., Gómez, J.J., Montiel, J.M.M., Tardós, J.D.: ORB-SLAM3: An accurate open-source library for visual, visual-inertial and multi-map SLAM. IEEE Transactions on Robotics 37 (6), 1874–1890 (2021) 4. Chen, G., Fu, T., Chen, H., Teng, W., Xiao, H., Zhao, Y.: Rdd: Robust feature detector and descriptor using deformable transformer. In: Proceedings of the Com-puter Vision and Pattern Recognition Conference. pp. 6394–6403 (2025)
+
+16 O. Dhaouadi et al. 5. Cisneros, I., Yin, P., Zhang, J., Choset, H., Scherer, S.: Alto: A large-scale dataset for uav visual place recognition and localization. arXiv preprint arXiv:2207.12317 (2022) 6. Dhaouadi, O., Marin, R., Meier, J.M., Kaiser, J., Cremers, D.: Ortholoc: UAV 6-dof localization and calibration using orthographic geodata. In: The Thirty-ninth Annual Conference on Neural Information Processing Systems Datasets and Bench-marks Track (2025) 7. Edstedt, J., Athanasiadis, I., Wadenbäck, M., Felsberg, M.: Dkm: Dense kernel-ized feature matching for geometry estimation. In: Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. pp. 17765–17775 (2023) 8. Edstedt, J., Bökman, G., Wadenbäck, M., Felsberg, M.: Dad: Distilled reinforce-ment learning for diverse keypoint detection. arXiv preprint arXiv:2503.07347 (2025) 9. Edstedt, J., Bökman, G., Wadenbäck, M., Felsberg, M.: DeDoDe: Detect, Don’t Describe — Describe, Don’t Detect for Local Feature Matching. In: 2024 Interna-tional Conference on 3D Vision (3DV). IEEE (2024) 10. Edstedt, J., Nordström, D., Zhang, Y., Bökman, G., Astermark, J., Larsson, V., Heyden, A., Kahl, F., Wadenbäck, M., Felsberg, M.: Roma v2: Harder better faster denser feature matching. arXiv preprint arXiv:2511.15706 (2025) 11. Edstedt, J., Sun, Q., Bökman, G., Wadenbäck, M., Felsberg, M.: Roma: Robust dense feature matching. In: Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. pp. 19790–19800 (2024) 12. Google: Google earth studio. https://earth.google.com/studio/ (2026) 13. Hodgson, J.C., Baylis, S.M., Mott, R., Herrod, A., Clarke, R.H.: Precision wildlife monitoring using unmanned aerial vehicles. Scientific reports 6(1), 22574 (2016) 14. Hu, M., Yin, W., Zhang, C., Cai, Z., Long, X., Chen, H., Wang, K., Yu, G., Shen, C., Shen, S.: Metric3d v2: A versatile monocular geometric foundation model for zero-shot metric depth and surface normal estimation. IEEE Transactions on Pattern Analysis and Machine Intelligence 46 (12), 10579–10596 (2024) 15. Jang, W., Weinzaepfel, P., Leroy, V., Agapito, L., Revaud, J.: Pow3r: Empowering unconstrained 3d reconstruction with camera and scene priors. In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp. 1071–1081 (2025) 16. Ji, Y., He, B., Tan, Z., Wu, L.: Game4loc: A uav geo-localization benchmark from game data. In: Proceedings of the AAAI Conference on Artificial Intelligence. vol. 39, pp. 3913–3921 (2025) 17. Jordan, S., Moore, J., Hovet, S., Box, J., Perry, J., Kirsche, K., Lewis, D., Tse, Z.T.H.: State-of-the-art technologies for uav inspections. IET Radar, Sonar & Nav-igation 12 (2), 151–164 (2018) 18. Ke, B., Qu, K., Wang, T., Metzger, N., Huang, S., Li, B., Obukhov, A., Schindler, K.: Marigold: Affordable adaptation of diffusion-based image generators for image analysis. IEEE Transactions on Pattern Analysis and Machine Intelligence (2025) 19. Keetha, N., Müller, N., Schönberger, J., Porzi, L., Zhang, Y., Fischer, T., Knapitsch, A., Zauss, D., Weber, E., Antunes, N., et al.: Mapanything: Univer-sal feed-forward metric 3d reconstruction. arXiv preprint arXiv:2509.13414 (2025) 20. Künzel, J., Hilsmann, A., Eisert, P.: Ripe: Reinforcement learning on unlabeled image pairs for robust keypoint extraction. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 4868–4877 (2025) 21. Landesvermessung und Geobasisinformation Brandenburg (LGB): Opengeo-data.brandenburg - data portal of geobasis-de / landesvermessung und geoba-sisinformation brandenburg. Online geodata platform (2025), https://data. OrthoTrack 17 
+
+geobasis-bb.de , data licensed under Datenlizenz Deutschland Namensnennung 2.0 22. Leroy, V., Cabon, Y., Revaud, J.: Grounding image matching in 3d with mast3r. In: European conference on computer vision. pp. 71–91. Springer (2024) 23. Li, X., Rao, T., Pan, C.: Edm: Efficient deep feature matching. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 26198–26208 (2025) 24. Liang, Y., Hu, Y., Shao, W., Fu, Y.: Learning dense feature matching via lift-ing single 2d image to 3d space. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 6621–6631 (2025) 25. Lin, H., Chen, S., Liew, J., Chen, D.Y., Li, Z., Shi, G., Feng, J., Kang, B.: Depth anything 3: Recovering the visual space from any views. arXiv preprint arXiv:2511.10647 (2025) 26. Lindenberger, P., Sarlin, P.E., Pollefeys, M.: Lightglue: Local feature matching at light speed. In: Proceedings of the IEEE/CVF international conference on com-puter vision. pp. 17627–17638 (2023) 27. Liu, Y., Lai, W., Zhao, Z., Xiong, Y., Zhu, J., Cheng, J., Xu, Y.: Liftfeat: 3d geometry-aware local feature matching. In: 2025 IEEE International Conference on Robotics and Automation (ICRA). pp. 11714–11720. IEEE (2025) 28. Lucas, B.D., Kanade, T.: An iterative image registration technique with an appli-cation to stereo vision. In: IJCAI’81: 7th international joint conference on Artificial intelligence. vol. 2, pp. 674–679 (1981) 29. Nistér, D.: An efficient solution to the five-point relative pose problem. IEEE Trans-actions on Pattern Analysis and Machine Intelligence 26 (6), 756–770 (2004) 30. Panek, V., Kukelova, Z., Sattler, T.: Meshloc: Mesh-based visual localization. In: European Conference on Computer Vision. pp. 589–609. Springer (2022) 31. Piccinelli, L., Yang, Y.H., Sakaridis, C., Segu, M., Li, S., Van Gool, L., Yu, F.: Unidepth: Universal monocular metric depth estimation. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 10106– 10116 (2024) 32. Potje, G., Cadar, F., Araujo, A., Martins, R., Nascimento, E.R.: Xfeat: Acceler-ated features for lightweight image matching. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 2682–2691 (2024) 33. Sarlin, P.E., DeTone, D., Malisiewicz, T., Rabinovich, A.: Superglue: Learning feature matching with graph neural networks. In: Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. pp. 4938–4947 (2020) 34. Scherer, J., Yahyanejad, S., Hayat, S., Yanmaz, E., Andre, T., Khan, A., Vukadi-novic, V., Bettstetter, C., Hellwagner, H., Rinner, B.: An autonomous multi-uav system for search and rescue. In: Proceedings of the first workshop on micro aerial vehicle networks, systems, and applications for civilian use. pp. 33–38 (2015) 35. Schleiss, M., Rouatbi, F., Cremers, D.: Vpair–aerial visual place recognition and localization in large-scale outdoor environments. arXiv preprint arXiv:2205.11567 (2022) 36. Senate Department for Urban Development, Building and Housing (Senatsverwal-tung für Stadtentwicklung, Bauen und Wohnen), Berlin: Geoportal berlin (geospa-tial data infrastructure berlin). https://gdi.berlin.de (2026), accessed: 2026-02-24 37. Sun, J., Liu, K., Zhang, C., Chen, C., Shen, J., Vong, C.M.: Cross-view uav geo-localization with precision-focused efficient design: A hierarchical distillation ap-proach with multi-view refinement. arXiv e-prints pp. arXiv–2510 (2025) 18 O. Dhaouadi et al. 38. Teed, Z., Deng, J.: Raft: Recurrent all-pairs field transforms for optical flow. In: European conference on computer vision. pp. 402–419. Springer (2020) 39. Teed, Z., Deng, J.: Droid-slam: Deep visual slam for monocular, stereo, and rgb-d cameras. In: Advances in Neural Information Processing Systems. vol. 34, pp. 16558–16569 (2021) 40. Teed, Z., Lipson, L., Deng, J.: Deep patch visual odometry. In: Advances in Neural Information Processing Systems. vol. 36 (2024) 41. Terzakis, G., Lourakis, M.: A consistently fast and globally optimal solution to the perspective-n-point problem. In: European Conference on Computer Vision. pp. 478–494. Springer (2020) 42. virtualcitymap berlin 3d city model. https : / / berlin . virtualcitymap . de/ 
+
+(2025), https://berlin.virtualcitymap.de/ 
+
+43. Vuong, K., Ghosh, A., Ramanan, D., Narasimhan, S., Tulsiani, S.: Aerialmegadepth: Learning aerial-ground reconstruction and view synthesis. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 21674–21684 (2025) 44. Wang, J., Chen, M., Karaev, N., Vedaldi, A., Rupprecht, C., Novotny, D.: Vggt: Visual geometry grounded transformer. In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp. 5294–5306 (2025) 45. Wang, R., Xu, S., Dong, Y., Deng, Y., Xiang, J., Lv, Z., Sun, G., Tong, X., Yang, J.: Moge-2: Accurate monocular geometry with metric scale and sharp details. In: The Thirty-ninth Annual Conference on Neural Information Processing Systems (2025), https://openreview.net/forum?id=16mDq7m2OK 
+
+46. Wang, S., Leroy, V., Cabon, Y., Chidlovskii, B., Revaud, J.: Dust3r: Geometric 3d vision made easy. In: Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. pp. 20697–20709 (2024) 47. Wang, S., Li, S., Zhang, Y., Yu, S., Yuan, S., She, R., Guo, Q., Zheng, J., Howe, O.K., Chandra, L., et al.: Uavscenes: A multi-modal dataset for uavs. In: Proceed-ings of the IEEE/CVF International Conference on Computer Vision. pp. 28946– 28958 (2025) 48. Wang, Y., He, X., Peng, S., Tan, D., Zhou, X.: Efficient loftr: Semi-dense local fea-ture matching with sparse-like speed. In: Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. pp. 21666–21675 (2024) 49. Wang, Y., Zhou, J., Zhu, H., Chang, W., Zhou, Y., Li, Z., Chen, J., Pang, J., Shen, C., He, T.: π3: Permutation-equivariant visual geometry learning. arXiv preprint arXiv:2507.13347 (2025) 50. Wang, Y., Lipson, L., Deng, J.: Sea-raft: Simple, efficient, accurate raft for optical flow. In: European Conference on Computer Vision. pp. 36–54. Springer (2024) 51. Wu, R., Cheng, X., Zhu, J., Liu, X., Zhang, M., Yan, S.: Uavd4l: A large-scale dataset for uav 6-dof localization. In: International Conference on 3D Vision (3DV) (2024) 52. Xu, W., Yao, Y., Cao, J., Wei, Z., Liu, C., Wang, J., Peng, M.: Uav-visloc: A large-scale dataset for uav visual localization. arXiv preprint arXiv:2405.11936 (2024) 53. Yan, Q., Zheng, J., Reding, S., Li, S., Doytchinov, I.: Crossloc: Scalable aerial local-ization assisted by multimodal synthetic data. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 17358–17368 (2022) 54. Yan, S., Cheng, X., Liu, Y., Zhu, J., Wu, R., Liu, Y., Zhang, M.: Render-and-compare: Cross-view 6-dof localization from noisy prior. In: 2023 IEEE Interna-tional Conference on Multimedia and Expo (ICME). pp. 2171–2176. IEEE (2023) 55. Yang, L., Kang, B., Huang, Z., Zhao, Z., Xu, X., Feng, J., Zhao, H.: Depth anything v2. Advances in Neural Information Processing Systems 37 , 21875–21911 (2024) OrthoTrack 19 56. Ye, Y., Teng, X., Chen, S., Li, Z., Liu, L., Yu, Q., Tan, T.: Exploring the best way for uav visual localization under low-altitude multi-view observation condition: a benchmark. arXiv preprint arXiv:2503.10692 (2025) 57. Zhang, Y., Keetha, N., Lyu, C., Jhamb, B., Chen, Y., Qiu, Y., Karhade, J., Jha, S., Hu, Y., Ramanan, D., et al.: Ufm: A simple path towards unified dense corre-spondence with flow. arXiv preprint arXiv:2506.09278 (2025) 58. Zhang, Z., Gupta, A., Jiang, H., Singh, H.: Neuflow-v2: Push high-efficiency opti-cal flow to the limit. In: 2025 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). pp. 2479–2485. IEEE (2025) 59. Zheng, Z., Wei, Y., Yang, Y.: University-1652: A multi-view multi-source bench-mark for drone-based geo-localization. In: Proceedings of the 28th ACM interna-tional conference on Multimedia. pp. 1395–1403 (2020) 60. Zhu, J., Peng, S., Wang, L., Tan, H., Liu, Y., Zhang, M., Yan, S.: Lod-loc v2: Aerial visual localization over low level-of-detail city models using explicit silhou-ette alignment. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 26610–26621 (2025) 61. Zhu, J., Yan, S., Wang, L., shengYue, z., Liu, Y., Zhang, M.: Lod-loc: Aerial visual localization using lod 3d map with neural wireframe alignment. In: Globerson, A., Mackey, L., Belgrave, D., Fan, A., Paquet, U., Tomczak, J., Zhang, C. (eds.) Advances in Neural Information Processing Systems. vol. 37, pp. 119063–119098. Curran Associates, Inc. (2024) 20 O. Dhaouadi et al. 
+
+# Supplementary Material 
+
+OrthoTrack: Continuous 6-DoF UAV Trajectory Estimation Anchored in Public Orthophotos 
+
+Overview. Section A covers implementation details, runtime and resource us-age, and hyperparameter sensitivity. Section B describes the MovingDrone gen-eration pipeline, realism augmentations, dataset splits and statistics, dataset visualization, and licensing. Section C presents additional experiments: founda-tion model evaluation under two alignment protocols, evaluation on UAVD4L, analysis of challenging scenarios, sensor prior noise sensitivity, geodata sensi-tivity, extended matcher ablation,  DOP  year analysis, and MovingDrone as a monocular depth benchmark. Section D discusses limitations and future work. Section E discusses ethical considerations and broader impact. 
+
+A Pipeline Details 
+
+A.1 Implementation Details 
+
+We use RoMa-v2 [10] in precise mode as the dense matcher M, sampling up to 
+
+N = 3 ,000 correspondences with confidence threshold cmin = 0 .4 (relaxed to 0.1
+
+when too few matches pass), selected for its strong cross-domain performance (Tab. C10). Inter-frame optical flow uses Lucas-Kanade with a 21 ×21 window, 3 pyramid levels, and forward-backward threshold τfb = 1 .0 px, providing the best accuracy-speed trade-off. PnP-RANSAC uses SQPnP [41] with reprojec-tion thresholds of 4.0 px for keyframes and 7.0 px for tracked frames. A crop is accepted when its inlier ratio exceeds rmin = 0 .30 . A new keyframe is trig-gered when tracked points fall below Nmin = 100 or the point-drop ratio exceeds 
+
+α = 0 .40 . The spatial-collapse radius σmin = 30 px prevents triggering when tracked points cluster in a small image region. The adaptive reprojection thresh-old starts at ebase = 2 .0 px and grows by δ = 2 .0 px per consecutive failure, with grace ramp G = 15 frames, growth factor f0 = 2 .0, growth margin m = 0 .35 ,and decay period D = 100 frames. Visibility-aware cropping samples the  DSM 
+
+on a 5 m grid within 800 m with 16 px z-buffer cells. First-frame initialization performs full-DOP  matching at reduced resolution. If this fails, a coarse-to-fine pyramid fallback dynamically subdivides the  DOP , stopping early as soon as any tile yields a reliable pose with at least 30 inliers. All hyperparameters were set once and used unchanged across all three evaluation datasets (MovingDrone, UAVScenes [47], UAVD4L [51]) without per-dataset tuning. 
+
+A.2 Runtime and Resource Usage 
+
+Tab. A1 reports per-component latencies averaged over 10 test sequences. The bottleneck is keyframe localization (RoMa-v2 matching + multi-crop PnP) at 1.4 s per event, amortized over inter-frame optical flow steps at 23 ms each, OrthoTrack 21 
+
+yielding 23.8 FPS and comfortably exceeding real-time for 30 FPS video. Faster RoMa-v2 variants (Base/Fast) reduce keyframe cost to 0.4–0.5 s while preserving submeter accuracy (see ablations in main paper), though overall throughput is dominated by inter-frame flow steps, so the end-to-end speedup is modest. Peak GPU memory is approximately 11 GB during keyframe events, driven by the RoMa-v2 Precise forward pass at 1,280 ×1,280 resolution. Between keyframes, only ∼2.1 GB is needed for Lucas-Kanade flow and PnP, leaving ample head-room for onboard processes. The full pipeline fits on a single consumer GPU with ≥12 GB VRAM (e.g. RTX 3060/4070). CPU RAM ranges from 6 to 18 GB depending on geodata tile extent (mean 11 GB). First-frame initialization takes 3.5 s on average (max 10.8 s) when the search spans local  DOP  coverage. A city-scale search scales linearly with tile count, but in practice the last known GPS fix constrains the area, making initialization near-instantaneous. 
+
+Table A1: Per-Component Timing. GPU: averaged over 10 test sequences on one NVIDIA L40S. CPU-only: Intel Xeon Gold 6248R.                 
+
+> RoMa: GPU RoMa: CPU Component LK: GPU LK: CPU LK: CPU First-frame initialization 3.5 s 3.2 s 227 s Keyframe localization 1.4 s 1.4 s 176 s Inter-frame tracking (LK + PnP) 23 ms 38 ms 79 ms Effective throughput 23.8 FPS 18.6 FPS 0.4 FPS
+
+A.3 Hyperparameter Sensitivity 
+
+We perform a one-at-a-time sweep of 12 pipeline hyperparameters, evaluating 4 values per parameter across the 10 test sequences. Tab. A2 reports the maximal deviation from the default. Three parameters ( m, D, σmin ) exhibit zero sensitiv-ity, while the remaining nine produce only marginal variations ( ∆ATE ≤ 0.26 m). The most influential are the number of sampled matches N and the point-drop ratio α. Median translation error and recall remain virtually unchanged (∆TE ≤ 0.03 m, ∆R@2 ≤ 0.9 percentage points), confirming that no parameter requires careful tuning. Fig. A1 visualizes the per-parameter trends. 
+
+B MovingDrone Dataset Details 
+
+This section provides additional details on the MovingDrone generation pipeline, realism augmentations, dataset splits, and statistics. 
+
+B.1 Generation Pipeline 
+
+The pipeline converts a Google Earth Studio [12] camera trajectory into a com-plete multi-modal sequence in five stages. (1) Trajectory design: we design 194 camera paths across 21 regions in Google Earth Studio, following flight patterns from publicly available drone footage (orbital inspections, linear flyovers, oblique 22 O. Dhaouadi et al. 
+
+Table A2: Hyperparameter Sensitivity. One parameter varied per row; others at default (bold). Symbol definitions in Sec. A. ∆ATE/ ∆TE: max. absolute deviation from default (m); ∆R@2: in pp. Sorted by ∆ATE.                                                                   
+
+> Parameter Default Swept Range ∆ATE ∆TE ∆R@2
+> N3000 [1000, 8000] 0.26 0.03 0.9
+> α0.4 [0.2, 0.75] 0.20 0.00 0.4
+> ebase 2[1.0, 5.0] 0.17 0.01 0.5
+> cmin 0.4 [0.2, 0.6] 0.15 0.02 0.7
+> τfb 1[0.5, 3.0] 0.10 0.01 0.3
+> G15 [5, 40] 0.08 0.02 0.4
+> Nmin 100 [50, 300] 0.08 0.01 0.3 PnP reproj 7[3.0, 15.0] 0.06 0.02 0.6
+> rmin 0.3 [0.1, 0.5] 0.03 0.00 0.1
+> m0.35 [0.15, 0.75] 0.00 0.00 0.0
+> D100 [30, 300] 0.00 0.00 0.0
+> σmin 30 [10.0, 80.0] 0.00 0.00 0.0 Default configuration (baseline) ATE = 0.67, TE = 0.33, R@2 = 97.9%
+
+descents, and multi-turn paths). Google Earth Studio exports per-frame camera state including ECEF position, WGS84 coordinates, Euler angles, and vertical 
+
+field of view  (FOV ). (2) Speed normalization: the exported animations are cin-ematographic and often exceed 200 km/h, far beyond real drones. We resample the temporal parametrization via cubic splines to match the target speed dis-tribution in Tab. B3 while preserving the spatial path. Position and rotation are interpolated jointly. (3) Rendering: we render photorealistic video from the Berlin VirtualCityMap [42] using Open3D offscreen EGL with 4× MSAA at 
+
+1920 × 1080 . Depth maps use raycasting, guaranteeing pixel-exact depth-pose consistency without projection artifacts. All geometry is translated to a local frame to avoid floating-point cancellation from large UTM coordinates. (4) Geo-data fetching: we automatically acquire reference data from the Berlin and Bran-denburg open-data portals [21, 36] based on each trajectory’s UTM bounding box: multi-year  DOP s at 0.2 m GSD (up to 14 years, 2011–2025, Fig. B3), a 
+
+DSM  at 0.2 m GSD, classified airborne  LiDAR  (5–20 pts/m 2, ASPRS classes), and LoD1/LoD2 CityGML building models with semantic labels. (5) Coordi-nate alignment: we convert the exported coordinates to UTM Zone 33N. Each pose is stored as a camera center (x, y, z ) in UTM and a camera-to-world rota-tion quaternion (qw, q x, q y , q z ). A Z-offset calibration corrects the vertical datum difference between the rendering mesh and the  DSM .
+
+Table B3: Target Speed Distribution. Proportions used for trajectory resampling.                
+
+> Category Reference Speed (km/h) Frac. Consumer slow DJI Mini (filming) 15–30 40% Consumer cruise DJI Mavic/Air 30–50 30% Prosumer max DJI Mavic 3 50–72 20% Racing / sport FPV sport mode 72–100 10%
+
+B.2 Realism Augmentations 
+
+Three physically motivated augmentations are applied to every sequence to nar-row the sim-to-real gap. OrthoTrack 23 2 0 0 0 4 0 0 0 6 0 0 0 8 0 0 0 
+
+> 0 .7 5
+> 0 .9 0 ATE (m )
+
+PnP thr. 
+
+Nmax    
+
+> 0 .2 0 .4 0 .6
+> 0 .7 5
+> 0 .9 0
+> 24
+> 0 .7 5
+> 0 .9 0
+
+ebase   
+
+> 0 .2 0 .4 0 .6
+> 0 .7 5
+> 0 .9 0 ATE (m )
+
+cmin      
+
+> 123
+> 0 .7 5
+> 0 .9 0
+> fb
+> 1 0 2 0 3 0 4 0
+> 0 .7 5
+> 0 .9 0
+
+G  
+
+> 1 0 0 2 0 0 3 0 0
+> 0 .7 5
+> 0 .9 0 ATE (m )
+
+Nmin    
+
+> 51 0 1 5
+> 0 .7 5
+> 0 .9 0
+> 0 .2 0 .4
+> 0 .7 5
+> 0 .9 0
+
+r min   
+
+> 0 .2 0 .4 0 .6
+> 0 .7 5
+> 0 .9 0 ATE (m )
+
+m  
+
+> 1 0 0 2 0 0 3 0 0
+> 0 .7 5
+> 0 .9 0
+
+D   
+
+> 2 0 4 0 6 0 8 0
+> 0 .7 5
+> 0 .9 0
+> min
+
+Fig. A1: Hyperparameter Sensitivity. ATE vs. parameter value for all 12 hyperpa-rameters (symbols in Tab. A2). Red square: default. Grey dashed: default ATE. Three parameters ( m, D, σmin ) show zero sensitivity, and the rest stay within 0.26 m of the baseline. 
+
+Trajectory Noise. Real  UAV  platforms exhibit two noise regimes: slow GPS/wind-induced drift (Tslow ≈ 3.5 s) and fast motor micro-vibrations (Tfast ≈ 0.1 s). We generate two independent Gaussian-filtered signals per chan-nel (weighted 30/70) and add them to the rendered trajectory. Roll banking proportional to yaw rate ( 0.15 ◦ per ◦/frame) simulates coordinated turns. Ta-ble B4 lists per-channel amplitudes. 
+
+Stochastic Jitter Events. We model two types of wind disturbances on top of the continuous noise above. Sudden gusts (20% per-sequence probability) pro-duce a 4-frame rotational spike of up to 0.8◦. Sustained gusts (40% probability) create 1–2 s episodes of amplified oscillation. 
+
+Motion Blur. Directional motion blur is applied to frames where camera speed exceeds 15 m/s. A convolution kernel aligned with the projected 2D motion vector has length proportional to the effective speed veff = v+0 .1·ω (translational + angular), clamped to [3 , 21] pixels. This affects 8–15% of frames depending on the speed profile. 
+
+Table B4: Trajectory Noise Parameters.               
+
+> Channel Amplitude ( σ)Bands Position XY 0.30 m drift + vibration Position Z 0.12 m drift + vibration Pitch, Yaw 0.15 ◦drift + vibration Roll 0.15 ◦+0.15 ·˙ψdrift + banking
+
+24 O. Dhaouadi et al. 
+
+B.3 Dataset Splits and Statistics 
+
+The four-way split (Tab. B5) disentangles two generalization axes: intra-region (novel viewpoints over familiar terrain) and inter-region (entirely unseen envi-ronments). Five geographically separated locations form the out-of-place test set, while the remaining 16 regions are divided into train, validation, and in-place test splits spanning diverse altitude and speed ranges. Although some  DSM  tiles overlap between regions due to the tile grid, camera trajectories and viewpoints are entirely disjoint. 
+
+Table B5: MovingDrone Split Statistics. Mean ± std of per-sequence values. Altitudes in  Above Ground Level  (AGL ). Range row: global extremes.                                                                                              
+
+> Split Seq. Regions Frames Speed (km/h) Alt. (m) Traj. (m) Tilt ( ◦)Dur. (h) Train 174 16 297,518 46 ±23 188 ±119 545 ±295 45 ±13 2.8 Val 10 731,721 33 ±26 302 ±283 558 ±590 38 ±21 0.3 Test-InPlace 558,618 55 ±25 216 ±84 561 ±235 46 ±80.1 Test-OutPlace 555,257 69 ±11 207 ±104 610 ±183 46 ±60.1 Total 194 21 343,114 46 ±23 195 ±134 548 ±314 44 ±14 3.2 Range 300–12,473 0–116 26–1,145 139–2,289 0–83
+
+Individual sequences range from 10 s to 7 min at 30 fps (mean 1,769 frames). The three largest regions (Mitte, Potsdamer Platz, Airport) contribute 50% of all frames. Per-sequence speeds closely follow the target distribution in Tab. B3, and speed and altitude are weakly correlated, ensuring broad coverage of the flight-parameter space. 
+
+B.4 Dataset Visualization 
+
+Fig. B2 illustrates the diversity of MovingDrone with 10 representative frames spanning altitudes from 31 to over 1,000 m  Above Ground Level  (AGL ), viewing angles from nadir to highly oblique, and nine scene types. Low Oblique Urban 31 m AGL, 82° tilt High Nadir City 1060 m AGL, 6° tilt Rural Landscape 134 m AGL, 45° tilt Waterfront 173 m AGL, 66° tilt Airport 622 m AGL, 29° tilt Stadium 251 m AGL, 65° tilt Industrial 67 m AGL, 55° tilt Suburban 57 m AGL, 48° tilt Historical Park 203 m AGL, 45° tilt Road 110 m AGL, 30° tilt 
+
+Fig. B2: Scene Diversity in MovingDrone. 10 frames spanning 31–1,060 m  AGL ,nadir to highly oblique views, and different scene types. 
+
+Fig. B3 shows all 14  DOP  years (2011–2025) for the same area around the Fernsehturm. The building facades in standard  DOP s highlights their perspective distortions compared to geometrically corrected TrueDOPs. The impact of  DOP 
+
+vintage on localization is analyzed in Sec. C.7. OrthoTrack 25 2021            
+
+> 2011 2014 2015 2016 2017 2018 2019 2021 2022 2023 2024 2025 2013
+> Fig. B3: All 14 DOP Years (2011–2025). Same area around the Fernsehturm. Green borders: geometrically corrected TrueDOPs. Red borders: standard DOPs with visible building lean.
+
+Fig. C4 presents all eight data modalities for five representative sequences. All spatial layers share the same UTM coordinate frame, enabling pixel-level cross-modal consistency. 
+
+B.5 Licensing 
+
+All geodata is published under open-data licenses by the Berlin Senate [36] and Geobasis Brandenburg [21]. The Berlin 3D city model VirtualCityMap [42] is available under the Data License Germany 2.0 (dl-de/by-2-0). Google Earth Studio [12] is used exclusively for camera trajectory design. No Google Earth imagery or renderings are included in the dataset, and all rendering is performed independently using the open-source VirtualCityMap mesh [42]. MovingDrone will be released with code for full reproducibility. 
+
+C Additional Experiments 
+
+C.1 Foundation Model Evaluation 
+
+The comparison in main paper reports pose estimation results of foundation models under oracle Sim(3) alignment. Tab. C6 additionally evaluates a first-frame and scale (ff+s) protocol that anchors the trajectory at the first ground-truth pose with a single global scale factor, simulating a scenario where an accurate initial 6-DoF pose and a global scale correction are available. Since OrthoTrack produces metrically scaled absolute poses from geodata, its results are identical under both protocols. Under oracle Sim(3), only DA3-Nested (ATE = 2.7 m) and DA3 (6.7 m) reach single-digit ATE, yet both remain roughly 4× worse than OrthoTrack (0.67 m). Switching to ff+s degrades all methods substantially, with the best ATE ris-ing from 2.7 to 11.4 m, because a single scale correction cannot compensate for rotational drift over long sequences. DUSt3R-family methods produce rotation errors above 60 ◦, confirming that pairwise global optimization is ill-conditioned for near-planar aerial geometry with small multi-view baselines relative to scene depth. 26 O. Dhaouadi et al. UAV Image     
+
+> Urban Suburban Rural Industrial Road
+> Depth
+> 0
+> 1
+> Norm. Depth
+> Normals Cropped DOP Cropped DSM
+> 10
+> 0
+> 10
+> 20
+> Elevation (m)
+> LoD1 LoD2 LiDAR
+
+Fig. C4: Full-Modality Visualization. Five sequences (columns) with all eight data modalities (rows), from  UAV  query through depth, normals,  DOP , DSM , LoD1/LoD2 meshes, and  LiDAR .OrthoTrack 27 
+
+Table C6: Foundation Model Evaluation under Two Alignment Protocols. 
+
+Each cell shows Sim(3) / ff+s values. Bold : best, underline: second best. 
+
+Method ATE ↓ TE ↓ RE ↓ R@5 ↑ FPS ↑
+
+DA3-Nested [25] † 2.7 / 11.4 1.8 / 10.8 2.6 / 1.1 77.5 / 63.5 11.3 DA3 [25] † 6.7 / 28.1 4.0 / 27.4 3.4 / 3.5 61.8 / 13.9 21.5 Pi3 [49] † 24.0 / 72.9 19.3 / 66.5 39.5 / 31.1 30.0 / 18.9 25.2 
+
+Pi3X [49] † 14.3 / 59.7 11.0 / 54.3 24.5 / 34.7 34.0 / 23.7 14.2 VGGT-SLAM v2 [44] 11.9 / 39.6 9.3 / 37.8 15.9 / 1.9 22.7 / 13.4 3.1 VGGT-SLAM v1 [44] 16.9 / 38.5 11.6 / 35.4 15.5 / 2.3 13.2 / 13.6 1.4 VGGT-Long [44] † 28.6 / 67.1 27.0 / 53.8 17.5 / 2.3 20.7 / 12.7 1.0 VGGT [44] † 31.4 / 93.0 27.4 / 64.9 26.5 / 12.8 12.9 / 10.9 15.8 MUSt3R [22] † 28.7 / 148.8 21.5 / 117.2 40.0 / 73.8 11.2 / 4.7 6.3 DUSt3R [46] † 53.4 / 139.8 43.6 / 112.2 81.3 / 89.9 4.5 / 5.1 0.2 MapAny.-K [19] † 57.1 / 154.7 43.3 / 132.2 77.4 / 81.7 0.0 / 2.8 5.5 MapAny. [19] † 55.7 / 145.4 43.8 / 114.5 94.5 / 105.6 0.0 / 2.7 5.5 PowR3R-BA [15] † 58.4 / 170.8 44.7 / 140.4 73.8 / 81.0 0.0 / 2.2 0.2 DUSt3R-M [22] † 55.4 / 118.2 47.3 / 86.9 62.2 / 69.6 0.0 / 3.1 0.2 MASt3R [22] † 130.6 / 256.2 114.3 / 234.2 126.5 / 116.5 0.0 / 1.1 1.5 OrthoTrack (Ours) ⋆ 0.67 0.33 0.06 90.9 23.8 ATE and TE in meters, RE in degrees, R@5 in %. † windowed inference. ⋆ Absolute poses (protocol-independent). Mitte (MovingDrone) Lohmuehlenbruecke (MovingDrone)      
+
+> Easting (m)
+> GT DA3-N. DA3 VGGT-SLAM Pi3 DUSt3R
+
+Fig. C5: Foundation Model Trajectories under Oracle Sim(3). Five models on Mitte (left) and Lohmuehlenbruecke (right), overlaid on the  DOP . DA3-Nested closely tracks ground truth, while DUSt3R diverges due to rotation errors in near-planar aerial geometry. 
+
+Figure C5 shows predicted trajectories on two representative sequences under oracle Sim(3). Top-performing methods remain close to the ground truth, while those with poor rotation estimation diverge significantly despite receiving the optimal global correction. 28 O. Dhaouadi et al. 
+
+C.2 Evaluation on UAVD4L 
+
+UAVD4L [51] covers Changsha, China, with 19 sequences ( ∼3,800 frames) at 0.5 fps, providing a geographically and operationally distinct test case. Images (up to 5280 ×3956 px) are resized to a maximum dimension of 1,920 px. The benchmark provides only a textured mesh, from which we render the reference 
+
+DOP  and  DSM , eliminating domain gap between geodata and the 3D scene model. As shown in Tab. C7, OrthoTrack localizes all 19 sequences with sub-degree rotation and near-perfect R@5. Its slightly lower R@1 compared to DROID-SLAM reflects limited geometric accuracy of the mesh-derived  DOP /DSM , where systematic offsets become the dominant error source at the 1 m threshold. Among foundation models, only DA3-Nested and Pi3 exceed DROID-SLAM’s R@5, yet all remain far below OrthoTrack. Fig. C6 confirms that DROID-SLAM, DPVO, and DA3-Nested diverge substantially despite oracle Sim(3), while OrthoTrack closely follows the ground truth. These results demonstrate that OrthoTrack also works in other scenes, cameras, and continents without adaptation, with accuracy scaling directly with geodata quality. 
+
+Table C7: Evaluation on UAVD4L [51]. 19 sequences (6 inTraj + 13 outTraj). 
+
+Bold : best; underline: second best.                                                                                                            
+
+> Method Align. ATE ↓TE ↓RE ↓R@1 ↑R@2 ↑R@5 ↑
+> VO / SLAM
+> Five-Point VO [29] Sim(3) 27.36 21.81 36.59 0.1 6.2 35.0 ORB-SLAM3 [3] ff+s 155.70 141.58 36.60 10.6 13.5 18.4 ORB-SLAM3 ‡[3] Sim(3) 68.84 59.03 27.23 13.6 22.2 34.3 DPVO [40] ff+s 68.39 58.45 18.08 40.2 56.9 66.5 DPVO [40] Sim(3) 33.74 26.24 22.40 57.0 66.1 68.4 DROID-SLAM [39] ff+s 68.70 56.35 21.39 40.3 62.0 68.3 DROID-SLAM [39] Sim(3) 32.47 24.70 19.09 62.7 67.9 68.5
+> Foundation models
+> DA3-Nested [25] Sim(3) 36.81 31.72 13.41 49.6 64.5 76.2 DUSt3R ∗[46] Sim(3) 16.31 11.92 9.37 22.3 43.4 66.1 Pi3 §[49] Sim(3) 5.67 4.43 6.32 41.8 61.2 73.5 VGGT-SLAM [44] Sim(3) 47.94 39.76 11.13 24.8 37.9 50.1
+> Geodata-based (no alignment)
+> OrthoLoC ¶[6] —1958.38 1.09 0.34 43.4 84.8 88.0 OrthoTrack (Ours) —1.26 1.01 0.26 50.7 96.5 99.8
+> Align.: Sim(3) = oracle 7-DoF, ff+s = first-frame anchor + scale, — = absolute poses (no alignment). ∗DUSt3R succeeded on 14/19 seq. (OOM on 5). §Pi3 on 12/19 (OOM on 7).
+> ‡ORB-SLAM3 Sim(3) from 16/19 (3 init failures). ¶OrthoLoC ATE dominated by sporadic catastrophic PnP failures; TE reflects typical-case accuracy.
+
+C.3 Challenging Scenarios 
+
+Figs. C7 and C8 present challenging scenarios from MovingDrone to illustrate OrthoTrack’s operating envelope and limitations. 
+
+Success Cases. Dense urban scenes with distinctive architectural features achieve submeter accuracy across a wide range of conditions (Fig. C7), including highly tilted views, moderate and high altitudes, suburban near-nadir perspec-tives, road corridors, and airport environments. Performance is largely texture-dependent: regions with distinctive, stable structures support accurate matching OrthoTrack 29 3 0 0 2 0 0 1 0 0 0 1 0 0 2 0 0 3 0 0                
+
+> 3 0 0
+> 2 0 0
+> 1 0 0
+> 0
+> 1 0 0
+> 2 0 0
+> 3 0 0
+> 2 0 0 1 0 0 01 0 0 2 0 0
+> 4 0 0 3 0 0 2 0 0 1 0 0 01 0 0 2 0 0 3 0 0
+> GT DROID-SLAM DPVO DA3-N. OrthoTrack
+> Easting (m) Northing (m)
+
+Fig. C6: UAVD4L Trajectory Visualization. Despite oracle Sim(3), all baselines diverge, while OrthoTrack tracks the ground truth closely. 
+
+regardless of altitude or tilt. OrthoTrack is robust to dynamic objects (PnP-RANSAC rejects outlier correspondences), temporal map change (submeter ac-curacy across 14  DOP  years, Sec. C.7), and transient failures (geodata-anchored matching prevents drift accumulation). 
+
+Failure Cases. The most severe failures arise from extreme camera tilt ( >70 °
+
+from nadir), where the  UAV  image shows building facades while the  DOP  shows rooftops, creating a fundamental geometric mismatch (Fig. C8). High-altitude nadir flights ( >700 m  AGL ) suffer from GSD mismatch between the  UAV  im-age and the 0.2 m/px  DOP . Low-altitude road scenes fail due to repetitive lane markings and ambiguous correspondences from dynamic traffic. Suburban res-idential areas and parks with few distinctive features also produce occasional failures. 
+
+Per-Frame Failure Rates. Tab. C8 quantifies OrthoTrack’s per-frame failure rate, i.e., the fraction of frames where the pipeline does not produce a valid pose. Across all three benchmarks, the failure rate remains below 0.3%, with the 10 MovingDrone test sequences achieving 0% failures. The few failures concentrate in sequences with extreme tilt or low-texture areas. 
+
+Table C8: Per-Frame Failure Rates. Frames where OrthoTrack fails to produce a valid pose. MovingDrone covers 35 sequences spanning the full altitude (26–1145 m) and tilt (0–83 °) range. Dataset Seqs Frames Failed Rate (%) Seqs w/ fail MovingDrone 35 63,629 166 0.26 5/35 MovingDrone (test) 10 13,875 0 0.00 0/10 UAVScenes 20 120,591 8 0.01 2/20 UAVD4L 19 3,781 10 0.26 3/19 30 O. Dhaouadi et al. UAV Frame 
+
+TE=0.20m | RE=0.04° XY=0.11m | Z=0.16m 
+
+Alt: 111m | Tilt: 51° 
+
+DOP Crop FoV + Visibility 
+
+> Dense Urban
+
+TE=0.32m | RE=0.04° XY=0.23m | Z=0.22m 
+
+Alt: 131m | Tilt: 2° 
+
+> Suburban
+
+TE=0.39m | RE=0.04° XY=0.39m | Z=0.04m 
+
+Alt: 229m | Tilt: 48° 
+
+> Urban Landmark
+
+TE=0.41m | RE=0.04° XY=0.41m | Z=0.04m 
+
+Alt: 114m | Tilt: 57° 
+
+> Rural
+
+TE=0.40m | RE=0.12° XY=0.19m | Z=0.35m 
+
+Alt: 137m | Tilt: 44° 
+
+> Road
+
+TE=0.68m | RE=0.04° XY=0.65m | Z=0.20m 
+
+Alt: 663m | Tilt: 22° 
+
+> Airport
+
+GT Pose Estimated Pose FoV Boundary Visible Surface Occluded Matching Area 
+
+Fig. C7: Challenging Success Examples. Same layout as Fig. C8. Despite high tilt, varied altitude, and diverse environments, OrthoTrack achieves submeter accuracy in all cases. OrthoTrack 31 UAV Frame 
+
+TE=595m | RE=103.43° XY=569m | Z=174m 
+
+> Alt: 34m | Tilt: 80°
+
+DOP Crop FoV + Visibility 
+
+> High Tilt, Low Alt.
+
+TE=10.2m | RE=0.53° XY=10.1m | Z=0.60m 
+
+> Alt: 1082m | Tilt: 12°
+> High Altitude
+
+TE=62.7m | RE=50.05° XY=47.6m | Z=40.9m 
+
+> Alt: 83m | Tilt: 0°
+> Nadir Road
+
+TE=10.5m | RE=7.76° XY=10.5m | Z=0.43m 
+
+> Alt: 76m | Tilt: 19°
+> Seasonal Changes
+
+TE=5.80m | RE=1.33° XY=5.67m | Z=1.26m 
+
+> Alt: 241m | Tilt: 26°
+> Suburban, Seasonal Ch.
+
+TE=5.77m | RE=0.97° XY=5.77m | Z=0.09m 
+
+> Alt: 334m | Tilt: 7°
+> Urban Park, Seasonal Ch.
+
+GT Pose Estimated Pose FoV Boundary Visible Surface Occluded Matching Area 
+
+Fig. C8: Failure Mode Examples. Each row:  UAV  frame (left),  DOP  crop (center), FoV overlay (right). Green/red triangles: GT/estimated positions. Per-frame TE, RE, altitude, and tilt annotated. 
+
+Per-Frame Error Distribution. Fig. C9 shows the per-frame translation er-ror as a function of altitude and camera tilt across 63,463 successfully localized frames from 35 MovingDrone sequences. Errors remain below 2 m for the ma-jority of frames up to 800 m altitude and 60 ° tilt, establishing the operational 32 O. Dhaouadi et al. 
+
+bounds of the system. Accuracy degrades at high altitudes ( >800 m, median 2.73 m) due to GSD mismatch and at extreme tilt ( >60 °, median 0.65 m but with heavy-tailed outliers). The overall Pearson correlations are modest (TE-altitude: 
+
+r=−0.12 , TE-tilt: r=0 .20 ), confirming that failures are driven by specific scene properties rather than altitude or tilt alone. 0 250 500 750 1000 1250     
+
+> Altitude (m)
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> Translation Error (m)
+> (a) TE vs. Altitude
+> 2 m
+> 5 m
+> 020 40 60 80
+> Camera Tilt from Nadir (deg)
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> Translation Error (m)
+> (b) TE vs. Tilt
+> 2 m
+> 5 m
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> log 10 (count)
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> log 10 (count)
+
+Fig. C9: Per-Frame Error Distribution. Translation error vs. altitude (left, col-ored by tilt) and vs. camera tilt (right, colored by altitude) over 63k frames from 35 MovingDrone sequences. Green/red lines: 2 m / 5 m thresholds. 
+
+C.4 Sensor Prior Noise Sensitivity 
+
+OrthoTrack does not require GPS or  IMU  by default. The pipeline matches the first frame against the full downscaled  DOP  to detect the approximate region, falling back to an exhaustive coarse-to-fine tile search if needed. All subsequent poses are determined solely by dense matching against the orthophoto. When a coarse position prior is available (e.g., an initial GPS reading), it can optionally narrow the first-frame search region. To quantify sensitivity, we sweep GPS hori-zontal noise σh ∈ { 0, 1, 3, 5, 10 , 20 } m and  IMU  yaw noise σyaw ∈ { 0◦, 2◦, . . . , 30 ◦}
+
+independently (Tab. C9). The results show near-complete invariance: ATE varies by less than 0.1 m across the full GPS noise range, and even 20 m noise (far beyond typical consumer receivers) preserves submeter accuracy.  IMU  yaw noise follows a similarly flat trend. Removing both priors entirely achieves essentially the same ATE as the prior-aided runs. This robustness arises because the prior affects only the initial 
+
+DOP  crop, and once the first match succeeds, subsequent frames rely on the tracked position. 
+
+C.5 Geodata Sensitivity Resolution To evaluate OrthoTrack’s robustness to map quality, we sweep the 
+
+DSM  and  DOP  GSD, as well as  DSM  noise σz (Fig. C10). The  DOP  resolu-tion dominates the error budget because it directly corrupts the 2D cross-view OrthoTrack 33 
+
+Table C9: Sensor Prior Noise Sensitivity. (a) GPS noise sweep ( σyaw = 4 ◦). (b) IMU yaw sweep ( σh = 3 m). No-prior default in grey .                                                                                                     
+
+> Config ATE ↓TE ↓RE ↓R@1 ↑R@2 ↑R@5 ↑
+> (a) GPS noise σh(m)
+> σh= 0 0.72 0.34 0.06 91.1 99.2 99.1
+> σh= 1 0.67 0.36 0.07 90.9 99.2 99.3
+> σh= 3 0.63 0.33 0.07 93.8 98.8 99.3
+> σh= 5 0.67 0.34 0.06 91.4 98.2 99.3
+> σh= 10 0.71 0.35 0.07 91.1 98.2 99.3
+> σh= 20 0.67 0.33 0.07 93.0 98.8 99.3
+> (b) IMU yaw noise σyaw (deg)
+> σyaw = 0 ◦0.66 0.34 0.06 92.4 98.8 99.3
+> σyaw = 2 ◦0.63 0.35 0.06 92.1 99.2 99.4
+> σyaw = 4 ◦0.63 0.33 0.07 93.8 98.8 99.3
+> σyaw = 8 ◦0.62 0.31 0.06 93.2 98.8 99.3
+> σyaw = 15 ◦0.64 0.35 0.07 91.9 99.3 99.4
+> σyaw = 30 ◦0.72 0.37 0.06 89.1 99.3 99.3 No prior 0.67 0.33 0.06 90.9 97.9 99.3
+
+matches and thereby degrades x, y, z coordinates. Conversely, a coarse  DSM  per-turbs only the z-coordinate during 3D lifting, and the PnP-RANSAC solver ab-sorbs the resulting noisy correspondences, leading to only moderate localization errors even at elevated noise levels. 0.2 0.4 1.0 2.0 4.0 10.0 GSD [m]      
+
+> +0
+> +1
+> +2
+> +3 ATE [m]
+> 0.0 0.5 1.0 2.0
+> z[m]
+> +0
+> +1
+> +2
+> +3
+> 050 100
+> 050 100 Succ. [%] (dashed)
+> DSM only DOP only DSM+DOP
+> znoise
+> Succ. [%] (dashed) ATE [m]
+
+Fig. C10: Geodata Sensitivity Sweep. ATE as a function of  DSM  and  DOP  res-olution (left) and  DSM  noise σz (right).  DOP  resolution dominates the error, while 
+
+DSM  noise is largely absorbed by PnP-RANSAC. 
+
+Fallback for Missing Geodata. In real-world deployments, reference geodata may become unavailable or severely degraded. Such gaps can be bridged by falling back to relative  SLAM  (e.g., DROID-SLAM), anchoring the trajectory to the last valid OrthoTrack pose and calibrating the scale using the most recent valid window. Experiments on the MovingDrone dataset demonstrate that for data gaps of 1s, 5s, 10s, and 15s, the mean ATE within the bridged segment is 0.52m, 0.63m, 0.86m, and 1.30m using online single-anchoring, and 0.54m, 0.36m, 0.46m, and 0.52m with offline two-end anchoring. This ensures trajectory continuity even during prolonged outages. Incorporating IMU measurements or 3D foundation models for local depth estimation could further enhance the ro-bustness of these fallback mechanisms. 
+
+C.6 Extended Matcher Ablation 
+
+Tab. C10 provides the complete matcher ablation referenced in main paper. All six sparse matchers effectively fail (at most 10% sequence success), confirming that local keypoint descriptors cannot bridge the aerial-to-orthophoto domain gap. Among dense methods, L2M [24], GIM variants, MASt3R [22], and all 34 O. Dhaouadi et al. 
+
+RoMa-v2 variants achieve 100% sequence success. L2M attains the best per-frame TE and R@1, while RoMa-v2 Precise achieves the best ATE. Several recent dense matchers (DaD, EDM, RDD) reach at most 30% sequence success despite strong standard benchmark results on MegaDepth and ScanNet, confirming that the aerial-to-orthophoto gap remains a distinct challenge. 
+
+Table C10: Extended Keyframe Matcher Ablation. Only the keyframe matching backbone varies; LK flow tracker and PnP solver are shared. Bold : best; underline: second best. 
+
+Matcher ATE ↓ TE ↓ RE ↓ R@1 ↑ R@2 ↑ R@5 ↑ Succ. ↑ #KF SP+SuperGlue ∗ [33] 1.32 0.44 0.12 6.3 8.0 9.2 10% 2SP+LightGlue ∗ [26] 0.91 0.41 0.09 7.7 9.3 10.0 10% 2DeDoDe [9] – – – 0.0 0.0 0.0 0% 1XFeat+LightGlue ∗ [32] 3.48 0.67 0.17 6.2 7.2 8.8 8% 2RIPE [20] – – – 0.0 0.0 0.0 0% 1LiftFeat [27] – – – 0.0 0.0 0.0 0% 1DKM [7] 956.8 674.56 58.47 25.5 30.2 31.8 47% 15 RoMa-v1 [11] 411.9 243.07 4.94 50.6 63.4 72.4 95% 14 GIM(DKM) [48] 2.56 0.52 0.10 89.1 97.9 99.4 100% 13 GIM(RoMa) [48] 4.63 1.16 0.18 46.9 84.6 96.2 100% 13 L2M [24] 6.23 0.29 0.06 94.9 96.4 98.3 100% 15 RoMa-v2 (Precise) 0.67 0.33 0.06 90.9 97.9 99.3 100% 15 RoMa-v2 (Base) 0.90 0.49 0.10 86.4 95.9 99.0 100% 13 RoMa-v2 (Fast) 0.88 0.58 0.11 79.9 96.9 99.1 100% 13 RoMa-v2 (Turbo) 4.66 1.60 0.29 47.4 73.0 91.3 100% 12 MASt3R [22] 5.74 2.10 0.46 20.4 56.3 85.6 100% 11 RDD [4] – – – 0.0 0.0 0.0 0% 1DaD(RoMa) ∗ [8] 0.96 0.68 0.10 22.8 27.7 30.0 30% 3EDM ∗ [23] 4.08 3.55 0.35 9.8 10.0 10.0 10% 2UFM [57] 572.4 517.14 69.51 0.0 0.0 0.0 79% 149  
+
+> ∗
+
+Metrics computed from the subset of sequences where the matcher produced valid poses. #KF: median number of keyframe events per sequence. Succ.: percentage of sequences with at least one valid pose. 
+
+Table C11: DOP Year Ablation. DSM fixed; all 14 years visualized in Fig. B3. 
+
+Year True ATE ↓ TE ↓ RE ↓ R@1 ↑ R@2 ↑ R@5 ↑
+
+2025 ✓ 0.67 0.33 0.06 90.9 97.9 99.3 2023 ✓ 3.34 0.44 0.08 88.5 97.0 99.4 2020 ✓ 0.93 0.65 0.15 78.4 94.5 99.9 
+
+2016 70.55 26.28 0.78 14.6 27.9 54.3 2013 ✓ 10.22 2.28 0.67 56.6 78.8 87.7 2011 110.4 102.9 2.94 9.0 19.8 38.3 
+
+C.7 DOP Year Analysis 
+
+Tab. C11 evaluates six  DOP  vintages spanning 2011–2025 with a fixed  DSM .Two factors dominate: geometric rectification and temporal appearance change. Rectification has the largest effect: the 2013 TrueDOP achieves over 11 × lower TE than the newer 2016 standard  DOP , because perspective distortions near tall buildings corrupt 2D–3D correspondences (Fig. B3). Temporal appearance change affects all  DOP s, including TrueDOPs: among the four TrueDOPs, newer vintages consistently achieve lower TE. Fig. C11 illustrates typical causes: sea-sonal vegetation (e.g., trees in full foliage obscuring road markings) and new con-OrthoTrack 35 
+
+struction alter scene appearance, degrading feature matching. TrueDOPs with close temporal proximity should therefore be preferred. 
+
+Fig. C11: DOP Temporal Appearance Gap. Two sequences (rows) with  UAV 
+
+query (blue border), camera  FOV  overlay on the 2025  DOP  (yellow: visible, red: oc-cluded), and corresponding  DOP  crop per year (green bounding box). 
+
+C.8 MovingDrone as a Monocular Depth Benchmark 
+
+Monocular depth estimation is a key enabling capability for  UAV  applications such as obstacle avoidance, 3D mapping, and path planning, yet existing depth benchmarks focus almost exclusively on indoor and street-level scenes. MovingDrone is uniquely suited for aerial depth evaluation: it provides pixel-level metric ground-truth depth rendered from the VirtualCityMap mesh via ray casting, covering a wide altitude range (26–1 145 m  AGL ) and diverse urban, suburban, rural, and historic scenes. We therefore use it to benchmark seven recent monocular depth estimators on the 10 test sequences. We report two evaluation protocols in a single table (Tab. C12): scale-aligned (median-ratio alignment per frame) and absolute (no alignment, testing whether the method’s metric scale generalizes to aerial altitudes). In the scale-aligned setting, MoGe v2 [45] achieves near-perfect ordinal depth, followed by UniDepth v2 [31], as confirmed visually in Fig. C12. Diffusion-based models (Marigold [18]) and DepthAnything v2 [55] in relative mode perform poorly even with scale alignment, suggesting their ordinal ranking degrades for aerial viewpoints with extreme depth ranges. 
+
+Table C12: Monocular Depth Estimation on MovingDrone. Each cell: abso-lute / scale-aligned (median-ratio per frame). Bold : best; underline: second best.                                                                                        
+
+> Method Type AbsRel ↓SqRel ↓RMSE ↓logRMSE ↓δ1↑δ2↑δ3↑FPS ↑
+> MoGe v2 [45] M0.30 /0.014 63.1 / 0.12 121.6 /6.0 0.42 /0.019 35.3 /100.0 72.1 /100.0 80.3 /100.0 4.6 UniDepth v2 [31] M0.39 / 0.029 61.2 / 0.53 132.8 / 11.8 0.52 / 0.036 12.1 / 99.8 43.9 / 100.0 71.3 / 100.0 5.6
+> Depth Pro [1] M0.99 / 0.082 308.8 / 4.62 315.5 / 38.0 4.61 / 0.100 0.0 / 94.9 0.0 / 99.9 0.0 / 100.0 0.3 Metric3D v2 [14] M0.90 / 0.093 262.7 / 9.13 290.5 / 38.8 2.43 / 0.130 0.0 / 93.6 0.0 / 98.0 0.0 / 98.8 1.3 DA v2 (metric) [55] M0.94 / 0.311 282.9 / 51.91 301.1 / 131.4 2.98 / 0.352 0.0 / 37.3 0.0 / 75.8 0.0 / 97.3 2.4 Marigold [18] R1.00 / 0.458 313.7 / 100.00 318.0 / 179.6 6.44 / 0.947 0.0 / 27.6 0.0 / 55.4 0.0 / 74.2 1.8 DA v2 (rel.) [55] R0.62 / 0.542 155.3 / 132.01 218.7 / 199.8 1.01 / 0.807 19.5 / 23.3 37.5 / 45.2 52.7 / 64.7 3.2
+
+M = metric estimator, R = relative-only. All values are per-sequence averages. δk thresholds follow the standard 1.25 k protocol. 36 O. Dhaouadi et al. Query 
+
+Urban 
+
+275 m 508 m 
+
+> GT MoGe v2
+
+AbsRel=0.013 =1.000 
+
+s=1.6 
+
+> UniDepth v2
+
+AbsRel=0.016 =1.000 
+
+s=1.6 
+
+> Depth Pro
+
+AbsRel=0.103 =0.922 
+
+s=104.8 
+
+> Metric3D v2
+
+AbsRel=0.081 =0.975 
+
+s=9.2 
+
+> DA v2 (M)
+
+AbsRel=0.359 =0.292 
+
+s=22.5 
+
+> Marigold
+
+AbsRel=0.581 =0.181 
+
+s=1092.8 
+
+> DA v2 (R)
+
+AbsRel=0.689 =0.353 
+
+s=84611.7 
+
+Industrial 
+
+368 m 698 m 
+
+AbsRel=0.010 =1.000 
+
+s=1.8 
+
+AbsRel=0.013 =1.000 
+
+s=2.0 
+
+AbsRel=0.110 =0.850 
+
+s=201.9 
+
+AbsRel=0.067 =0.993 
+
+s=15.9 
+
+AbsRel=0.413 =0.291 
+
+s=34.8 
+
+AbsRel=0.753 =0.171 
+
+s=2091.3 
+
+AbsRel=0.767 =0.445 
+
+s=126698.4 
+
+Rural 
+
+171 m 281 m 
+
+AbsRel=0.016 =1.000 
+
+s=1.5 
+
+AbsRel=0.033 =1.000 
+
+s=1.9 
+
+AbsRel=0.058 =1.000 
+
+s=79.8 
+
+AbsRel=0.038 =1.000 
+
+s=17.7 
+
+AbsRel=0.176 =0.651 
+
+s=20.2 
+
+AbsRel=0.460 =0.248 
+
+s=516.0 
+
+AbsRel=0.477 =0.393 
+
+s=54621.9 
+
+Suburban 
+
+138 m 288 m 
+
+AbsRel=0.026 =1.000 
+
+s=1.5 
+
+AbsRel=0.020 =1.000 
+
+s=1.3 
+
+AbsRel=0.062 =0.993 
+
+s=74.6 
+
+AbsRel=0.055 =0.999 
+
+s=5.1 
+
+AbsRel=0.269 =0.384 
+
+s=11.0 
+
+AbsRel=0.420 =0.257 
+
+s=523.7 
+
+AbsRel=0.586 =0.425 
+
+s=41247.8 
+
+Historic 
+
+142 m 333 m 
+
+AbsRel=0.017 =1.000 
+
+s=1.5 
+
+AbsRel=0.016 =1.000 
+
+s=1.6 
+
+AbsRel=0.067 =0.953 
+
+s=71.4 
+
+AbsRel=0.077 =1.000 
+
+s=6.0 
+
+AbsRel=0.237 =0.469 
+
+s=14.6 
+
+AbsRel=0.482 =0.300 
+
+s=762.7 
+
+AbsRel=0.516 =0.577 
+
+s=52678.3 
+
+Fig. C12: Depth Estimation Qualitative Comparison. Five scenes (columns) with GT depth and seven predictions (rows), all median-scale-aligned. MoGe v2 and UniDepth v2 match GT best, while DA v2 and Marigold produce over-smoothed depth at aerial altitude. 
+
+In absolute mode, all methods except MoGe v2 and UniDepth v2 produce near-zero δ1, indicating that current metric depth models are calibrated for in-door or street-level scales and fail to generalize to aerial altitudes without re-training. Even the best absolute result (MoGe v2, AbsRel = 0.30) is 20 × worse than its scale-aligned counterpart (0.014), highlighting the metric-scale gap as the dominant challenge for aerial depth estimation. 
+
+D Limitations and Future Work 
+
+Geodata Coverage. OrthoTrack leverages publicly available orthophotos and surface models, which are freely accessible for many countries worldwide. Our OrthoTrack 37 
+
+DOP year analysis (Sec. C.7) already shows robustness to outdated maps span-ning 14 years. Extending the pipeline to additional map sources could further broaden coverage. 
+
+Extreme Viewpoints. Highly tilted views ( >70 °) create a geometric mismatch between the UAV perspective and the nadir orthophoto, a challenge inherent to all orthophoto-based methods. OrthoTrack already handles typical aerial tilt ranges well (Sec. C.3). Incorporating oblique imagery could further extend cov-erage to facade-level views. 
+
+Future Directions. Since OrthoTrack is training-free and modular, it directly benefits from advances in dense matching without architectural changes. Faster or more viewpoint-invariant matchers would simultaneously improve accuracy and throughput, extending the current real-time capability. 
+
+E Ethical Considerations and Broader Impact 
+
+Privacy. OrthoTrack outputs only 6-DoF camera poses and performs no per-son detection, re-identification, or surveillance. MovingDrone is fully synthetic, rendered from the VirtualCityMap mesh [42] which models building geometry only and contains no people or identifiable content. All geodata is government-published under open-data licenses at 20 cm/px, precluding individual identifi-cation. 
+
+Dual Use and Safety. This project is developed with the explicit intent of ad-vancing civilian UAV applications, such as search and rescue, disaster response, and infrastructure inspection. Our research aims to improve autonomy strictly for these positive societal use cases. The system relies on open-access geodata to complement commercial drones, and safe deployment requires task-specific validation. 
+
+Bias and Environmental Footprint. MovingDrone reflects one European city (Berlin). Since OrthoTrack is training-free, generalization depends solely on the dense matcher. Experiments on UAVScenes and UAVD4L confirm transfer to non-European cities without adaptation. The pipeline runs in real time on a single GPU, keeping its footprint low.

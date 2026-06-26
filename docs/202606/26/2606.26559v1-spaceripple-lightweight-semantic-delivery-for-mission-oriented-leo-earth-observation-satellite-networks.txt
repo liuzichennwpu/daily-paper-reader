@@ -1,0 +1,244 @@
+Title: SpaceRipple: Lightweight Semantic Delivery for Mission-Oriented LEO Earth Observation Satellite Networks
+
+URL Source: https://arxiv.org/pdf/2606.26559v1
+
+Published Time: Fri, 26 Jun 2026 00:26:31 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# SpaceRipple: Lightweight Semantic Delivery for Mission-Oriented LEO Earth Observation Satellite Networks 
+
+Ziyi Yang, Hao Yuan, Yunxiang Yi, Wenbo Wang and Xing Zhang 
+
+Beijing University of Posts and Telecommunications 
+
+Beijing, China 
+
+Abstract —Earth observation satellite networks generate mas-sive volumes of high-resolution imagery, whereas inter-satellite and downlink resources remain limited. In many time-sensitive missions, ground users require mission-relevant semantic infor-mation rather than a full raw-image downlink. This paper pro-poses SpaceRipple, a lightweight framework for mission-oriented semantic delivery and on-board processing in Earth observation satellite networks. A sensing satellite performs adaptive compres-sion and metadata generation to reduce inter-satellite traffic, while an edge computing satellite restores the received repre-sentation and extracts task-relevant semantic information. Un-like fidelity-driven image transmission, SpaceRipple coordinates compression, forwarding, restoration, and semantic inference within a collaborative pipeline, enabling semantic-oriented de-livery instead of pixel-level image delivery. A compression-aware MoE enhancement module is further introduced to improve robustness under degraded visual inputs. Experimental results show that SpaceRipple achieves favorable reconstruction qual-ity, improved semantic detection performance, and substantial bandwidth savings, demonstrating its potential for efficient and reliable Earth observation under constrained satellite-network resources. 
+
+Index Terms —Earth observation satellite networks, on-board image processing, communication-computing co-design, semantic communication, mixture of experts 
+
+I. I NTRODUCTION 
+
+Earth observation satellites support disaster monitoring, target recognition, environmental assessment, and resource in-vestigation [1]. However, increasing image resolution sharply raises transmission cost. The conventional “acquisition–full downlink–ground processing” pipeline is therefore inefficient for time-sensitive missions [2], [7]. Advances in inter-satellite links and on-board computing make collaborative processing increasingly feasible [1], [2]. In many scenarios, ground operators do not require full raw imagery; instead, they need task-relevant semantic information such as scene labels, detected targets, or regional status indicators. This motivates semantic-oriented delivery rather than fidelity-driven image downlink [4], [5]. However, re-quiring the sensing satellite to generate only compact seman-tic messages may reduce adaptability across heterogeneous missions and weaken robustness under varying observation quality. A practical system should therefore preserve sufficient intermediate information for downstream recovery and task-oriented refinement, while still avoiding full-image downlink. Existing studies have addressed image compression, on-board intelligence, and semantic communication separately [1], [3], [7]. Recent SR-powered satellite image acquisition systems show that on-board compression and receiver-side reconstruction can substantially reduce downlink traffic, but they still primarily target high-fidelity image acquisition or reconstruction [7]. SpaceRipple instead treats restoration as an intermediate step toward semantic-oriented delivery, where the final downlink objective is mission-relevant semantic informa-tion rather than reconstructed imagery. The sensing satellite must reduce payload size while preserving task-relevant cues, and the edge computing satellite must recover a representation suitable for reliable semantic inference. We therefore propose SpaceRipple, a lightweight and re-liable framework for mission-oriented semantic delivery and on-board processing in Earth observation satellite networks. The sensing satellite performs adaptive compression and metadata generation, the edge computing satellite conducts restoration, enhancement, and semantic inference, and the ground receives compact semantic messages instead of full image downlink. The novelty of SpaceRipple lies primar-ily in the system-level co-design of compression, forward-ing, restoration, and semantic-oriented delivery for mission-oriented Earth observation satellite networks. An MoE-based enhancement module is further introduced to improve robust-ness after compression [7], [8]. The main contributions are as follows:  
+
+> •
+
+We present a collaborative satellite-network framework that couples image compression, inter-satellite forward-ing, restoration, and semantic-oriented delivery for Earth observation.  
+
+> •
+
+We introduce a metadata-assisted restoration pipeline with pixel-feature-driven MoE enhancement to improve task robustness under compressed transmission.  
+
+> •
+
+We evaluate the framework from visual, task, and sys-tem perspectives, showing strong reconstruction quality, higher semantic F1 scores, and clear contact-window throughput gains. II. S YSTEM MODEL 
+
+A. System Architecture 
+
+SpaceRipple comprises four functional components: sens-ing satellites, inter-satellite links, edge computing satellites,   
+
+> arXiv:2606.26559v1 [cs.CV] 25 Jun 2026 Earth Observation Satellite
+> （EOS
+> ）
+> HR Image
+> Orbital
+> Compute
+> Semantic
+> Information
+> Downlink
+> Compressed LR Images
+> +Meta Info.
+> ISLs
+> (Inter-Satellite Links)
+> Ground Station
+> Target Area
+> Decompress
+> &
+> Semantic
+> Extraction
+> Compress
+
+Fig. 1: Application scenario of SpaceRipple. and ground stations. As shown in Fig. 1, the sensing satellite acquires high-resolution imagery, performs on-board com-pression, and forwards the compressed image together with metadata to an edge computing satellite. The edge computing satellite then performs restoration and semantic extraction, while the ground station receives mission-relevant semantic messages instead of a full-image downlink. Fig. 2 illus-trates the workflow. This architecture reduces the sensing-side burden and avoids raw-image downlink, improving mission-oriented information delivery under constrained transmission and on-board resources. 
+
+B. Data Flow and Processing Pipeline 
+
+According to the system workflow, SpaceRipple consists of four stages: observation, compression and forwarding, on-board restoration and semantic processing, and semantic-result downlink. The sensing satellite captures a raw high-resolution image and compresses it into a communication-efficient representation together with metadata. The edge computing satellite then restores and enhances the received input before semantic inference [3], [5]. In the final stage, only the semantic message is downlinked to the ground, rather than the complete raw image or a fidelity-optimized reconstruction. Accordingly, the downlink objective shifts from pixel-level image delivery to mission-relevant information delivery, shortening the “observation– transmission–decision” cycle. 
+
+C. Data Representation and Modeling 
+
+Let the raw image captured by the sensing satellite be denoted by IHR , where the subscript HR indicates the original high-resolution observation. The sensing-side com-pression module fϕ(·) maps the raw image to a compressed representation and associated side metadata: 
+
+(IC , M ) = fϕ(IHR ). (1) Here, IC denotes the compressed image representation to be transmitted, and M denotes the side metadata generated during compression. In SpaceRipple, the metadata is represented as 
+
+M = {r, c }, (2) where r denotes the compression ratio and c denotes calibration-related side information, such as color calibration cues. The transmitted packet is therefore written as 
+
+X = {IC , M }, (3) where X denotes the complete transmitted representation delivered through the inter-satellite link. Its payload size is 
+
+Bpkt = B(IC ) + B(M ), (4) where B(·) denotes the number of transmitted bits. Upon reception, the edge computing satellite performs restoration as 
+
+IR = gψ (IC , M ), (5) where gψ (·) denotes the restoration module and IR denotes the restored image used for downstream semantic inference. To characterize structural recoverability after compression, we further define a recoverability score based on the structural similarity between the restored image and the original high-resolution image: 
+
+Rred = SSIM( IR, I HR ), (6) where SSIM( ·, ·) denotes the structural similarity index. A higher value of Rred indicates that more structural information from the original image remains recoverable after compres-sion and restoration. Finally, the semantic head hω (·) produces the mission-oriented output 
+
+S = hω (IR), (7) where hω (·) denotes the semantic inference head and S
+
+denotes the final semantic output, which may correspond to scene labels, detection results, or regional attributes depending on the specific task. The objective is not exact pixel-level reconstruction, but the reliable preservation of task-relevant information needed to support mission inference under constrained transmission resources [5]. 
+
+D. Design Objectives and Characteristics 
+
+The design of SpaceRipple is guided by transmission effi-ciency, processing reliability, and communication–computing co-design. First, the framework reduces transmission burden. By per-forming adaptive compression on the sensing satellite and shifting restoration and semantic processing to the edge com-puting satellite, SpaceRipple avoids forwarding raw imagery and uses limited link resources more efficiently [3]. Second, efficiency should not undermine mission robust-ness. SpaceRipple therefore transmits metadata together with the compressed image and performs restoration, calibration, and enhancement on the edge computing satellite, helping compensate for compression-induced loss and stabilize se-mantic outputs [5]. At the system level, the design preference of SpaceRipple can be summarized as 
+
+Jsys ∝ Qtask ↑, Bpkt ↓, Pobs ↓, (8) HR   
+
+> HR HR HR CR Decision
+> &
+> Compress
+> LR
+> Redund.
+> LR
+> LR
+> LR
+> Meta Info.
+> HR
+> HR
+> HR
+> HR CR Decision
+> &
+> Compress
+
+From 
+
+Camera 
+
+Earth Observation Satellites 
+
+（EOSs 
+
+）
+
+> LR
+> Redund. & Lightweight Assistant Model
+> LR
+> LR
+> LR
+> Meta Info.
+> Lanczos
+> Interp.
+> SR
+> SR
+> SR
+> SR
+> MoE
+> Color
+> calibration
+> HR
+> HR
+> HR
+> HR
+> Semantic
+> Extraction
+> Semantic
+> Information
+> Ground Station
+
+Orbital Compute 
+
+> Meta Info. Downstream-task Req.
+
+LR Input 
+
+> ISLs
+> (Inter-Satellite Links)
+> ISLs
+> (Inter-Satellite Links)
+
+Fig. 2: System workflow of SpaceRipple. where Jsys denotes the overall system utility, Qtask denotes mission-task effectiveness, Bpkt is the transmitted payload size per sample, and Pobs is the sensing-side model footprint. This relation expresses the intended design tradeoff rather than an explicitly optimized training objective. III. P ROPOSED METHOD 
+
+SpaceRipple follows a task-oriented design principle: im-agery is compressed at the sensing satellite and semantically refined at the edge computing satellite. Rather than optimizing image fidelity alone, the framework jointly considers transmis-sion efficiency, restoration usability, and downstream semantic effectiveness under constrained inter-satellite resources [5]. The proposed method is designed as a system-level collabora-tive pipeline rather than as a standalone restoration backbone. 
+
+A. Adaptive Compression, Metadata, and Restoration 
+
+Given a raw image, the sensing satellite first performs adaptive compression to generate a communication-efficient representation together with metadata [3], [7]. According to (2)–(4), the transmitted information consists of the com-pressed image and metadata carrying compression-ratio and calibration-related cues. The compression ratio is defined as 
+
+CR = HR size LR size , (9) where HR size and LR size denote the source-image size and the compressed payload size, respectively. To support content-adaptive compression, the raw HR im-age is first divided into non-overlapping 256 × 256 pixel tiles. SpaceRipple then estimates the redundancy of each tile before transmission. For a tile I and a candidate downsampling factor 
+
+K, the redundancy score is defined as 
+
+ϕ(I, K ) = SSIM  LI( S(I, K )) , I , (10) where S(I, K ) denotes downsampling I by a factor of K,and LI( ·) denotes Lanczos interpolation back to the original tile size. A larger ϕ(I, K ) indicates that the tile remains structurally recoverable after downsampling and can therefore tolerate stronger compression. For each tile, the sensing satellite selects the largest feasible 
+
+K satisfying 
+
+ϕ(I, K ) > τ ϕ, (11) where τϕ is the redundancy threshold. This rule enables ag-gressive compression for structurally redundant regions while retaining sufficient recoverable information for downstream semantic inference. After receiving the compressed representation and meta-data, the edge computing satellite performs decompression-based restoration and lightweight preprocessing. Since com-pression may weaken textures, edges, and color consistency, this stage aims to recover a feature-compatible input for se-mantic inference rather than a visually perfect reconstruction [5]. The restoration process in (5) is conditioned on both the compressed image and metadata, allowing compression-ratio and calibration cues to stabilize recovery before semantic inference. 
+
+B. Compression-Aware MoE Enhancement 
+
+To improve semantic robustness after compression, Spac-eRipple employs an MoE enhancement module on the edge computing satellite [7], [8]. In the proposed framework, MoE is used as a conditional enhancement mechanism rather than as a standalone architectural contribution. The routing decision is guided jointly by two types of cues: local pixel-feature characteristics extracted from different spatial regions of the compressed image, and the compression ratio contained in the metadata. The former provides content-aware cues for Fig. 3: Impact of the redundancy threshold on data reduction ratio, SSIM, and PSNR. distinguishing regions with different structural and semantic importance, whereas the latter provides compression-aware cues indicating the severity of transmission-induced degra-dation. By combining these cues, the MoE module adaptively allocates enhancement strength to different regions and pro-duces features that are more suitable for downstream semantic inference. This design does not rely on a particular number of experts or a specific routing implementation. Instead, the MoE module is used to preserve task-relevant information under high compression ratios and to support more aggressive yet reliable compression. 
+
+C. Semantic Output and Downlink Strategy 
+
+The enhanced features are then fed into the semantic head to generate mission outputs such as scene labels, detection results, regional descriptions, or event indicators. Unlike con-ventional image-downlink pipelines, SpaceRipple treats se-mantic results as the primary downlink payload, reserving link resources for high-value mission information and reducing response latency [4]–[6]. In this way, the framework shifts the downlink objec-tive from pixel-level delivery to mission-oriented informa-tion delivery. Compression, restoration, and enhancement are therefore not treated as isolated processing stages, but as coordinated components serving reliable semantic delivery under constrained inter-satellite communication resources. IV. E XPERIMENTAL RESULTS AND ANALYSIS 
+
+A. Evaluation Protocol 
+
+We evaluate SpaceRipple from three aspects: semantic-task performance, perceptual consistency after on-board restora-tion, and transmission efficiency. Let precision and recall be denoted by P and R, respectively. The F1 score is 
+
+F 1 = 2P R P + R . (12) A higher F1 score indicates better retention of mission-relevant discriminative information after compression and on-board processing. For perceptual assessment, we adopt LPIPS [9]: LPIPS (IR, I HR ) = X
+
+> l
+
+wl ∥ψl(IR) − ψl(IHR )∥22 , (13) where ψl(·) denotes deep features at layer l and wl is the corresponding weight. In addition to task and perceptual metrics, we report model scale, contact-window throughput, and data reduction ratio. All methods are evaluated under the same testing conditions for fair comparison. Fig. 3 shows the effect of the redundancy threshold on bandwidth saving and reconstruction quality. As the threshold increases, the data reduction ratio generally decreases, espe-cially for target-containing regions, while PSNR and SSIM improve or remain stable. This indicates a clear tradeoff: a higher threshold preserves more task-relevant visual informa-tion, but at the cost of reduced transmission savings. 
+
+B. Lightweight Deployment and Task Performance 
+
+SpaceRipple adopts a two-tier deployment strategy. The sensing satellite executes lightweight compression and meta-data generation, while the edge computing satellite performs restoration and semantic inference [1], [2]. The lightweight claim in this work primarily concerns deployment on the sensing satellite. In the current implementation, the auxiliary compression model on the sensing node contains only 1.53M parameters, while more computation-intensive modules, in-cluding restoration, MoE enhancement, and semantic infer-ence, are shifted to the edge computing satellite. To further formalize this deployment characteristic, we define the effective sensing-side model footprint as 
+
+Pdeploy = Pobs , (14) where Pobs denotes the parameter count of the model actually deployed on the sensing satellite. In the current implemen-tation, Pobs = 1 .53 M, which indicates that the sensing-side model footprint remains low. The system-level computation distribution can be written as 
+
+Csys = Cobs + Ccs , (15) where Cobs and Ccs denote the computation assigned to the sensing satellite and the edge computing satellite, respectively. SpaceRipple is designed such that Cobs ≪ C cs .Fig. 4 compares the reconstruction quality of SpaceRipple with representative methods in terms of PSNR, SSIM, and LPIPS. SpaceRipple achieves the best values on all three metrics. In particular, it reaches the lowest LPIPS of 0.2114 and the highest SSIM of 0.7689, indicating better percep-tual similarity and structural preservation. The PSNR result TABLE I: Comparison of target-presence detection perfor-mance among different methods on ship recognition and city vehicle recognition tasks.                                     
+
+> (a) Ship recognition task
+> Method Precision Recall F1 Score Bicubic 0.5870 0.7714 0.6667 Lanczos 0.5952 0.7142 0.6494 SwinIR 0.7727 0.9714 0.8608 Real-ESRGAN 0.6957 0.9143 0.7901 SpaceRipple 0.8421 0.8860 0.8635
+> (b) City vehicle recognition task
+> Method Precision Recall F1 Score Bicubic 0.8133 0.6224 0.7052 Lanczos 0.7568 0.5714 0.6512 SwinIR 0.6190 0.9286 0.7429 Real-ESRGAN 0.6233 0.9286 0.7459 SpaceRipple 0.8350 0.9290 0.8790
+
+of 26.92 dB is likewise the highest among the compared methods. Overall, the proposed restoration pipeline maintains favorable image quality while providing a stronger basis for downstream semantic inference. To complement the quantitative results, we present a qual-itative example of the compression–reconstruction process. As shown in Fig. 5, the compressed image preserves the overall scene structure but loses fine textures. Upsampling restores more complete global content, although local regions remain blurred. The reconstructed HR image recovers sharper boundaries and more natural textures, consistent with the quantitative gains reported in Fig. 4. As shown in Table I, SpaceRipple achieves the highest F1 score on both the ship recognition task and the city vehicle recognition task, demonstrating its superior and consistent target-presence detection performance across different scenar-ios. 
+
+C. Contact-Window Throughput Gain 
+
+To measure communication efficiency, let W be the avail-able contact window, C the link bandwidth, and Bpkt the aver-age transmitted payload per sample. This formulation follows the practical observation that Earth-observation LEO satellites face intermittent and capacity-limited contact opportunities for space-to-ground data transfer [7]. The number of deliverable samples can be written as 
+
+N =
+
+ CW Bpkt 
+
+
+
+. (16) A smaller payload therefore directly increases the number of observations that can be delivered within the same contact window. This improvement is a system-level gain rather than a codec-level gain alone. Instead of spending most of the transmission budget on redundant pixel-level delivery, SpaceRipple allocates more resources to semantically valuable observations, leading to higher effective sensing throughput under bandwidth-constrained conditions. 
+
+D. Data Reduction and Latency Benefits of Semantic Delivery 
+
+For different downlink granularities, the total data reduction ratio is defined as 
+
+η = 1 − BSR 
+
+Bbase 
+
+, (17) where BSR is the total transmitted data under SpaceRipple and Bbase is that of the image-level downlink baseline. When only compact semantic results are downlinked, the transmitted data volume can be substantially reduced com-pared with image-level downlink [4], [5]. This is especially attractive for event-triggered monitoring and alerting, where a semantic alert or regional status description is often more valuable than delayed delivery of the full image. Fig. 6 compares the data reduction ratios of different down-link strategies. For image-oriented downlink, increasing the spatial compression ratio from 4 × to 128 × improves the data reduction ratio from 77.73% to 96.02%, but stronger compres-sion also increases the reconstruction burden for preserving task-relevant information. Semantic-oriented delivery achieves higher efficiency, with data reduction ratios of 98.27% for rich semantic delivery and 99.67% for simple semantic delivery. Here, simple semantic delivery is encoded as a minimal JSON semantic packet, while rich semantic delivery is modeled as a structured detection message containing bounding boxes, class labels, confidence scores, and an image-level header. The default rich semantic payload is set to 192 B per target-containing image, with sensitivity evaluated from 128 to 512 B. These results show that semantic delivery reduces bandwidth more effectively than image-oriented downlink while avoiding costly reconstruction, making it better suited for mission-oriented Earth observation under limited link resources. Recent semantic image communication results below 0.03 bits per pixel further indicate that savings above 90%, and in some cases above 99%, are feasible when the delivery target is semantic rather than visual fidelity [6]. This is consistent with the design of SpaceRipple. 
+
+E. System-Level Interpretation 
+
+The advantage of SpaceRipple appears consistently at the visual, task, and system levels. The pipeline maintains favor-able PSNR, SSIM, and LPIPS after compression and recovery; task-level results confirm stronger preservation of downstream semantic information; and the contact-window throughput gain shows that these improvements also increase the number of mission-effective samples processed within a constrained communication opportunity. This interpretation is consistent with the design relation in (8), where task effectiveness is favored while payload size and the sensing-side model footprint are suppressed. 
+
+F. Discussion 
+
+The main value of SpaceRipple lies not only in stronger compression, but also in redefining the final downlink objec-tive. Unlike conventional pipelines that center on image down-link and defer semantic processing to the ground, the proposed Fig. 4: Comparison of reconstruction quality with representative methods in terms of PSNR, SSIM, and LPIPS. 
+
+Fig. 5: Qualitative comparison of the compression– reconstruction process. From left to right: original HR image, compressed SR image, upsampled SR image, and recon-structed HR image. 
+
+Fig. 6: Data reduction and semantic delivery accuracy for different downlink granularities. framework treats semantic information as the primary mission output and performs restoration only to the extent needed for reliable downstream inference. The framework also separates sensing and computing re-sponsibilities in a deployment-friendly way. The sensing satellite carries only a lightweight front-end model, while restoration and semantic processing are shifted to the edge computing satellite. In the current implementation, this aux-iliary compression model contains only 1.53M parameters, reducing the on-board model footprint at the sensing satellite. V. C ONCLUSION 
+
+This paper presented SpaceRipple, a lightweight frame-work for mission-oriented semantic delivery and on-board processing in Earth observation satellite networks. By co-ordinating sensing-side compression, edge-side restoration, and semantic-oriented delivery within a unified pipeline, SpaceRipple shifts the downlink objective from full-image transmission to mission-relevant information delivery under constrained satellite-network resources. Experimental results show that the proposed framework maintains competitive visual recoverability and effective task performance, while substantially improving contact-window throughput. These results indicate that SpaceRipple provides a practical way to support mission-oriented Earth observation when communication resources are limited. Future work will consider real link conditions, multi-task scenarios, and lighter deployment strategies. REFERENCES [1] G. Wang, G. Wan, Z. Su, Y. Wang, Y. Jia, G. Li, and S. Liang, “High-performance on-orbit intelligent computing and real-time services for remote sensing satellites based on large-scale computing power in space,” IEEE Access , vol. 13, pp. 92114–92133, 2025, doi: 10.1109/AC-CESS.2025.3573932. [2] J.-H. Chen, W.-C. Kuo, and W. Liao, “SpaceEdge: Optimizing service latency and sustainability for space-centric task offloading in LEO satel-lite networks,” IEEE Transactions on Wireless Communications , vol. 23, no. 10, pp. 15435–15446, 2024, doi: 10.1109/TWC.2024.3429510. [3] M. Wang, S. Xiang, and J. Xiao, “Task-oriented intelligent compression method for high resolution optical satellite remote sensing image,” 
+
+Geomatics and Information Science of Wuhan University , vol. 47, no. 8, pp. 1213–1219, 2022, doi: 10.13203/j.whugis20220153. [4] G. Xin, P. Fan, and K. B. Letaief, “Semantic communication: A survey of its theoretical development,” Entropy , vol. 26, no. 2, Art. no. 102, 2024, doi: 10.3390/e26020102. [5] C. Guo, J. Xi, Z. He, J. Liu, and J. Yang, “A knowledge base driven task-oriented image semantic communication scheme,” Remote Sensing ,vol. 16, no. 21, Art. no. 4044, 2024, doi: 10.3390/rs16214044. [6] J. Dong, T. Yan, and W. Sun, “A low-bit-rate image semantic commu-nication system based on semantic graph,” Electronics , vol. 13, no. 12, Art. no. 2366, 2024, doi: 10.3390/electronics13122366. [7] C. Sun, Y. Zhang, B. Tao, D. Vasisht, and M. K. Marina, “DeepSpace: Super resolution powered efficient and reliable satellite image data acquisition,” in Proc. ACM SIGCOMM Conf. (SIGCOMM) , Coimbra, Portugal, Sept. 2025, pp. 311–328, doi: 10.1145/3718958.3750523. [8] C. Riquelme, J. Puigcerver, B. Mustafa, M. Neumann, R. Jenatton, A. Susano Pinto, D. Keysers, and N. Houlsby, “Scaling vision with sparse mixture of experts,” in Advances in Neural Information Process-ing Systems , vol. 34, 2021. [9] R. Zhang, P. Isola, A. A. Efros, E. Shechtman, and O. Wang, “The unreasonable effectiveness of deep features as a perceptual metric,” in Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR) , 2018, pp. 586–595, doi: 10.1109/CVPR.2018.00068.
