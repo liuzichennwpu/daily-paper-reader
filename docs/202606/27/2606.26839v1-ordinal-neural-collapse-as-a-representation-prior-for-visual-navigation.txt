@@ -1,0 +1,660 @@
+Title: Ordinal Neural Collapse as a Representation Prior for Visual Navigation
+
+URL Source: https://arxiv.org/pdf/2606.26839v1
+
+Published Time: Fri, 26 Jun 2026 00:59:33 GMT
+
+Number of Pages: 27
+
+Markdown Content:
+# Ordinal Neural Collapse as a Representation Prior for Visual Navigation 
+
+E-In Son ⋆ , Jung-Taak Kim ⋆ , and Seung-Woo Seo †
+
+Dept. of ECE & ASRI, Seoul National University, Korea 
+
+{pingpang,mychoco333,seo}@snu.ac.kr 
+
+Abstract. Learning robust navigation policies directly from visual ob-servations remains a fundamental challenge in vision-based robotic nav-igation. In end-to-end imitation learning approaches, the visual encoder and action decoder are jointly optimized using a single action loss, which provides only an indirect supervisory signal to the encoder. This indi-rect supervision frequently results in the encoder learning ambiguous, action-agnostic representations. The problem is further complicated by substantial variations in scene structure and appearance across diverse environments, as well as the prevalence of visual distractors inherent to real-world navigation settings. Such action-agnostic features cause the navigation policy to produce inconsistent actions at ambiguous deci-sion points, leading to navigation failure. To overcome these limitations, we propose ORION (Ordinal Neural Collapse for Visual Navigation), a method that explicitly organizes the encoder’s representation space ac-cording to the ordinal structure of navigation actions. In the context of goal-directed navigation, ego-centric control categories from Far Left to 
+
+Far Right exhibit a natural ordinal relationship in which neighboring classes share similar visual contexts, while semantically opposing classes differ substantially in appearance. We encourage class representations to be arranged sequentially along a single discriminative axis, while sup-pressing off-axis variance within each class. The pretrained encoder is then integrated into a diffusion-based navigation framework, and the full pipeline is fine-tuned end-to-end. Extensive experiments in both simula-tion and real-world settings show that ORION consistently outperforms end-to-end and neural collapse baselines in navigation success rate and goal progress, with notable gains in visually challenging scenarios such as complex multi-way intersections. 
+
+Keywords: Goal-Conditioned Visual Navigation · Neural Collapse ·
+
+Representation Geometry 
+
+## 1 Introduction 
+
+Recently, end-to-end imitation learning has become a dominant approach for vision-based navigation. By jointly optimizing a vision encoder and an action  
+
+> ⋆
+
+Equal contribution.  
+
+> †
+
+Corresponding author.      
+
+> arXiv:2606.26839v1 [cs.RO] 25 Jun 2026 2E. Son et al. Goal
+> Goal
+> (a) NoMaD (Baseline) Goal
+> Goal (b) ORION (Ours)
+> Fig. 1: Structured representations improve action consistency at intersec-tions. Given the same goal image, (a) the NoMaD baseline generates candidate way-points scattered across multiple directions, while (b) our method concentrates them toward the goal direction. Each colored trajectory represents one candidate sampled from the action decoder.
+
+decoder from expert demonstrations, recent systems have achieved strong per-formance across diverse environments [2, 8, 26]. Diffusion-based action decoders have further improved performance by capturing multimodal action distribu-tions [2, 27]. However, relying solely on a single action loss provides limited learning signals for the vision encoder. Since the objective is to imitate actions, the training loss acts on the final action output rather than supervising the intermediate representation. Prior work has shown that encoders trained this way often latch onto visually salient but task-irrelevant features [28,34]. In visual navigation, this problem is worse because training data spans diverse environments with wide variation in layout, lighting, and terrain [3, 19]. The encoder must compress this visual diversity into a shared latent space, yet receives no explicit signal to organize its representations around control-relevant structure. As a result, the learned representations lack consistent action-related semantics, leading to degraded performance in novel visual conditions. Fig. 1a illustrates this effect. At an intersection, the baseline policy produces candidate paths scattered across multiple directions rather than consistently toward the goal. This suggests that the model focuses on imitating expert actions, while the learned representation may not sufficiently capture goal-relevant visual structure. Recent work has explored structuring visual representations to be control-aware , decoupling representation learning from policy learning through staged training [14, 18, 20, 28, 34]. A particularly compelling perspective comes from 
+
+neural collapse (NC) [21], which characterizes the terminal phase of training in ORION 3
+
+deep classifiers: features of the same class converge to their class mean, and the class means form a symmetric simplex geometry. Notably, Qi et al . [23] observed that neural collapse also emerges in vision-based control tasks formulated with discrete control classes, and showed that explicitly encouraging this structure through encoder pretraining improves downstream policy performance. Their work raises a natural question: what is the appropriate class definition and geo-metric structure for a visual navigation task? In navigation, the robot’s immediate control action is largely determined by where it needs to go. This intuition motivates the use of goal-relative directions as a natural basis for defining discrete control classes, which can be divided into ordered categories ranging from Far Left to Far Right [22]. Unlike categorical control classes where all pairs are treated as equally spaced, goal-relative classes are naturally more similar to neighboring classes than to distant ones. Neigh-boring classes correspond to nearby steering commands and share similar visual contexts, while opposing classes represent different navigational situations. We leverage this natural ordering as a prior structure for the learned representation space. Recent theoretical analysis has shown that ordinal classes naturally collapse onto a one-dimensional ordered subspace, rather than the simplex geometry assumed in standard neural collapse [17]. Building on this, we propose ORION 
+
+(Ordinal Neural Collapse for Visual Navigation), which explicitly imposes ordinal geometric structure on a vision encoder’s representation space for continuous visual control. To our knowledge, this represents the first attempt to leverage ordinal neural collapse geometry for visual navigation. Rather than restricting the encoder’s capacity, our method provides a struc-tured initialization from which downstream end-to-end training can refine the full range of navigation-relevant features. Specifically, we develop a supervised ordinal projection that aligns class means along a learned axis, paired with a compactness objective that suppresses variance perpendicular to the axis. We build on the NoMaD [27] navigation framework, which combines a vision en-coder with a Transformer context module, and a diffusion action decoder [2]. Our approach operates in two stages: we first pretrain the vision encoder us-ing ordinal neural collapse objectives on direction-labeled navigation data, then fine-tune the entire pipeline end-to-end with the standard diffusion policy loss. In simulation and real-world navigation experiments, ORION demonstrates improved robustness compared to the end-to-end trained baseline, particularly in novel environments and visually ambiguous scenarios such as intersections with similar visual features. Our contributions are as follows: 
+
+– We identify that goal-relative navigation classes have inherently non-uniform inter-class similarity, forming a natural ordinal structure. Existing control-oriented methods overlook this property by assuming uniform class separa-tion. 
+
+– We propose ORION, a pretraining method for ordinal control classes, com-prising supervised ordinal projection and orthogonal variance suppression, 4 E. Son et al. 
+
+that enforces ordinal alignment while collapsing representations toward the ordinal axis. 
+
+– We evaluate our method in simulation and real-world navigation experiments and show that ORION improves the success rate by up to +26 pp and reduces heading jerk by up to 71% over the NoMaD baseline. 
+
+## 2 Related Work 
+
+2.1 Representation Learning for Robot Control 
+
+While end-to-end imitation learning jointly optimizes perception and control, it often yields encoders that overfit to task-irrelevant visual distractors rather than actionable structures [6, 11, 34]. This has motivated staged training ap-proaches that decouple representation learning from policy optimization through contrastive objectives [14,28], task-aware pretraining on large-scale data [20], or systematic benchmarking of pretrained visual backbones for embodied tasks [18]. These works establish that control-relevant representations improve downstream performance, but they do not prescribe a specific target geometry for the repre-sentation space. 
+
+2.2 Neural Collapse and Control-Oriented Clustering Neural collapse in classification. Papyan et al . [21] discovered that deep classifiers in their terminal training phase exhibit a striking regularity: within-class features collapse to their class mean, and the class means converge to a Simplex Equiangular Tight Frame (ETF) with uniform pairwise cosine similar-ity cos θ = −1/(K−1) . This geometry has been theoretically grounded [35, 36] and extended to imbalanced settings [4, 9]. Critically, NC has evolved from an observation into a prescriptive tool, where explicitly enforcing NC geometry im-proves robustness and generalization in downstream tasks [15, 32]. 
+
+Control-oriented clustering. Qi et al . [23] brought this prescriptive perspec-tive to visual control. They observed that NC-like clustering spontaneously arises in behavior cloning when features are labeled by action-derived classes, and pro-posed Relative Pose Orthants (REPOs)—a multi-dimensional binary partition yielding 2d categorical classes—as control-oriented labels. Pretraining encoders to minimize NC metrics improved downstream policy performance by 10–35% across multiple tasks. Because REPO classes are categorical with no ordinal re-lationship, the Simplex ETF geometry is structurally appropriate: all class pairs 
+
+should be equidistant. 
+
+Ordinal neural collapse. Ma et al . [17] proved that in ordinal regression, class means collapse onto a one-dimensional subspace ordered by class rank, rather than forming a Simplex ETF. Their analysis relies on cumulative probabilities ORION 5Vision     
+
+> Encoder
+> Current Observation
+> Goal Image
+> 1st Stage: ORION Pretraining
+> 2nd Stage: E2E training
+> Transformer
+> Goal Image
+> Vision
+> Encoder Vision
+> Encoder
+> Action
+> ℒ!"#$%&
+> Ordinal Neural Collapse
+> Near Left
+> Straight
+> Ordinal
+> Axi s
+> Far Left
+> ℒ%'( +ℒ%'#)
+> ℒ*+,-
+> Near Right
+> Far Right
+> Observations
+> Diffusion
+> Polic y
+
+Fig. 2: Overall Pipeline of the Proposed Method. Given the current observa-tion and a goal image, the vision encoder extracts latent features whose geometry is structured by Ordinal Neural Collapse objectives (Stage 1). In Stage 2, the model is fine-tuned end-to-end to align representation geometry with control semantics. 
+
+and threshold parameters specific to ordinal regression; we adopt the geometric insight—ordinal alignment on a 1D subspace—as an inductive bias, not the theoretical framework itself (Section 3). 
+
+2.3 Learning-Based Visual Navigation 
+
+Learning-based navigation has progressed from classical modular pipelines [30] and early visuomotor policies [3,19,22] toward scalable, data-driven approaches. ViNT [26] trained a Transformer-based model on diverse multi-robot data for topological goal-reaching. NoMaD [27] extended this with a diffusion policy de-coder [2] that represents multimodal action distributions, unifying goal-conditioned navigation and exploration through goal masking. NoMaD architecture serves as our baseline. Subsequent work has further refined the diffusion-based action de-coder through cost-guided sampling [33] and bridge models with informative priors [24]. Despite advances in policy architecture and sampling strategy, the encoder in these systems is trained end-to-end without explicit structure in the repre-sentation space. Hong et al . [10] addressed this partially through semantic map supervision for indoor navigation, but no prior work has organized encoder rep-resentations to reflect the ordinal structure of the navigation action space. Our approach fills this gap by pretraining the vision encoder with ordinal alignment objectives before policy learning. 6 E. Son et al. 
+
+## 3 Method 
+
+3.1 Problem Setup and Overview 
+
+We consider image-goal navigation via imitation learning: given an observation ot
+
+and a goal image g, the agent predicts a continuous action at ∈ Rd. We build on the NoMaD architecture [27], which decomposes the policy into a vision encoder 
+
+fθ that maps each image to a feature ht = fθ (ot) ∈ RD , a Transformer context module Tϕ that aggregates observation and goal features into zt = Tϕ(ht−p:t, h g ),and a diffusion decoder Dψ [2] that generates actions conditioned on zt.When such an architecture is trained end-to-end, the encoder is supervised only indirectly through the action denoising loss. Our approach adds a pretrain-ing stage before this end-to-end pipeline. In Stage 1, we train only the encoder fθ
+
+using the Ordinal Neural Collapse (ONC) objectives, which shape the geometry of the feature space to better align with the structure of visual navigation tasks. In Stage 2, the pretrained encoder is integrated into the full NoMaD pipeline and fine-tuned end-to-end with the diffusion policy loss. We emphasize that pretrain-ing provides a structured geometric initialization; it does not constrain what the encoder learns during downstream training. The overall pipeline is illustrated in Fig. 2. 
+
+3.2 Goal-Relative Control Classes 
+
+To define supervisory structure for representation shaping, we first discretize the continuous action space into ordered classes based on the angular direction toward the goal. Let αt ∈ [−π, π ) denote the relative angular offset between the agent’s heading and the goal direction. We partition the front field of view into 
+
+K uniform angular bins and assign each sample to a class yt ∈ { 0, . . . , K − 1};if the goal lies outside the field of view, the sample is assigned to a separate out-of-view class yt = K, yielding K + 1 classes in total. These classes have a natural ordinal structure: class 0 corresponds to the far right goal direction, class K − 1 to the far left, and intermediate classes are ordered between them. Consequently, neighboring classes share similar steering contexts, while distant classes represent different behaviors. The out-of-view class is excluded from the ordinal objectives, which assume an ordered relationship between classes. It contributes only to LCDNV , which does not rely on any ordinal assumption. 
+
+3.3 ORION Pretraining Objectives 
+
+We propose ORION pretraining loss, which consists of three components: class separability, supervised ordinal projection, and orthogonal compactness. Let μk
+
+denote the mean feature of class k, ¯μ the global mean, ˜μk := μk − ¯μ the centered class mean, and σ2 
+
+> k
+
+the within-class variance. ORION 7
+
+Class Separability. To encourage compact class clusters, we minimize the class-distance normalized variance (CDNV) [5], which measures intra-class com-pactness relative to inter-class separation: 
+
+LCDNV = 1
+
+|P| 
+
+X
+
+> (k,k ′)∈P
+
+σ2 
+
+> k
+
++ σ2
+
+> k′
+
+2 ∥˜μk − ˜μk′ ∥22
+
+, (1) where P = {(k, k ′) | k < k ′} is the set of all unordered class pairs. 
+
+Supervised Ordinal Projection. Our method aligns class means along a one-dimensional axis according to their ordinal order. This design is motivated by ONC theory [17], which shows that under ordinal regression, class means collapse onto a one-dimensional subspace ordered by class rank. We assign each class an equally spaced target position tk = k − (K − 1) /2
+
+for k ∈ { 0, . . . , K − 1}, and define the supervised ordinal axis as the direction that best aligns the centered class means with the target ordering: 
+
+w = ˜M ⊤t
+
+∥ ˜M ⊤t∥2
+
+, (2) where ˜M = [˜ μ0, . . . , ˜μK−1]⊤ ∈ RK×D is the matrix of centered class means and t = [ t0, . . . , t K−1]⊤. The ordinal projection loss then encourages the pro-jected class means pk = ˜ μ⊤ 
+
+> k
+
+w to match the targets: 
+
+Lord = 1
+
+K
+
+> K−1
+
+X
+
+> k=0
+
+(pk − tk)2 . (3) Unlike PCA-based approaches that identify the principal axis without label information, our supervised projection directly incorporates the known ordinal structure, guaranteeing zero ordinal violations by construction. 
+
+Orthogonal Compactness. To concentrate features onto the ordinal subspace, we penalize within-class variance in the directions orthogonal to the ordinal axis: 
+
+Lorth = 1
+
+N
+
+> N
+
+X
+
+> t=1
+
+(I − ww ⊤)( ht − μyt ) 2 , (4) where w is the supervised ordinal axis defined in Eq. (2). While Lord positions class means along w, Lorth collapses the orthogonal directions, encouraging fea-tures to lie on the ordinal axis. This geometric constraint applies only during pretraining. Downstream end-to-end fine-tuning is free to recover orthogonal variation as needed for the full navigation task. 8 E. Son et al. 
+
+Algorithm 1 ORION Pretraining and Downstream Fine-tuning 
+
+Require: Dataset D = {(ot, g, a t, y t)}, encoder fθ , context module Tϕ, diffusion de-coder Dψ
+
+Stage 1: ORION Pretraining (train fθ only) 1: Initialize running class means {μk }, variances {σ2 
+
+> k
+
+}, axis w
+
+2: for each mini-batch B do 
+
+3: ht ← fθ (ot) for all (ot, y t) ∈ B 
+
+4: Update {μk }, {σ2 
+
+> k
+
+} via Welford’s algorithm 5: Compute centered class means ˜μk ← μk − ¯μ
+
+6: Compute LCDNV  ▷ Eq. (1) 7: Compute supervised axis: w ← EMA 
+
+
+
+w, ˜M ⊤t/∥ ˜M ⊤t∥
+
+
+
+8: Compute Lord from projections pk = ˜ μ⊤ 
+
+> k
+
+w ▷ Eq. (3) 9: Compute Lorth = 1
+
+> N
+
+PNt=1 (I − ww ⊤)( ht − μyt ) 2 ▷ Eq. (4) 10: Update θ by ∇θ LORION  ▷ Eq. (5) 11: end for Stage 2: Fine-tune fθ , T ϕ, D ψ end-to-end with diffusion policy loss [27]. 
+
+Overall Objective. The full pretraining loss is: 
+
+LORION = λcdnv LCDNV + λord Lord + λorth Lorth , (5) where LCDNV promotes class separability, Lord enforces ordinal alignment along a learned axis, and Lorth reduces orthogonal variation to reinforce one-dimensional structure. The full training procedure is shown in Alg. 1. 
+
+3.4 Training Considerations Encoder-level Application. We apply ORION pretraining to the encoder features ht rather than the context-level features zt. The context module in-tegrates temporal and goal information through attention. Applying geometric constraints at this stage disrupts temporal aggregation and results in unstable feature norms. Additional experimental results are included in the supplemen-tary material. 
+
+Stable Statistics Estimation. The pretraining objectives depend on class means and variances, which can be noisy when estimated from single mini-batches. We maintain running statistics using Welford’s online algorithm [31] and smooth the ordinal axis w via exponential moving average across batches. Gra-dient flow is preserved by computing losses from current-batch features centered with the incrementally updated statistics (details in supplementary material). ORION 9
+
+## 4 Experiments 
+
+4.1 Experimental Setup Training Data and Control Classes. We use the same training dataset as NoMaD [27], which consists of trajectories collected from diverse environments and robotic platforms. The dataset includes RECON [25], SCAND [12], GoStan-ford [8], and SACSoN [7], totaling approximately 140 hours of navigation time. Goal images are sampled from future observations along the same trajectory, drawn 3–20 steps ahead of the current observation during training. Each sample is labeled with a goal-relative class based on the angular offset αt between the agent’s heading and the goal. We partition the front field of view [−90 ◦, 90 ◦]
+
+into K = 5 uniform angular bins and assign samples outside this range to an out-of-view class, yielding six classes in total. This explicit out-of-view class cap-tures goal-irrelevant states, allowing the encoder to convey such conditions to downstream control. 
+
+Training. In Stage 1, we pretrain the EfficientNet-B0 [29] encoder for 30 epochs using AdamW [16] with a learning rate of 10 −5, cosine scheduling, and batch size 256. Loss weights are λcdnv = 1 .0, λord = 1 .0, λorth = 1 .0. In Stage 2, we integrate the pretrained encoder into the full NoMaD pipeline and fine-tune all parameters end-to-end for 30 epochs with the diffusion policy loss, following the NoMaD defaults [27]: a 1D conditional U-Net decoder with 10 denoising steps, trajectory prediction horizon of 8, and learning rate 10 −4.
+
+Baselines. We compare our method with the following baselines: 
+
+– ViNT [26]: A goal-conditioned policy trained end-to-end using a single ac-tion regression loss. 
+
+– NoMaD [27]: The diffusion-based policy trained end-to-end without encoder pretraining. 
+
+– NC-ETF : Encoder pretraining based on the Simplex ETF geometry pro-posed by Qi et al . [23]. We adapt this formulation to the visual navigation setting, enforcing three standard NC metrics (CDNV, STD Norm, STD An-gle). 
+
+Evaluation Metrics. We report success rate, progress, collision, and heading jerk. 
+
+– Success Rate (SR): the fraction of trials in which the agent reaches the goal. The goal-reaching distance tolerance is set to 1.0 m for indoor, and 
+
+5.0 m for outdoor. The time limit is set to 300 s per episode. 
+
+– Progress (Prog.): the ratio of visited visual subgoal nodes to the total number of subgoal nodes along the route, capturing partial task completion in failed episodes. 10 E. Son et al. 
+
+Table 1: Navigation performance in simulated environments. We evaluate in Indoor (2D-3D-S) and Outdoor (Gazebo citysim) environments. Bold denotes the best result per route.                                                                              
+
+> Environment Route Method Task Performance Traj. Quality
+> SR (%) ↑Prog. (%) ↑Collision ↓H-Jerk (med.) ↓
+> Indoor (2D-3D-S) Basic ViNT [26] 76 74.58 0.24 4.12 NoMaD [27] 92 95.17 0.02 4.61 NC-ETF 86 89.32 0.14 4.33 ORION 96 96.68 0.04 1.58
+> Intersection ViNT [26] 036.12 1.00 4.99 NoMaD [27] 17 32.07 0.81 15.48 NC-ETF 12 25.48 0.88 12.13 ORION 91 93.82 0.09 4.99
+> Outdoor (Citysim) Basic ViNT [26] 45 73.58 1.48 1.22 NoMaD [27] 88 89.85 0.12 5.08 NC-ETF 89 91.18 0.21 2.38 ORION 94 94.68 0.06 1.09
+> Multi Intersection ViNT [26] 16 44.24 2.16 2.34
+> NoMaD [27] 48 70.30 1.80 34.49 NC-ETF 40 68.57 1.39 11.98 ORION 74 86.39 0.45 10.13
+
+– Collision: the mean number of physical contacts with obstacles per episode, indicating navigation safety. 
+
+– Heading Jerk (H-Jerk): the median absolute change in heading angle be-tween consecutive time steps. This metric captures short-horizon directional stability and is particularly diagnostic at intersections, where temporally inconsistent encoder features manifest as rapid heading oscillations. 
+
+4.2 Simulation Results 
+
+We evaluate our method in two simulated environments: (i) Stanford 2D-3D-S [1], an indoor environment with narrow corridors, and (ii) a Gazebo-based urban simulation (Citysim) [13]. Each environment includes two test routes with 
+
+N = 100 trials per route. All methods are deployed on a Clearpath Husky UGV. 
+
+Overall Performance. Across both simulation environments, ORION consis-tently outperforms the baselines in terms of success rate and progress. (Tab. 1) On Basic , which is mostly straight with a single intersection, all diffusion-based methods achieve high success rates, with ORION showing moderate improve-ment over NoMaD (e.g., 94 vs. 88 SR on Citysim Basic ). Performance differences become more pronounced on Multi-Intersection spanning approximately 200 m and requiring four consecutive directional decisions, where ORION outperforms ORION 11 Star t    
+
+> Goal
+> Star tGoal
+> 2D -3D -SCitySim
+> Multi -Intersection Basic Multi -Intersection
+> Start
+> Goal
+> Goal
+> Start
+> Basic
+
+Fig. 3: Qualitative comparison in simulation. Green and red dots denote the start and goal positions, respectively. Trajectories are color-coded as NoMaD (green) and ORION (red). 
+
+NoMaD in success rate by a margin of +26 pp (48% to 74%). ViNT performs worse than both diffusion-based methods across settings. 
+
+Intersection-Level Behavior. Fig. 3 compares top-view trajectories of No-MaD and ORION at an intersection. NoMaD exhibits temporal flickering: the diffusion decoder alternates between competing directions across successive time steps. ORION instead concentrates candidate paths toward a single direction, producing more consistent trajectories and reducing heading jerk by 71% over NoMaD (34.49 → 10.13 on Multi-Intersection ). 
+
+Geometric Interpretation. NC-ETF, which enforces Simplex ETF geome-try during pretraining, performs comparably to or below the NoMaD baseline despite using the same two-stage training procedure as ORION. This indicates that representation pretraining with a mismatched geometric structure does not improve navigation and can even degrade performance. 
+
+Failure Analysis. ORION failures on intersection routes fall into two cate-gories: (i) premature turning, where the agent initiates a turn too early and collides with obstacles at the intersection boundary; and (ii) branch misjudg-ment, where the agent selects an incorrect direction. Premature turning is also observed in NoMaD and mainly arises from imprecise turn timing rather than representation quality. Branch misjudgment is the dominant failure mode of No-MaD; ORION reduces its frequency but does not eliminate it. 
+
+4.3 Real-World Results 
+
+We evaluate our method in three complex real-world environments: Indoor, Cam-pus, and Field. We conduct 10 evaluation episodes per route on Indoor and 
+
+Campus . On Field environment, due to longer travel distances and reduced con-trollability of environmental factors, we conduct 6 trials per route. All policies are deployed on a Clearpath Husky UGV with a ZED 2i stereo camera (left RGB stream only) and an NVIDIA Jetson Orin for onboard inference. 12 E. Son et al.                                          
+
+> Table 2: Navigation performance in real-world environments. We evaluate in Indoor, Campus, and Field environments. Bold denotes the best result per route. Indoor Campus Field Method SR ↑Prog. ↑H-Jerk ↓SR ↑Prog. ↑H-Jerk ↓SR ↑Prog. ↑H-Jerk ↓
+> ViNT 20 56.97 2.34 40 52.15 7.76 036.70 8.51
+> NoMaD 40 57.19 5.09 60 73.95 13.67 16.67 37.41 20.77 ORION 60 92.12 4.64 70 80.61 12.17 33.33 48.99 13.45
+
+Overall Performance. Across all environments, our method achieves higher success rates and progress compared to the baselines in real-world experiments (Tab. 2). 
+
+Indoor is particularly challenging due to visually repetitive corridors where all choices appear nearly identical. Here, ORION achieves a higher success rate than both baselines, better distinguishing similar visual features. On Campus , the same intersection instability observed in the simulation also appears. Both ViNT and NoMaD often make inconsistent directional decisions at visually ambiguous junctions. In contrast, ORION exhibits more stable behavior at intersections, leading to more reliable navigation outcomes. 
+
+Field environment involves long-range navigation ( ≈200m) over uneven ter-rain with sparse visual features. In this setting, all methods show relatively low success rates. Nevertheless, ORION consistently achieves higher progress toward the goal, indicating more stable long-horizon navigation without drifting away from the intended direction. 
+
+Qualitative Analysis. Fig. 4 shows qualitative comparisons across the three environments. We highlight behavioral patterns not captured by aggregate met-rics. On Indoor , our policy frequently attempts to avoid the staircase obstacle, occasionally failing to reach the goal as a result. This obstacle avoidance be-havior, which is not explicitly supervised during pretraining, emerges from the end-to-end fine-tuning stage. The robot generally follows the subgoal sequence and achieves high progress, with failures caused by physical constraints rather than navigation errors. On Campus , baseline policies show temporal flickering near intersections, con-sistent with simulation observations. ORION trajectories show more consistent path selection at these junctions (See first row of Fig. 1). 
+
+Field presents a large open space where many feasible directions exist, making it easy for the robot to drift from the intended route. ORION is able to recover and return toward the route even after temporary deviations, a behavior not observed with the baselines. Notably, ViNT achieves the lowest H-Jerk across all environments. However, this mainly reflects the limitation of its regression-based policy. By averaging ORION 13 Start 
+
+> Goal
+> Start
+> Goal
+> Goal
+> Goal
+
+(a) Indoor (b) Campus (c) Field 
+
+> Goal
+> Start
+> Goal
+
+Fig. 4: Real-world Qualitative Results. Green and red dots denote start and goal positions, respectively. Trajectories are color-coded as ViNT (blue), NoMaD (green), and ORION (red). The orange frames show example ego images and their corresponding sampled paths in each trajectory. 
+
+over multimodal action distributions, the policy avoids decisive turns. As a re-sult, ViNT produces smooth but less responsive trajectories, which leads to the lowest success rates. In contrast, ORION achieves lower H-Jerk than NoMaD de-spite using the same diffusion-based decoder. This suggests that the pretrained encoder helps the policy make clearer goal-relevant decisions, leading to more decisive actions. Additional qualitative results are provided in the supplementary material. 
+
+4.4 Ablation Studies 
+
+We ablate three key design choices underlying ORION: its representation geom-etry, the individual loss terms, and the two-stage training structure. 
+
+Geometry vs. Direction Labels. To isolate whether ORION’s gain stems from its ordinal-collapse geometry or merely from adding a direction-aware pre-training stage, we compare against CE-only pretraining: cross-entropy classifica-tion over the same K=5 directional bins, followed by the identical Stage-2 pro-tocol. As shown in Tab. 3a, CE-only reaches only 16% SR on Multi-Intersection, below the no-pretraining NoMaD baseline (48%), and yields the highest heading jerk. Direction supervision here is not merely insufficient but actively harmful, as forcing directional labels through a mismatched classification objective degrades the representation rather than structuring it. ORION’s gains therefore require its task-matched ordinal-collapse objectives, not direction supervision alone. 
+
+Loss Components. Tab. 3b reports ablation results with individual loss terms removed. With LCDNV alone, the model achieves only 33% SR. Adding Lord 
+
+improves SR to 45% by ordering class means along a 1D axis. The full model reaches 74% SR, as Lorth tightens within-class distributions around the axis that 
+
+Lord defines. Lorth requires Lord to be present, as it reduces orthogonal variance relative to the axis that Lord constructs. 14 E. Son et al.                               
+
+> Table 3: Pretraining design ablations. We evaluate on Citysim Multi-Intersection, reporting a mean over 100 episodes.
+> (a) Geometry vs. direction labels.
+> Method SR ↑Prog. ↑H-Jerk ↓
+> NoMaD 48 70.30 34.49 CE-only 16 38.35 54.63 ORION 74 86.39 10.13
+> (b) Loss component contributions.
+> Variant SR ↑Prog. ↑H-Jerk ↓LCDNV only 33 55.54 19.41
+> LCDNV +Lord 45 69.16 42.98 ORION (full) 74 86.39 10.13
+
+Two-Stage vs. Joint Training. Tab. 4 compares two-stage ORION pretrain-ing against NC-Joint, which applies ORION losses as auxiliary objectives during end-to-end training from the start. NC-Joint fails entirely, achieving 0% success rate with H-Jerk an order of magnitude higher than NoMaD (147.95 vs. 5.08). Qualitatively, the NC-Joint policy generates paths that spread radially regard-less of goal direction, failing to concentrate toward the target. This indicates that the ORION and diffusion objectives interfere destructively when optimized simultaneously: neither the encoder’s ordinal structure nor the decoder’s action prediction converges properly under conflicting gradients. Two-stage pretraining resolves this by separating the two objectives temporally, allowing the encoder to establish geometric structure in Stage 1 before the diffusion objective is in-troduced in Stage 2. (See supplementary material for further details)                 
+
+> Table 4: Two-stage vs. joint training. We evaluate on the Citysim Basic, reporting a mean over 100 episodes.
+> Variant SR ↑Prog. ↑H-Jerk ↓
+> NoMaD 88 89.85 5.08 NC-Joint 010.34 147.95 ORION (Two-Stage) 94 94.68 1.09
+
+4.5 Representation Analysis 
+
+Section 4.4 shows that joint training fails to establish ordinal structure. A nat-ural question is whether Stage 2 fine-tuning preserves the structure established during pretraining. Fig. 5 addresses this question by comparing class distribu-tions projected onto the supervised ordinal axis after full training (Stage 1 + Stage 2). Both models achieve correct ordinal ordering by mode, indicating that end-to-end training itself induces partial ordinal structure. However, the degree of within-class concentration differs substantially. In NoMaD (Fig. 5b), class dis-tributions are broad with heavy cross-class overlap near the center of the axis. In ORION (Fig. 5c), each class occupies a more compact region with Far–Near ORION 15 Far Left 
+
+> Near Left
+> Straight
+> Near Right
+> Far Right
+
+Fig. 5: Class distributions on the supervised ordinal axis after Stage 2 fine-tuning. (a) Target ordinal geometry. (b) NoMaD: Far and Near classes nearly overlap at both extremes. (c) ORION: all five classes maintain distinct modes. Projections are normalized to zero mean and unit variance. Distributions are computed on the held-out RECON [25] test split using Gaussian kernel density estimation (bandwidth 
+
+h = 0 .15 ). Residual overlap near boundaries reflects bin-boundary ambiguity, where visually similar samples across an angular bin boundary receive different labels. 
+
+mode separations 6−9× larger than in NoMaD (0.37–0.53 vs. < 0.06 in nor-malized units). This confirms that the ordinal structure from Stage 1 persists through 30 epochs of end-to-end fine-tuning, validating the two-stage design. 
+
+## 5 Conclusion 
+
+We present ORION (Ordinal Neural Collapse for Visual Navigation) pretrain-ing framework that embeds ordinal geometric structure into the vision encoder’s representation space for image-goal navigation. ORION pretraining shapes the encoder feature space to reflect the ordinal similarity of steering decisions, pro-viding a structured initialization for the downstream diffusion policy. Experi-ments in both simulation and real-world deployments show that ORION con-sistently improves navigation success rates over end-to-end and NC baselines, with particular gains at visually ambiguous intersections. Our results highlight the importance of structured representations for interpreting visual observations in end-to-end navigation models. We believe this principle can extend to other control tasks where actions exhibit inherent structure. 
+
+## Acknowledgements 
+
+This research was supported by the Challengeable Future Defense Technology Research and Development Program through the Agency for Defense Devel-opment (ADD) funded by the Defense Acquisition Program Administration (DAPA) in 2026 (No. 915108201) and in part by the BK21 FOUR Program, Education and Research Program for Future ICT Pioneers, Seoul National Uni-versity, in 2026. 16 E. Son et al. 
+
+## References 
+
+1. Armeni, I., Sax, S., Zamir, A.R., Savarese, S.: Joint 2d-3d-semantic data for indoor scene understanding. arXiv preprint arXiv:1702.01105 (2017) 2. Chi, C., Feng, S., Du, Y., Xu, Z., Cousineau, E., Burchfiel, B., Song, S.: Diffusion policy: Visuomotor policy learning via action diffusion. In: Proceedings of Robotics: Science and Systems (RSS) (2023) 3. Codevilla, F., Müller, M., López, A., Koltun, V., Dosovitskiy, A.: End-to-end driv-ing via conditional imitation learning. In: 2018 IEEE international conference on robotics and automation (ICRA). pp. 4693–4700. IEEE (2018) 4. Fang, C., He, H., Long, Q., Su, W.J.: Exploring deep neural networks via layer-peeled model: Minority collapse in imbalanced training. Proceedings of the Na-tional Academy of Sciences 118 (43), e2103091118 (2021) 5. Galanti, T., György, A., Hutter, M.: On the role of neural collapse in transfer learning. In: International Conference on Learning Representations (2021) 6. Geirhos, R., Jacobsen, J.H., Michaelis, C., Zemel, R., Brendel, W., Bethge, M., Wichmann, F.A.: Shortcut learning in deep neural networks. Nature Machine In-telligence 2(11), 665–673 (2020) 7. Hirose, N., Shah, D., Sridhar, A., Levine, S.: Sacson: Scalable autonomous control for social navigation. IEEE Robotics and Automation Letters 9(1), 49–56 (2023) 8. Hirose, N., Xia, F., Martín-Martín, R., Sadeghian, A., Savarese, S.: Deep visual mpc-policy learning for navigation. IEEE Robotics and Automation Letters 4(4), 3184–3191 (2019) 9. Hong, W., Ling, S.: Neural collapse for unconstrained feature model under cross-entropy loss with imbalanced data. Journal of Machine Learning Research 25 (192), 1–48 (2024) 10. Hong, Y., Zhou, Y., Zhang, R., Dernoncourt, F., Bui, T., Gould, S., Tan, H.: Learning navigational visual representations with semantic map supervision. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 3055–3067 (2023) 11. Ilyas, A., Santurkar, S., Tsipras, D., Engstrom, L., Tran, B., Madry, A.: Adversarial examples are not bugs, they are features. Advances in neural information processing systems 32 (2019) 12. Karnan, H., Nair, A., Xiao, X., Warnell, G., Pirk, S., Toshev, A., Hart, J., Biswas, J., Stone, P.: Socially compliant navigation dataset (scand): A large-scale dataset of demonstrations for social navigation. IEEE Robotics and Automation Letters 
+
+7(4), 11807–11814 (2022) 13. Koenig, N., Howard, A.: Design and use paradigms for gazebo, an open-source multi-robot simulator. In: 2004 IEEE/RSJ international conference on intelligent robots and systems (IROS)(IEEE Cat. No. 04CH37566). vol. 3, pp. 2149–2154. Ieee (2004) 14. Laskin, M., Srinivas, A., Abbeel, P.: Curl: Contrastive unsupervised representations for reinforcement learning. In: International conference on machine learning. pp. 5639–5650. PMLR (2020) 15. Li, X., Liu, S., Zhou, J., Lu, X., Fernandez-Granda, C., Zhu, Z., Qu, Q.: Un-derstanding and improving transfer learning of deep models via neural collapse. Transactions on Machine Learning Research (2024) 16. Loshchilov, I., Hutter, F.: Decoupled weight decay regularization. In: International Conference on Learning Representations (2019), https://openreview.net/forum? id=Bkg6RiCqY7 ORION 17 17. Ma, C., Obuchi, T., Tanaka, T.: Neural collapse in cumulative link models for ordinal regression: An analysis with unconstrained feature model. In: The Thirty-ninth Annual Conference on Neural Information Processing Systems (2025) 18. Majumdar, A., Yadav, K., Arnaud, S., Ma, Y.J., Chen, C., Silwal, S., Jain, A., Berges, V.P., Wu, T., Vakil, J., Abbeel, P., Malik, J., Batra, D., Lin, Y., Maksymets, O., Rajeswaran, A., Meier, F.: Where are we in the search for an ar-tificial visual cortex for embodied intelligence? In: Thirty-seventh Conference on Neural Information Processing Systems (2023) 19. Mirowski, P., Pascanu, R., Viola, F., Soyer, H., Ballard, A., Banino, A., Denil, M., Goroshin, R., Sifre, L., Kavukcuoglu, K., Kumaran, D., Hadsell, R.: Learning to navigate in complex environments. In: International Conference on Learning Representations (2017) 20. Nair, S., Rajeswaran, A., Kumar, V., Finn, C., Gupta, A.: R3m: A universal visual representation for robot manipulation. In: Conference on Robot Learning. pp. 892– 909. PMLR (2023) 21. Papyan, V., Han, X., Donoho, D.L.: Prevalence of neural collapse during the ter-minal phase of deep learning training. Proceedings of the National Academy of Sciences 117 (40), 24652–24663 (2020) 22. Pomerleau, D.A.: Alvinn: An autonomous land vehicle in a neural network. Ad-vances in neural information processing systems 1 (1988) 23. Qi, H., Yin, H., Yang, H.: Control-oriented clustering of visual latent represen-tation. In: The Thirteenth International Conference on Learning Representations (2025) 24. Ren, H., Zeng, Y., Bi, Z., Wan, Z., Huang, J., Cheng, H.: Prior does matter: Visual navigation via denoising diffusion bridge models. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (2025) 25. Shah, D., Eysenbach, B., Rhinehart, N., Levine, S.: Rapid Exploration for Open-World Navigation with Latent Goal Models. In: 5th Annual Conference on Robot Learning (2021), https://openreview.net/forum?id=d_SWJhyKfVw 
+
+26. Shah, D., Sridhar, A.K., Dashora, N., Stachowicz, K., Black, K., Hirose, N., Levine, S.: Vint: A foundation model for visual navigation. In: Conference on Robot Learn-ing (2023), https://api.semanticscholar.org/CorpusID:259262396 
+
+27. Sridhar, A., Shah, D., Glossop, C., Levine, S.: Nomad: Goal masked diffusion poli-cies for navigation and exploration. In: 2024 IEEE International Conference on Robotics and Automation (ICRA). pp. 63–70. IEEE (2024) 28. Stooke, A., Lee, K., Abbeel, P., Laskin, M.: Decoupling representation learning from reinforcement learning. In: International conference on machine learning. pp. 9870–9879. PMLR (2021) 29. Tan, M., Le, Q.: Efficientnet: Rethinking model scaling for convolutional neural networks. In: International conference on machine learning. pp. 6105–6114. PMLR (2019) 30. Thrun, S., Burgard, W., Fox, D.: Probabilistic robotics. MIT press (2005) 31. Welford, B.P.: Note on a method for calculating corrected sums of squares and products. Technometrics 4(3), 419–420 (1962) 32. Yang, Y., Chen, S., Li, X., Xie, L., Lin, Z., Tao, D.: Inducing neural collapse in imbalanced learning: Do we really need a learnable classifier at the end of deep neural network? In: Advances in Neural Information Processing Systems. vol. 35, pp. 37991–38002 (2022) 33. Zeng, Y., Ren, H., Wang, S., Huang, J., Cheng, H.: Navidiffusor: Cost-guided diffusion model for visual navigation. arXiv preprint arXiv:2504.10003 (2025) 18 E. Son et al. 34. Zhang, A., McAllister, R.T., Calandra, R., Gal, Y., Levine, S.: Learning invariant representations for reinforcement learning without reconstruction. In: International Conference on Learning Representations (2021) 35. Zhou, J., Li, X., Ding, T., You, C., Qu, Q., Zhu, Z.: On the optimization landscape of neural collapse under mse loss: Global optimality with unconstrained features. In: International Conference on Machine Learning. pp. 27179–27202. PMLR (2022) 36. Zhu, Z., Ding, T., Zhou, J., Li, X., You, C., Sulam, J., Qu, Q.: A geometric analysis of neural collapse with unconstrained features. In: Advances in Neural Information Processing Systems. vol. 34, pp. 29820–29834 (2021) Ordinal Neural Collapse as a Representation Prior for Visual Navigation Supplementary Material 
+
+E-In Son ⋆ , Jung-Taak Kim ⋆ , and Seung-Woo Seo †
+
+Dept. of ECE & ASRI, Seoul National University, Korea 
+
+{pingpang,mychoco333,seo}@snu.ac.kr 
+
+## 1 Method Design Justification 
+
+1.1 Effect of the Number of Ordinal Bins ( K)
+
+We empirically evaluate how the number of ordinal bins affects navigation per-formance by varying K ∈ { 3, 5, 7} while keeping all other settings identical. Results are summarized in Tab. S1. 
+
+K=5 achieves the best performance across both routes. K=3 partitions the front FOV into 60 ° bins, too coarse to separate visually distinct steering deci-sions, and falls substantially below the NoMaD baseline. K=7 narrows each bin to approximately 26 °, at which point angular estimation noise frequently crosses class boundaries and degrades label quality. K=5 balances directional resolution against label stability. 
+
+Table S1: Effect of the number of ordinal bins ( K). Navigation on CitySim Basic and Multi-Intersection (100 episodes each). 
+
+K Basic Multi-Intersection SR ↑ Prog. ↑ Collision ↓ SR ↑ Prog. ↑ Collision ↓
+
+NoMaD 88 89.85 0.12 48 70.30 1.80 3 36 52.99 1.80 2 17.63 3.18 5 (ours) 94 94.68 0.06 74 86.39 0.45 
+
+7 83 87.20 0.64 50 69.38 1.05 
+
+1.2 Bin Discretization: Equal-Angle vs. K-Means Clustering 
+
+The main paper adopts equal angular bins as a parameter-free definition that di-rectly reflects the angular structure of navigation directions. To examine whether a data-driven alternative yields meaningfully different boundaries, we derive bin boundaries from k-means clustering of goal-relative angles in the training data. Fig. S1(a,b) shows that the k-means clustering-based partitions closely match the equal-angle definition. We therefore use the equal-angle definition in all main experiments due to its simplicity. 2 E. Son et al. 3 classes 5 classes 7 classes    
+
+> (b) K -means clustering
+> (a) Equal angular bins
+> 3 classes 5 classes 7 classes
+> (c) REPO (Relative Pose Orthant) axis
+
+Fig. S1: Comparison of discretization methods for goal-relative directions. 
+
+(a) equal angular bins, (b) k-means clustering, and (c) illustration of REPO axis. 
+
+1.3 REPO Discretization 
+
+We additionally evaluate the REPO (Relative Pose Orthant) discretization pro-posed in prior work [1]. REPO defines action classes based on the sign of the relative pose components (x, y, θ ), partitioning the 3D relative pose space into eight orthants (Fig. S1(c)). We adapt this discretization to the navigation setting to examine whether ETF geometry remains a viable pretraining target when the class structure is not ordinal. As discussed in the main paper, REPO orthants do not reflect the angular continuity of navigation directions. Applying the three standard Neural Collapse losses (CDNV, STDNorm, STDAngle) results in un-stable optimization in which the STDAngle term fails to converge, preventing the feature space from forming a regular simplex (See Fig. S2). This further sup-ports the main paper’s argument that ETF geometry is structurally mismatched to tasks with inherently non-uniform inter-class similarity. 0 5 10 15 20 25 30             
+
+> Epoch
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> CDNV
+> 0510 15 20 25 30
+> Epoch
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> STD Norm
+> 0510 15 20 25 30
+> Epoch
+> 0.25
+> 0.30
+> 0.35
+> 0.40
+> 0.45
+> 0.50
+> 0.55
+> STD Angle
+
+Fig. S2: Training curves of REPO-ETF. CDNV and STDNorm decrease during training, but STDAngle fails to converge, preventing the formation of the ETF struc-ture. ORION 3
+
+1.4 NC Application Site: Encoder vs. Transformer 
+
+In the NoMaD architecture, the vision encoder fθ produces per-image tokens, which are aggregated by a Transformer context module Tϕ into a context vector 
+
+zt. A natural question is whether to apply ONC objectives to the encoder output 
+
+(our choice) or the transformer output .We compare three configurations: (a) Encoder NC (ours): ONC losses applied to the goal-image encoder output 
+
+hg = fθ (g).(b) Context NC: ONC losses applied to the context vector zt = Tϕ(ht−p:t, h g ).(c) Context NC + LayerNorm (LN): Same as (b) with LayerNorm normal-ization to prevent norm explosion. Experimental results are shown in Tab. S2. Context NC suffers from severe norm explosion (110 vs. 25), confirming that the Transformer’s attention dy-namics conflict with geometric constraints on feature norms. Adding LayerNorm stabilizes the norm but still yields poor navigation performance (SR 27), sug-gesting that the interference is not merely a scaling issue. Forcing ordinal struc-ture onto context features appears to disrupt the temporal aggregation that the Transformer is designed to perform.                          
+
+> Table S2: NC application site comparison. Navigation results on CitySim Multi-Intersection (100 episodes). NC Site Pretrain (Stage 1) Navigation (Stage 2) Feat. Norm CDNV SR ↑Prog. ↑Collision ↓
+> Encoder NC (ours) 25.13 0.00269 74 86.39 0.45
+> Context NC 110.52 0.00157 14 24.07 2.86 Context NC + LN 12.23 0.00160 30 64.55 1.80
+
+1.5 Joint Training Failure Analysis 
+
+Tab. 4 in the main paper reports that NC-Joint achieves 0% success rate. Fig. S3 reveals the underlying cause. When NC and diffusion objectives are optimized simultaneously on a shared encoder, neither converges. In particular, the action loss fails to converge (Fig. S3 (a)), indicating that the policy is unable to learn a stable imitation policy. Consequently, the policy produces radial trajectories that do not correspond to valid navigation behavior, leading to a 0% success rate. 4 E. Son et al. (c) Candidate Waypoints (NC -Joint) (a) Action Loss (b) Ordinal Violation 
+
+Fig. S3: Joint training failure. (a) Action loss: NC-Joint (red) diverges while ORION (blue) converges. (b) NC-Joint shows persistently high ordinal violation throughout training, whereas ORION converges to zero. (c) Resulting candidate way-points spread radially, ignoring goal direction. 
+
+1.6 Loss Component Ablation (Extended) 
+
+Tab. 3 of the main paper reports three ablation variants. Here, we introduce two additional variants to further isolate the contribution of each component (Lord + Lorth and LCDNV + Lorth ). Removing LCDNV leads to the largest performance drop (SR 74 →19 ), indicat-ing that ordinal alignment alone cannot produce a meaningful structure without inter-class separation. The variant LCDNV + Lorth (SR 35) performs comparably to LCDNV alone (SR 33), confirming that Lorth provides little benefit without the ordinal axis established by Lord . All incomplete variants fall below the NoMaD baseline (SR 48), highlighting the necessity of the full loss combination. 
+
+Table S3: Extended loss ablation . Results on CitySim Multi-Intersection (100 episodes each). Variant SR ↑ Prog. ↑ H-Jerk ↓
+
+ORION (full) 74 86.39 10.13 
+
+Lord + Lorth 19 35.68 14.83 
+
+LCDNV + Lorth 35 60.13 12.27 
+
+LCDNV + Lord 45 69.16 42.98 
+
+LCDNV only 33 55.54 19.41 
+
+## 2 Additional Analysis of the Learned Representation 
+
+We provide additional analysis to understand the structure of the learned rep-resentation better. 
+
+2.1 Class Mean Similarity Analysis 
+
+To examine how control classes are structured in the learned feature space, we compute pairwise cosine similarities between class mean features, producing ORION 5FL NL S NR FR OOV                                                                  
+
+> (a) NC-ETF
+> FL
+> NL
+> S
+> NR
+> FR
+> OOV
+> 1.00 -0.02 -0.17 0.01 -0.12 0.16
+> -0.02 1.00 -0.52 -0.18 -0.18 -0.18
+> -0.17 -0.52 1.00 -0.70 -0.10 0.05
+> 0.01 -0.18 -0.70 1.00 0.06 -0.08
+> -0.12 -0.18 -0.10 0.06 1.00 0.04
+> 0.16 -0.18 0.05 -0.08 0.04 1.00
+> FL NL SNR FR OOV
+> (b) ORION
+> FL
+> NL
+> S
+> NR
+> FR
+> OOV
+> 1.00 0.96 -0.27 -0.97 -0.87 0.25
+> 0.96 1.00 -0.00 -1.00 -0.97 -0.01
+> -0.27 -0.00 1.00 0.00 -0.25 -1.00
+> -0.97 -1.00 0.00 1.00 0.97 0.01
+> -0.87 -0.97 -0.25 0.97 1.00 0.26
+> 0.25 -0.01 -1.00 0.01 0.26 1.00
+> 1.00
+> 0.75
+> 0.50
+> 0.25
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Cosine Similarity
+
+Fig. S4: Pairwise cosine similarities between class means after pretraining. 
+
+FL=Far Left, NL=Near Left, S=Straight, NR=Near Right, FR=Far Right, OOV=Out-of-View. (a) NC-ETF fails to capture the natural relationships between navigation actions, treating classes as unrelated. (b) ORION: exhibits a clear ordinal structure: adjacent classes are similar, while opposing classes are anti-correlated. 
+
+the similarity matrix shown in Fig. S4. The Simplex ETF enforces a uniform pairwise cosine similarity of −1/(C−1) = −0.2 across all C=6 classes. NC-ETF fails to reach this target, as pairwise cosines range from −0.70 to +0 .16 with no clear relationship between semantic class distance and geometric similarity. For example, Far Left –Straight (−0.17 ) and Far Left –Far Right (−0.12 ) yield nearly identical values, despite encoding very different navigational relationships. ORION, by contrast, produces a monotonic ordinal structure where adjacent classes are similar and opposing classes are anti-correlated, consistent with the theoretical geometry for uniformly spaced class means along a one-dimensional axis. An interesting pattern emerges for the Out-of-View ( OOV ) class, which is excluded from the ordinal loss. Under ORION, OOV shows strong negative similarity with Straight (−1.00 ) while being positively similar to extreme turning classes. This behavior aligns with the navigation context, as the goal falls outside the field of view primarily when the robot needs to execute a sharp turn. Further qualitative analysis of the OOV class is provided in Sec. 2.2. 
+
+2.2 Linear Probe Analysis of Control Classes 
+
+To analyze how the learned representation relates to control decisions, we attach a linear probing head to the encoder features. The probe predicts the control class from the encoder features. This linear probe is used only for analysis and does not influence policy training. We visualize the predicted control classes together with the generated trajectories in Fig. S5. Classes 0–4 correspond to Far Right 
+
+to Far Left , while class 5 denotes the OOV case. Fig. S5(a) shows a sequence of inference results at an intersection. Consistent with the linear probe predicting 6 E. Son et al. (a) Linear probe of intersection 
+
+## t Goal 
+
+Goal 
+
+> (b) Linear probe of OOV situation
+
+Fig. S5: Linear probe analysis of ORION. Predicted trajectories and linear probe outputs are overlaid on the current observation. Classes 0–4 correspond to directions from Far Right to Far Left , and class 5 denotes OOV. (a) Intersection scenario. (b) OOV scenario. 
+
+right-turn classes (1 and 2), the generated trajectories repeatedly follow right-turn paths. Fig. S5(b) illustrates an OOV scenario where the goal image has little visual relationship with the current observation. In this case, the linear probe predicts class 5, and the generated trajectories correspondingly produce sharp turning motions. 
+
+## 3 Implementation Details 
+
+3.1 Stable Statistics Estimation and Gradient Flow 
+
+The ORION pretraining objectives depend on class means μk and within-class variances, which involve ratios of second-order statistics (Eq. 1) and axis estima-tion from K class centroids. These quantities are sensitive to sampling noise in individual mini-batches. A small perturbation in a single class mean can cause large fluctuations in CDNV denominators and abrupt rotations of the ordinal axis w. We address this with a dual-track design: running statistics for stable estimation, and current-batch computation for gradient flow. ORION 7
+
+Running statistics via Welford’s algorithm. We maintain per-class running means 
+
+¯μk, counts nk, and sums of squared deviations Sk using Welford’s online algo-rithm [2]. These are updated incrementally at each batch without storing his-torical features: 
+
+nk ← nk + 1 , δ = h − ¯μk, ¯μk ← ¯μk + δ/n k, Sk ← Sk + δ · (h − ¯μk). (1) These updates are performed with torch.no_grad() and serve as stable refer-ence values. They are not part of the computation graph. 
+
+Gradient flow through current-batch features. All loss terms (Eqs. 1, 3, 4 in the main paper) are computed from current-batch features ht = fθ (ot), which retain their computation graph. The running statistics ¯μk and ¯μ enter only as 
+
+detached constants : wherever a class mean or global mean appears in the loss computation, the running estimate is used with stopped gradients. Gradients thus flow exclusively through ht, updating the encoder parameters θ while the reference statistics remain stable across batches. 
+
+Axis smoothing. Additionally, the supervised ordinal axis w is smoothed via exponential moving average (EMA, β=0 .95 ) to prevent abrupt rotations from noisy class mean estimates. The axis is detached from the computation graph; gradients for Lorth flow through feature residuals, not through w itself. 
+
+3.2 Training Dynamics 
+
+Fig. S6 shows individual loss components during ORION’s Stage 1 pretraining. 0 5 10 15 20 25 30             
+
+> Epoch
+> 0
+> 5
+> 10
+> 15
+> 20
+> CDNV
+> 0510 15 20 25 30
+> Epoch
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> ORDINAL
+> 0510 15 20 25 30
+> Epoch
+> 0.0004
+> 0.0006
+> 0.0008
+> 0.0010
+> 0.0012
+> 0.0014
+> 0.0016
+> ORTH
+
+Fig. S6: Stage 1 pretraining dynamics. 
+
+3.3 Additional Qualitative Results 
+
+We provide additional qualitative analysis in Fig. S7 and Fig. S8. Sequential inference results show temporal consistency and stable goal-directed alignment in challenging intersections and narrow corridors. 8 E. Son et al. NoMaD ORION(Ours) 
+
+> t
+> NoMaD
+
+(a) Simulation (b) Real -world 
+
+t 
+
+> Goal Goal
+> ORION(Ours)
+
+Fig. S7: Qualitative comparison of sequential inference results at an inter-section. (a) Simulation. (b) Real-world. The green dot indicates the robot’s current position, while the red dot indicates the location of the given goal image. (a) NoMaD (Baseline) (b) ORION (Ours) 
+
+Fig. S8: Qualitative comparison along a real-world trajectory in a narrow corridor. (a) NoMaD. (b) ORION. The yellow and red lines denote the robot trajec-tory and sampled actions, respectively. ORION 9
+
+3.4 Deployment Setup 
+
+The robot platform used in our experiments is shown in Fig. S9. Clearpath Husky A200 
+
+> Zed2i Camera
+> NVIDIA Jetson AGX Orin
+
+Fig. S9: Real-world robot platform used in our experiments. The system uses an NVIDIA Jetson AGX Orin and a ZED 2i stereo camera (left RGB only), running the navigation model onboard at 3 Hz with an average speed of 0.5 m/s. Low-level control is performed by a PID controller with parameters consistently tuned across all baselines and environments. 
+
+## References 
+
+1. Qi, H., Yin, H., Yang, H.: Control-oriented clustering of visual latent representation. In: The Thirteenth International Conference on Learning Representations (2025), 
+
+https://openreview.net/forum?id=pPQPQ7Yd58 
+
+2. Welford, B.P.: Note on a method for calculating corrected sums of squares and products. Technometrics 4(3), 419–420 (1962)
