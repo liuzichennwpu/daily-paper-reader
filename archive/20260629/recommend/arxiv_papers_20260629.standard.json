@@ -1,0 +1,404 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-29T21:52:50.915627+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 3,
+    "deep_cap": 7,
+    "deep_selected": 3,
+    "quick_candidates": 6,
+    "quick_skim_target": 12,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2606.27871v1",
+      "source": "arxiv",
+      "title": "LocalNav: Distilling Frontier VLMs and Embodied RL for On-Device Object Goal Navigation",
+      "abstract": "Vision Language Models (VLMs) have emerged in the robotic domain as a powerful tool that enables environmental perception with language context, serving as a catalyst for open-vocabulary tasks like ObjectNav. Yet, their computational footprint typically confines them to cloud execution, hindering low-latency inference with local deployment on resource-constrained robots. To address this challenge, we present a distillation strategy that transfers complex spatial-semantic reasoning from large frontier models into a lightweight, 4B-parameter local VLM for edge execution on embedded GPU devices (e.g., Jetson Orin). We first establish a State of the Art (SotA), Scene Graph (SG)-based pipeline using Claude Sonnet 4.6, achieving a 39.7% Success Rate (SR) on the HM3D OVON benchmark. We then demonstrate that fine-tuning Qwen3.5-4B on just 500 frontier reasoning traces effectively enables navigation capabilities, yielding a SR of 34.5%, narrowing the gap to the performance of large cloud models. Finally, we introduce E-RLVR with Token Generation (TG) regularization to compress output sequence lengths for physical deployment while grounding the agent in its task. This downstream optimization reduces TG overhead by 72.1% and latency by 71.8%. Combined with quantization, this joint strategy yields a cumulative 82.8% reduction in overall inference latency without significantly sacrificing performance, presenting a viable paradigm for local, low-latency VLM execution on mobile robots.",
+      "authors": [
+        "Nicolas Baumann",
+        "Liam Boyle",
+        "Pu Deng",
+        "Edoardo Ghignone",
+        "Boyang Sun",
+        "Marc Pollefeys",
+        "Luca Benini",
+        "Michele Magno"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-06-26T09:11:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.27871v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "uses VLM for object goal navigation, directly transferable to UAV vision-language navigation",
+      "llm_evidence_cn": "使用视觉语言模型进行目标导航，方法可直接迁移至无人机视觉语言导航",
+      "llm_evidence": "使用视觉语言模型进行目标导航，方法可直接迁移至无人机视觉语言导航",
+      "canonical_evidence": "使用视觉语言模型进行目标导航，方法可直接迁移至无人机视觉语言导航",
+      "llm_tldr_en": "Distills frontier VLMs into a lightweight 4B model for on-device object goal navigation, achieving 39.7% success rate on robotic platforms.",
+      "llm_tldr_cn": "该论文针对具身智能中视觉语言模型计算开销大、难以本地部署的问题，提出将前沿大模型的空间语义推理能力蒸馏至轻量级本地VLM（4B参数），在Jetson Orin等边缘设备上实现低延迟目标导航。通过场景图管道和强化学习优化，在机器人平台上达到39.7%的成功率，为无人机等资源受限平台的视觉语言导航提供了可行的轻量化方案。",
+      "llm_tldr": "该论文针对具身智能中视觉语言模型计算开销大、难以本地部署的问题，提出将前沿大模型的空间语义推理能力蒸馏至轻量级本地VLM（4B参数），在Jetson Orin等边缘设备上实现低延迟目标导航。通过场景图管道和强化学习优化，在机器人平台上达到39.7%的成功率，为无人机等资源受限平台的视觉语言导航提供了可行的轻量化方案。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24786v2",
+      "source": "arxiv",
+      "title": "Counting Trees from Satellite Imagery with Noisy Supervision",
+      "abstract": "Counting individual trees is a fundamental task for environmental monitoring, yet remains largely unexplored with satellite imagery. At these resolutions, isolated trees may still be identifiable, but crown boundaries become ambiguous in dense forests, making the notion of an individual tree inherently ill-defined. Moreover, large-scale manual annotations of individual trees are prohibitively expensive. While scalable supervision can be derived from airborne LiDAR, the resulting annotations are noisy and difficult to exploit effectively.   We address these challenges by formulating tree counting as a spatial density matching problem supervised through Unbalanced Optimal Transport. This formulation naturally accommodates both precise localization of isolate trees and robust density estimation in dense forests. We further introduce a self-correction mechanism that leverages transport residuals to progressively refine noisy supervision during training.   We evaluate our approach on TinyTrees, a new benchmark spanning three continents and three satellite sensors, comprising over 216 million tree annotations (including 639k manually verified instances) across $25\\,890$ km$^2$. Our method consistently outperforms detection-based, regression-based, and transport-based distribution-matching baselines, demonstrating the effectiveness of unbalanced transport and reliability-aware supervision for large-scale tree counting from satellite imagery. Code, data and models are available at https://github.com/dgominski/treematch.",
+      "authors": [
+        "Dimitri Gominski",
+        "Maurice Mugabowindekwe",
+        "Qiue Xu",
+        "Xiaowei Tong",
+        "Martin Brandt",
+        "Hieu Le",
+        "Rasmus Fensholt",
+        "Dimitris Samaras",
+        "Loic Landrieu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-23T16:45:05+00:00",
+      "link": "https://arxiv.org/pdf/2606.24786v2",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "tree counting from satellite imagery",
+      "llm_evidence_cn": "卫星图像树木计数",
+      "llm_evidence": "卫星图像树木计数",
+      "canonical_evidence": "卫星图像树木计数",
+      "llm_tldr_en": "Formulates tree counting as a spatial density matching problem using Unbalanced Optimal Transport, handling noisy LiDAR-derived supervision.",
+      "llm_tldr_cn": "针对卫星图像中树木计数任务标注困难且LiDAR噪声大的问题，将计数建模为空间密度匹配问题，使用非平衡最优传输监督。该方法能同时处理稀疏和密集场景，在噪声标注下仍能有效学习。实验证明在多个卫星图像数据集上性能优于现有方法。",
+      "llm_tldr": "针对卫星图像中树木计数任务标注困难且LiDAR噪声大的问题，将计数建模为空间密度匹配问题，使用非平衡最优传输监督。该方法能同时处理稀疏和密集场景，在噪声标注下仍能有效学习。实验证明在多个卫星图像数据集上性能优于现有方法。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.28266v1",
+      "source": "arxiv",
+      "title": "RSICCLLM: A Multimodal Large Language Model for Remote Sensing Image Change Captioning",
+      "abstract": "Remote Sensing Image Change Captioning (RSICC) aims to describe changes between bi-temporal remote sensing images and holds significant research and application value. However, most existing methods rely on conventional deep learning architectures, and the limited model capacity constrains performance. Although large-model post-training techniques have achieved great success in general domains, their direct transfer to RSICC remains challenging due to data scarcity and the need for fine-grained change understanding. To address this, we propose RSICCLLM, the first post-training framework for large vision-language models in RSICC. Specifically, we design a data generation paradigm, release the instruction dataset RSICI, and establish a task-specific RSICC benchmark. We further introduce Difference-aware Supervised Fine-tuning to explicitly extract change representations and guide the model in perceiving and understanding temporal differences. In addition, we propose Dual-Negative Preference Optimization (DNPO), which employs two complementary negative-sample construction strategies to construct the preference dataset RSICP and further refine model performance. Extensive experiments validate the superior capability of RSICCLLM, which achieves outstanding results with only 7B parameters, surpassing models of substantially larger scales. The code and dataset will be made publicly available at https://github.com/keaill/RSICCLLM.",
+      "authors": [
+        "Yelin Wang",
+        "Zijia Song",
+        "Shuo Ye",
+        "Chuanguang Yang",
+        "Miaoyu Wang",
+        "Yong Xu",
+        "Zhulin An",
+        "Yongjun Xu",
+        "Zitong Yu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-26T16:57:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.28266v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal large language model for remote sensing change captioning",
+      "llm_evidence_cn": "遥感图像变化描述的多模态大语言模型",
+      "llm_evidence": "遥感图像变化描述的多模态大语言模型",
+      "canonical_evidence": "遥感图像变化描述的多模态大语言模型",
+      "llm_tldr_en": "Proposes RSICCLLM, a large vision-language model post-training framework for remote sensing image change captioning with instruction dataset.",
+      "llm_tldr_cn": "针对遥感图像变化描述中传统深度学习方法容量有限且大模型迁移困难的问题，提出首个基于大视觉语言模型的后训练框架RSICCLLM，设计数据生成范式和指令数据集RSICI，显著提升了变化描述的细粒度理解能力。",
+      "llm_tldr": "针对遥感图像变化描述中传统深度学习方法容量有限且大模型迁移困难的问题，提出首个基于大视觉语言模型的后训练框架RSICCLLM，设计数据生成范式和指令数据集RSICI，显著提升了变化描述的细粒度理解能力。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "remote sensing image analysis",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.25206v1",
+      "source": "arxiv",
+      "title": "RAVEN: Long-Horizon Reasoning & Navigation with a Visuo-Spatio-Temporal Memory",
+      "abstract": "Long-term robot deployment requires a compact and scalable memory that preserves fine-grained visual semantics, grounds observations in space and time, and enables efficient storage and retrieval. In this paper, we propose RAVEN, an agentic memory system for long-horizon robotic question answering and navigation. RAVEN stores visual embeddings with pose and time in a vector database, and grounds retrieval in a spatial map to answer queries and navigate to goals. By operating directly on visual embeddings, RAVEN avoids lossy image-to-text captioning and enables accurate semantic, spatial, and temporal retrieval at scale. Across several simulated and real-world video question-answering benchmarks, RAVEN consistently surpasses caption-based memory systems and matches frontier VLMs on long-horizon tasks at 10$\\times$ lower retrieval cost. Finally, we instantiate RAVEN on a Unitree Go1 robot for the task of long-horizon navigation for natural language goal-reaching, and show successful deployment over several large indoor environments.",
+      "authors": [
+        "Yixun Hu",
+        "Zhicheng Zheng",
+        "Lihan Zha",
+        "Chunwei Xing",
+        "Rajdeep Singh",
+        "Omar Hossain",
+        "Antonio Loquercio",
+        "Dhruv Shah"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-23T21:56:41+00:00",
+      "link": "https://arxiv.org/pdf/2606.25206v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "long-horizon robotic navigation with visuo-spatial-temporal memory",
+      "llm_evidence_cn": "基于视觉-空间-时间记忆的长时机器人导航",
+      "llm_evidence": "基于视觉-空间-时间记忆的长时机器人导航",
+      "canonical_evidence": "基于视觉-空间-时间记忆的长时机器人导航",
+      "llm_tldr_en": "RAVEN proposes an agentic memory system for long-horizon robotic navigation and QA that stores visual embeddings with pose and time in a vector database, enabling accurate semantic, spatial, and temporal retrieval without lossy captioning, surpassing caption-based memory on multiple benchmarks.",
+      "llm_tldr_cn": "针对长期机器人部署中记忆系统需要紧凑且可扩展的问题，RAVEN提出一种基于视觉嵌入的智能记忆系统，将视觉特征与位姿时间一起存储在向量数据库中，通过空间地图引导检索，避免了有损的图像转文本过程，在多个模拟和真实视频问答基准上超越基于标题的记忆方法，为导航和问答提供了高效通用的记忆解决方案。",
+      "llm_tldr": "针对长期机器人部署中记忆系统需要紧凑且可扩展的问题，RAVEN提出一种基于视觉嵌入的智能记忆系统，将视觉特征与位姿时间一起存储在向量数据库中，通过空间地图引导检索，避免了有损的图像转文本过程，在多个模拟和真实视频问答基准上超越基于标题的记忆方法，为导航和问答提供了高效通用的记忆解决方案。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.24068v1",
+      "source": "arxiv",
+      "title": "ObsGraph: Hierarchical Observation Representation for Embodied Reasoning and Exploration",
+      "abstract": "Embodied reasoning and exploration are increasingly considered crucial abilities for robots operating in complex and unfamiliar environments. To accomplish tasks in such settings, an agent must identify and acquire the information necessary for the task through exploration. We propose ObsGraph, an observation-centric hierarchical scene graph that unifies scene representation, retrieval, and exploration. It retains visual evidence and organizes it into room-view-object layers: rooms provide coarse semantic anchors, views preserve contextual object covisibility, and objects store fine-grained details. On top of this representation, we perform coarse-to-fine hierarchical retrieval under a bounded budget, and crucially use retrieval outcomes to structure the exploration candidate space--activating room-level exploration, view refinement, or frontier exploration--thereby tightly coupling representation, retrieval, and adaptive multi-scale exploration. Experiments across embodied reasoning and exploration benchmarks demonstrate improved success and efficiency, highlighting the benefits of structured scene representation and more targeted information gathering driven by identified evidence gaps.",
+      "authors": [
+        "Taekbeom Lee",
+        "Youngseok Jang",
+        "Jeonghwa Heo",
+        "Jeongjun Choi",
+        "H. Jin Kim"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "published": "2026-06-23T02:17:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.24068v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "hierarchical scene graph for embodied navigation and exploration",
+      "llm_evidence_cn": "用于具身导航和探索的层次化场景图",
+      "llm_evidence": "用于具身导航和探索的层次化场景图",
+      "canonical_evidence": "用于具身导航和探索的层次化场景图",
+      "llm_tldr_en": "ObsGraph proposes a hierarchical observation-centric scene graph for embodied agents, unifying scene representation, retrieval, and exploration with coarse-to-fine retrieval, enhancing navigation in unfamiliar environments.",
+      "llm_tldr_cn": "具身智能体在复杂环境中需要探索和获取信息。ObsGraph提出了一种以观测为中心的层次化场景图，将视觉证据组织为房间-视角-物体层，支持由粗到精的层次化检索，并利用检索结果指导探索。该方法在未知环境中提升了导航和推理能力，对无人机视觉语言导航中的场景理解和探索策略具有借鉴意义。",
+      "llm_tldr": "具身智能体在复杂环境中需要探索和获取信息。ObsGraph提出了一种以观测为中心的层次化场景图，将视觉证据组织为房间-视角-物体层，支持由粗到精的层次化检索，并利用检索结果指导探索。该方法在未知环境中提升了导航和推理能力，对无人机视觉语言导航中的场景理解和探索策略具有借鉴意义。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.26046v1",
+      "source": "arxiv",
+      "title": "RoboAtlas: Contextual Active SLAM",
+      "abstract": "We present RoboAtlas, a contextual Active SLAM framework that adaptively balances geometric exploration and semantic reasoning using a scalable 3D semantic mapping system, OpenRoboVox. RoboAtlas integrates frontier exploration, global semantic-map reasoning, and egocentric VLM-based reasoning through a contextual multi-armed bandit that transitions from exploration to semantically guided navigation as scene understanding improves. We evaluate the system in simulation and on a Unitree Go2 robot in large-scale real-world environments exceeding 1800 m2 with approx. 30k mapped semantic instances, achieving a 100% task success rate. On the GOAT-Bench \"Val Unseen\" benchmark, RoboAtlas achieves state-of-the-art performance with highest reported success rate (SR) of 90.6%, using GPT-4o, improving over the strongest prior baseline by 17.8 percentage points in SR. Using the much smaller Qwen2.5-VL-7B model, it still achieves 88.8% SR, outperforming all baselines using GPT-4o in SR, and revealing the importance of the information gained by our semantic mapping framework over simply replacing the underlying foundation model. The results demonstrate that grounding foundation models with large-scale 3D semantic maps enables robust and efficient contextual Active SLAM.",
+      "authors": [
+        "Alexander Schperberg",
+        "Shivam K. Panda",
+        "Abraham P. Vinod",
+        "M. K. Jawed",
+        "Stefano Di Cairano"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-06-24T17:26:07+00:00",
+      "link": "https://arxiv.org/pdf/2606.26046v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "VLM-based semantic reasoning for active SLAM, transferable to UAV navigation",
+      "llm_evidence_cn": "基于视觉语言模型的语义推理用于主动SLAM，方法可迁移至无人机导航",
+      "llm_evidence": "基于视觉语言模型的语义推理用于主动SLAM，方法可迁移至无人机导航",
+      "canonical_evidence": "基于视觉语言模型的语义推理用于主动SLAM，方法可迁移至无人机导航",
+      "llm_tldr_en": "Proposes RoboAtlas, a contextual active SLAM framework using VLM-based reasoning to balance exploration and semantic navigation, achieving high success rates.",
+      "llm_tldr_cn": "针对传统主动SLAM缺乏语义推理的问题，提出RoboAtlas框架，集成边界探索、全局语义地图推理和第一人称VLM推理，通过情境多臂赌博机动态调整探索与语义导航，在真实环境和大规模基准上达到100%任务成功率和90.6%成功率。",
+      "llm_tldr": "针对传统主动SLAM缺乏语义推理的问题，提出RoboAtlas框架，集成边界探索、全局语义地图推理和第一人称VLM推理，通过情境多臂赌博机动态调整探索与语义导航，在真实环境和大规模基准上达到100%任务成功率和90.6%成功率。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.28049v1",
+      "source": "arxiv",
+      "title": "AirGroundBench: Probing Spatial Intelligence in Multimodal Large Models under Heterogeneous Multi-View Embodied Collaboration",
+      "abstract": "In recent years, multimodal large language models (MLLMs) have shown strong potential for embodied intelligence, yet their ability to maintain geometrically consistent spatial understanding across heterogeneous views remains under-evaluated. Existing benchmarks largely focus on single-agent, single-view perception, leaving a gap in the systematic assessment of collaborative air-ground settings, where multi-scale observations are complementary but introduce scale mismatch, asymmetric occlusion, and reference-frame inconsistencies. We present AirGroundBench, a diagnostic benchmark for evaluating multi-view spatial intelligence in heterogeneous UAV-UGV collaboration. AirGroundBench is built from 11 high-fidelity simulated environments with 1,021 synchronized air-ground observation pairs, yielding approximately 62,000 dual-view, four-option single-choice visual question answering instances and 115 closed-loop vision-language navigation episodes. It covers 10 task types organized into four progressively demanding capability dimensions: spatial perception, cross-view alignment, spatial transformation and reasoning, and embodied decision-making. To support geometry-grounded evaluation and analysis, we provide structured spatial annotations, including cross-view object identities and metric 2D and 3D bounding boxes. Evaluations of 13 representative MLLMs under UAV-only, UGV-only, and dual-view input settings reveal consistent bottlenecks: models perform relatively well on spatial perception but struggle with cross-view alignment and transformation-intensive reasoning, and these deficits propagate to sequential decision-making in vision-language navigation. Although dual-view inputs provide measurable gains over single-view variants, a persistent gap from human performance remains, highlighting geometric consistency as a key limitation of current embodied MLLMs.",
+      "authors": [
+        "Haotian Li",
+        "Yida Wang",
+        "Leyuan Wang",
+        "Jinshan Lai",
+        "Keyang Wang",
+        "Zonghao Guo",
+        "Qiang Ma",
+        "Liuyu Xiang",
+        "Jianwei Hu",
+        "Zhaofeng He"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-26T12:51:22+00:00",
+      "link": "https://arxiv.org/pdf/2606.28049v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "keyword:rs-fusion",
+        "query:UAV-VLN",
+        "query:rs-fusion"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "benchmark for multimodal UAV-UGV collaboration with MLLMs",
+      "llm_evidence_cn": "多模态无人机-无人车协作的基准测试",
+      "llm_evidence": "多模态无人机-无人车协作的基准测试",
+      "canonical_evidence": "多模态无人机-无人车协作的基准测试",
+      "llm_tldr_en": "AirGroundBench evaluates multi-view spatial intelligence in heterogeneous UAV-UGV collaboration using multimodal large models; relevant to multimodal navigation for UAVs.",
+      "llm_tldr_cn": "针对现有基准只关注单智能体单视角感知，本文提出AirGroundBench，系统评估无人机-无人车协作中的多视角空间智能。该基准包含11个高真实度场景，涵盖尺度不匹配、非对称遮挡等挑战，为多模态大模型在异构协作中的应用提供诊断工具。虽不直接涉及语言指令，但支持多模态模型评估，与UAV多模态导航相关。",
+      "llm_tldr": "针对现有基准只关注单智能体单视角感知，本文提出AirGroundBench，系统评估无人机-无人车协作中的多视角空间智能。该基准包含11个高真实度场景，涵盖尺度不匹配、非对称遮挡等挑战，为多模态大模型在异构协作中的应用提供诊断工具。虽不直接涉及语言指令，但支持多模态模型评估，与UAV多模态导航相关。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "multimodal navigation using vision and language for UAV",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.27410v1",
+      "source": "arxiv",
+      "title": "DFM: Difference Feature Modeling with Text-Guided Gated Contrastive Loss for Remote Sensing Image Change Captioning",
+      "abstract": "The primary goal of Remote Sensing Image Change Captioning (RSICC) is to automatically generate descriptions of changes between remote sensing images captured at different time points. Existing models still rely on a single autoregressive generation paradigm, which tends to prioritize learning easily generated vocabulary over capturing discriminative differences between images. To address this, we reframe the training paradigm and propose a novel Difference Feature Modeling (DFM) framework. Specifically, we introduce a Text-guided Gated Contrastive Loss (TGCL) to guide the vision encoder to extract critical features from a text-modal perspective. Additionally, we incorporate a pre-trained Change Detection model to transfer stable change detection knowledge. In order to further enhance the representation, we design a Joint Feature Modeling (JFM) module to achieve the fusion of multi-scale difference representations, thereby capturing comprehensive spatiotemporal variations between multi-temporal images. Extensive experiments on multiple datasets demonstrate the effectiveness of our approach.",
+      "authors": [
+        "Yelin Wang",
+        "Zijia Song",
+        "Chuanguang Yang",
+        "Miaoyu Wang",
+        "Zhulin An",
+        "Libo Huang",
+        "Yongjun Xu"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV",
+        "cs.LG"
+      ],
+      "published": "2026-06-25T11:49:21+00:00",
+      "link": "https://arxiv.org/pdf/2606.27410v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multimodal fusion with text-guided contrastive loss for remote sensing",
+      "llm_evidence_cn": "遥感图像变化描述中的文本引导对比损失多模态融合",
+      "llm_evidence": "遥感图像变化描述中的文本引导对比损失多模态融合",
+      "canonical_evidence": "遥感图像变化描述中的文本引导对比损失多模态融合",
+      "llm_tldr_en": "Proposes a Difference Feature Modeling framework with text-guided gated contrastive loss for remote sensing image change captioning, enhancing discriminative feature extraction.",
+      "llm_tldr_cn": "针对遥感图像变化描述任务中现有模型缺乏判别性差异特征的问题，提出差异特征建模框架，引入文本引导门控对比损失，从文本模态视角指导视觉编码器提取关键特征，并结合预训练变化检测模块，提升了变化描述的准确性。",
+      "llm_tldr": "针对遥感图像变化描述任务中现有模型缺乏判别性差异特征的问题，提出差异特征建模框架，引入文本引导门控对比损失，从文本模态视角指导视觉编码器提取关键特征，并结合预训练变化检测模块，提升了变化描述的准确性。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "multimodal data fusion techniques",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.28039v1",
+      "source": "arxiv",
+      "title": "Mind the Gap: Quantifying the Domain Gap in Cross-Sensor Diffusion Super-Resolution",
+      "abstract": "Demand for high-resolution satellite imagery has increased interest in super-resolution (SR) to bridge the spatial resolution gap between freely available missions such as Sentinel-2 and commercial systems like PlanetScope. Because no sensor provides true paired low- and high-resolution observations, SR models are usually trained on synthetically degraded data, creating a domain gap on real cross-sensor imagery. In this work, we provide the first systematic study of how this synthetic-to-real mismatch affects the performance of modern diffusion-based SR models. Using a large, geometrically and temporally aligned dataset of Sentinel-2 and PlanetScope imagery, we evaluate five state-of-the-art diffusion architectures under controlled experimental settings. We also introduce LPIPS-Sat, a domain-adapted perceptual metric based on Sentinel-2 self-supervised features. Our results show two persistent challenges: synthetically trained models degrade sharply on real pairs, while models trained on real cross-sensor data exhibit optimisation difficulties and struggle to adapt to the physical and radiometric diversity. These findings highlight a key limitation of current SR and motivate methods that disentangle super-resolution from domain adaptation.",
+      "authors": [
+        "Dawid Kopeć",
+        "Katarzyna Jabłońska",
+        "Wojciech Kozłowski",
+        "Maciej Zięba"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-26T12:43:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.28039v1",
+      "tags": [
+        "keyword:rs-fusion",
+        "query:rs-fusion"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "quantifies domain gap in satellite super-resolution",
+      "llm_evidence_cn": "量化卫星超分辨率中的域差距",
+      "llm_evidence": "量化卫星超分辨率中的域差距",
+      "canonical_evidence": "量化卫星超分辨率中的域差距",
+      "llm_tldr_en": "Systematic study of synthetic-to-real mismatch in diffusion-based super-resolution for satellite imagery using Sentinel-2 and PlanetScope data.",
+      "llm_tldr_cn": "该论文针对卫星图像超分辨率中合成数据与真实数据之间的域差距问题，首次系统研究了现代扩散模型在跨传感器场景下的性能退化。利用大规模配准的Sentinel-2和PlanetScope数据集，评估了五种先进扩散架构，揭示了合成训练导致的泛化瓶颈，为遥感超分辨率模型部署提供了关键提示。",
+      "llm_tldr": "该论文针对卫星图像超分辨率中合成数据与真实数据之间的域差距问题，首次系统研究了现代扩散模型在跨传感器场景下的性能退化。利用大规模配准的Sentinel-2和PlanetScope数据集，评估了五种先进扩散架构，揭示了合成训练导致的泛化瓶颈，为遥感超分辨率模型部署提供了关键提示。",
+      "llm_tags": [
+        "query:rs-fusion"
+      ],
+      "matched_query_tag": "query:rs-fusion",
+      "matched_query_text": "satellite image processing",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
