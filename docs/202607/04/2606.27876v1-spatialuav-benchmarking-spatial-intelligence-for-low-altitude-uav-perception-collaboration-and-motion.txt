@@ -1,0 +1,687 @@
+Title: SpatialUAV: Benchmarking Spatial Intelligence for Low-Altitude UAV Perception, Collaboration, and Motion
+
+URL Source: https://arxiv.org/pdf/2606.27876v1
+
+Published Time: Mon, 29 Jun 2026 00:40:59 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 1
+
+# SpatialUAV: Benchmarking Spatial Intelligence for Low-Altitude UAV Perception, Collaboration, and Motion 
+
+Haoyu Zhang, Meng Liu, Member, IEEE , Qianlong Xiang, Kun Wang, Yaowei Wang, Member, IEEE , Liqiang Nie, Senior Member, IEEE 
+
+Abstract —Spatial intelligence is essential for low-altitude unmanned aerial vehicle (UAV) perception, collaboration, and navigation. However, existing UAV benchmarks often emphasize image-level recognition, single-view understanding, or narrow answer formats, leaving 3D spatial inference, multi-view collabo-ration, scene dynamics, and diverse task formulations insufficiently evaluated. To address these gaps, we introduce SpatialUAV, a real low-altitude UAV benchmark comprising 4,331 curated instances across 14 fine-grained task types, covering semantic discrimination, spatial relation, aerial–aerial collaboration, aerial– ground collaboration, and motion understanding. SpatialUAV organizes all samples into a unified visual-input–question–answer schema, while supporting seven input configurations and nine answer formats, including option labels, region identifiers, geo-metric values, cross-view correspondences, and free-form motion descriptions. To ensure reliable and grounded evaluation, our data construction pipeline integrates detector-assisted regions, depth supervision, metadata-derived rules, extensive manual annotation, blind filtering, and multi-turn human validation, together with task-specific metrics for heterogeneous outputs. Evaluating representative vision-language models across three categories, we show that current models remain far from human-level performance, with pronounced bottlenecks in cross-view asso-ciation, structured grounding, geometric reasoning, and temporal viewpoint understanding. These results offer empirical guidance for advancing low-altitude UAV spatial intelligence. Code and data are available at https://github.com/Hyu-Zhang/SpatialUAV. 
+
+Index Terms —Low-altitude UAV, spatial intelligence, bench-mark, multi-view collaboration. 
+
+I. I NTRODUCTION 
+
+# SPATIAL intelligence is central to multimodal artificial intelligence, robotics, and embodied perception, and it is especially important for unmanned aerial vehicles (UAVs) deployed in search and rescue, infrastructure inspection, logis-tics, environmental monitoring, and urban sensing [1]–[3]. For UAVs, recognizing scene content alone is insufficient. They must also infer target locations, distances, viewpoint changes, and feasible motion paths. These capabilities directly affect UAV navigation, collaboration, and decision making in complex physical environments [4], [5]. Despite its importance, existing spatial-intelligence research remains largely grounded in human-centered visual perspec-tives [6]. Recent benchmarks such as SpatialVLM [7] and VSI-Bench [8] have advanced metric, 3D, and video-based spatial evaluation, but they mainly rely on natural images, indoor scenes, object-centric viewpoints, or observations from human height. These settings do not adequately capture low-altitude UAV perception, where top-down or oblique views introduce perspective distortion, altitude-dependent scale variation, par-tial occlusion, and aerial–ground viewpoint mismatch [9]. Consequently, existing benchmarks remain insufficient for assessing spatial abilities that are critical in UAV scenarios, particularly cross-view understanding, spatial relation modeling, and navigation-oriented scene reasoning. More recently, several efforts [10], [11] have begun to extend spatial intelligence evaluation to urban and UAV-related scenarios. For instance, CityEQA [10] and Open3D-VQA [12] provide simulation-based evaluation platforms for city-scale embodied question answering and open 3D spatial reasoning, respectively, advancing research on spatial understanding in complex environments. SpatialSky-Bench [13] further moves toward real UAV navigation scenarios by evaluating spatial abilities such as bounding box recognition, distance and height perception, color understanding, and landing safety assessment. These benchmarks provide an important foundation for studying spatial intelligence in low-altitude platforms, and indicate a broader shift from conventional ground-level perspectives toward more challenging urban and UAV settings. Nevertheless, current UAV benchmarks still leave several important aspects insufficiently covered: ❶ Incomplete spatial reasoning. Many existing tasks remain centered on image-level recognition or caption generation, providing limited evaluation of deeper spatial inference. This is insufficient for low-altitude UAV scenarios, where observations are affected by strong perspective projection and complete 3D information is often unavailable, such settings require models to infer 3D spatial relations from limited 2D observations. ❷ Limited multi-view collaboration. A single UAV view is inherently restricted and often affected by occlusion, making collaborative perception essential for scalable low-altitude applications. However, existing benchmarks provide limited systematic eval-uation of cross-view association, aerial–ground alignment, and shared-region reasoning. ❸ Underexplored scene dynamics. 
+
+Temporal and action-related spatial abilities, including UAV-centric motion understanding and viewpoint-change modeling, are often separated from static scene understanding or omitted altogether. ❹ Simplified task formats. Existing benchmarks often rely on narrow input and output formats, whereas low-altitude UAV tasks are highly diverse and require evaluation over more complex input settings and structured answer forms. To address these limitations, we introduce SpatialUAV, a real low-altitude UAV benchmark with 4,331 curated instances spanning 14 task types. SpatialUAV jointly evaluates semantic discrimination, spatial relation, aerial–aerial collaboration, aerial–ground collaboration, and video-based UAV motion understanding under a unified visual-input–question–answer schema. With seven input configurations and nine answer for-mats, it provides a diagnostic evaluation of 3D spatial inference,  
+
+> arXiv:2606.27876v1 [cs.CV] 26 Jun 2026 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 2
+
+TABLE I COMPARISON BETWEEN SPATIAL UAV AND REPRESENTATIVE RELATED BENCHMARKS . #T ASKS DENOTES THE NUMBER OF EVALUATED TASK TYPES , 
+
+> WHILE
+
+#I NPUTS AND #O UTPUTS DENOTE THE NUMBER OF DISTINCT VISUAL -INPUT CONFIGURATIONS AND ANSWER FORMATS , RESPECTIVELY . A2A AND 
+
+A2G DENOTE AERIAL –AERIAL AND AERIAL –GROUND CROSS -VIEW EVALUATION , AND MOTION DENOTES UAV EGO -MOTION UNDERSTANDING .                                                                                                                        
+
+> Benchmark Visual Input Evaluation Scope #Tasks #Inputs #Outputs #Samples Grounding A2A A2G Motion
+> Indoor Spatial Benchmarks
+> ScanQA [14] Indoor scenes Object grounding / spatial relation 1114,976 ××××
+> SQA3D [15] Indoor scenes Situated reasoning / scene understanding 1113,519 ××××
+> VSI-Bench [8] Indoor videos Spatial memory / temporal reasoning 8125,131 ××××
+> ESI-Bench [16] Indoor scenes Active perception / embodied interaction 10 143,081 ××××
+> Low-Altitude UAV Benchmarks
+> UrbanVideo-Bench [9] UAV videos Urban perception / video reasoning 16 115,355 ××××
+> SpatialSky-Bench [13] UAV images Spatial perception / navigation safety 13 271,300 ✓×××
+> AirCopBench [17] UAV images Multi-UAV perception / collaborative reasoning 14 111,025 ×✓××
+> MM-UAVBench [18] UAV images/videos UAV perception / cognition and planning 19 315,702 ××××
+> UAVBench [19] UAV images Visual understanding / region-level grounding 10 2450K ✓×××
+> LinkS 2Bench [20] UAV-satellite images Cross-view localization / relation reasoning 12 1417.9K ✓×××
+> SpatialUAV (Ours) UAV images/videos Spatial reasoning / anomaly detection / multi-view collaboration / transformation 14 794,331 ✓✓✓✓
+
+cross-view grounding, and temporal motion understanding in real UAV scenarios. To ensure reliable and grounded evaluation, its annotations are constructed from detector-assisted regions, depth supervision, metadata-derived rules, and extensive manual labeling, followed by multi-turn human validation. We further evaluate 18 representative vision-language models (VLMs) across three categories, and conduct detailed analyses and validations to reveal key limitations and provide insights for future research on low-altitude UAV spatial intelligence. Our main contributions are summarized as follows:  
+
+> •
+
+We construct SpatialUAV, a real low-altitude UAV bench-mark with 4,331 curated instances and 14 fine-grained task types covering semantic discrimination, spatial relation, aerial–aerial collaboration, aerial–ground collaboration, and motion understanding.  
+
+> •
+
+We design a unified data construction pipeline for diverse UAV spatial reasoning settings, covering seven input configurations and nine answer formats, while integrating multi-source supervision, extensive manual annotation, and task-specific metrics for heterogeneous outputs.  
+
+> •
+
+Through evaluations of three categories of representative VLMs with additional analyses and validations, we reveal key limitations of current models and provide insights for future research on low-altitude UAV spatial intelligence. II. R ELATED WORK 
+
+A. Indoor Spatial Reasoning Benchmarks 
+
+Early spatial reasoning benchmarks have largely been developed in indoor or embodied settings. ScanQA [14] and SQA3D [15] formulate question answering over reconstructed 3D scenes, with an emphasis on object-level geometry, relative spatial layouts, and situated reasoning from agent-centered viewpoints. EgoThink [6] extends this line of evaluation to egocentric observations by assessing first-person perspective reasoning across perception, spatial understanding, and action planning. Recent video-based benchmarks further broaden the evaluation scope. VSI-Bench [8] examines whether VLMs can understand, memorize, and recall spatial layouts from video, while Cambrian-S [21] introduces VSI-SUPER to probe long-horizon spatial recall and continual counting beyond brute-force context expansion. MMSI-Video-Bench [22] provides a comprehensive evaluation of spatial perception, reasoning, planning, prediction, and cross-video understanding. More recently, ESI-Bench [16] closes the perception–action loop in simulated indoor environments by requiring embodied agents to actively acquire informative observations through perception, locomotion, and manipulation. Although these benchmarks are valuable for evaluating general spatial intelligence, they remain primarily grounded in indoor, human-height, or generic egocentric scenarios. As a result, they do not fully capture the distinctive viewpoints, scale variations, altitude-dependent observations, and operational demands of low-altitude UAVs. In contrast, SpatialUAV is built upon real UAV observations to evaluate spatial reasoning in aerial scenarios involving perception, collaboration, and navigation. 
+
+B. Low-Altitude UAV Benchmarks 
+
+One line of research extends embodied evaluation from indoor environments to open, city-scale scenarios, typically through high-fidelity simulation or simulator-supported data. EmbodiedCity [23] provides a realistic 3D urban platform for evaluating embodied agents in perception, planning, and interaction within complex city environments. CityEQA [10] combines active urban exploration with open-vocabulary ques-tion answering, requiring agents to reason over long-horizon, multi-view observations. UrbanVideo-Bench [9] evaluates recall, perception, reasoning, and navigation using continu-ous first-person drone videos collected from both real and simulated cities. Open3D-VQA [12] focuses on aerial 3D spatial reasoning from visual and point-cloud observations, while AirCopBench [17] introduces multi-drone collaborative perception and decision-making under challenging perceptual conditions. A second line of work more directly addresses UAV-specific visual understanding and operational reasoning [24]. SpatialSky-Bench [13] evaluates navigation-oriented spatial intelligence, including localization, distance and height estimation, and landing-safety assessment. MM-UAVBench [18] systematically assesses perception, cognition, and planning on real-world low-altitude UAV data. UAVBench and UAVIT-1M [19] further combine a large-scale real-image benchmark with instruction-tuning data for UAV-oriented VLMs. Another UAVBench [25] JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 3Region Recognition 
+
+> Which regions in the image
+> contain a streetlight?
+> Region 5, Region 6 and
+> Region 7
+
+Collaboration Recognition 
+
+> Which aerial UAV image was captured at the same
+> location as the ground image?
+> B
+
+Shared Association 
+
+> List all shared region pairs between the aerial image
+> and ground image.
+> 3-15, 4 -5, 2 -3, 7 -4, 0 -7, 6 -1
+
+View Translation 
+
+Collaboration Recognition 
+
+Global Motion  
+
+> This video is captured from a drone -mounted camera. Please describe, in temporal order, how the drone moves, how the camera angl e changes, and how the main object shifts
+> in the frame, ending with the final viewing focus.
+> The drone rotated to the left while maintaining a stable altitude, capturing residential buildings and landscaping, and final ly reached a new viewpoint slightly offset from its
+> starting position.
+
+Anomaly Detection 
+
+> Which regions exhibit
+> abnormal events?
+> Region 6
+
+Direction Recognition                  
+
+> With the front facing the 12
+> o'clock direction, in which
+> o'clock direction is the
+> target in Region 10 relative
+> to the drone?
+> 7 o'clock
+
+Distance Comparison 
+
+> Which region contains the
+> building that is located on the
+> far left of the drone?
+> Region 1
+> Select the region in the aerial image that is closest to
+> the capture location of the ground image.
+> Region 0
+
+Path Planning                        
+
+> If you are standing at the ground image capture
+> location, determine the direction you should move to
+> reach the red region shown in the aerial image
+> Direction 3
+> Which option can collaborate with the given UAV
+> viewpoint, i.e., capture imagery of the same area?
+> D
+
+Shared Association 
+
+> List all shared region pairs between the two UAV
+> images.
+> 6-11, 2 -9, 4 -12, 7 -10, 3 -5, 5 -1, 0 -7, 1 -15, 11 -16, 9 -14
+
+Object Matching 
+
+> Which bounding box in image2 corresponds to the
+> object at Region 0 in image1?
+> [823, 189, 932, 249]
+
+Camera Transformation                  
+
+> What are the aligned heading offset angle and
+> relative translation distance from Image 1to Image
+> 2’s target pose?
+> -160.0 degrees, -70.0 meters
+
+Occlusion Removal                   
+
+> Which region in image 2contains the object that
+> occludes the point -marked object in image 1?
+> Region 2
+> AB
+> CD
+> AB
+> CD
+
+Fig. 1. Representative examples from SpatialUAV. Colored panels denote different evaluation settings: single-image semantic and spatial reasoning, aerial–ground collaboration, aerial–aerial collaboration and viewpoint transformation, and video-based UAV motion understanding. 
+
+shifts the focus toward agentic mission reasoning through physically grounded and safety-validated flight scenarios with quantitative risk labels. LinkS 2Bench [20] connects dynamic UAV videos with static satellite imagery to evaluate wide-area cross-view spatial intelligence. SpatialUAV complements these efforts by providing a diag-nostic evaluation grounded in real low-altitude UAV observa-tions. Unlike benchmarks centered on a single viewpoint, static scene understanding, or isolated operational tasks, SpatialUAV jointly evaluates fine-grained spatial geometry, aerial–aerial and aerial–ground collaboration, and UAV-centric motion reasoning. It therefore targets UAV-specific spatial capabilities that remain fragmented or underrepresented in existing benchmarks. III. B ENCHMARK CONSTRUCTION 
+
+Fig. 1 illustrates the task coverage of SpatialUAV. We formulate each task instance as a tuple (V, τ, q, y ∗), where 
+
+V = (I1, . . . , I K ) is the ordered visual input, τ ∈ T
+
+denotes one of the 14 task types, q is the task-specific question or instruction, and y∗ ∈ Y τ is the canonical answer. Here K ∈ { 1, 2, 5, 16 } covers single images, paired views, candidate-view selection, and video frames, respectively. Fig. 2 summarizes the construction pipeline. Starting from a large collection of low-altitude UAV images, videos, and metadata, we design task-specific construction procedures for different spatial reasoning abilities, standardize all samples into a unified format, and perform multi-turn human and model-assisted validation. As shown in Table I, the resulting SpatialUAV JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 41
+
+Data Collection 
+
+> Images and metadata
+> from UAV datasets
+
+2
+
+Task Synthesis 
+
+> Manual & rule -guided
+> sample Annotation
+
+3
+
+Standardization 
+
+> Standardized
+> I–Q–A format
+
+4
+
+Blind Filtering 
+
+> Text -only blind
+> filtering
+
+5
+
+Hybrid Validation   
+
+> Human and model -
+> assisted review
+
+★
+
+Final Output   
+
+> Curated SpatialUAV
+> benchmark
+> AirCopBench
+> MAVREC
+> AirScape
+> BEDI
+> University -1652
+> ……
+> List all shared region pairs
+> between the two UAV images.
+> 3-2, 2 -1, 0 -4, 5 -14
+> 4,331
+> Instance s14
+> tasks Textual prompt
+
+Fig. 2. Overall construction pipeline of SpatialUAV. In the task synthesis step, each instance is constructed by organizing task-specific visual inputs, designing the corresponding question, and annotating the ground-truth answer. 30.4%    
+
+> Single Image
+> Multiple Image
+> 69.6%
+> 13.8%
+> Semantic Disc .
+> 16.5%
+> Spatial  Rel .
+> Air -Air Collab.
+> 28.4%
+> Air -Ground Collab.
+> 18.1%
+> 23.1%
+> Motion  Understand .
+> 13.4%
+> Reg. Rec.
+> 0.4%
+> Anom.
+> 10.5%
+> Dir. Rec.
+> 6.0%
+> Dist .
+> Comp .
+> Collab.  Rec.
+> 9.7%
+> Shared
+> Assoc.
+> 1.7%
+> Obj.
+> Match
+> 4.9%
+> Cam .Trans .
+> 10.6%
+> Occ.
+> Rem.
+> 1.4%
+> Shared
+> Assoc.
+> 1.5%
+> Collab . Rec .
+> 11.5%
+> View
+> Trans.
+> 1.8%
+> Path
+> Plan.
+> 3.3%
+> 23.1%
+> Global  Motion
+
+Fig. 3. Task distribution of SpatialUAV. The inner ring shows the major reasoning groups, and the outer ring reports the fine-grained task categories. 
+
+exhibits advantages over existing benchmarks in task scope, input configurations, and answer formats. 
+
+Data Collection. We first conduct a comprehensive survey of existing low-altitude UAV resources and select five data sources that support the requirements of our task taxonomy: BEDI [26], AirCopBench [17], MAVREC [27], AirScape [28], and University-1652 [29]. From these sources, we curate UAV images, videos, and associated metadata, while pre-serving supervision-relevant information, including source labels, paired-view correspondences, scene identifiers, temporal ordering, and available camera or trajectory annotations. 
+
+Task Synthesis. The second stage converts the collected data into task-specific image–question–answer instances. For each task, we define the visual input format, question construction strategy, and answer source. Detailed task-level statistics are provided in Table II. 
+
+1) Visual Input Format: We adopt several visual input for-mats to accommodate different spatial reasoning requirements. For region-level tasks, the input images are annotated with 0 200 400 600 800 1000 1200 
+
+> Number of instances
+> Region Label
+> Free-form Text
+> Option Letter
+> Clock Direction
+> Angle-Distance Pair
+> Direction Label
+> Region Pair List
+> Bounding Box
+> Angle Value
+> 1,105 (25.5%)
+> 1,000 (23.1%)
+> 920 (21.2%)
+> 455 (10.5%)
+> 400 (9.2%)
+> 144 (3.3%)
+> 140 (3.2%)
+> 106 (2.4%)
+> 61 (1.4%)
+
+Answer Format Distribution 
+
+Fig. 4. Answer-format distribution of SpatialUAV. The histogram reports the number and proportion of instances for each canonical answer format. 
+
+bounding boxes and neutral region identifiers, such as Region 0. The original category labels and box-to-region mappings are hidden from the model and used only for supervision, as in Region Recognition and Object Matching. For tasks in which visible annotations may introduce shortcut cues or bias cross-view matching, such as Collaboration Recognition and Camera Transformation, we use clean images without overlays. For tasks requiring additional spatial cues, such as Occlusion Removal and Path Planning, annotators provide task-specific boxes or path-related marks. For temporal reasoning, Global Motion uses ordered video frames. 
+
+2) Question Construction: Questions are constructed using three strategies. First, template-based questions instantiate object labels, region identifiers, bounding boxes, or candidate options into predefined prompts. This strategy is used for tasks such as Region Recognition, Direction Recognition, Distance Comparison, and Object Matching. Second, fixed questions are used when the query form is stable across samples, as in Anomaly Detection, Shared Association, Camera Transformation, and Global Motion. Third, manually written questions are used when the task depends on scene-specific context, particularly for Path Planning and selected Occlusion Removal cases. 
+
+3) Answer Construction: Answers are generated from the most reliable supervision available for each task. Rule-based answers are obtained from source metadata, detector-to-region JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 5 
+
+> TABLE II SETTING -SPECIFIC TASK DESIGN SUMMARY OF SPATIAL UAV.
+
+Group Task Type Description Image Format Question Design Answer Source Semantic Discrimination 
+
+Region Recognition Find region ID(s) for a queried object. Detected image Template: object label Rule: label–region ID map Anomaly Detection Identify abnormal or safety-critical regions. Detected image Fixed Manual 
+
+Spatial Relation 
+
+Direction Recognition Predict drone-relative direction. Detected image Template: region ID Rule: clock direction Distance Comparison Compare closer/farther marked regions. Detected image Template Rule: Metric3D depth 
+
+Aerial–Aerial Collaboration 
+
+Collaboration Recognition Select the matched UAV view. Clean image Fixed choice Rule: paired-view match Shared Association Mark shared regions between two views. Detected image Fixed Manual Object Matching Match a target by bbox or region ID. Detected image Templates: bbox ↔
+
+region ID Rule: detector boxes + shared labels Camera Transformation Infer heading offset and relative translation. Clean image Fixed Rule: camera/trajectory metadata Occlusion Removal Recover targets hidden in one view. Annotated pair image Manual Manual 
+
+Aerial–Ground Collaboration 
+
+Shared Association Mark shared aerial–ground regions. Detected image Fixed Manual Collaboration Recognition Select the matched aerial/ground view. Clean image Template choice Rule: cross-view match View Translation Translate ground position across views. Detected image Fixed Manual Path Planning Decide ground movement direction. Annotated UAV + ground path Manual Manual 
+
+Motion Understanding 
+
+Global Motion Describe UAV/camera motion over time. Video frames Fixed Manual 
+
+mappings, paired-view correspondences, verified associations, and camera or trajectory metadata. This strategy is used for tasks such as Region Recognition, Collaboration Recognition, Object Matching, and Camera Transformation. Depth-related answers are computed from regional Metric3D [30] estimates and further checked during validation, as in Distance Com-parison. Manual annotation is used for judgments that are difficult to derive automatically, including anomaly localization, shared cross-view correspondences, occlusion recovery, view translation, path-planning directions, and free-form motion descriptions. Examples of these diverse answer formats are shown in Fig. 1. 
+
+Standardization. This stage serializes all synthesized sam-ples into a unified record schema for evaluation and release. Each record contains the image or frame paths, task identifier, question, source tag, and ground-truth answer. Although the tasks differ in visual input formats and answer types, the standardized schema retains their task-specific outputs, including option letters, region identifiers, region-pair lists, bounding boxes, heading offsets, translation distances, direction labels, and free-form motion descriptions. 
+
+Blind Filtering. To remove samples with textual short-cuts, we perform blind filtering using DeepSeek-V4-Pro and Qwen3.6-27B 1. Each model receives only the textual prompt, 
+
+> 1https://huggingface.co/Qwen/Qwen3.6-27B.
+
+without access to any visual input. If either model answers a sample correctly from text alone, the sample is removed, since the question wording or option design may reveal the answer. This filtering step helps ensure that retained samples require visual spatial reasoning rather than reliance on language priors, dataset biases, or formatting artifacts. 
+
+Hybrid Validation. We conduct two rounds of validation to ensure annotation quality. The first round consists of exhaustive human cross-validation, in which annotators inspect the visual input, question wording, answer format, and ground-truth label for every sample. Any disagreement is resolved through manual review. The second round performs targeted model-assisted validation. Specifically, we evaluate three representative models, Qwen3-VL-30B [31], Qwen3.6-35B, and InternVL3.5-38B [32], on the complete set of visual samples. Samples for which all three models produce the same prediction that conflicts with the ground truth are reopened for human review. Through this two-stage validation protocol, we remove ambiguous, inconsistent, or potentially mislabeled samples and retain only instances that pass all quality checks. 
+
+Statistical Analysis. The resulting SpatialUAV dataset contains 4,331 curated instances spanning four reasoning settings and 14 fine-grained tasks: 1,315 single-image samples, 1,231 aerial–aerial samples, 785 aerial–ground samples, and 1,000 video-motion samples. The full task distribution is shown in Fig. 3. In addition to task diversity, SpatialUAV includes JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 6
+
+TABLE III PERFORMANCE OF REPRESENTATIVE MODELS ON OUR SPATIAL UAV. RR: R EGION RECOGNITION ; AD: A NOMALY DETECTION ; DR: D IRECTION 
+
+RECOGNITION ; DC: D ISTANCE COMPARISON ; CR: C OLLABORATION RECOGNITION ; SA: S HARED ASSOCIATION ; OM: O BJECT MATCHING ; CT: C AMERA 
+
+TRANSFORMATION ; OR: O CCLUSION REMOVAL ; VT: V IEW TRANSLATION ; PP: P ATH PLANNING ; GM: G LOBAL MOTION . B EST AND SECOND -BEST MODEL RESULTS ARE SHOWN IN BOLD AND UNDERLINED , RESPECTIVELY . ∗ DENOTES RESULTS ON THE RANDOMLY SAMPLED 20% PER -TASK SUBSET .
+
+Single Image Multiple Image Method Rank Avg Semantic Spatial aerial–aerial aerial–ground Motion RR AD DR DC CR SA OM CT OR SA CR VT PP GM 
+
+Human Level ∗ – 89.0 99.3 100 95.4 97.6 99.5 92.9 85.6 40.2 98.3 92.7 97.8 98.2 96.4 89.1 Random Choice – 14.4 8.0 17.7 7.5 9.2 26.9 0.8 1.4 0.9 25.4 1.0 22.6 5.3 14.6 24.1 
+
+Closed-source Models 
+
+GPT-5.4 ∗ - 50.2 40.6 33.3 47.3 48.1 86.9 8.6 4.8 7.6 41.7 18.4 77.0 40.0 50.0 64.8 GPT-5.4 1 56.7 56.7 64.7 50.6 53.6 92.6 32.8 28.8 8.2 49.2 44.2 79.8 54.0 45.8 66.6 
+
+Gemini-3.1-Flash 4 45.9 72.1 76.5 53.6 64.4 46.9 31.6 6.1 7.2 36.5 41.2 65.2 60.5 54.9 37.6 Claude-Opus-4-7 2 51.3 71.3 64.7 39.1 60.2 85.7 26.2 22.2 5.4 22.2 0.0 80.4 0.0 51.4 51.9 
+
+Spatial-Specific Models 
+
+SpatialVLM 13 25.7 30.8 5.9 8.4 32.6 26.7 5.1 9.0 8.0 20.6 8.4 24.6 38.2 4.2 46.3 SenseNova-SI-1.1-InternVL3-8B 16 22.2 45.3 5.9 7.9 40.6 26.2 5.1 4.2 3.5 44.4 1.2 38.6 13.2 25.0 14.7 SenseNova-SI-1.2-InternVL3-8B 14 24.5 41.1 2.9 7.9 43.3 43.3 5.3 5.7 1.9 44.4 0.3 45.2 9.2 18.1 17.7 SenseNova-SI-1.3-InternVL3-8B 17 21.0 50.0 5.9 6.4 36.8 26.0 6.6 8.5 1.0 41.3 0.9 31.0 7.9 0.0 16.6 Spatial-VLM-4B 18 20.9 34.0 14.7 0.0 37.2 27.1 1.1 4.3 0.0 22.2 0.0 24.4 14.5 0.0 25.4 Cambrian-S-7B 15 24.1 11.4 11.8 12.8 40.2 24.3 1.1 1.4 0.0 23.8 1.7 26.4 10.5 19.4 42.7 VST-7B-SFT 9 29.7 47.1 8.8 9.9 47.5 15.5 2.4 3.8 7.7 46.0 2.1 23.4 10.5 20.8 54.4 SpaceEra 12 27.3 42.8 6.4 8.1 43.6 40.8 5.8 6.7 3.0 43.7 1.3 42.2 12.9 20.2 30.1 SpaceEra++ 11 28.2 43.6 6.1 8.7 44.3 41.7 6.2 6.3 3.3 44.4 1.6 43.1 13.8 19.7 31.9 
+
+Open-source Models 
+
+Qwen2.5-7B 10 28.4 38.9 5.9 18.5 40.2 22.1 4.4 11.8 7.1 20.6 18.1 26.4 29.0 6.9 46.9 Qwen3.5-9B 5 42.5 70.0 64.7 51.0 66.3 37.9 11.1 7.1 6.2 33.3 21.7 37.0 64.5 36.1 48.4 Qwen3.6-27B ∗ - 49.8 66.4 66.7 62.6 71.2 60.7 5.7 9.5 9.8 25.0 34.8 61.0 66.7 46.4 50.2 Qwen3.6-27B 3 49.5 66.2 76.5 60.4 69.7 61.9 24.7 9.0 7.4 33.3 36.5 58.2 47.4 54.9 50.5 Qwen3.6-35B-A3B 6 37.3 54.6 17.7 51.9 65.5 19.5 16.8 10.4 0.9 30.2 30.1 34.8 50.0 28.5 47.7 InternVL3.5-8B 7 30.8 44.6 11.8 13.9 50.6 26.2 6.2 6.1 7.4 20.6 9.9 35.4 22.4 6.9 49.1 InternVL3.5-14B 8 30.4 39.0 5.9 22.6 49.4 21.9 4.6 5.2 4.7 22.2 7.5 18.6 18.4 34.0 55.3 Semantic     
+
+> Discrimination
+> Spatial
+> Relation
+> Aerial-Aerial
+> Collaboration
+> Aerial-Ground
+> Collaboration
+> Motion
+> Understanding
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Macro-average score (%)
+> 99.7
+> 96.5
+> 83.3
+> 96.3
+> 89.1
+> 60.7
+> 52.1
+> 42.3
+> 56.0
+> 66.6
+> 68.0
+> 49.7
+> 32.3
+> 33.0
+> 51.9
+> 71.3
+> 65.0
+> 27.3
+> 49.2
+> 50.5
+> 12.8
+> 8.3
+> 11.1
+> 10.9
+> 24.1
+> Human Level GPT-5.4 Claude-Opus-4-7 Qwen3.6-27B Random Choice
+
+Fig. 5. Macro-average performance across SpatialUAV reasoning groups. Each group score is computed by averaging the task-level scores within the corresponding reasoning group. 
+
+nine canonical answer formats, as summarized in Fig. 4. These formats range from discrete labels and region references to geometric values, correspondence lists, bounding boxes, and free-form motion descriptions. Overall, SpatialUAV provides diversity in both task type and answer structure, enabling the evaluation of VLMs across recognition, grounding, geometric reasoning, cross-view association, planning-oriented decision making, and temporal spatial understanding. IV. E VALUATION ON SPATIAL UAV 
+
+A. Evaluation Setup 1) Benchmark Models: To comprehensively evaluate spatial reasoning in low-altitude UAV scenarios, we reported human-level performance as an upper reference and random-choice performance as a lower baseline. We further evaluated repre-sentative VLMs from three categories, following the grouping in Table III:  
+
+> •
+
+Closed-source models : GPT-5.4 2, Gemini-3.1-Flash 3, and Claude-Opus-4-7 4. 
+
+> •
+
+Spatial-specific models : SpatialVLM [7], SenseNova-SI-1.1-InternVL3-8B [33], SenseNova-SI-1.2-InternVL3-8B [33], SenseNova-SI-1.3-InternVL3-8B [33], Spatial-VLM-4B [34], Cambrian-S-7B [21], VST-7B-SFT [35], SpaceEra [36], and SpaceEra++ [37].  
+
+> •
+
+Open-source models : Qwen2.5-7B [38], Qwen3.5-9B 5,Qwen3.6-27B, Qwen3.6-35B-A3B, InternVL3.5-8B [32], and InternVL3.5-14B [32]. All models are evaluated on the full SpatialUAV annotation file using identical question prompts and visual inputs. We used 
+
+> 2
+
+https://platform.openai.com/docs/models. 
+
+> 3
+
+https://ai.google.dev/gemini-api/docs/models. 
+
+> 4
+
+https://platform.claude.com/docs/en/about-claude/models/overview. 
+
+> 5
+
+https://huggingface.co/Qwen/Qwen3.5-9B. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 7                
+
+> TABLE IV HIGH -RESOLUTION INPUT ABLATION ON DIRECTION RECOGNITION (DR)
+> AND AERIAL –GROUND SHARED ASSOCIATION (A2G-SA). O RIG .DENOTES THE SCORES REPORTED IN TABLE III, WHILE HIGH -R ES DENOTES INFERENCE WITH ENLARGED IMAGE -TOKEN BUDGETS .∆REPORTS THE ABSOLUTE SCORE CHANGE FROM ORIG .TO HIGH -R ES .
+
+Method DR A2G-SA Orig. High-Res ∆ Orig. High-Res ∆
+
+SpatialVLM 8.4 8.4 0.0 8.4 5.5 2.9 ↓
+
+Cambrian-S-7B 12.8 12.7 0.1 ↓ 1.7 2.0 0.3 ↑
+
+VST-7B-SFT 9.9 14.9 5.0 ↑ 2.1 5.0 2.9 ↑
+
+SpaceEra++ 8.7 10.5 1.8 ↑ 1.6 3.7 2.1 ↑
+
+Qwen3.6-27B 60.4 58.9 1.5 ↓ 36.5 25.8 10.7 ↓   
+
+> TABLE V ANSWER -FORMAT -LEVEL DIAGNOSTIC PERFORMANCE ON SPATIAL UAV. WITHIN EACH SCORE COLUMN ,BOLD AND UNDERLINE INDICATE THE HIGHEST AND LOWEST ANSWER -FORMAT SCORES ,RESPECTIVELY .
+
+Answer Format GPT-5.4 Claude-Opus-4-7 Qwen3.6-27B Avg 
+
+Region Label 52.0 56.3 59.4 55.9 Free-form Text 66.6 51.9 50.5 56.3 Option Letter 85.7 82.8 59.9 76.1 
+
+Clock Direction 50.5 39.1 60.4 50.0 Angle-Distance Pair 4.5 6.7 2.3 4.5 Direction Label 45.8 51.4 54.9 50.7 Region Pair List 38.1 14.1 30.2 27.5 Bounding Box 36.8 20.8 0.0 19.2 Angle Value 32.8 39.3 41.0 37.7 
+
+deterministic decoding with temperature set to 0 and top-p
+
+set to 1.0. The maximum output length is set to 512 tokens for API-hosted models and most local models, 256 tokens for SpatialVLM, and 1,280 tokens for VST-7B-SFT. Human performance is measured on a randomly sampled 20% subset from each task, comprising 863 samples across 14 task types. Random-choice baselines are generated using a task-specific random prediction script and evaluated with the same metrics as model outputs. All experiments are conducted on 8 NVIDIA A100 GPUs. 
+
+2) Metric Design: As summarized in Fig. 4, SpatialUAV includes nine answer formats, ranging from discrete labels and region identifiers to correspondence lists, bounding boxes, geometric values, and free-form motion descriptions. We first parsed each prediction into the task-specific canonical format. Each sample is assigned a normalized score si ∈ [0 , 1] , and each task score in Table III is reported as: 
+
+100 × N −1 X
+
+> i
+
+si, (1) where N denotes the number of test instances for the task.  
+
+> •
+
+Discrete labels and region IDs. Option letters, clock directions, path-planning labels, and single-region outputs are evaluated by exact matching: 
+
+si = 1[ˆ y = y], (2) where ˆy and y denote the parsed prediction and ground-truth canonical label, and 1[·] is the indicator function. For multi-region outputs, such as Region Recognition and Anomaly Detection, we used conservative partial credit: 
+
+si =
+
+(
+
+0, | ˆY | > |Y |,
+
+| ˆY ∩ Y |/|Y |, otherwise , (3) where ˆY and Y are the predicted and ground-truth region sets, | · | denotes set size, and ∩ denotes set intersection.  
+
+> •
+
+Region-pair correspondences. For Shared Association, predictions are parsed into region-pair correspondences. We computed the pair-level F1 score as: 
+
+si = F1 = 2P R P + R , P = m
+
+| ˆP| , R = m
+
+|P| , (4) where ˆP and P are the predicted and ground-truth correspondence sets, m is the number of matched pairs.  
+
+> •
+
+Bounding boxes. For bounding-box outputs, we combined overlap, center consistency, and size consistency: 
+
+( c = 0 .5 IoU + 0 .25 cctr + 0 .25 csize ,si = 1[c ≥ τbbox ], (5) where c is the composite bounding-box score, IoU 
+
+measures overlap, and τbbox = 0 .5 is the acceptance threshold. The center and size consistency terms are computed as: 
+
+
+
+cctr = max 
+
+
+
+0, 1 − ∥ˆp − p∥2
+
+√w2 + h2
+
+
+
+,csize = 12
+
+min( ˆ w, w )max( ˆ w, w ) + min( ˆh, h )max( ˆh, h )
+
+!
+
+,
+
+(6) where ˆp and p denote the predicted and ground-truth box centers, ( ˆ w, ˆh) and (w, h ) denote their widths and heights, and the center distance is normalized by the ground-truth box diagonal.  
+
+> •
+
+Geometric values. For camera transformation, predictions are parsed as either an angle-only answer or an angle– distance pair. We computed the circular heading error and absolute translation error as: 
+
+(
+
+∆θ = min( |ˆθ0 − θ0|, 360 − | ˆθ0 − θ0|),
+
+∆r = |ˆr − r|, (7) where ˆθ0 and θ0 are the predicted and ground-truth heading offsets normalized to [0 , 360) , and ˆr and r are the predicted and ground-truth relative translations in meters. The final score is: 
+
+si =
+
+(
+
+1[∆ θ ≤ τθ ], angle -only ,
+
+1[∆ θ ≤ τθ ∧ ∆r ≤ τr ], angle -distance , (8) where τθ = 10 ◦ and τr = 10 meters are the acceptance thresholds.  
+
+> •
+
+Free-form descriptions. For Global Motion, we evaluated semantic similarity between the prediction ˆt and reference description t:
+
+si = LLM Sim(ˆ t, t ), (9) where LLM Sim is the semantic similarity score in [0 , 1] 
+
+computed by a GPT-5.4-mini 6 judge.                                                     
+
+> 6https://platform.openai.com/chat/edit?models=gpt-5.4-mini. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 8A2G Shared Association
+> List all shared region pairs between the aerial image
+> and ground image.
+> A2A Object Matching A2A Camera Transformation
+> What are the aligned heading offset angle and
+> relative translation distance from Image 1to Image
+> 2’s target pose?
+> GPT -5.4 :174.0 degrees ,39.0 meters
+> Qwen3.6 -27B :180.0 degrees ,0.0 meters
+> Human :180.0 degrees ,75.0 meters
+> GT :180.0 degrees ,67.5 meters
+> Which bounding box in image2 corresponds to the
+> object at Region 0 in image1?
+> GPT -5.4 :[575, 765, 642, 804]
+> VST -7B -SFT :[1001, 171, 1107, 252]
+> SpaceEra ++ :[611, 551, 761, 612]
+> GT :[592, 781, 655, 814]
+> GPT -5.4 :0-0,1-1,3-3,6-2
+> VST -7B -SFT :1-2,2-1,3-3,4-4,5-5,6-6
+> Qwen3.6 -27B :0-0,1-1,2-2,3-3
+> GT :3-3, 0 -0, 1 -1, 7 -2
+> 0.00
+> 0.00
+> 1.00
+> 1.00
+> 0.00
+> 0.00
+> 0.75
+> 0.20
+> 0.75
+> Fig. 6. Qualitative cases on representative SpatialUAV tasks. The examples cover aerial–aerial camera transformation, aerial–aerial object matching, and aerial–ground shared association. Green and red text indicate correct and incorrect answer components, respectively, and the score on the right of each prediction is computed using the corresponding task-specific metric.
+
+B. How Far Are Models from Human-Level UAV Spatial Intelligence? 
+
+Table III shows that current VLMs remain substantially below the human reference on UAV spatial reasoning. Human performance reaches 89.0% on average, whereas the best-performing model, GPT-5.4, achieves 56.7%. Among open-source models, Qwen3.6-27B obtains the highest average score of 49.5%. Although closed-source models generally rank higher, their advantage is not consistent across all tasks, indicating that model scale and proprietary training do not uniformly translate into robust UAV spatial intelligence. Fig. 5 further summarizes performance across reasoning groups. Models perform relatively better on semantic discrimi-nation and simple spatial relations, but the gap becomes more pronounced when cross-view or cross-platform collaboration is required. In particular, even the best aerial–ground collaboration score reaches only 56.0%. These tasks require models to align observations across viewpoints, recover shared regions, and reason about viewpoint transformations, rather than merely recognizing visible objects. The first case in Fig. 6 provides an intuitive example: although some models predict a plausible heading offset, errors in the relative translation still lead to failure under the camera-transformation metric. Temporal motion understanding is also challenging, as models must integrate ordered UAV frames to infer coherent camera and target motion. Overall, the dominant bottlenecks lie in cross-view association, viewpoint transformation, and temporal motion reasoning. Current VLMs remain substantially below the human reference in UAV spatial reasoning, with the largest gaps observed in cross-view association, viewpoint transformation, and temporal motion reasoning. 
+
+C. Do Spatial-Specific Models Actually Transfer to Low-Altitude UAV Views? 
+
+Table III shows that spatial-specific pretraining does not reliably transfer to low-altitude UAV views. The best spatial-specific model, VST-7B-SFT, achieves only 29.7% on average, substantially below GPT-5.4 at 56.7%. This limitation is particu-larly evident on UAV-specific geometric tasks. For example, the highest spatial-specific score on Direction Recognition is only 12.8%. Although some spatial-specific models exhibit isolated strengths on occlusion removal or motion description, these gains do not translate into robust aerial geometry or cross-view correspondence. The second case in Fig. 6 further illustrates this transfer gap: spatial-specific models fail to localize the matched object across two aerial views, whereas GPT-5.4 produces the correct bounding box. We further examined whether this gap is primarily caused by limited target visibility in low-altitude UAV images. To this end, we increased the input resolution by a factor of four by doubling both the image width and height, with results reported in Table IV. Under this high-resolution setting, the gains remain limited and inconsistent. VST-7B-SFT improves on Direction Recognition, reaching 14.9%, whereas other spatial-specific models show only marginal changes or even degrade on aerial– ground Shared Association. These results indicate that limited target visibility alone cannot explain the performance gap. Instead, existing spatial priors still generalize poorly to low-altitude UAV geometry, particularly under aerial-viewpoint distortion and aerial–ground alignment challenges. Spatial-specific pretraining does not reliably transfer to low-altitude UAV views, as existing spatial priors remain weak under aerial-viewpoint distortion and aerial–ground alignment challenges. 
+
+D. Are Low Scores Simply Caused by Difficult Answer For-mats? 
+
+We summarized the performance of representative models across different answer formats in Table V. The results show substantial variation across formats, however, this variation should not be interpreted as a pure output-format effect. In Spa-tialUAV, answer formats are inherently coupled with task types. For example, Option Letter mainly corresponds to recognition or comparison tasks and achieves an average score of 76.1%, while Free-form Text reaches 56.3% under semantic scoring. In JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 9A2A-SA 
+
+> A2G-SA
+> OM-BBox
+> CT
+> Task
+> 5
+> 15
+> 25
+> 35
+> 45
+> 60
+> Score
+
+GPT-5.4  
+
+> +4.0
+> +2.9
+> -2.8
+> -1.2
+> Orig. MC
+> A2A-SA
+> A2G-SA
+> OM-BBox
+> CT
+> Task
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> Score
+
+VST-7B-SFT  
+
+> +1.6
+> -0.6
+> +1.9
+> -1.4
+> Orig. MC
+> A2A-SA
+> A2G-SA
+> OM-BBox
+> CT
+> Task
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> Score
+
+Qwen3.6-27B   
+
+> -8.7
+> -10.3
+> 0.0
+> +2.8
+> Orig. MC
+> Fig. 7. Answer-format ablation across four representative tasks. Each panel reports one model, with Orig. and MC denoting the original structured-answer setting and the multiple-choice reformulation, respectively. Signed labels indicate the score change from Orig. to MC.
+
+contrast, Region Pair List, Bounding Box, and Angle-Distance Pair are associated with more demanding abilities, including cross-view correspondence, precise localization, and geometric transformation, with average scores of only 27.5%, 19.2%, and 4.5%, respectively. The second and third cases in Fig. 6 make this point concrete: object matching requires precise cross-view localization, while shared association can receive only partial F1 credit when models recover some correct pairs but still miss or hallucinate correspondences. Thus, the low scores under these formats largely reflect the intrinsic difficulty of the corresponding spatial reasoning problems. To examine whether models already possess these abilities but are penalized mainly by the required output format, we further convert four structured-output tasks into multiple-choice variants while keeping the visual input and reasoning objective unchanged. For each sample, the ground-truth answer is used as the correct option, and distractor options are generated by randomly perturbing the ground truth. As shown in Fig. 7, the resulting improvements are small and inconsistent. GPT-5.4 improves only modestly on A2A-SA and A2G-SA but drops on OM-BBox and CT. VST-7B-SFT varies only within a narrow range, while Qwen3.6-27B even drops on both shared-association tasks after the multiple-choice reformulation. These results indicate that relaxing the output constraints does not reliably recover performance. The low scores are therefore better explained by unresolved spatial reasoning challenges, particularly cross-view association, precise localization, and geometric reasoning under UAV viewpoints. Answer-format differences largely reflect the dif-ficulty of the associated task types, and multiple-choice reformulation confirms that spatial reasoning, rather than output formatting alone, remains the primary bottleneck. V. D ISCUSSION 
+
+The results of SpatialUAV suggest two promising directions for improving UAV-oriented spatial intelligence. First , the weak transfer of spatial-specific models and the limited gains from higher input resolution suggest that current spatial priors are not well aligned with low-altitude UAV observations. Domain-specific training or instruction tuning on UAV data, including aerial viewpoints, cross-view pairs, and region-level annotations, may therefore help reduce the gap caused by altitude-dependent scale changes, oblique perspective distortion, and aerial–ground viewpoint mismatch. Second , the lowest scores are concentrated in tasks requiring precise grounding, cross-view association, geometric transformation, and structured outputs, indicating that these challenges are not purely language-generation problems. Future agentic systems may therefore coordinate task-specific tools for grounding, matching, geometric estimation, motion analysis, and canonical answer generation. VI. C ONCLUSION 
+
+We present SpatialUAV, a real low-altitude UAV benchmark for evaluating spatial intelligence across perception, collabora-tion, and motion. Built from 4,331 curated instances and 14 task types, SpatialUAV provides diverse input settings, answer formats, and task-specific metrics for diagnostic evaluation. Experiments show that current VLMs remain far from human-level performance, especially in aerial geometry, cross-view association, structured grounding, and temporal viewpoint reasoning. These findings suggest that future UAV-oriented models should move beyond recognition and answer-format adaptation toward more robust spatial reasoning in real low-altitude environments. REFERENCES [1] Z. Zou, M. Ye, L. Ji, L. Zhou, S. Tang, Y. Gan, and S. Li, “Long-short match for lost control in uav multi-object tracking,” IEEE Transactions on Multimedia , vol. 28, pp. 786–800, 2026. [2] T. Xiang, X. Xia, J. Yuan, and Z. Tu, “Fre-stformer: A frequency-based spatio-temporal transformer for uav human action recognition,” IEEE Transactions on Multimedia , pp. 1–13, 2026. [3] Z. Song, Y. Li, S. Zhou, W. Tang, and L. Wang, “Mode-track: Robust multi-object tracking with motion decoupling in uav videos,” IEEE Transactions on Multimedia , pp. 1–11, 2026. [4] V. Cohen, J. X. Liu, R. Mooney, S. Tellex, and D. Watkins, “A survey of robotic language grounding: tradeoffs between symbols and embeddings,” in Proceedings of the Thirty-Third International Joint Conference on Artificial Intelligence , 2024, pp. 7999–8009. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 10 
+
+[5] T. Wang, X. Mao, C. Zhu, R. Xu, R. Lyu, P. Li, X. Chen, W. Zhang, K. Chen, T. Xue et al. , “Embodiedscan: A holistic multi-modal 3d perception suite towards embodied ai,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 19 757–19 767. [6] S. Cheng, Z. Guo, J. Wu, K. Fang, P. Li, H. Liu, and Y. Liu, “Egothink: Evaluating first-person perspective thinking capability of vision-language models,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 14 291–14 302. [7] B. Chen, Z. Xu, S. Kirmani, B. Ichter, D. Sadigh, L. Guibas, and F. Xia, “Spatialvlm: Endowing vision-language models with spatial reasoning capabilities,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 14 455–14 465. [8] J. Yang, S. Yang, A. W. Gupta, R. Han, L. Fei-Fei, and S. Xie, “Thinking in space: How multimodal large language models see, remember, and recall spaces,” in Proceedings of the Computer Vision and Pattern Recognition Conference , 2025, pp. 10 632–10 643. [9] B. Zhao, J. Fang, Z. Dai, Z. Wang, J. Zha, W. Zhang, C. Gao, Y. Wang, J. Cui, X. Chen et al. , “Urbanvideo-bench: Benchmarking vision-language models on embodied intelligence with video data in urban spaces,” in Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , 2025, pp. 32 400– 32 423. [10] Y. Zhao, K. Xu, Z. Zhu, Y. Hu, Z. Zheng, Y. Chen, Y. Ji, C. Gao, Y. Li, and J. Huang, “Cityeqa: A hierarchical llm agent on embodied question answering benchmark in city space,” in Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing ,2025, pp. 12 465–12 480. [11] N. Jiang, K. Wang, X. Peng, X. Yu, Q. Wang, J. Xing, G. Li, G. Guo, Q. Ye, J. Jiao, J. Zhao, and Z. Han, “Anti-uav: A large-scale benchmark for vision-based uav tracking,” IEEE Transactions on Multimedia , vol. 25, pp. 486–500, 2023. [12] W. Zhang, Z. Zhou, X. Zeng, L. Xuchen, J. Fang, C. Gao, J. Cui, Y. Li, X. Chen, and X.-P. Zhang, “Open3d-vqa: A benchmark for embodied spatial concept reasoning with multimodal large language model in open space,” in Proceedings of the 33rd ACM International Conference on Multimedia , 2025, pp. 12 784–12 791. [13] L. Zhang, Y. Zhang, H. Li, H. Fu, Y. Tang, H. Ye, L. Chen, X. Liang, X. Hao, and W. Ding, “Is your vlm sky-ready? a comprehensive spatial intelligence benchmark for uav navigation,” arXiv preprint arXiv:2511.13269 , 2025. [14] D. Azuma, T. Miyanishi, S. Kurita, and M. Kawanabe, “Scanqa: 3d question answering for spatial scene understanding,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2022, pp. 19 129–19 139. [15] X. Ma, S. Yong, Z. Zheng, Q. Li, Y. Liang, S.-C. Zhu, and S. Huang, “Sqa3d: Situated question answering in 3d scenes,” in International Conference on Learning Representations , 2023. [16] Y. Hong, J. Liu, H. Yin, M. Li, L. Guibas, F.-F. Li, J. Wu, and Y. Choi, “ESI-Bench: Towards embodied spatial intelligence that closes the perception–action loop,” arXiv preprint arXiv:2605.18746 , 2026. [17] J. Zha, Y. Fan, T. Zhang, G. Chen, Y. Chen, C. Gao, and X. Chen, “Aircopbench: A benchmark for multi-drone collaborative embodied perception and reasoning,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 2, 2026, pp. 1507–1515. [18] S. Dai, Z. Ma, Z. Luo, X. Yang, Y. Huang, W. Zhang, C. Chen, Z. Guo, W. Xu, Y. Sun, and M. Sun, “MM-UAVBench: How well do multimodal large language models see, think, and plan in low-altitude uav scenarios?” 
+
+arXiv preprint arXiv:2512.23219 , 2025. [19] Y. Zhan and Y. Yuan, “Uavbench and uavit-1m: Benchmarking and enhancing mllms for low-altitude uav vision-language understanding,” 
+
+arXiv preprint arXiv:2603.14336 , 2026. [20] D. Liu, J. Feng, D. Li, Y. Zheng, G. Li, W. Dong, and G. Shi, “Are vlms lost between sky and space? LinkS 2Bench for uav-satellite dynamic cross-view spatial intelligence,” arXiv preprint arXiv:2604.02020 , 2026. [21] S. Yang, J. Yang, P. Huang, E. L. Brown II, Z. Yang, Y. Yu, S. Tong, Z. Zheng, Y. Xu, M. Wang et al. , “Cambrian-s: Towards spatial supersensing in video,” in The Fourteenth International Conference on Learning Representations , 2026. [22] J. Lin, R. Xu, S. Zhu, S. Yang, P. Cao, Y. Ran, M. Hu, C. Zhu, Y. Xie, Y. Long, W. Hu, D. Lin, T. Wang, and J. Pang, “Mmsi-video-bench: A holistic benchmark for video-based spatial intelligence,” arXiv preprint arXiv:2512.10863 , 2025. [23] C. Gao, B. Zhao, W. Zhang, J. Mao, J. Zhang, Z. Zheng, F. Man, J. Fang, Z. Zhou, J. Cui, X. Chen, and Y. Li, “Embodiedcity: A benchmark platform for embodied agent in real-world city environment,” arXiv preprint arXiv:2410.09604 , 2024. [24] Z. Shao, G. Cheng, J. Ma, Z. Wang, J. Wang, and D. Li, “Real-time and accurate uav pedestrian detection for social distancing monitoring in covid-19 pandemic,” IEEE Transactions on Multimedia , vol. 24, pp. 2069–2083, 2022. [25] M. A. Ferrag, A. Lakas, and M. Debbah, “UAVBench: An open benchmark dataset for autonomous and agentic ai uav systems via llm-generated flight scenarios,” arXiv preprint arXiv:2511.11252 , 2025. [26] M. Guo, M. Wu, J. He, S. Li, H. Li, and C. Tao, “Bedi: A comprehensive benchmark for evaluating embodied agents on uavs,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 232, pp. 910–936, 2026. [27] A. Dutta, S. Das, J. Nielsen, R. Chakraborty, and M. Shah, “Multiview aerial visual recognition (mavrec): Can multi-view improve aerial visual perception?” arXiv preprint arXiv:2312.04548 , 2023. [28] B. Zhao, R. Tang, M. Jia, Z. Wang, F. Man, X. Zhang, Y. Shang, W. Zhang, W. Wu, C. Gao, X. Chen, and Y. Li, “Airscape: An aerial generative world model with motion controllability,” arXiv preprint arXiv:2507.08885 ,2025. [29] Z. Zheng, Y. Wei, and Y. Yang, “University-1652: A multi-view multi-source benchmark for drone-based geo-localization,” in Proceedings of the 28th ACM International Conference on Multimedia , 2020, pp. 1395–1403. [30] W. Yin, C. Zhang, H. Chen, Z. Cai, G. Yu, K. Wang, X. Chen, and C. Shen, “Metric3d: Towards zero-shot metric 3d prediction from a single image,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2023, pp. 9043–9053. [31] S. Bai, Y. Cai, R. Chen, K. Chen, X. Chen, Z. Cheng, L. Deng, W. Ding, C. Gao, C. Ge et al. , “Qwen3-vl technical report,” arXiv preprint arXiv:2511.21631 , 2025. [32] W. Wang, Z. Gao, L. Gu, H. Pu, L. Cui, X. Wei, Z. Liu, L. Jing, S. Ye, J. Shao et al. , “Internvl3. 5: Advancing open-source multimodal models in versatility, reasoning, and efficiency,” arXiv preprint arXiv:2508.18265 ,2025. [33] Z. Cai, R. Wang, C. Gu, F. Pu, J. Xu, Y. Wang, W. Yin, Z. Yang, C. Wei, T. Zhou et al. , “Scaling spatial intelligence with multimodal foundation models,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2026, pp. 7879–7890. [34] D. Wu, F. Liu, Y.-H. Hung, and Y. Duan, “Spatial-mllm: Boosting mllm capabilities in visual-based spatial intelligence,” Advances in neural information processing systems , vol. 38, pp. 13 569–13 597, 2026. [35] R. Yang, Z. Zhu, Y. Li, J. Huang, S. Yan, S. Zhou, Z. Liu, X. Li, S. Li, W. Wang et al. , “Visual spatial tuning,” arXiv preprint arXiv:2511.05491 ,2025. [36] H. Zhang, M. Liu, Z. Li, H. Wen, W. Guan, Y. Wang, and L. Nie, “Spatial understanding from videos: Structured prompts meet simulation data,” Advances in Neural Information Processing Systems , vol. 38, pp. 103 202–103 229, 2026. [37] W. Guan, H. Zhang, M. Liu, Q. Xiang, Y. Wang, and L. Nie, “Spaceera++: A unified framework towards 3d spatial reasoning in video,” IEEE Transactions on Pattern Analysis and Machine Intelligence , 2026. [38] A. Yang, A. Li, B. Yang, B. Zhang, B. Hui, B. Zheng, B. Yu, C. Gao, C. Huang, C. Lv et al. , “Qwen3 technical report,” arXiv preprint arXiv:2505.09388 , 2025.
