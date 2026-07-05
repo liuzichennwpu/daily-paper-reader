@@ -1,101 +1,17 @@
 {
-  "generated_at": "2026-07-05T14:23:32.164192+00:00",
-  "updated_date": "20260606-20260705",
+  "generated_at": "2026-07-05T21:31:01.336318+00:00",
+  "updated_date": "20260705",
   "carryover_days": 9,
   "tag_states": {
     "UAV-VLN": {
-      "updated_date": "20260606-20260705",
+      "updated_date": "20260705",
       "carryover_days": 9,
       "items": []
     },
     "rs-fusion": {
-      "updated_date": "20260704",
+      "updated_date": "20260705",
       "carryover_days": 9,
-      "items": [
-        {
-          "id": "2607.01050v1",
-          "source": "arxiv",
-          "title": "GeoSearcher: Anchor-Guided Progressive Reasoning for Remote Sensing Visual Grounding with Process Supervision",
-          "abstract": "Recent multimodal large language models (MLLMs) have shown strong cross-modal understanding and coordinate generation abilities in visual grounding. However, transferring these abilities to remote sensing visual grounding (RSVG) remains challenging. High-resolution remote sensing images usually cover large-scale scenes, where targets are often extremely small and surrounded by numerous visually similar distractors. Meanwhile, queries often contain multiple clues, such as reference objects, spatial relations, and target attributes. Existing MLLM-based methods usually formulate RSVG as one-step coordinate generation, which may lead to unstable predictions for small-object localization and complex queries. To address these challenges, we propose GeoSearcher, which reformulates RSVG as an anchor-guided progressive reasoning process and realizes it through two coupled stages: Anchor-Centric Reasoning Supervised Fine-Tuning (ACR-SFT) and Process-Faithful Group Relative Policy Optimization (PF-GRPO). In ACR-SFT, anchor-centric reasoning data are used to teach the model to represent key visual clues as anchors and progressively integrate location, relational, and attribute clues around them. In PF-GRPO, Process-Aware Reward (PAR) and Reasoning-Informative Sample Selector (RISS) further optimize this reasoning behavior by jointly evaluating key reasoning steps and target localization, while focusing training on samples that are more beneficial for improving progressive reasoning. Through this design, GeoSearcher transforms large-scale visual search into a more constrained local reasoning process. Extensive experiments on DIOR-RSVG, OPT-RSVG, and VRS-Bench show that GeoSearcher outperforms existing state-of-the-art methods. The project will be released at https://github.com/wangdianyu954-xixi/GeoSearcher.",
-          "authors": [
-            "Dianyu Wang",
-            "Yidan Zhang",
-            "Peirong Zhang",
-            "Xuyang Li",
-            "Xiaoxuan Liu",
-            "Lei Wang"
-          ],
-          "primary_category": "cs.CV",
-          "categories": [
-            "cs.CV"
-          ],
-          "published": "2026-07-01T15:12:51+00:00",
-          "link": "https://arxiv.org/pdf/2607.01050v1",
-          "tags": [
-            "keyword:UAV-VLN",
-            "keyword:rs-fusion",
-            "query:UAV-VLN",
-            "query:rs-fusion"
-          ],
-          "llm_score": 8.0,
-          "llm_evidence_en": "remote sensing visual grounding with MLLMs and progressive reasoning",
-          "llm_evidence_cn": "远程感知视觉定位，使用多模态大语言模型和渐进推理",
-          "llm_evidence": "远程感知视觉定位，使用多模态大语言模型和渐进推理",
-          "canonical_evidence": "远程感知视觉定位，使用多模态大语言模型和渐进推理",
-          "llm_tldr_en": "GeoSearcher uses anchor-guided progressive reasoning and process supervision for remote sensing visual grounding, improving small-object localization with MLLMs.",
-          "llm_tldr_cn": "该论文针对高分辨率遥感图像中小目标视觉定位困难的问题，提出GeoSearcher方法，通过锚点引导的渐进推理和过程监督，利用多模态大语言模型实现稳定的跨模态定位。在多个基准上取得领先性能，为遥感场景的精细化定位提供了有效方案。",
-          "llm_tldr": "该论文针对高分辨率遥感图像中小目标视觉定位困难的问题，提出GeoSearcher方法，通过锚点引导的渐进推理和过程监督，利用多模态大语言模型实现稳定的跨模态定位。在多个基准上取得领先性能，为遥感场景的精细化定位提供了有效方案。",
-          "llm_tags": [
-            "query:rs-fusion"
-          ],
-          "matched_query_tag": "query:rs-fusion",
-          "matched_query_text": "attention mechanism for multimodal remote sensing",
-          "matched_requirement_id": "req-12",
-          "selection_source": "carryover_cache",
-          "paper_id": "2607.01050v1",
-          "carry_days": 1
-        },
-        {
-          "id": "2606.31745v1",
-          "source": "arxiv",
-          "title": "JL1-CC&QA: Extending the JL1-CD Benchmark with Change Captioning and Question Answering",
-          "abstract": "Remote sensing change detection (CD) traditionally focuses on pixel-level binary segmentation, which identifies where changes occur but neither what nor why. To bridge this semantic gap, we introduce JL1-CC&QA, a multi-task benchmark that extends the JL1-CD dataset with two complementary annotation layers: change captioning (CC) and change question answering (QA). Built upon 5,000 bi-temporal image pairs acquired by the Jilin-1 satellite at 0.5-0.75m ground sample distance, the benchmark comprises: (i) JL1-CC, providing 17,021 quality-verified captions that describe diverse land-cover transformations; and (ii) JL1-QA, offering 20,060 question-answer pairs across eight question types, enabling fine-grained, interactive interrogation of surface changes. All annotations are produced via a three-stage pipeline consisting of multi-modal large language model (LLM) generation, vision-grounded LLM judging, and human expert verification. We hope that JL1-CC&QA, as a benchmark unifying binary change masks, change captions, and change-oriented QA over the same image set, will serve as a valuable resource for the community to advance multi-task change understanding in remote sensing. The dataset is available at https://github.com/circleLZY/JL1-CD.",
-          "authors": [
-            "Ziyuan Liu",
-            "Ruifei Zhu",
-            "Ouqiao Ma",
-            "Yuantao Gu"
-          ],
-          "primary_category": "cs.CV",
-          "categories": [
-            "cs.CV",
-            "cs.AI"
-          ],
-          "published": "2026-06-30T14:37:25+00:00",
-          "link": "https://arxiv.org/pdf/2606.31745v1",
-          "tags": [
-            "keyword:rs-fusion",
-            "query:rs-fusion"
-          ],
-          "llm_score": 8.0,
-          "llm_evidence_en": "remote sensing change captioning and QA benchmark with multi-task annotations",
-          "llm_evidence_cn": "遥感变化描述和问答基准，具有多任务标注",
-          "llm_evidence": "遥感变化描述和问答基准，具有多任务标注",
-          "canonical_evidence": "遥感变化描述和问答基准，具有多任务标注",
-          "llm_tldr_en": "JL1-CC&QA extends JL1-CD benchmark with change captioning and question answering, enabling semantic interpretation beyond binary change maps.",
-          "llm_tldr_cn": "该论文针对遥感变化检测仅输出二值掩膜缺乏语义的问题，在JL1-CD数据集上扩展了变化描述和变化问答两种标注，构建了包含17021条描述和20060个问答对的多任务基准。该基准支持更丰富的变化语义解释和交互式查询，为遥感多模态理解提供了新资源。",
-          "llm_tldr": "该论文针对遥感变化检测仅输出二值掩膜缺乏语义的问题，在JL1-CD数据集上扩展了变化描述和变化问答两种标注，构建了包含17021条描述和20060个问答对的多任务基准。该基准支持更丰富的变化语义解释和交互式查询，为遥感多模态理解提供了新资源。",
-          "llm_tags": [
-            "query:rs-fusion"
-          ],
-          "matched_query_tag": "query:rs-fusion",
-          "matched_query_text": "Multimodal feature fusion for remote sensing",
-          "matched_requirement_id": "req-15",
-          "selection_source": "carryover_cache",
-          "paper_id": "2606.31745v1",
-          "carry_days": 1
-        }
-      ]
+      "items": []
     }
   }
 }

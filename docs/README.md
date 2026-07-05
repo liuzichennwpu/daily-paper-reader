@@ -6,43 +6,40 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-06 ~ 2026-07-05
-- 运行时间：2026-07-05 14:29:01 UTC
+- 最新运行日期：2026-07-05
+- 运行时间：2026-07-05 21:36:08 UTC
 - 运行状态：成功
-- 本次总论文数：7
-- 精读区：2
-- 速读区：5
+- 本次总论文数：6
+- 精读区：5
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读2篇、速读5篇，聚焦视觉语言导航前沿，其中《CLOSER-VLN》和《DART-VLN》分别提出闭环自验证检索增强推理和测试时记忆衰减与反循环正则化，双双斩获高分。  
-最值得关注的方向是让代理在导航中“自我反思”与“对抗遗忘幻觉”，大幅提升长程任务的可靠性和避障能力。  
-建议读者先抓住“自验证闭环”这一思路，在自己的视觉导航或机器人项目中加入简单的一致性检查，即可低成本验证效果。
-- 详情：[/20260606-20260705/README](/20260606-20260705/README)
+今日精读聚焦遥感解析新范式：用语义驱动尺度选择实现高效跨模态指代分割，以及将变化检测升级为描述与问答的多模态基准。  
+最值得关注：从“在哪变”到“怎么变”，变化描述与问答将成为遥感时序分析的新交互形态；跨模态对齐中的尺度自适应策略显著提升指代分割效率。  
+建议读者：若深耕遥感语义理解，可对比探索“指代分割”与“变化问答”背后的统一多模态融合框架。
+- 详情：[/202607/05/README](/202607/05/README)
 
 ### 精读区论文标签
-1. [CLOSER-VLN: Closed-Loop Self-Verified Retrieval-Augmented Reasoning for Aerial Vision-Language Navigation](/20260606-20260705/2606.28397v1-closer-vln-closed-loop-self-verified-retrieval-augmented-reasoning-for-aerial-vision-language-navigation)  
-   标签：评分：10.0/10、query:uav-vln
-   evidence：提出用于空中视觉语言导航的闭环自验证检索增强推理方法
-2. [DART-VLN: Test-Time Memory Decay and Anti-Loop Regularization for Discrete Vision-Language Navigation](/20260606-20260705/2607.01043v1-dart-vln-test-time-memory-decay-and-anti-loop-regularization-for-discrete-vision-language-navigation)  
-   标签：评分：8.0/10、query:uav-vln
-   evidence：针对离散视觉语言导航的测试时记忆衰减与防循环正则化框架
+1. [Semantic-Driven Scale and Spatial Selection for Efficient Cross-Modal Alignment in Referring Remote Sensing Image Segmentation](/202607/05/2606.30244v1-semantic-driven-scale-and-spatial-selection-for-efficient-cross-modal-alignment-in-referring-remote-sensing-image-segmentation)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：使用自然语言表达进行遥感图像指代分割,跨模态融合
+2. [JL1-CC&QA: Extending the JL1-CD Benchmark with Change Captioning and Question Answering](/202607/05/2606.31745v1-jl1-ccqa-extending-the-jl1-cd-benchmark-with-change-captioning-and-question-answering)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：扩展遥感变化检测至图像描述与问答，构建遥感图像分析多模态基准
+3. [GeoSearcher: Anchor-Guided Progressive Reasoning for Remote Sensing Visual Grounding with Process Supervision](/202607/05/2607.01050v1-geosearcher-anchor-guided-progressive-reasoning-for-remote-sensing-visual-grounding-with-process-supervision)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：提出锚引导的渐进推理实现遥感视觉定位，融合视觉与语言特征
+4. [Interpretation-Oriented Cloud Removal via Observation-Anchored Residual Flow with Geo-Contextual Alignment](/202607/05/2607.02471v1-interpretation-oriented-cloud-removal-via-observation-anchored-residual-flow-with-geo-contextual-alignment)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：面向光学遥感的云去除，确保下游解译的忠实重建
+5. [Application of Machine Learning Tools for Waterbird Colony Monitoring Provides Gains in Precision and Temporal Efficiency](/202607/05/biorxiv-10-64898-2026-07-01-735369-v1-application-of-machine-learning-tools-for-waterbird-colony-monitoring-provides-gains-in-precision-and-temporal-efficiency)  
+   标签：评分：9.0/10、query:rs-fusion
+   evidence：基于无人机的深度学习水鸟监测，遥感应用中的目标检测
 
 ### 速读区论文标签
-1. [ViTL: Temporal Logic-Guided Zero-Shot Natural Language Navigation via Vision-Language Models](/20260606-20260705/2606.30696v1-vitl-temporal-logic-guided-zero-shot-natural-language-navigation-via-vision-language-models)  
-   标签：评分：7.0/10、query:uav-vln
-   evidence：利用VLM实现带时序逻辑约束的零样本自然语言导航
-2. [DroneFINE: Domain-Aware Parameter-Efficient Fine-Tuning of Vision-Language Detectors for Drone Images](/20260606-20260705/2607.00338v1-dronefine-domain-aware-parameter-efficient-fine-tuning-of-vision-language-detectors-for-drone-images)  
+1. [Beyond 2D Matching: A Unified Single-Stage Framework for Geometry-Aware Cross-View Object Geo-Localization](/202607/05/2606.30576v1-beyond-2d-matching-a-unified-single-stage-framework-for-geometry-aware-cross-view-object-geo-localization)  
    标签：评分：7.0/10、query:rs-fusion
-   evidence：针对无人机图像域差异，微调VLM检测器，实现高效检测
-3. [Path-level Hindsight Instructions for Semantic Exploration in Vision-Language Navigation](/20260606-20260705/2607.01754v1-path-level-hindsight-instructions-for-semantic-exploration-in-vision-language-navigation)  
-   标签：评分：7.0/10、query:uav-vln
-   evidence：采用后见指令对齐的在线策略VLN框架，增强语义探索
-4. [CoFL-S: Spatially Queryable Sector Flow Fields for Local Language-Conditioned Navigation](/20260606-20260705/2607.02222v1-cofl-s-spatially-queryable-sector-flow-fields-for-local-language-conditioned-navigation)  
-   标签：评分：7.0/10、query:uav-vln
-   evidence：提出一种可用于无人机VLN的低层级语言条件流场方法
-5. [RAVEN: Long-Horizon Reasoning & Navigation with a Visuo-Spatio-Temporal Memory](/20260606-20260705/2606.25206v1-raven-long-horizon-reasoning--navigation-with-a-visuo-spatio-temporal-memory)  
-   标签：评分：6.0/10、query:uav-vln
-   evidence：基于记忆的机器人视觉语言导航与问答
+   evidence：使用无人机与卫星图像进行跨视角目标地理定位
 
 
 <div class="dpr-home-promo-card">
