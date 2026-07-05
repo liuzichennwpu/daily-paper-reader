@@ -6,79 +6,43 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-04
-- 运行时间：2026-07-04 21:44:56 UTC
+- 最新运行日期：2026-06-06 ~ 2026-07-05
+- 运行时间：2026-07-05 14:29:01 UTC
 - 运行状态：成功
-- 本次总论文数：19
-- 精读区：7
-- 速读区：12
+- 本次总论文数：7
+- 精读区：2
+- 速读区：5
 
 ### 今日简报（AI）
-1) 今日精读2篇高分论文，聚焦无人机城市视觉导航与遥感图像无训练定位两大突破。
-2) 《DynFly》以10分满分实现动态感知的无人机连续轨迹生成，《ExACT》以9分提出免训练遥感图像视觉定位新范式。
-3) 建议从这两篇精读入手，再结合速读中的无人机边缘智能与RGB-T稀疏融合等实战技术。
-- 详情：[/202607/04/README](/202607/04/README)
+今日精读2篇、速读5篇，聚焦视觉语言导航前沿，其中《CLOSER-VLN》和《DART-VLN》分别提出闭环自验证检索增强推理和测试时记忆衰减与反循环正则化，双双斩获高分。  
+最值得关注的方向是让代理在导航中“自我反思”与“对抗遗忘幻觉”，大幅提升长程任务的可靠性和避障能力。  
+建议读者先抓住“自验证闭环”这一思路，在自己的视觉导航或机器人项目中加入简单的一致性检查，即可低成本验证效果。
+- 详情：[/20260606-20260705/README](/20260606-20260705/README)
 
 ### 精读区论文标签
-1. [DynFly: Dynamic-Aware Continuous Trajectory Generation for UAV Vision-Language Navigation in Urban Environments](/202607/04/2606.31654v1-dynfly-dynamic-aware-continuous-trajectory-generation-for-uav-vision-language-navigation-in-urban-environments)  
+1. [CLOSER-VLN: Closed-Loop Self-Verified Retrieval-Augmented Reasoning for Aerial Vision-Language Navigation](/20260606-20260705/2606.28397v1-closer-vln-closed-loop-self-verified-retrieval-augmented-reasoning-for-aerial-vision-language-navigation)  
    标签：评分：10.0/10、query:uav-vln
-   evidence：无人机视觉语言导航
-2. [ExACT: Exemplar-Driven Calibrated Refinement for Training-Free Visual Grounding in Remote Sensing Images](/202607/04/2606.28920v1-exact-exemplar-driven-calibrated-refinement-for-training-free-visual-grounding-in-remote-sensing-images)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：遥感视觉定位，使用自然语言描述
-3. [Beyond Backscatter: AlphaEarth Land-Cover Priors for Rapid SAR Flood Segmentation Across Foundation Backbones](/202607/04/2606.29134v1-beyond-backscatter-alphaearth-land-cover-priors-for-rapid-sar-flood-segmentation-across-foundation-backbones)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：利用土地覆盖先验的SAR洪水分割
-4. [Semantic-Driven Scale and Spatial Selection for Efficient Cross-Modal Alignment in Referring Remote Sensing Image Segmentation](/202607/04/2606.30244v1-semantic-driven-scale-and-spatial-selection-for-efficient-cross-modal-alignment-in-referring-remote-sensing-image-segmentation)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：基于自然语言表达的遥感图像分割，直接涉及遥感多模态视觉-语言融合
-5. [Dual Sparse Aggregation Transformer for Multispectral Object Detection](/202607/04/2606.31015v1-dual-sparse-aggregation-transformer-for-multispectral-object-detection)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：多光谱目标检测中的跨模态融合
-6. [DynFly: Dynamic-Aware Continuous Trajectory Generation for UAV Vision-Language Navigation in Urban Environments](/202607/04/2606.31654v2-dynfly-dynamic-aware-continuous-trajectory-generation-for-uav-vision-language-navigation-in-urban-environments)  
-   标签：评分：9.0/10、query:uav-vln
-   evidence：无人机视觉语言导航连续轨迹生成
-7. [DroneFINE: Domain-Aware Parameter-Efficient Fine-Tuning of Vision-Language Detectors for Drone Images](/202607/04/2607.00338v1-dronefine-domain-aware-parameter-efficient-fine-tuning-of-vision-language-detectors-for-drone-images)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：无人机视觉语言检测与领域自适应微调
+   evidence：提出用于空中视觉语言导航的闭环自验证检索增强推理方法
+2. [DART-VLN: Test-Time Memory Decay and Anti-Loop Regularization for Discrete Vision-Language Navigation](/20260606-20260705/2607.01043v1-dart-vln-test-time-memory-decay-and-anti-loop-regularization-for-discrete-vision-language-navigation)  
+   标签：评分：8.0/10、query:uav-vln
+   evidence：针对离散视觉语言导航的测试时记忆衰减与防循环正则化框架
 
 ### 速读区论文标签
-1. [Cross-Session 3D LiDAR and Camera Fusion for Robust Localization of Unmanned Aerial Vehicles in GPS-Denied Environments](/202607/04/2606.28951v1-cross-session-3d-lidar-and-camera-fusion-for-robust-localization-of-unmanned-aerial-vehicles-in-gps-denied-environments)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：多模态传感器融合（激光雷达和相机）用于无人机定位
-2. [AERIS: Aerial-Edge Role-Driven Intelligence at Runtime via Orchestrated Language-Model Swarm](/202607/04/2606.30151v1-aeris-aerial-edge-role-driven-intelligence-at-runtime-via-orchestrated-language-model-swarm)  
-   标签：评分：8.0/10、query:uav-vln
-   evidence：无人机指令跟随，结合语言模型
-3. [Efficient RGB-T Object Detection via Sparse Cross-Modality Fusion](/202607/04/2606.30215v1-efficient-rgb-t-object-detection-via-sparse-cross-modality-fusion)  
-   标签：评分：8.0/10、query:rs-fusion
-   evidence：高效RGB-T检测的稀疏跨模态融合方法
-4. [FutureNav: Unified World-Action Modeling for Vision-and-Language Navigation](/202607/04/2606.30367v1-futurenav-unified-world-action-modeling-for-vision-and-language-navigation)  
-   标签：评分：8.0/10、query:uav-vln
-   evidence：视觉语言导航框架，含世界动作联合建模
-5. [SpatialUAV: Benchmarking Spatial Intelligence for Low-Altitude UAV Perception, Collaboration, and Motion](/202607/04/2606.27876v1-spatialuav-benchmarking-spatial-intelligence-for-low-altitude-uav-perception-collaboration-and-motion)  
+1. [ViTL: Temporal Logic-Guided Zero-Shot Natural Language Navigation via Vision-Language Models](/20260606-20260705/2606.30696v1-vitl-temporal-logic-guided-zero-shot-natural-language-navigation-via-vision-language-models)  
    标签：评分：7.0/10、query:uav-vln
-   evidence：包含导航任务的无人机空间智能基准
-6. [Scalable Bayesian Spatial Mixture Modelling for Remote Sensing Image Segmentation](/202607/04/2606.29448v1-scalable-bayesian-spatial-mixture-modelling-for-remote-sensing-image-segmentation)  
+   evidence：利用VLM实现带时序逻辑约束的零样本自然语言导航
+2. [DroneFINE: Domain-Aware Parameter-Efficient Fine-Tuning of Vision-Language Detectors for Drone Images](/20260606-20260705/2607.00338v1-dronefine-domain-aware-parameter-efficient-fine-tuning-of-vision-language-detectors-for-drone-images)  
    标签：评分：7.0/10、query:rs-fusion
-   evidence：基于贝叶斯空间混合模型的遥感图像分割
-7. [TerraDiT-$Ω$: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive](/202607/04/2606.31029v1-terradit--unified-spatial-control-for-satellite-image-synthesis-with-any-geospatial-primitive)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：使用地理空间原语的卫星图像合成
-8. [A Modular Vision-Language-Action Robotics Framework for Indoor Environments](/202607/04/2606.31144v1-a-modular-vision-language-action-robotics-framework-for-indoor-environments)  
+   evidence：针对无人机图像域差异，微调VLM检测器，实现高效检测
+3. [Path-level Hindsight Instructions for Semantic Exploration in Vision-Language Navigation](/20260606-20260705/2607.01754v1-path-level-hindsight-instructions-for-semantic-exploration-in-vision-language-navigation)  
    标签：评分：7.0/10、query:uav-vln
-   evidence：模块化视觉-语言-动作框架，支持自然语言导航，可迁移至无人机
-9. [SatSplat: Geometrically-Accurate Gaussian Splatting for Satellite Imagery](/202607/04/2606.28581v1-satsplat-geometrically-accurate-gaussian-splatting-for-satellite-imagery)  
-   标签：评分：6.0/10、query:rs-fusion
-   evidence：卫星图像的三维高斯喷溅重建
-10. [CMTFormer: Marrying Transformer with Hierarchical Information Interaction for RGB-Event Object Detection](/202607/04/2606.29136v1-cmtformer-marrying-transformer-with-hierarchical-information-interaction-for-rgb-event-object-detection)  
-   标签：评分：6.0/10、query:rs-fusion
-   evidence：多模态融合目标检测，含注意力机制
-11. [Flying to Image-Specified Objects: 3D Quadrotor Navigation via Cross-Graph Memory and Viewpoint Planning](/202607/04/2606.29917v1-flying-to-image-specified-objects-3d-quadrotor-navigation-via-cross-graph-memory-and-viewpoint-planning)  
+   evidence：采用后见指令对齐的在线策略VLN框架，增强语义探索
+4. [CoFL-S: Spatially Queryable Sector Flow Fields for Local Language-Conditioned Navigation](/20260606-20260705/2607.02222v1-cofl-s-spatially-queryable-sector-flow-fields-for-local-language-conditioned-navigation)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：提出一种可用于无人机VLN的低层级语言条件流场方法
+5. [RAVEN: Long-Horizon Reasoning & Navigation with a Visuo-Spatio-Temporal Memory](/20260606-20260705/2606.25206v1-raven-long-horizon-reasoning--navigation-with-a-visuo-spatio-temporal-memory)  
    标签：评分：6.0/10、query:uav-vln
-   evidence：四旋翼无人机图像目标导航，该方法可扩展至语言引导导航
-12. [FROST: Training-Free Few-Shot Segmentation with Frozen Features and Nonparametric Statistics](/202607/04/2606.31136v1-frost-training-free-few-shot-segmentation-with-frozen-features-and-nonparametric-statistics)  
-   标签：评分：6.0/10、query:rs-fusion
-   evidence：针对遥感的小样本分割方法
+   evidence：基于记忆的机器人视觉语言导航与问答
 
 
 <div class="dpr-home-promo-card">
