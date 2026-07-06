@@ -6,40 +6,34 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-05
-- 运行时间：2026-07-05 21:36:08 UTC
+- 最新运行日期：2026-06-07 ~ 2026-07-06
+- 运行时间：2026-07-06 06:44:35 UTC
 - 运行状态：成功
-- 本次总论文数：6
-- 精读区：5
-- 速读区：1
+- 本次总论文数：4
+- 精读区：1
+- 速读区：3
 
 ### 今日简报（AI）
-今日精读聚焦遥感解析新范式：用语义驱动尺度选择实现高效跨模态指代分割，以及将变化检测升级为描述与问答的多模态基准。  
-最值得关注：从“在哪变”到“怎么变”，变化描述与问答将成为遥感时序分析的新交互形态；跨模态对齐中的尺度自适应策略显著提升指代分割效率。  
-建议读者：若深耕遥感语义理解，可对比探索“指代分割”与“变化问答”背后的统一多模态融合框架。
-- 详情：[/202607/05/README](/202607/05/README)
+今日深读 4 篇视觉语言导航论文，重点突破零样本与可部署机器人，其中精读的 ViTL 用时序逻辑让 VLM 零样本导航拿了 8 分。
+最值得关注 ViTL 的时序逻辑引导零样本方法和社交机器人导航中高层语义到底层控制的衔接思路。
+普通读者若想入门，建议从 ViTL 把自然语言转成时序约束的巧思看起，再对比速读里的实际系统落地设计。
+- 详情：[/20260607-20260706/README](/20260607-20260706/README)
 
 ### 精读区论文标签
-1. [Semantic-Driven Scale and Spatial Selection for Efficient Cross-Modal Alignment in Referring Remote Sensing Image Segmentation](/202607/05/2606.30244v1-semantic-driven-scale-and-spatial-selection-for-efficient-cross-modal-alignment-in-referring-remote-sensing-image-segmentation)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：使用自然语言表达进行遥感图像指代分割,跨模态融合
-2. [JL1-CC&QA: Extending the JL1-CD Benchmark with Change Captioning and Question Answering](/202607/05/2606.31745v1-jl1-ccqa-extending-the-jl1-cd-benchmark-with-change-captioning-and-question-answering)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：扩展遥感变化检测至图像描述与问答，构建遥感图像分析多模态基准
-3. [GeoSearcher: Anchor-Guided Progressive Reasoning for Remote Sensing Visual Grounding with Process Supervision](/202607/05/2607.01050v1-geosearcher-anchor-guided-progressive-reasoning-for-remote-sensing-visual-grounding-with-process-supervision)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：提出锚引导的渐进推理实现遥感视觉定位，融合视觉与语言特征
-4. [Interpretation-Oriented Cloud Removal via Observation-Anchored Residual Flow with Geo-Contextual Alignment](/202607/05/2607.02471v1-interpretation-oriented-cloud-removal-via-observation-anchored-residual-flow-with-geo-contextual-alignment)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：面向光学遥感的云去除，确保下游解译的忠实重建
-5. [Application of Machine Learning Tools for Waterbird Colony Monitoring Provides Gains in Precision and Temporal Efficiency](/202607/05/biorxiv-10-64898-2026-07-01-735369-v1-application-of-machine-learning-tools-for-waterbird-colony-monitoring-provides-gains-in-precision-and-temporal-efficiency)  
-   标签：评分：9.0/10、query:rs-fusion
-   evidence：基于无人机的深度学习水鸟监测，遥感应用中的目标检测
+1. [ViTL: Temporal Logic-Guided Zero-Shot Natural Language Navigation via Vision-Language Models](/20260607-20260706/2606.30696v1-vitl-temporal-logic-guided-zero-shot-natural-language-navigation-via-vision-language-models)  
+   标签：评分：8.0/10、query:uav-vln
+   evidence：零样本自然语言导航框架，可直接用于无人机自然语言指令导航
 
 ### 速读区论文标签
-1. [Beyond 2D Matching: A Unified Single-Stage Framework for Geometry-Aware Cross-View Object Geo-Localization](/202607/05/2606.30576v1-beyond-2d-matching-a-unified-single-stage-framework-for-geometry-aware-cross-view-object-geo-localization)  
-   标签：评分：7.0/10、query:rs-fusion
-   evidence：使用无人机与卫星图像进行跨视角目标地理定位
+1. [Vision-Language Models for Deployable Social Robot Navigation: Bridging Semantic Reasoning and Low-Level Control](/20260607-20260706/2606.28760v1-vision-language-models-for-deployable-social-robot-navigation-bridging-semantic-reasoning-and-low-level-control)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：基于VLM的导航，含语言交互，可迁移至无人机
+2. [Path-level Hindsight Instructions for Semantic Exploration in Vision-Language Navigation](/20260607-20260706/2607.01754v1-path-level-hindsight-instructions-for-semantic-exploration-in-vision-language-navigation)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：提出用于VLN的Phi-Nav事后指令方法，适用于无人机视觉语言导航中的指令跟随。
+3. [CoFL-S: Spatially Queryable Sector Flow Fields for Local Language-Conditioned Navigation](/20260607-20260706/2607.02222v1-cofl-s-spatially-queryable-sector-flow-fields-for-local-language-conditioned-navigation)  
+   标签：评分：7.0/10、query:uav-vln
+   evidence：为视觉语言导航提出低层视觉-语言-动作框架，方法可迁移至无人机VLN
 
 
 <div class="dpr-home-promo-card">

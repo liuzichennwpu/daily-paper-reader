@@ -1,0 +1,69 @@
+{
+  "label": "2026-06-07 ~ 2026-07-06",
+  "date": "2026-06-07 ~ 2026-07-06",
+  "generated_at": "2026-07-06T06:44:47",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "20260607-20260706/2606.30696v1-vitl-temporal-logic-guided-zero-shot-natural-language-navigation-via-vision-language-models",
+      "section": "deep",
+      "title_en": "ViTL: Temporal Logic-Guided Zero-Shot Natural Language Navigation via Vision-Language Models",
+      "authors": "Kaier Liang, Hengde Dai, Cristian-Ioan Vasile",
+      "date": "2026-06-29",
+      "pdf": "https://arxiv.org/pdf/2606.30696v1",
+      "score": "8.0",
+      "evidence": "零样本自然语言导航框架，可直接用于无人机自然语言指令导航",
+      "tldr": "面向未知环境的机器人零样本导航，难以处理“先清洁椅子，再打开电视”等含时序逻辑的长时指令；ViTL框架先利用大语言模型将自然语言指令编译为线性时序逻辑公式，再转换为确定性有限自动机来驱动多通道价值图与动态重规划；同时，在视觉语言模型中引入方向分数，为每个前沿方向打分，而非生成方向无关的值；在HM3D数据集上，ViTL成功完成零样本长时时序导航任务，并使单目标导航的准确率和效率优于基线方法，为零样本复杂指令导航提供了有效方案。",
+      "tags": "query:uav-vln",
+      "abstract_en": "Enabling robots to follow natural language commands to complete zero-shot long-horizon tasks remains challenging. It requires extracting implicit temporal and logical constraints from natural language commands and executing multiple sub-tasks accordingly. Recent zero-shot object navigation methods use vision-language models (VLMs) to guide frontier-based exploration in unknown environments, but they are limited to single-target tasks. Real-world commands such as \"Clean either the chair or the couch, then turn on the tv.\" require navigating to multiple targets in a temporally constrained order, which no existing zero-shot system can handle. We present ViTL, a framework that addresses this gap at two levels. At the task level, we use a large language model (LLM) to compile natural language commands into Linear Temporal Logic (LTL) formulas, which are then converted into Deterministic Finite Automata~(DFA) that coordinate multi-channel value maps and trigger dynamic replanning when new objects are detected. At the navigation level, we introduce directional score: rather than producing a direction-agnostic value across the entire field of view, we label frontier directions on the observation image and extract per-direction scores from the VLM. Experiments on Habitat-Matterport 3D (HM3D) show that the full framework enables zero-shot long-horizon completion of natural language navigation tasks with temporal constraints, and that directional score improves single-target navigation accuracy and efficiency over the baseline.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260607-20260706/2606.28760v1-vision-language-models-for-deployable-social-robot-navigation-bridging-semantic-reasoning-and-low-level-control",
+      "section": "quick",
+      "title_en": "Vision-Language Models for Deployable Social Robot Navigation: Bridging Semantic Reasoning and Low-Level Control",
+      "authors": "Runji Cai, Toshihiko Yamasaki, Ling Xiao",
+      "date": "2026-06-27",
+      "pdf": "https://arxiv.org/pdf/2606.28760v1",
+      "score": "7.0",
+      "evidence": "基于VLM的导航，含语言交互，可迁移至无人机",
+      "tldr": "社交机器人导航需理解人类意图与社会规范，传统方法缺乏语义推理。本综述提出整合视觉-语言模型（VLMs）的统一框架，将系统分为高层推理、底层控制及桥接机制，并设计路线图。总结了代表性方法与数据集，强调混合架构必要性。为构建可部署、社交合规的VLM导航系统奠定基础。",
+      "tags": "query:uav-vln",
+      "abstract_en": "Social robot navigation (SRN) requires more than geometric path planning; it demands understanding human intentions, social norms, and contextual cues to generate socially compliant behaviors. Although classical navigation methods provide reliable metric planning and collision avoidance, they often lack the semantic reasoning capabilities necessary for operation in complex human-centered environments. Recent advances in Vision-Language Models (VLMs) have opened new opportunities for SRN by enabling high-level VLM understanding, commonsense reasoning, and natural language interaction. However, a fundamental challenge remains: how to integrate VLMs into real-time, safety-critical navigation systems and reliably translate their high-level reasoning into grounded navigation actions. In this survey, we present a unified perspective of VLM-based SRN and organize existing approaches into three interconnected components: high-level VLM reasoning, low-level planning and control, and intermediate mechanisms that bridge reasoning and action. Based on this perspective, we propose a structured roadmap for coupling VLMs with navigation systems, covering semantic reasoning, evaluators, spatial grounding, intermediate representations, and control modules. The roadmap highlights both the strengths of VLMs and the necessity of hybrid architectures for practical deployment. We further review representative datasets and evaluation platforms developed for SRN. Finally, we discuss key open challenges. This survey aims to provide a foundation for building reliable, socially compliant, and deployable VLM-enabled navigation systems.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260607-20260706/2607.01754v1-path-level-hindsight-instructions-for-semantic-exploration-in-vision-language-navigation",
+      "section": "quick",
+      "title_en": "Path-level Hindsight Instructions for Semantic Exploration in Vision-Language Navigation",
+      "authors": "Sung June Kim, Sangpil Kim, Honglak Lee",
+      "date": "2026-07-02",
+      "pdf": "https://arxiv.org/pdf/2607.01754v1",
+      "score": "7.0",
+      "evidence": "提出用于VLN的Phi-Nav事后指令方法，适用于无人机视觉语言导航中的指令跟随。",
+      "tldr": "在视觉语言导航中，在线策略探索虽扩大状态分布，却造成轨迹与指令语义错位。为此，Phi-Nav引入三阶段双监督循环，先由事后扬声器将探索路径转换为指令，再将其作为额外专家演示进行二次模仿，从而弥合监督缺口。在R2R-CE和RxR-CE基准上，Phi-Nav仅需少量专家演示即可取得有竞争力的性能。这强调了语义探索的重要性，为数据高效训练具身智能体提供了有效途径。",
+      "tags": "query:uav-vln",
+      "abstract_en": "On-policy exploration is a crucial component for training robust Vision-Language Navigation agents, as it exposes the policy to a broader state distribution. However, such exploration inevitably leads to trajectories that deviate from expert demonstrations, resulting in a semantic mismatch between the executed visual stream and the original language instruction. In this work, we address this challenge by introducing Phi-Nav, a unified on-policy framework that leverages hindsight reasoning to align instructions with the agent's actual exploratory journey. Specifically, Phi-Nav operates through a three-stage dual-supervision cycle: 1) the agent performs oracle-guided on-policy exploration, sampling a trajectory while learning from expert action feedback, 2) a hindsight speaker synthesizes a path-level hindsight instruction grounded in the collected visual observations, and 3) the agent conducts a second imitation pass, treating the synthesized trajectory-instruction pair as an additional expert demonstration. Through this process, Phi-Nav bridges the critical semantic supervision gap inherent in on-policy methods, transforming semantically unlabeled movement into dense training signals. Evaluations on the R2R-CE and RxR-CE benchmarks show that Phi-Nav yields competitive performance while requiring only a fraction of the expert demonstrations used by current baselines. These results underscore the necessity of semantic exploration in VLN, positioning Phi-Nav as an effective solution for training embodied agents with limited data.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260607-20260706/2607.02222v1-cofl-s-spatially-queryable-sector-flow-fields-for-local-language-conditioned-navigation",
+      "section": "quick",
+      "title_en": "CoFL-S: Spatially Queryable Sector Flow Fields for Local Language-Conditioned Navigation",
+      "authors": "Haokun Liu, Zhaoqi Ma, Yicheng Chen, Wentao Zhang, Masaki Kitagawa, Zicen Xiong, Jinjie Li, Moju Zhao",
+      "date": "2026-07-02",
+      "pdf": "https://arxiv.org/pdf/2607.02222v1",
+      "score": "7.0",
+      "evidence": "为视觉语言导航提出低层视觉-语言-动作框架，方法可迁移至无人机VLN",
+      "tldr": "视觉语言导航中，高层语义理解与全局规划虽已成熟，低层动作仍以离散前转与转向为主，难以生成平滑轨迹，且在不同控制频率下泛化性差。为此，CoFL-S提出空间可查询的扇形流场：通过视觉和语言输入预测局部扇区内的密集流场，然后经流场展开生成连续动作序列。训练时，它将完整指令与动作序列分解为对齐的子指令和帧级流场监督，并引入连续时间Habitat基准，使用统一速度控制器进行闭环评估，消除指令分解的影响。实验表明，CoFL-S在连续时间基准中不同规划频率下均显著优于动作标记和动作块基线，零样本真实世界部署也展现了更强泛化能力。该工作首次将流场表示用于低层语言条件导航，为连续动作空间下的VLN提供了有效解决方案。",
+      "tags": "query:uav-vln",
+      "abstract_en": "Vision-Language Navigation has increasingly emphasized high-level instruction reasoning, memory, global map construction, and instruction decomposition, while the low-level action representation remains comparatively underexplored. We propose CoFL-S, a low-level vision-language-action framework that predicts a language-conditioned flow field over the robot's local visible sector and generates continuous trajectories by rolling out the predicted field. To train this low-level representation, we convert each VLN-CE episode, originally a whole-episode instruction paired with an action sequence, into frame-level local supervision with aligned sub-instructions and matched action, trajectory, and dense flow-field targets. For evaluation, we introduce a continuous-time Habitat benchmark that isolates low-level action interfaces from instruction decomposition and executes all methods through a shared velocity-command controller, enabling decomposition-independent closed-loop comparison across different planner frequencies rather than fixed discrete forward-and-turn transitions in VLN-CE. Under matched encoders and training settings, CoFL-S consistently outperforms action-token and action-chunk baselines across planner frequencies in the continuous-time Habitat benchmark, and zero-shot real-world closed-loop deployment further shows its advantage over both baselines beyond simulation.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
