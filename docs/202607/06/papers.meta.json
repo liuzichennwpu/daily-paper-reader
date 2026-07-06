@@ -1,0 +1,39 @@
+{
+  "label": "2026-07-06",
+  "date": "2026-07-06",
+  "generated_at": "2026-07-06T21:30:54",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/06/2607.01754v1-path-level-hindsight-instructions-for-semantic-exploration-in-vision-language-navigation",
+      "section": "quick",
+      "title_en": "Path-level Hindsight Instructions for Semantic Exploration in Vision-Language Navigation",
+      "authors": "Sung June Kim, Sangpil Kim, Honglak Lee",
+      "date": "2026-07-02",
+      "pdf": "https://arxiv.org/pdf/2607.01754v1",
+      "score": "7.0",
+      "evidence": "提出事后推理用于视觉语言导航，对齐指令与探索路径",
+      "tldr": "视觉语言导航中，在线策略探索虽扩展状态分布，但常偏离专家轨迹，造成视觉序列与指令的语义错位。Phi-Nav框架通过路径级事后指令，将无标签探索转化为密集语义监督，弥补了这一缺陷。在R2R-CE和RxR-CE基准上，该框架仅需少量专家演示即实现具竞争力的性能。该工作验证了语义探索对于训练有限数据下具身导航代理的重要性。",
+      "tags": "query:uav-vln",
+      "abstract_en": "On-policy exploration is a crucial component for training robust Vision-Language Navigation agents, as it exposes the policy to a broader state distribution. However, such exploration inevitably leads to trajectories that deviate from expert demonstrations, resulting in a semantic mismatch between the executed visual stream and the original language instruction. In this work, we address this challenge by introducing Phi-Nav, a unified on-policy framework that leverages hindsight reasoning to align instructions with the agent's actual exploratory journey. Specifically, Phi-Nav operates through a three-stage dual-supervision cycle: 1) the agent performs oracle-guided on-policy exploration, sampling a trajectory while learning from expert action feedback, 2) a hindsight speaker synthesizes a path-level hindsight instruction grounded in the collected visual observations, and 3) the agent conducts a second imitation pass, treating the synthesized trajectory-instruction pair as an additional expert demonstration. Through this process, Phi-Nav bridges the critical semantic supervision gap inherent in on-policy methods, transforming semantically unlabeled movement into dense training signals. Evaluations on the R2R-CE and RxR-CE benchmarks show that Phi-Nav yields competitive performance while requiring only a fraction of the expert demonstrations used by current baselines. These results underscore the necessity of semantic exploration in VLN, positioning Phi-Nav as an effective solution for training embodied agents with limited data.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/06/2607.01043v1-dart-vln-test-time-memory-decay-and-anti-loop-regularization-for-discrete-vision-language-navigation",
+      "section": "quick",
+      "title_en": "DART-VLN: Test-Time Memory Decay and Anti-Loop Regularization for Discrete Vision-Language Navigation",
+      "authors": "Shaoheng Zhang, Zhichen Li, Jie Mei",
+      "date": "2026-07-01",
+      "pdf": "https://arxiv.org/pdf/2607.01043v1",
+      "score": "6.0",
+      "evidence": "离散VLN测试时改进，方法对视觉语言导航有参考价值",
+      "tldr": "基于记忆的离散VLN智能体在部分可观察下，即使强冻结骨干也易因过时记忆和低效回溯而失败。DART-VLN提出无训练测试时控制框架，包含读侧记忆衰减重加权以抑制陈旧冗余，以及动作选择时反循环正则化惩罚即时反向。在R2R和REVERIE上，方法实现了更短轨迹、更低耗时和导航性能提升，联合策略获得最佳质量-效率权衡。行为分析证实反循环正则化减少局部回溯，该轻量干预使冻结模型更可靠高效，为测试时优化提供了新思路。",
+      "tags": "query:uav-vln",
+      "abstract_en": "Memory-based discrete vision-language navigation (VLN) agents must act under partial observability, yet even strong frozen backbones remain vulnerable at test time. Two common failure modes are stale historical evidence at memory readout and inefficient local backtracking during action selection. We present DART-VLN, a training-free test-time control framework for discrete VLN. DART-VLN combines Test-Time Memory Decay, a read-side memory reweighting rule that suppresses stale and redundant evidence without rewriting stored content, with Anti-Loop Regularization, a lightweight next-hop penalty that discourages immediate reversals during action selection. The framework introduces no new learnable parameters and leaves the learned backbone unchanged. Experiments on R2R and REVERIE show a consistent pattern: decay-only provides stable read-side gains, while decay+anti-loop achieves the best overall quality-efficiency trade-off, yielding shorter trajectories, lower runtime, and improved navigation performance in key settings. Behavioral analysis further confirms that anti-loop regularization reduces local backtracking and improves path efficiency under frozen backbones. Overall, the results show that modest test-time control can make memory-based discrete VLN more reliable and efficient without retraining.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

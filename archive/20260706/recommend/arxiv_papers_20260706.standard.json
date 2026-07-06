@@ -1,0 +1,92 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-06T21:29:34.748762+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.01754v1",
+      "source": "arxiv",
+      "title": "Path-level Hindsight Instructions for Semantic Exploration in Vision-Language Navigation",
+      "abstract": "On-policy exploration is a crucial component for training robust Vision-Language Navigation agents, as it exposes the policy to a broader state distribution. However, such exploration inevitably leads to trajectories that deviate from expert demonstrations, resulting in a semantic mismatch between the executed visual stream and the original language instruction. In this work, we address this challenge by introducing Phi-Nav, a unified on-policy framework that leverages hindsight reasoning to align instructions with the agent's actual exploratory journey. Specifically, Phi-Nav operates through a three-stage dual-supervision cycle: 1) the agent performs oracle-guided on-policy exploration, sampling a trajectory while learning from expert action feedback, 2) a hindsight speaker synthesizes a path-level hindsight instruction grounded in the collected visual observations, and 3) the agent conducts a second imitation pass, treating the synthesized trajectory-instruction pair as an additional expert demonstration. Through this process, Phi-Nav bridges the critical semantic supervision gap inherent in on-policy methods, transforming semantically unlabeled movement into dense training signals. Evaluations on the R2R-CE and RxR-CE benchmarks show that Phi-Nav yields competitive performance while requiring only a fraction of the expert demonstrations used by current baselines. These results underscore the necessity of semantic exploration in VLN, positioning Phi-Nav as an effective solution for training embodied agents with limited data.",
+      "authors": [
+        "Sung June Kim",
+        "Sangpil Kim",
+        "Honglak Lee"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-02T06:11:07+00:00",
+      "link": "https://arxiv.org/pdf/2607.01754v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "proposes hindsight reasoning for vision-language navigation to align instructions with exploratory paths",
+      "llm_evidence_cn": "提出事后推理用于视觉语言导航，对齐指令与探索路径",
+      "llm_evidence": "提出事后推理用于视觉语言导航，对齐指令与探索路径",
+      "canonical_evidence": "提出事后推理用于视觉语言导航，对齐指令与探索路径",
+      "llm_tldr_en": "Phi-Nav uses path-level hindsight instructions to align language with on-policy exploration, improving VLN agent robustness.",
+      "llm_tldr_cn": "视觉语言导航中，在线探索常使轨迹偏离专家示范，导致指令与视觉流不匹配。本文提出Phi-Nav框架，通过事后推理生成与探索路径一致的指令，形成三阶段双监督循环。实验表明该方法有效解决了语义错位，提升了VLN策略的泛化能力，对无人机视觉语言导航等任务具有借鉴意义。",
+      "llm_tldr": "视觉语言导航中，在线探索常使轨迹偏离专家示范，导致指令与视觉流不匹配。本文提出Phi-Nav框架，通过事后推理生成与探索路径一致的指令，形成三阶段双监督循环。实验表明该方法有效解决了语义错位，提升了VLN策略的泛化能力，对无人机视觉语言导航等任务具有借鉴意义。",
+      "llm_tags": [
+        "query:uav-vln:composite"
+      ],
+      "matched_query_tag": "query:uav-vln:composite",
+      "matched_query_text": "Papers central to 请帮我查找无人机视觉语言导航UAV VLN的论文, especially work that connects or combines: UAV visual language navigation; vision language navigation for unmanned aerial vehicles; drone navigation with natural language instructions; language guided drone navigation; multimodal navigation using vision and language for UAV; UAV instruction following with visual environment; find papers on UAV visual language navigation; research about vision language navigation for drones.",
+      "matched_requirement_id": "req-composite-uav-vln",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.01043v1",
+      "source": "arxiv",
+      "title": "DART-VLN: Test-Time Memory Decay and Anti-Loop Regularization for Discrete Vision-Language Navigation",
+      "abstract": "Memory-based discrete vision-language navigation (VLN) agents must act under partial observability, yet even strong frozen backbones remain vulnerable at test time. Two common failure modes are stale historical evidence at memory readout and inefficient local backtracking during action selection. We present DART-VLN, a training-free test-time control framework for discrete VLN. DART-VLN combines Test-Time Memory Decay, a read-side memory reweighting rule that suppresses stale and redundant evidence without rewriting stored content, with Anti-Loop Regularization, a lightweight next-hop penalty that discourages immediate reversals during action selection. The framework introduces no new learnable parameters and leaves the learned backbone unchanged. Experiments on R2R and REVERIE show a consistent pattern: decay-only provides stable read-side gains, while decay+anti-loop achieves the best overall quality-efficiency trade-off, yielding shorter trajectories, lower runtime, and improved navigation performance in key settings. Behavioral analysis further confirms that anti-loop regularization reduces local backtracking and improves path efficiency under frozen backbones. Overall, the results show that modest test-time control can make memory-based discrete VLN more reliable and efficient without retraining.",
+      "authors": [
+        "Shaoheng Zhang",
+        "Zhichen Li",
+        "Jie Mei"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-07-01T15:07:07+00:00",
+      "link": "https://arxiv.org/pdf/2607.01043v1",
+      "tags": [
+        "keyword:UAV-VLN",
+        "query:UAV-VLN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "discrete VLN test-time improvement, methodologically relevant to VLN",
+      "llm_evidence_cn": "离散VLN测试时改进，方法对视觉语言导航有参考价值",
+      "llm_evidence": "离散VLN测试时改进，方法对视觉语言导航有参考价值",
+      "canonical_evidence": "离散VLN测试时改进，方法对视觉语言导航有参考价值",
+      "llm_tldr_en": "DART-VLN introduces training-free test-time memory decay and anti-loop regularization to improve discrete VLN agent performance; method could benefit UAV VLN if applied.",
+      "llm_tldr_cn": "离散视觉语言导航智能体在测试时常见记忆陈旧与无效回溯问题。本文提出DART-VLN，结合测试时记忆衰减规则以抑制过时证据，以及抗循环正则化轻量级惩罚避免立即回撤，无需额外训练参数。实验表明该方法能提升零样本导航成功率，为无人机VLN测试时优化提供可用思路。",
+      "llm_tldr": "离散视觉语言导航智能体在测试时常见记忆陈旧与无效回溯问题。本文提出DART-VLN，结合测试时记忆衰减规则以抑制过时证据，以及抗循环正则化轻量级惩罚避免立即回撤，无需额外训练参数。实验表明该方法能提升零样本导航成功率，为无人机VLN测试时优化提供可用思路。",
+      "llm_tags": [
+        "query:uav-vln"
+      ],
+      "matched_query_tag": "query:uav-vln",
+      "matched_query_text": "vision language navigation for unmanned aerial vehicles",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
