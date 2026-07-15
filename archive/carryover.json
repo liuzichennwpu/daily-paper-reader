@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-07-13T21:30:14.477695+00:00",
-  "updated_date": "20260713",
+  "generated_at": "2026-07-15T21:07:37.385133+00:00",
+  "updated_date": "20260715",
   "carryover_days": 9,
   "tag_states": {
     "UAV-VLN": {
-      "updated_date": "20260713",
+      "updated_date": "20260715",
       "carryover_days": 9,
       "items": []
     },
